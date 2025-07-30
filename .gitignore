@@ -1,6 +1,7 @@
 # Dependency directories
 node_modules/
 .cache/
+/.next
 
 # Build output
 build/
