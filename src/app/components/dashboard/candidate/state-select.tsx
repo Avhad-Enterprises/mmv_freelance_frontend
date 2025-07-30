@@ -1,20 +1,30 @@
 import React from "react";
 import NiceSelect from "@/ui/nice-select";
 
-const StateSelect = () => {
-  const handleState = (item: { value: string; label: string }) => {};
+type StateSelectProps = {
+  value?: string;
+  onChange: (value: string) => void;
+};
+
+const StateSelect = ({ value, onChange }: StateSelectProps) => {
+  const options = [
+    { value: "Sydney", label: "Sydney" },
+    { value: "Tokyo", label: "Tokyo" },
+    { value: "Delhi", label: "Delhi" },
+    { value: "Shanghai", label: "Shanghai" },
+    { value: "Mumbai", label: "Mumbai" },
+    { value: "Bangalore", label: "Bangalore" },
+    { value: "London", label: "London" },
+  ];
+
+  const selectedIndex = options.findIndex(opt => opt.value === value);
+
   return (
     <NiceSelect
-      options={[
-        { value: "Sydney", label: "Sydney" },
-        { value: "Tokyo", label: "Tokyo" },
-        { value: "Delhi", label: "Delhi" },
-        { value: "Shanghai", label: "Shanghai" },
-        { value: "Mumbai", label: "Mumbai" },
-        { value: "Bangalore", label: "Bangalore" },
-      ]}
-      defaultCurrent={0}
-      onChange={(item) => handleState(item)}
+      key={value}
+      options={options}
+      defaultCurrent={selectedIndex >= 0 ? selectedIndex : 0}
+      onChange={(item) => onChange(item.value)}
       name="State"
     />
   );

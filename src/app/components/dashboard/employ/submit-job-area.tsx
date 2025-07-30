@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import DashboardHeader from "../candidate/dashboard-header";
 import StateSelect from "../candidate/state-select";
@@ -8,21 +9,64 @@ import CountrySelect from "../candidate/country-select";
 import EmployExperience from "./employ-experience";
 import icon from "@/assets/dashboard/images/icon/icon_16.svg";
 import NiceSelect from "@/ui/nice-select";
+import { type } from "os";
 
 // props type 
 type IProps = {
   setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const SubmitJobArea = ({setIsOpenSidebar}:IProps) => {
-  const handleCategory = (item: { value: string; label: string }) => {};
-  const handleJobType = (item: { value: string; label: string }) => {};
-  const handleSalary = (item: { value: string; label: string }) => {};
+type IUserData = {
+  user_id: number;
+  project_title: string;
+  project_description: string;
+  projects_type: string;
+  budget: number;
+  skills_required: string[];
+};
+
+type FormData = {
+  project_title: string;
+  project_description: string;
+  project_category: string;
+  projects_type: string;
+  Budget: string;
+  // salary_min: string;
+  // salary_max: string;
+  skills_required: string[];
+  experience: string;
+  address: string;
+  country: string;
+  city: string;
+  state: string;
+};
+
+const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
+  const [formData, setFormData] = useState<FormData>({
+    project_title: "",
+    project_description: "",
+    project_category: "Designer",
+    projects_type: "Full time",
+    Budget: "Monthly",
+    // salary_min: "",
+    // salary_max: "",
+    skills_required: [],
+    experience: "",
+    address: "",
+    country: "",
+    city: "",
+    state: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const handleCategory = (item: { value: string; label: string }) => { };
+  const handleJobType = (item: { value: string; label: string }) => { };
+  const handleSalary = (item: { value: string; label: string }) => { };
   return (
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar}/>
+        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
         {/* header end */}
 
         <h2 className="main-title">Post a New Job</h2>
@@ -130,7 +174,7 @@ const SubmitJobArea = ({setIsOpenSidebar}:IProps) => {
           {/* employ experience start */}
           <EmployExperience />
           {/* employ experience end */}
-          <h4 className="dash-title-three pt-50 lg-pt-30">File Attachment</h4>
+          {/* <h4 className="dash-title-three pt-50 lg-pt-30">File Attachment</h4>
           <div className="dash-input-wrapper mb-20">
             <label htmlFor="">File Attachment*</label>
             <div className="attached-file d-flex align-items-center justify-content-between mb-15">
@@ -139,13 +183,13 @@ const SubmitJobArea = ({setIsOpenSidebar}:IProps) => {
                 <i className="bi bi-x"></i>
               </a>
             </div>
-          </div>
-          <div className="dash-btn-one d-inline-block position-relative me-3">
+          </div> */}
+          {/* <div className="dash-btn-one d-inline-block position-relative me-3">
             <i className="bi bi-plus"></i>
             Upload File
             <input type="file" id="uploadCV" name="uploadCV" placeholder="" />
           </div>
-          <small>Upload file .pdf, .doc, .docx</small>
+          <small>Upload file .pdf, .doc, .docx</small> */}
           <h4 className="dash-title-three pt-50 lg-pt-30">
             Address & Location
           </h4>
@@ -162,22 +206,28 @@ const SubmitJobArea = ({setIsOpenSidebar}:IProps) => {
             <div className="col-lg-4">
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">Country*</label>
-                <CountrySelect />
+                <CountrySelect onChange={function (value: string): void {
+                  throw new Error("Function not implemented.");
+                }} />
               </div>
             </div>
             <div className="col-lg-4">
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">City*</label>
-                <CitySelect />
+                <CitySelect onChange={function (value: string): void {
+                  throw new Error("Function not implemented.");
+                }} />
               </div>
             </div>
             <div className="col-lg-4">
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">State*</label>
-                <StateSelect />
+                <StateSelect onChange={function (value: string): void {
+                  throw new Error("Function not implemented.");
+                }} />
               </div>
             </div>
-            <div className="col-12">
+            {/* <div className="col-12">
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">Map Location*</label>
                 <div className="position-relative">
@@ -195,7 +245,7 @@ const SubmitJobArea = ({setIsOpenSidebar}:IProps) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 

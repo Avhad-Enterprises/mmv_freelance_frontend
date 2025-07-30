@@ -1,0 +1,4 @@
+{
+  "/dashboard/employ-dashboard/submit-job/page": "app/dashboard/employ-dashboard/submit-job/page.js",
+  "/dashboard/employ-dashboard/jobs/page": "app/dashboard/employ-dashboard/jobs/page.js"
+}
