@@ -1,18 +1,50 @@
-"use client";
+'use client';
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { IJobType } from "@/types/job-data-type";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { add_to_wishlist } from "@/redux/features/wishlist";
+import { add_to_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
+import { makePostRequest, makeDeleteRequest } from "@/utils/api";
+import useDecodedToken from "@/hooks/useDecodedToken"; // <-- import custom hook
 
 const ListItemTwo = ({ item }: { item: IJobType }) => {
   const { wishlist } = useAppSelector((state) => state.wishlist);
   const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
   const dispatch = useAppDispatch();
+  const decoded = useDecodedToken(); // <-- use custom hook
 
-  const handleAddWishlist = (item: IJobType) => {
-    dispatch(add_to_wishlist(item));
+  const handleAddWishlist = async (job: IJobType) => {
+    try {
+      if (!decoded || !decoded.user_id) {
+        console.warn("User not logged in or token invalid.");
+        return;
+      }
+
+      const userId = decoded.user_id;
+
+      if (isActive) {
+        // Remove from wishlist
+        await makeDeleteRequest("saved/delete", {
+          user_id: userId,
+          projects_task_id: job.projects_task_id,
+        });
+        dispatch(remove_from_wishlist(job.projects_task_id));
+      } else {
+        // Add to wishlist
+        const payload = {
+          user_id: userId,
+          projects_task_id: job.projects_task_id,
+          is_active: true,
+          is_deleted: false,
+          created_by: userId,
+        };
+
+        await makePostRequest("saved/create", payload);
+        dispatch(add_to_wishlist(job));
+      }
+    } catch (error) {
+      console.error("Error in wishlist toggle:", error);
+    }
   };
 
   return (
@@ -20,35 +52,29 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
       <div className="row justify-content-between align-items-center">
         <div className="col-md-5">
           <div className="job-title d-flex align-items-center">
-            {/* Logo optional - if available */}
-            {item.logo && (
-              <Link href={`/job-details-v1/${item.projects_task_id}`} className="logo">
-                <Image src={item.logo} alt="logo" className="lazy-img m-auto" width={50} height={50} />
-              </Link>
-            )}
             <div className="split-box1">
-              {/* Deadline as duration placeholder */}
               <Link href={`/job-details-v1/${item.projects_task_id}`} className="job-duration fw-500">
-                {new Date(item.Deadline).toLocaleDateString()}
+                {item.Deadline?.slice(0, 10)}
               </Link>
               <Link href={`/job-details-v1/${item.projects_task_id}`} className="title fw-500 tran3s">
-                {item.project_title?.slice(0, 22)} {item.project_title?.length > 20 ? ".." : ""}
+                {item.project_title?.slice(0, 22)}
+                {item.project_title?.length > 20 ? ".." : ""}
               </Link>
             </div>
           </div>
         </div>
+
         <div className="col-md-4 col-sm-6">
           <div className="job-location">
             <Link href={`/job-details-v1/${item.projects_task_id}`}>
-              {/* fallback if location not available */}
-              {item.location ?? "Remote / Not specified"}
+              Remote / Not specified
             </Link>
           </div>
           <div className="job-salary">
-            <span className="fw-500 text-dark">${item.Budget}</span> / Fixed Budget{" "}
-            {item.experience ? ` . ${item.experience}` : ""}
+            <span className="fw-500 text-dark">${item.Budget}</span> / Fixed Budget
           </div>
         </div>
+
         <div className="col-md-3 col-sm-6">
           <div className="btn-group d-flex align-items-center justify-content-sm-end xs-mt-20">
             <a
@@ -56,7 +82,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
               className={`save-btn text-center rounded-circle tran3s me-3 cursor-pointer ${isActive ? "active" : ""}`}
               title={`${isActive ? "Remove Job" : "Save Job"}`}
             >
-              <i className="bi bi-bookmark-dash"></i>
+              <i className={`bi ${isActive ? "bi-bookmark-check-fill" : "bi-bookmark-dash"}`}></i>
             </a>
             <Link href={`/job-details-v1/${item.projects_task_id}`} className="apply-btn text-center tran3s">
               APPLY
