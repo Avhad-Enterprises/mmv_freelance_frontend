@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import ActionDropdown from "../candidate/action-dropdown";
 
@@ -6,13 +7,15 @@ const EmployJobItem = ({
   info,
   date,
   application,
-  status,
+  projectsTaskId,
+  // status,
 }: {
   title: string;
   info: string;
   date: string;
   application: string;
-  status: string;
+  projectsTaskId: number;
+  // status: string;
 }) => {
   return (
     <tr className={status}>
@@ -21,10 +24,16 @@ const EmployJobItem = ({
         <div className="info1">{info}</div>
       </td>
       <td>{date}</td>
-      <td>{application} Applications</td>
       <td>
-        <div className="job-status text-capitalize">{status}</div>
+        <Link href={`/applications/details/${projectsTaskId}`}>
+          <span className="text-primary" style={{ cursor: 'pointer' }}>
+            {application} Applications
+          </span>
+        </Link>
       </td>
+      {/* <td>
+        <div className="job-status text-capitalize">{status}</div>
+      </td> */}
       <td>
         <div className="action-dots float-end">
           <button
@@ -36,7 +45,10 @@ const EmployJobItem = ({
             <span></span>
           </button>
           {/* action dropdown start */}
-          <ActionDropdown />
+          <ActionDropdown
+            projectsTaskId={projectsTaskId}
+            deletedBy={Number(localStorage.getItem("user_id"))}
+          />
           {/* action dropdown end */}
         </div>
       </td>

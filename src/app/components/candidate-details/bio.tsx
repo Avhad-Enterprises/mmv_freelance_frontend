@@ -1,33 +1,40 @@
 import React from "react";
 
-const CandidateBio = () => {
+interface CandidateBioProps {
+  bio: {
+    location: string;
+    email: string;
+    total_earnings: number;
+  };
+}
+const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
   return (
     <ul className="style-none">
       <li>
         <span>Location: </span>
-        <div>Spain, Barcelona </div>
+        <div>{bio.location}</div>
       </li>
-      <li>
+      {/* <li>
         <span>Age: </span>
         <div>28</div>
-      </li>
+      </li> */}
       <li>
         <span>Email: </span>
         <div>
-          <a href="mailto:me@support.com">me@support.com</a>
+          <a href="mailto:${bio.email}">{bio.email}</a>
         </div>
       </li>
-      <li>
+      {/* <li>
         <span>Qualification: </span>
         <div>Master Degree</div>
       </li>
       <li>
         <span>Gender: </span>
         <div>Male</div>
-      </li>
+      </li> */}
       <li>
         <span>Expected Salary: </span>
-        <div>$3k-$4k/month</div>
+        <div>{bio.total_earnings}/month</div>
       </li>
       <li>
         <span>Social:</span>

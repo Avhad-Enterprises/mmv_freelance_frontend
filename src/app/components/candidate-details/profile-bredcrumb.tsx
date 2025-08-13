@@ -14,7 +14,7 @@ const ProfileBreadcrumb = ({title,subtitle}:{title:string;subtitle:string}) => {
               <div className="title-two">
                 <h2 className="text-white">{title}</h2>
               </div>
-              <ul className="style-none d-flex justify-content-center page-pagination mt-15">
+              {/* <ul className="style-none d-flex justify-content-center page-pagination mt-15">
                 <li>
                   <Link href="/">Home</Link>
                 </li>
@@ -22,7 +22,7 @@ const ProfileBreadcrumb = ({title,subtitle}:{title:string;subtitle:string}) => {
                   <i className="bi bi-chevron-right"></i>
                 </li>
                 <li>{subtitle}</li>
-              </ul>
+              </ul> */}
             </div>
           </div>
         </div>
