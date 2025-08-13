@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8000/api/v1/";
-export const IMAGE_BASE_URL= "http://localhost:8000/";
+const BASE_URL = "http://13.235.113.131:8000/api/v1/";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -33,5 +32,8 @@ export async function makePutRequest(endpoint, bodyData) {
   return await apiClient.put(endpoint, bodyData);
 }
 
+export async function makePatchRequest(endpoint, bodyData) {
+  return await apiClient.patch(endpoint, bodyData);
+}
 
 export default apiClient;

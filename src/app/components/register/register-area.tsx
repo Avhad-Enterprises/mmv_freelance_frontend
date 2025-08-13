@@ -1,10 +1,14 @@
+"use client";
 import React from "react";
+import { useState } from "react";
 import Image from "next/image";
 import RegisterForm from "../forms/register-form";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
 
 const RegisterArea = () => {
+  const [activeTab, setActiveTab] = useState<"candidate" | "employer">("candidate");
+
   return (
     <section className="registration-section position-relative pt-100 lg-pt-80 pb-150 lg-pb-80">
       <div className="container">
@@ -16,11 +20,12 @@ const RegisterArea = () => {
             <ul className="nav nav-tabs border-0 w-100 mt-30" role="tablist">
               <li className="nav-item" role="presentation">
                 <button
-                  className="nav-link active"
+                  className={`nav-link ${activeTab === "candidate" ? "active" : ""}`}
+                  onClick={() => setActiveTab("candidate")}
                   data-bs-toggle="tab"
                   data-bs-target="#fc1"
                   role="tab"
-                  aria-selected="true"
+                  aria-selected={activeTab === "candidate"}
                   tabIndex={-1}
                 >
                   Candidates
@@ -28,11 +33,12 @@ const RegisterArea = () => {
               </li>
               <li className="nav-item" role="presentation">
                 <button
-                  className="nav-link"
+                  className={`nav-link ${activeTab === "employer" ? "active" : ""}`}
+                  onClick={() => setActiveTab("employer")}
                   data-bs-toggle="tab"
                   data-bs-target="#fc2"
                   role="tab"
-                  aria-selected="false"
+                  aria-selected={activeTab === "employer"}
                   tabIndex={-1}
                 >
                   Employer
@@ -41,14 +47,14 @@ const RegisterArea = () => {
             </ul>
             <div className="tab-content mt-40">
               <div
-                className="tab-pane fade show active"
+                className={`tab-pane fade ${activeTab === "candidate" ? "show active" : ""}`}
                 role="tabpanel"
                 id="fc1"
               >
-                <RegisterForm />
+                <RegisterForm activeTab={activeTab} />
               </div>
-              <div className="tab-pane fade" role="tabpanel" id="fc2">
-                <RegisterForm />
+              <div className={`tab-pane fade ${activeTab === "employer" ? "show active" : ""}`}>
+                <RegisterForm activeTab={activeTab} />
               </div>
             </div>
 

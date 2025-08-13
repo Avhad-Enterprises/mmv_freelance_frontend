@@ -6,8 +6,24 @@ import FilterCandidateExperience from "./filter-experince";
 import JobPrices from "../../jobs/filter/job-prices";
 import FilterEnglishFluency from "./filter-english-fluency";
 
-const CandidateV1FilterArea = () => {
-  const [priceValue, setPriceValue] = useState<number[]>([0, 50000]);
+type Props = {
+  onSkillChange: (value: string) => void;
+  onLocationChange: (value: string) => void;
+  onApplyFilter: () => void;
+  skills: string[];
+  locations: string[];
+};
+
+const CandidateV1FilterArea = ({
+  onSkillChange,
+  onLocationChange,
+  onApplyFilter,
+  skills,
+  locations,
+}: Props) => {
+
+  const [priceValue, setPriceValue] = useState<[number, number]>([0, 50000]);
+
   return (
     <div
       className="filter-area-tab offcanvas offcanvas-start"
@@ -21,7 +37,7 @@ const CandidateV1FilterArea = () => {
       ></button>
       <div className="main-title fw-500 text-dark">Filter By</div>
       <div className="light-bg border-20 ps-4 pe-4 pt-25 pb-30 mt-20">
-        <div className="filter-block bottom-line pb-25">
+        {/* <div className="filter-block bottom-line pb-25">
           <a
             className="filter-title fw-500 text-dark"
             data-bs-toggle="collapse"
@@ -34,15 +50,15 @@ const CandidateV1FilterArea = () => {
           <div className="collapse show" id="collapseSemploye">
             <div className="main-body">
               <form action="#" className="input-box position-relative">
-                <input type="text" placeholder="Name or keyword" />
+                <input type="text" placeholder="Name or keyword" onChange={handleSearch} />
                 <button>
                   <i className="bi bi-search"></i>
                 </button>
               </form>
             </div>
           </div>
-        </div>
-        <div className="filter-block bottom-line pb-25 mt-25">
+        </div> */}
+        <div className="filter-block bottom-line pb-25">
           <a
             className="filter-title fw-500 text-dark"
             data-bs-toggle="collapse"
@@ -54,7 +70,7 @@ const CandidateV1FilterArea = () => {
           </a>
           <div className="collapse show" id="collapseCategory">
             <div className="main-body">
-              <FilterSkills />
+              <FilterSkills skills={skills} onChange={onSkillChange} />
             </div>
           </div>
         </div>
@@ -71,12 +87,12 @@ const CandidateV1FilterArea = () => {
           </a>
           <div className="collapse show" id="collapseLocation">
             <div className="main-body">
-              <FilterCandidateLocation />
+              <FilterCandidateLocation locations={locations} onChange={onLocationChange} />
             </div>
           </div>
         </div>
 
-        <div className="filter-block bottom-line pb-25 mt-25">
+        {/* <div className="filter-block bottom-line pb-25 mt-25">
           <a
             className="filter-title fw-500 text-dark collapsed"
             data-bs-toggle="collapse"
@@ -91,9 +107,9 @@ const CandidateV1FilterArea = () => {
               <FilterCandidateExperience />
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <div className="filter-block bottom-line pb-25 mt-25">
+        {/* <div className="filter-block bottom-line pb-25 mt-25">
           <a
             className="filter-title fw-500 text-dark collapsed"
             data-bs-toggle="collapse"
@@ -121,7 +137,7 @@ const CandidateV1FilterArea = () => {
               </ul>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="filter-block bottom-line pb-25 mt-25">
           <a
@@ -187,6 +203,10 @@ const CandidateV1FilterArea = () => {
 
         <a
           href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            onApplyFilter();
+          }}
           className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
         >
           Apply Filter
