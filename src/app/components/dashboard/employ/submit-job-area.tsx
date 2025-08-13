@@ -1,3 +1,4 @@
+
 "use client";
 import React from "react";
 import { useState } from "react";
@@ -263,3 +264,4 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
 };
 
 export default SubmitJobArea;
+

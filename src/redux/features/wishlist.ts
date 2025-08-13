@@ -3,57 +3,54 @@ import { getLocalStorage, setLocalStorage } from "@/utils/localstorage";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { IJobType } from "@/types/job-data-type";
 
-// Check if the cookie exists
+// Load wishlist from localStorage
 const wishlistData = getLocalStorage("wishlist_items");
-let initialWishlistState: {
+
+const initialState: {
   wishlist: IJobType[];
 } = {
-  wishlist: [],
+  wishlist: wishlistData || [],
 };
-
-// If the wishlist exists, parse its value and set it as the initial state
-if (wishlistData) {
-  try {
-    initialWishlistState = {
-      wishlist: wishlistData,
-    };
-  } catch (error) {
-    console.error("Error parsing wishlist data:", error);
-  }
-}
 
 export const wishlistSlice = createSlice({
   name: "wishlist",
-  initialState: initialWishlistState,
+  initialState,
   reducers: {
-    add_to_wishlist: (state, { payload }:{ payload:IJobType }) => {
+    add_to_wishlist: (state, { payload }: { payload: IJobType }) => {
       const isExist = state.wishlist.some(
-        (item: IJobType) => item.id === payload.id
+        (item) => item.projects_task_id === payload.projects_task_id
       );
+
       if (!isExist) {
         state.wishlist.push(payload);
-        notifySuccess(`${payload.title} added to wishlist`);
+        notifySuccess(`${payload.project_title} added to wishlist`);
       } else {
         state.wishlist = state.wishlist.filter(
-          (item: IJobType) => item.id !== payload.id
+          (item) => item.projects_task_id !== payload.projects_task_id
         );
-        notifyError(`${payload.title} removed from wishlist`);
+        notifyError(`${payload.project_title} removed from wishlist`);
       }
+
       setLocalStorage("wishlist_items", state.wishlist);
     },
-    remove_wishlist_product: (state, { payload }:{ payload:IJobType }) => {
-      state.wishlist = state.wishlist.filter(
-        (item: IJobType) => item.id !== payload.id
+
+    remove_from_wishlist: (state, { payload }: { payload: number }) => {
+      const removedItem = state.wishlist.find(
+        (item) => item.projects_task_id === payload
       );
-      notifyError(`${payload.title} removed from wishlist`);
+
+      if (removedItem) {
+        notifyError(`${removedItem.project_title} removed from wishlist`);
+      }
+
+      state.wishlist = state.wishlist.filter(
+        (item) => item.projects_task_id !== payload
+      );
+
       setLocalStorage("wishlist_items", state.wishlist);
-      notifyError(`${payload.title} removed from wishlist`);
-    }
+    },
   },
 });
 
-export const {
-  add_to_wishlist,
-  remove_wishlist_product,
-} = wishlistSlice.actions;
+export const { add_to_wishlist, remove_from_wishlist } = wishlistSlice.actions;
 export default wishlistSlice.reducer;

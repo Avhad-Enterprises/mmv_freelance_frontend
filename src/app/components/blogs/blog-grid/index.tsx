@@ -8,19 +8,36 @@ import { IBlogDataType } from "@/types/blog-type";
 import { makeGetRequest } from "@/utils/api";
 
 const BlogGridArea = () => {
-  const [blogs, setBlogs] = useState<IBlogDataType[]>([]);
+  const [allBlogs, setAllBlogs] = useState<IBlogDataType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+
+  // Safe JSON parser
+  const safeJson = (str: any): string[] => {
+    try {
+      return typeof str === "string" ? JSON.parse(str) : [];
+    } catch (error) {
+      console.error("JSON parse error:", error);
+      return [];
+    }
+  };
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await makeGetRequest("blogs");
-        const data: IBlogDataType[] = res.data;
-        // Filter by blog-postbox and take first 6
-        const filtered = data
-          .filter((b) => b.sub_section?.includes("blog-postbox"))
-          .slice(0, 6);
-        setBlogs(filtered);
+        const res = await makeGetRequest("blog/getallblogs");
+        const data = res.data?.data;
+
+        const parsedBlogs: IBlogDataType[] = data.map((b: any): IBlogDataType => ({
+          ...b,
+          sub_section: safeJson(b.sub_section),
+          tags: safeJson(b.tags),
+          notes: safeJson(b.notes),
+        }));
+
+        console.log("Parsed Blogs:", parsedBlogs); // Debugging log
+        setAllBlogs(parsedBlogs);
       } catch (error) {
         console.error("Error fetching blogs:", error);
       } finally {
@@ -31,6 +48,9 @@ const BlogGridArea = () => {
     fetchBlogs();
   }, []);
 
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedBlogs = allBlogs.slice(startIndex, startIndex + itemsPerPage);
+
   return (
     <section className="blog-section pt-100 lg-pt-80 pb-120 lg-pb-80">
       <div className="container">
@@ -38,16 +58,26 @@ const BlogGridArea = () => {
           <div className="col-lg-8">
             {loading ? (
               <p>Loading...</p>
-            ) : (
+            ) : paginatedBlogs.length > 0 ? (
               <div className="row">
-                {blogs.map((b) => (
-                  <div key={b.blog_id} className="col-md-6">
-                    <BlogItem blog={b} style_2={true} />
+                {paginatedBlogs.map((blog) => (
+                  <div key={blog.blog_id} className="col-md-6">
+                    <BlogItem blog={blog} style_2={true} />
                   </div>
                 ))}
               </div>
+            ) : (
+              <p>No blogs found.</p>
             )}
-            <BlogPagination />
+
+            {!loading && allBlogs.length > itemsPerPage && (
+              <BlogPagination
+                total={allBlogs.length}
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                onPageChange={setCurrentPage}
+              />
+            )}
           </div>
 
           <div className="col-lg-4">

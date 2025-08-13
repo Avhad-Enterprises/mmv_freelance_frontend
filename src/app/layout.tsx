@@ -4,7 +4,7 @@ import localFont from 'next/font/local';
 import { EB_Garamond } from "next/font/google";
 import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
-import { Toaster } from "react-hot-toast"; // ✅ import toast
+import { Toaster } from "react-hot-toast"; //  import toast
 
 const gordita = localFont({
   src: [

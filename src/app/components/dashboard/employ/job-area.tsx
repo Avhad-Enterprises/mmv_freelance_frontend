@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "../candidate/dashboard-header";
 import EmployJobItem from "./job-item";
@@ -250,3 +251,4 @@ const EmployJobArea = ({ setIsOpenSidebar }: IProps) => {
 };
 
 export default EmployJobArea;
+

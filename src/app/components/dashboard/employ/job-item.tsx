@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import React from "react";
 import ActionDropdown from "../candidate/action-dropdown";
@@ -54,3 +55,4 @@ const EmployJobItem = ({
 };
 
 export default EmployJobItem;
+
