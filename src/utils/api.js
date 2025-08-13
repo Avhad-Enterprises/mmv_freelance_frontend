@@ -1,3 +1,4 @@
+
 import axios from "axios";
 
 const BASE_URL = "http://localhost:8000/api/v1/";
@@ -40,3 +41,4 @@ export async function makeDeleteRequest(endpoint, data = {}) {
 }
 
 export default apiClient;
+
