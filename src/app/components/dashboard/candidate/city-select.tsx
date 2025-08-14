@@ -30,3 +30,4 @@ const CitySelect = ({ value, onChange }: CitySelectProps) => {
   );
 };
 export default CitySelect;
+

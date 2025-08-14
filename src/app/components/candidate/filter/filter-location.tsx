@@ -25,3 +25,4 @@ const FilterCandidateLocation = ({
 };
 
 export default FilterCandidateLocation;
+

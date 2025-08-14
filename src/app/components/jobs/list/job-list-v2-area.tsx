@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import job_data from "@/data/job-data";
 import ListItemTwo from "./list-item-2";
-import { IJobType } from "@/types/job-data-type";
+import { IJobType2 } from "@/types/job-data-type2";
 import Pagination from "@/ui/pagination";
 import JobGridItem from "../grid/job-grid-item";
 import { useAppSelector } from "@/redux/hook";
@@ -18,8 +18,8 @@ const JobListV2Area = ({ itemsPerPage,grid_style=false }: { itemsPerPage: number
   const { category, experience, job_type, location,english_fluency,search_key } = useAppSelector(
     (state) => state.filter
   );
-  const [currentItems, setCurrentItems] = useState<IJobType[] | null>(null);
-  const [filterItems, setFilterItems] = useState<IJobType[]>([]);
+  const [currentItems, setCurrentItems] = useState<IJobType2[] | null>(null);
+  const [filterItems, setFilterItems] = useState<IJobType2[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
   const [jobType, setJobType] = useState(grid_style ?"grid" : "list");

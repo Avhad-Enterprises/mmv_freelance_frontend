@@ -56,7 +56,7 @@ const WishlistArea = () => {
                 className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}
               >
                 {wishlist?.map((job) => (
-                  <ListItemTwo key={job.id} item={job} />
+                  <ListItemTwo key={job.projects_task_id} item={job} />
                 ))}
               </div>
 
@@ -65,7 +65,7 @@ const WishlistArea = () => {
               >
                 <div className="row">
                   {wishlist?.map((job) => (
-                    <div key={job.id} className="col-sm-6 mb-30">
+                    <div key={job.projects_task_id} className="col-sm-6 mb-30">
                       <JobGridItem item={job} />
                     </div>
                   ))}

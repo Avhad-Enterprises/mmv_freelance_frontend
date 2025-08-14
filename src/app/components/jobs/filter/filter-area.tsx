@@ -71,3 +71,4 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 };
 
 export default FilterArea;
+

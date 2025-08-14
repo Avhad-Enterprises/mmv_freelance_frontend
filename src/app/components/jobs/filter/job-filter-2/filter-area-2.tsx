@@ -112,3 +112,4 @@ const FilterAreaTwo = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 };
 
 export default FilterAreaTwo;
+
