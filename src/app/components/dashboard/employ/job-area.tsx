@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "../candidate/dashboard-header";
 import EmployJobItem from "./job-item";
@@ -40,7 +39,7 @@ const EmployJobArea = ({ setIsOpenSidebar }: IProps) => {
     }
     try {
       const response = await makeGetRequest(`projectsTask/tasks-with-client/${clientId}`);
-      console.log(response.data);
+      console.log("response",response);
 
       if (response.data?.data?.length) {
         const projects = response.data.data.map((project: ProjectTask) => ({
@@ -251,4 +250,3 @@ const EmployJobArea = ({ setIsOpenSidebar }: IProps) => {
 };
 
 export default EmployJobArea;
-

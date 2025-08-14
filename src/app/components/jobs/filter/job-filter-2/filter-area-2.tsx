@@ -8,6 +8,11 @@ import { SalaryRangeSlider } from "../job-prices";
 import FilterEnglishFluency from "./filter-english-fluency";
 import { resetFilter } from "@/redux/features/filterSlice";
 import { useAppDispatch } from "@/redux/hook";
+import { setExperience } from "@/redux/features/filterSlice";
+import { setEnglishFluency } from "@/redux/features/filterSlice";
+import { setLocation } from "@/redux/features/filterSlice";
+import { setProjectsType } from "@/redux/features/filterSlice";
+import { type } from "os";
 
 // prop type
 type IProps = {
@@ -18,6 +23,20 @@ type IProps = {
 
 const FilterAreaTwo = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
   const dispatch = useAppDispatch();
+
+  const handleExperienceChange = (experience: string, type: string) => {
+    dispatch(setExperience(experience));
+    dispatch(setProjectsType((type)))
+  };
+
+  const handleFluencyChange = (fluency: string) => {
+    dispatch(setEnglishFluency(fluency));
+  };
+
+  const handleLocationChange = (location: string) => {
+    dispatch(setLocation(location));
+  };
+  
   // handleReset
   const handleReset = () => {
     dispatch(resetFilter());
@@ -93,3 +112,4 @@ const FilterAreaTwo = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 };
 
 export default FilterAreaTwo;
+

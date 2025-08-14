@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import React from "react";
 import ActionDropdown from "../candidate/action-dropdown";
@@ -46,7 +45,10 @@ const EmployJobItem = ({
             <span></span>
           </button>
           {/* action dropdown start */}
-          <ActionDropdown />
+          <ActionDropdown
+            projectsTaskId={projectsTaskId}
+            deletedBy={Number(localStorage.getItem("user_id"))}
+          />
           {/* action dropdown end */}
         </div>
       </td>
@@ -55,4 +57,3 @@ const EmployJobItem = ({
 };
 
 export default EmployJobItem;
-

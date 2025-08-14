@@ -1,21 +1,28 @@
-import candidate_data from '@/data/candidate-data';
-import NiceSelect from '@/ui/nice-select';
-import React from 'react';
+import React from "react";
+import NiceSelect from "@/ui/nice-select";
 
-const FilterCandidateLocation = () => {
-  const uniqueLocations = [...new Set(candidate_data.map(c => c.location))];
-  const handleLocation = (item: { value: string; label: string }) => {};
-  const options = uniqueLocations.map((l) => {
-    return {value:l,label:l}
-  })
+const FilterCandidateLocation = ({
+  locations,
+  onChange,
+}: {
+  locations: string[];
+  onChange: (value: string) => void;
+}) => {
+  const options = locations.map((loc) => ({
+    value: loc,
+    label: loc,
+  }));
+
   return (
     <NiceSelect
       options={options}
       defaultCurrent={0}
-      onChange={(item) => handleLocation(item)}
+      onChange={(item) => onChange(item.value)}
+      cls="bg-white"
       name="Location"
     />
   );
 };
 
 export default FilterCandidateLocation;
+

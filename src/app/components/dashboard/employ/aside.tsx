@@ -1,4 +1,3 @@
-
 "use client";
 import React from "react";
 import Image, { StaticImageData } from "next/image";
@@ -111,7 +110,7 @@ type IProps = {
   isOpenSidebar: boolean,
   setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }
-const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
+const EmployAside: React.FC<IProps> = ({ isOpenSidebar, setIsOpenSidebar }) => {
   const pathname = usePathname();
   const [userData, setUserData] = useState<IUserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -163,8 +162,27 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
           </div>
           <div className="user-data">
             <div className="user-avatar online position-relative rounded-circle">
-              <Image src={avatar} alt="avatar" className="lazy-img" style={{ height: 'auto' }} />
+              {userData?.profile_picture ? (
+                <Image
+                  src={userData.profile_picture}
+                  alt="avatar"
+                  className="lazy-img"
+                  width={75}
+                  height={75}
+                  style={{ objectFit: 'cover', borderRadius: '50%' }}
+                />
+              ) : (
+                <Image
+                  src={avatar} // fallback static avatar
+                  alt="avatar"
+                  className="lazy-img"
+                  width={70}
+                  height={70}
+                  style={{ objectFit: 'cover', borderRadius: '50%' }}
+                />
+              )}
             </div>
+
             <div className="user-name-data">
               <button
                 className="user-name dropdown-toggle"
@@ -263,4 +281,3 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
 };
 
 export default EmployAside;
-

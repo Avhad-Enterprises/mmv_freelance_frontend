@@ -69,7 +69,10 @@ const CandidateDetailsV2Area = () => {
               <div className="cadidate-profile-sidebar ms-xl-5 ms-xxl-0 md-mt-60">
                 <div className="cadidate-bio bg-wrapper mb-60 md-mb-40">
                   {/* CandidateBio */}
-                  <CandidateBio />
+                  <CandidateBio bio={{
+                    location: '',
+                    email: ''
+                  }} />
                   {/* CandidateBio */}
                   <a href="#" className="btn-ten fw-500 text-white w-100 text-center tran3s mt-15">Download CV</a>
                 </div>

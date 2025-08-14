@@ -6,6 +6,7 @@ import JobTags from './job-tags';
 import JobPrices from './job-prices';
 import { useAppDispatch } from '@/redux/hook';
 import { resetFilter } from '@/redux/features/filterSlice';
+import { setBudgetRange } from '@/redux/features/filterSlice';
 
 type IProps = {
   priceValue: [number, number];
@@ -15,6 +16,7 @@ type IProps = {
 
 const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
   const dispatch = useAppDispatch();
+  
 
   const handleReset = () => {
     dispatch(resetFilter());
@@ -69,3 +71,4 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 };
 
 export default FilterArea;
+
