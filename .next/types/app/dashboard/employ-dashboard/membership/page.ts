@@ -1,4 +1,4 @@
-// File: D:\ReactJs\MMV Freelance Frontend\mmv_freelance_frontend\src\app\dashboard\employ-dashboard\membership\page.tsx
+// File: C:\Users\avinash singh patel\Desktop\newBuild\mmv_freelance_frontend\src\app\dashboard\employ-dashboard\membership\page.tsx
 import * as entry from '../../../../../../src/app/dashboard/employ-dashboard/membership/page.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
