@@ -11,7 +11,7 @@ import { toast } from "react-hot-toast";
 
 // Props type
 type IProps = {
-  setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
+  // setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type FormData = {
@@ -37,7 +37,7 @@ type FormData = {
   created_by?: number;
 };
 
-const EditProjectArea = ({ setIsOpenSidebar }: IProps) => {
+const EditProjectArea = ({ setIsOpenSidebar }: any) => {
   const [formData, setFormData] = useState<FormData>({
     project_title: "",
     project_description: "",

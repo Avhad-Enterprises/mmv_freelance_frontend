@@ -22,6 +22,7 @@ export type ICandidate = {
   experience: string;
   favorite?: boolean;
   qualification: string;
+  
 }
 
 const candidate_data:ICandidate[] = [

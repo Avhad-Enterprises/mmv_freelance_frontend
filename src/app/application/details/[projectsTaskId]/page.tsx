@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 type Props = {
     params: { projectsTaskId: string };
-    setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+   // setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type Application = {
@@ -29,8 +29,9 @@ type Application = {
 
 const ApplicationDetailsPage = ({ params }: Props) => {
     const { projectsTaskId } = params;
+
     const [applications, setApplications] = useState<Application[]>([]);
-    const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(false);
+    const [isOpenSidebar, setIsOpenSidebarState] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -92,8 +93,8 @@ const ApplicationDetailsPage = ({ params }: Props) => {
     return (
         <div className="dashboard-body">
             <div className="position-relative">
-                <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
-                <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+                <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebarState} />
+        <DashboardHeader setIsOpenSidebar={setIsOpenSidebarState} />
                 <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
                     <div className="d-flex align-items-center gap-2">
                         <Link href="/dashboard/employ-dashboard/jobs">

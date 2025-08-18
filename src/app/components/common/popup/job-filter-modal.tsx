@@ -75,9 +75,9 @@ const JobFilterModal = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
                       </div>
                       <div className="main-body ps-xl-4 flex-fill">
                         <SalaryRangeSlider
-                          maxPrice={maxPrice}
                           priceValue={priceValue}
                           setPriceValue={setPriceValue}
+                          maxPrice={maxPrice}
                         />
                       </div>
                     </div>

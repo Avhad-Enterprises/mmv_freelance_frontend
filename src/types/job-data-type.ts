@@ -1,4 +1,5 @@
 export interface IJobType {
+  category: any;
   projects_task_id: number;
   client_id: number;
   editor_id: number | null;

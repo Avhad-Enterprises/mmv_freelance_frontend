@@ -24,7 +24,7 @@ const CandidateProfileDetailsPage = () => {
         {/* breadcrumb end */}
 
         {/* candidate details area start */}
-        <CandidateDetailsArea />
+        <CandidateDetailsArea freelancer={null} loading={false} />
         {/* candidate details area end */}
 
         {/* job portal intro start */}

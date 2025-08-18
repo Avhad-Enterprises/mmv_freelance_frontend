@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const BlogDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
-  const blog = blog_data.find((b) => Number(b.id) === Number(params.id))!;
+  const blog = blog_data.find((b) => Number(b.blog_id) === Number(params.id))!;
   return (
     <Wrapper>
       <div className="main-page-wrapper">

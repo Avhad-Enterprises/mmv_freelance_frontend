@@ -11,9 +11,10 @@ type Props = {
   projectsTaskId: number;
   deletedBy: number;
   onDeleted?: (id: number) => void;
+  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const ActionDropdown = ({ projectsTaskId, deletedBy, onDeleted }: Props) => {
+const ActionDropdown = ({ projectsTaskId, deletedBy, onDeleted ,setIsOpenSidebar}: Props) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const userId = Number(localStorage.getItem("user_id"));

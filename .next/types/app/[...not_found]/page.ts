@@ -1,4 +1,4 @@
-// File: C:\Users\avinash singh patel\Desktop\newBuild\mmv_freelance_frontend\src\app\[...not_found]\page.tsx
+// File: D:\avdent\mmv_freelance_frontend\src\app\[...not_found]\page.tsx
 import * as entry from '../../../../src/app/[...not_found]/page.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
@@ -15,6 +15,7 @@ checkFields<Diff<{
   fetchCache?: 'auto' | 'force-no-store' | 'only-no-store' | 'default-no-store' | 'default-cache' | 'only-cache' | 'force-cache'
   preferredRegion?: 'auto' | 'global' | 'home' | string | string[]
   runtime?: 'nodejs' | 'experimental-edge' | 'edge'
+  maxDuration?: number
   
   metadata?: any
   generateMetadata?: Function

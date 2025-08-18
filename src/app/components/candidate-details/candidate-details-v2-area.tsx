@@ -1,5 +1,5 @@
 "use client"
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import EmailSendForm from '../forms/email-send-form';
 import CandidateBio from './bio';
 import CandidateProfileSlider from './candidate-profile-slider';
@@ -18,13 +18,13 @@ const CandidateDetailsV2Area = () => {
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
                 <div className="inner-card mb-65 lg-mb-40">
                   <h3 className="title">Overview</h3>
-                  <p>Hello my name is Ariana Gande Connor and I’m a Financial Supervisor from Netherlands, Rotterdam. In pharetra orci dignissim, blandit mi semper, ultricies diam. Suspendisse malesuada suscipit nunc non volutpat. Sed porta nulla id orci laoreet tempor non consequat enim. Sed vitae aliquam velit. Aliquam Integer vehicula rhoncus molestie. Morbi ornare ipsum sed sem condimentum, et pulvinar tortor luctus. Suspendisse condimentum lorem ut elementum aliquam. </p> <br/>
-                    <p>Mauris nec erat ut libero vulputate pulvinar. Aliquam ante erat, blandit at pretium et, accumsan ac est. Integer vehicula rhoncus molestie. Morbi ornare ipsum sed sem condimentum, et pulvinar tortor luctus. Suspendisse condimentum lorem ut elementum aliquam. Mauris nec.</p>
+                  <p>Hello my name is Ariana Gande Connor and I’m a Financial Supervisor from Netherlands, Rotterdam. In pharetra orci dignissim, blandit mi semper, ultricies diam. Suspendisse malesuada suscipit nunc non volutpat. Sed porta nulla id orci laoreet tempor non consequat enim. Sed vitae aliquam velit. Aliquam Integer vehicula rhoncus molestie. Morbi ornare ipsum sed sem condimentum, et pulvinar tortor luctus. Suspendisse condimentum lorem ut elementum aliquam. </p> <br />
+                  <p>Mauris nec erat ut libero vulputate pulvinar. Aliquam ante erat, blandit at pretium et, accumsan ac est. Integer vehicula rhoncus molestie. Morbi ornare ipsum sed sem condimentum, et pulvinar tortor luctus. Suspendisse condimentum lorem ut elementum aliquam. Mauris nec.</p>
                 </div>
                 <h3 className="title">Intro</h3>
                 <div className="video-post d-flex align-items-center justify-content-center mt-25 lg-mt-20 mb-75 lg-mb-50">
-                  <a className="fancybox rounded-circle video-icon tran3s text-center" 
-                   onClick={() => setIsVideoOpen(true)} style={{ cursor: 'pointer' }}>
+                  <a className="fancybox rounded-circle video-icon tran3s text-center"
+                    onClick={() => setIsVideoOpen(true)} style={{ cursor: 'pointer' }}>
                     <i className="bi bi-play"></i>
                   </a>
                 </div>
@@ -71,7 +71,8 @@ const CandidateDetailsV2Area = () => {
                   {/* CandidateBio */}
                   <CandidateBio bio={{
                     location: '',
-                    email: ''
+                    email: '',
+                    total_earnings: 0
                   }} />
                   {/* CandidateBio */}
                   <a href="#" className="btn-ten fw-500 text-white w-100 text-center tran3s mt-15">Download CV</a>

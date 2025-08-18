@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 type Props = {
     params: { projectsTaskId: string };
-    setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    // setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type Application = {

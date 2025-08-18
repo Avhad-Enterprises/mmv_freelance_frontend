@@ -4,6 +4,9 @@ import Link from "next/link";
 import { ICandidate } from "@/data/candidate-data";
 
 type Candidate = {
+  favorite: any;
+  post: any;
+  salary_duration: any;
   username: any;
   first_name: string;
   last_name: string;

@@ -34,7 +34,9 @@ const CandidateV3Area = ({ style_2 }: { style_2?: boolean }) => {
                 <div className="d-flex justify-content-between align-items-center">
                   <div className="short-filter d-flex align-items-center">
                     <div className="text-dark fw-500 me-2">Short:</div>
-                    <ShortSelect />
+                    <ShortSelect onChange={function (value: string): void {
+                        throw new Error("Function not implemented.");
+                      } } />
                   </div>
                   <button
                     onClick={() => setJobType("list")}
@@ -62,7 +64,7 @@ const CandidateV3Area = ({ style_2 }: { style_2?: boolean }) => {
                       key={item.id}
                       className="col-xxl-3 col-lg-4 col-sm-6 d-flex"
                     >
-                      <CandidateGridItem item={item} style_2={true} />
+                      {/* <CandidateGridItem item={item} style_2={true} /> */}
                     </div>
                   ))}
                 </div>
@@ -71,9 +73,9 @@ const CandidateV3Area = ({ style_2 }: { style_2?: boolean }) => {
               <div
                 className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}
               >
-                {candidate_data.map((item) => (
+                {/* {candidate_data.map((item) => (
                   <CandidateListItem key={item.id} item={item} style_2={true} />
-                ))}
+                ))} */}
               </div>
 
               <div className="pt-20 d-sm-flex align-items-center justify-content-between">
