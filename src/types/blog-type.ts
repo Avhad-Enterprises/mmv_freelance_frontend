@@ -18,9 +18,9 @@ export interface IBlogDataType {
   reading_time: number;
   comment_count: number;
   scheduled_at: string | null;
-  sub_section: string[];
-  tags: string[];
-  notes: string[];
+  sub_section: string;   // API se string aata hai (JSON string)
+  tags: string;          // API se string aata hai (JSON string)
+  notes: string;         // API se string aata hai (JSON string)
   is_active: number;
   created_by: number;
   created_at: string;

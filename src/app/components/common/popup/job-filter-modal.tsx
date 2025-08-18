@@ -3,27 +3,29 @@ import React from "react";
 import { resetFilter } from "@/redux/features/filterSlice";
 import { useAppDispatch } from "@/redux/hook";
 import SearchFilter from "../../jobs/filter/job-filter-2/search-filter";
-import FilterCategory from "../../jobs/filter/job-filter-2/filter-category";
-import FilterLocation from "../../jobs/filter/job-filter-2/filter-location";
-import FilterEnglishFluency from "../../jobs/filter/job-filter-2/filter-english-fluency";
+// import FilterCategory from "../../jobs/filter/job-filter-2/filter-category";
+// import FilterLocation from "../../jobs/filter/job-filter-2/filter-location";
+// import FilterEnglishFluency from "../../jobs/filter/job-filter-2/filter-english-fluency";
 import FilterJobType from "../../jobs/filter/job-filter-2/filter-job-type";
 import FilterExperience from "../../jobs/filter/job-filter-2/filter-experience";
 import { SalaryRangeSlider } from "../../jobs/filter/job-prices";
 
-// prop type
+// Correct prop types (tuple instead of number[])
 type IProps = {
-  priceValue: number[];
-  setPriceValue: React.Dispatch<React.SetStateAction<number[]>>;
+  priceValue: [number, number];
+  setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>;
   maxPrice: number;
 };
 
 const JobFilterModal = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
   const dispatch = useAppDispatch();
+
   // handleReset
   const handleReset = () => {
     dispatch(resetFilter());
-    setPriceValue([0, maxPrice]);
+    setPriceValue([0, maxPrice]); //tuple match ho gaya
   };
+
   return (
     <div
       className="modal popUpModal fade"
@@ -51,13 +53,13 @@ const JobFilterModal = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
                     <SearchFilter />
                   </div>
                   <div className="col-lg-3 col-sm-6">
-                    <FilterCategory />
+                    {/* <FilterCategory /> */}
                   </div>
                   <div className="col-lg-3 col-sm-6">
-                    <FilterLocation />
+                    {/* <FilterLocation /> */}
                   </div>
                   <div className="col-lg-3 col-sm-6">
-                    <FilterEnglishFluency />
+                    {/* <FilterEnglishFluency /> */}
                   </div>
                 </div>
 
