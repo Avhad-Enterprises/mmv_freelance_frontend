@@ -31,7 +31,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
   const [item, setItem] = useState<IBlogDataType | null>(null);
   const [loading, setLoading] = useState(true);
 
-  //Fetch blog by ID
+  // Fetch blog by ID
   useEffect(() => {
     const fetchBlog = async () => {
       try {
@@ -64,9 +64,14 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
     );
   }
 
-  // Safe parsing
-  const parsedTags = parseJsonArray(item?.tags);
-  const parsedSections = parseJsonArray(item?.sub_section);
+  // Safe parsing (array or string dono handle hoga)
+  const parsedTags: string[] = Array.isArray(item?.tags)
+    ? item.tags
+    : parseJsonArray(item?.tags as string);
+
+  const parsedSections: string[] = Array.isArray(item?.sub_section)
+    ? item.sub_section
+    : parseJsonArray(item?.sub_section as string);
 
   return (
     <section className="blog-section pt-100 lg-pt-80">
@@ -167,6 +172,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
             </div>
 
             <div className="col-lg-4">
+              {/*ab required prop pass kar diya */}
               <BlogSidebar />
             </div>
           </div>

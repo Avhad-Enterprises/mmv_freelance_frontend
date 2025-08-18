@@ -23,7 +23,7 @@ const OpenPosition = () => {
         </div>
         <div className="mt-50">
           {job_items.map((item) => (
-            <ListItemTwo key={item.id} item={item} />
+            <ListItemTwo key={item.projects_task_id} item={item} />
           ))}
         </div>
       </div>

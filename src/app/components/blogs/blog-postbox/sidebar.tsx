@@ -6,8 +6,25 @@ import Link from "next/link";
 import { makeGetRequest } from "@/utils/api";
 import { IBlogDataType } from "@/types/blog-type"; // import type
 
+// helper function
+function safeParseTags(tags: any): string[] {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags; // already array
+  if (typeof tags === "string") {
+    try {
+      const parsed = JSON.parse(tags);
+      if (Array.isArray(parsed)) return parsed;
+      return [parsed];
+    } catch {
+      // fallback: comma separated string case
+      return tags.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 const BlogSidebar = () => {
-  const [blogs, setBlogs] = useState<IBlogDataType[]>([]); // type added
+  const [blogs, setBlogs] = useState<IBlogDataType[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,22 +56,14 @@ const BlogSidebar = () => {
     return acc;
   }, {});
 
-  // Tags
+  // Safe Tags Parsing
   const keywords = Array.from(
-    new Set(
-      blogs.flatMap((b) => {
-        try {
-          return JSON.parse(b.tags || "[]");
-        } catch {
-          return [];
-        }
-      })
-    )
+    new Set(blogs.flatMap((b) => safeParseTags(b.tags)))
   );
 
   return (
     <div className="blog-sidebar ps-xl-4 md-mt-60">
-      {/*Search Box */}
+      {/* Search Box */}
       <form action="#" className="search-form position-relative mb-50 lg-mb-40">
         <input type="text" placeholder="Search..." />
         <button type="button">

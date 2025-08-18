@@ -81,7 +81,7 @@ const BlogGridArea = () => {
           </div>
 
           <div className="col-lg-4">
-            <BlogSidebar />
+            <BlogSidebar/>
           </div>
         </div>
       </div>

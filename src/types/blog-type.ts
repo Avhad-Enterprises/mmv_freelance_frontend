@@ -1,11 +1,10 @@
 // types/blog-type.ts
 
 export interface IBlogDataType {
-  id: any;
   blog_id: number;
   title: string;
+  // img: string; // API se string aata hai (URL)
   slug: string;
-  featured: any;
   featured_image: string;
   content: string;
   short_description: string;
@@ -19,7 +18,7 @@ export interface IBlogDataType {
   comment_count: number;
   scheduled_at: string | null;
   sub_section: string;   // API se string aata hai (JSON string)
-  tags: string;          // API se string aata hai (JSON string)
+  tags: string[];          // API se string aata hai (JSON string)
   notes: string;         // API se string aata hai (JSON string)
   is_active: number;
   created_by: number;
@@ -29,9 +28,4 @@ export interface IBlogDataType {
   is_deleted: boolean;
   deleted_by: number | null;
   deleted_at: string | null;
-  date: any;
-  desc: any;
-  author: any;
-  blog: any;
-  img: any;
 }

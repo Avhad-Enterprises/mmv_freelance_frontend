@@ -10,10 +10,10 @@ import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
 import { CategoryCardWrapper } from "./components/category/category-section-2";
 import { how_works_data } from "@/data/how-works-data";
 import FeatureTen from "./components/features/feature-ten";
-import TopCompany from "./components/top-company/top-company";
-import FeedbackOne from "./components/feedBacks/feedback-one";
+// import TopCompany from "./components/top-company/top-company";
+// import FeedbackOne from "./components/feedBacks/feedback-one";
 import { FaqItems } from "./components/faqs/faq-one";
-import BlogFive from "./components/blogs/blog-five";
+import BlogFive from "./components/blogs/blog-two";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
 
@@ -97,12 +97,12 @@ const HomeSix = () => {
         {/* text feature end */}
 
         {/* top company start */}
-        <TopCompany />
+        {/* <TopCompany /> */}
         {/* top company end */}
 
 
         {/* feedback start */}
-        <FeedbackOne style_2={true} style_3={true} />
+        {/* <FeedbackOne style_2={true} style_3={true} /> */}
         {/* feedback end */}
 
         {/* faq start */}

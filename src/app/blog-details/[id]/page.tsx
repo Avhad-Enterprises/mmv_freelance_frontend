@@ -6,14 +6,12 @@ import JobPortalIntro from "../../components/job-portal-intro/job-portal-intro";
 import CompanyBreadcrumb from "../../components/common/common-breadcrumb";
 import FooterOne from "@/layouts/footers/footer-one";
 import BlogDetailsArea from "../../components/blogs/blog-details";
-import blog_data from "@/data/blog-data";
 
 export const metadata: Metadata = {
   title: "Blog Details",
 };
 
 const BlogDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
-  const blog = blog_data.find((b) => Number(b.blog_id) === Number(params.id))!;
   return (
     <Wrapper>
       <div className="main-page-wrapper">
@@ -28,8 +26,8 @@ const BlogDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
         />
         {/*breadcrumb end */}
 
-        {/* blog details start */}
-        <BlogDetailsArea item={blog} />
+        {/*blog details start */}
+        <BlogDetailsArea blogId={Number(params.id)} />
         {/* blog details end */}
 
         {/* job portal intro start */}
