@@ -416,7 +416,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               </div>
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="">Statu*s</label>
+                  <label htmlFor="">Status</label>
                   <NiceSelect
                     options={[
                       { value: "0", label: "Inactive" },

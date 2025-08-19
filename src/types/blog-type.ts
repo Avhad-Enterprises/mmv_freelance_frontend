@@ -1,6 +1,7 @@
 // types/blog-type.ts
 
 export interface IBlogDataType {
+  id(id: any): unknown;
   blog_id: number;
   title: string;
   img?: any; // API se string aata hai (URL)

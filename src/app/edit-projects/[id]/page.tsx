@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import EmployAside from "@/app/components/dashboard/employ/aside";

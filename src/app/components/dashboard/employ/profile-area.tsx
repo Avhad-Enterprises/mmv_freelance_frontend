@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import avatar from '@/assets/dashboard/images/avatar_04.jpg';
 import icon from '@/assets/dashboard/images/icon/icon_16.svg';
+import blankAvatar from '@/assets/dashboard/images/usericon.jpg';
 import CountrySelect from '../candidate/country-select';
 import CitySelect from '../candidate/city-select';
 import StateSelect from '../candidate/state-select';
@@ -48,6 +49,18 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
   const [selectedCity, setSelectedCity] = useState<string | undefined>(undefined);
   const [selectedState, setSelectedState] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userData?.profile_picture) {
+      setProfilePic(userData.profile_picture);
+    }
+  }, [userData]);
+
+  const handleDeleteProfilePic = () => {
+    setProfilePic(null);
+  };
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -99,12 +112,23 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
         <div className="bg-white card-box border-20">
           <div className="user-avatar-setting d-flex align-items-center mb-30">
-            <Image src={avatar} alt="avatar" className="lazy-img user-img" />
+            <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+              <Image
+                src={profilePic || blankAvatar}
+                alt="avatar"
+                fill
+                style={{ objectFit: 'cover', borderRadius: '50%' }}
+              />
+
+            </div>
+
             <div className="upload-btn position-relative tran3s ms-4 me-3">
               Upload new photo
               <input type="file" id="uploadImg" name="uploadImg" placeholder="" />
             </div>
-            <button className="delete-btn tran3s">Delete</button>
+            <button className="delete-btn tran3s" onClick={handleDeleteProfilePic}>
+              Delete
+            </button>
           </div>
 
           <div className="row">
@@ -146,6 +170,7 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
                 />
               </div>
             </div>
+            {/* <div className="col-md-6">
             {/* <div className="col-md-6">
               <div className="dash-input-wrapper mb-30">
                 <label htmlFor="">Company Size*</label>
@@ -239,15 +264,20 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
             <div className="col-lg-3">
               <div className="dash-input-wrapper mb-25">
-                <label htmlFor="">City*</label>
-                <CitySelect
-                  value={selectedCity}
-                  onChange={(val) => setSelectedCity(val)}
+                <label htmlFor="">State*</label>
+                <StateSelect
+                  value={selectedState}
+                  onChange={(val) => setSelectedState(val)}
                 />
               </div>
             </div>
             <div className="col-lg-3">
               <div className="dash-input-wrapper mb-25">
+                <label htmlFor="">City*</label>
+                <CitySelect
+                  value={selectedCity}
+                  onChange={(val) => setSelectedCity(val)}
+                />
                 <label htmlFor="">Zip Code*</label>
                 <input type="number"
                   value={userData?.pincode}
@@ -256,11 +286,10 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
             <div className="col-lg-3">
               <div className="dash-input-wrapper mb-25">
-                <label htmlFor="">State*</label>
-                <StateSelect
-                  // value={selectedState}
-                  // onChange={(val:any) => setSelectedState(val)}
-                />
+                <label htmlFor="">Zip Code*</label>
+                <input type="number"
+                  value={userData?.pincode}
+                  placeholder="1708" />
               </div>
             </div>
             {/* <div className="col-12">
