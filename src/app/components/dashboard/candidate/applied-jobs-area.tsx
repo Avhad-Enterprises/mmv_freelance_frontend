@@ -14,8 +14,8 @@ const statusMap: Record<number, 'Pending' | 'Accepted' | 'Rejected'> = {
 interface IJob {
   projects_task_id: number;
   project_title: string;
-  Budget: number;
-  Deadline: string;
+  budget: number;
+  deadline: string;
   project_category: string;
   projects_type: string;
   status: 'Pending' | 'Accepted' | 'Rejected';
@@ -138,8 +138,8 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
             <p>Category: {job.project_category}</p>
             <p>Type: {job.projects_type}</p>
-            <p>Budget: ₹{job.Budget}</p>
-            <p>Deadline: {new Date(job.Deadline).toLocaleDateString()}</p>
+            <p>Budget: ₹{job.budget}</p>
+            <p>Deadline: {new Date(job.deadline).toLocaleDateString()}</p>
           </div>
         ))
       )}
