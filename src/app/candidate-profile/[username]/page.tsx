@@ -27,6 +27,7 @@ type IFreelancer = {
     email: string;
     certification: any[];
     services: any[];
+    total_earnings: number;
 };
 
 const CandidateProfilePage = ({ params }: PageProps) => {

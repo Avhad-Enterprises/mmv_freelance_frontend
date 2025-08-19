@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 };
 
 const BlogDetailsPage = () => {
-  const blog = blog_data[0]
+  // pehle blog ko pick kar rahe hain
+  const blog = blog_data[0];
+
   return (
     <Wrapper>
       <div className="main-page-wrapper">
@@ -21,15 +23,19 @@ const BlogDetailsPage = () => {
         <Header />
         {/* header end */}
 
-        {/*breadcrumb start */}
+        {/* breadcrumb start */}
         <CompanyBreadcrumb
           title="Blog"
           subtitle="Read our blog from top talents"
         />
-        {/*breadcrumb end */}
+        {/* breadcrumb end */}
 
         {/* blog details start */}
-        <BlogDetailsArea item={blog}/>
+        {/* Agar BlogDetailsArea ko blogId chahiye */}
+        <BlogDetailsArea blogId={blog?. blog_id ?? 1} />
+
+        {/* Agar BlogDetailsArea ko pura item chahiye hota
+            to yeh hota: <BlogDetailsArea item={blog} /> */}
         {/* blog details end */}
 
         {/* job portal intro start */}

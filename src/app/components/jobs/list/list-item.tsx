@@ -43,7 +43,7 @@ const ListItem = ({ item,style_2,cls='' }: { item: IJobType;style_2?:boolean;cls
             <Link href={`/job-details-v1/${id}`}>{location}</Link>
           </div>
           <div className="job-category">
-            {category.map((c, i) => (
+            {category.map((c:any, i:any) => (
               <a key={i} href="#">
                 {c}
                 {i < category.length - 1 && ", "}

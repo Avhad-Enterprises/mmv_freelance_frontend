@@ -7,7 +7,7 @@ import ErrorMsg from "../common/error-msg";
 import icon from "@/assets/images/icon/icon_60.svg";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { makePostRequest } from "@/utils/api"; // ✅ Make sure path is correct
+import { makePostRequest } from "@/utils/api"; // Make sure path is correct
 
 // form data type
 type IFormData = {

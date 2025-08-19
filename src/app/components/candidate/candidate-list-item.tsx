@@ -13,6 +13,9 @@ type Candidate = {
   profile_picture?: string;
   skill?: any[];
   total_earnings: number;
+  favorite: any;
+  post: any;
+  salary_duration: any;
 }
 
 const CandidateListItem = ({ item, style_2 = false }: { item: Candidate; style_2?: boolean }) => {

@@ -6,7 +6,7 @@ import shape_2 from "@/assets/images/shape/shape_03.svg";
 import SearchForm from "../../forms/search-form";
 
 const JobBreadcrumb = ({
-  title = "Job Listing",
+  title = "Project Listing",
   subtitle = "We delivered blazing fast & striking work solution",
 }: {
   title?: string;

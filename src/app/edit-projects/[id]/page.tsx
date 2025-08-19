@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 
 // Props type
 type IProps = {
-  setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
+  // setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type FormData = {
@@ -36,7 +36,7 @@ type FormData = {
   created_by?: number;
 };
 
-const EditProjectArea = ({ setIsOpenSidebar }: IProps) => {
+const EditProjectArea = ({ setIsOpenSidebar }: any) => {
   const [formData, setFormData] = useState<FormData>({
     project_title: "",
     project_description: "",
@@ -359,7 +359,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar || setIsOpenSidebarState} />
+        <EmployAside />
         <DashboardHeader setIsOpenSidebar={setIsOpenSidebar || setIsOpenSidebarState} />
         <h2 className="main-title">Edit Project</h2>
 

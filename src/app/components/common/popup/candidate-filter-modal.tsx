@@ -9,7 +9,9 @@ import SelectCandidateQualification from "../../candidate/filter/select-qualific
 import SelectCandidateType from "../../candidate/filter/select-gender";
 
 const CandidateFilterModal = () => {
-  const [priceValue, setPriceValue] = useState<number[]>([0, 50000]);
+  //const [priceValue, setPriceValue] = useState<number[]>([0, 50000]);
+  const [priceValue, setPriceValue] = useState<[number, number]>([0, 50000]);
+
   return (
     <div
       className="modal popUpModal fade"
@@ -51,7 +53,9 @@ const CandidateFilterModal = () => {
                       <div className="filter-title fw-500 text-dark">
                         Skills
                       </div>
-                      <FilterSkills />
+                      <FilterSkills skills={[]} onChange={function (value: string): void {
+                        throw new Error("Function not implemented.");
+                      }} />
                     </div>
                   </div>
                   <div className="col-lg-3">
@@ -59,7 +63,9 @@ const CandidateFilterModal = () => {
                       <div className="filter-title fw-500 text-dark">
                         Location
                       </div>
-                      <FilterCandidateLocation />
+                      <FilterCandidateLocation locations={[]} onChange={function (value: string): void {
+                        throw new Error("Function not implemented.");
+                      }} />
                     </div>
                   </div>
                   <div className="col-lg-3">

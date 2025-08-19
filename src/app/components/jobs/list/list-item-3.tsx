@@ -42,7 +42,7 @@ const ListItemThree = ({ item }: { item: IJobType }) => {
             </ul>
           </div>
         </div>
-        <p>{item.overview.slice(0, 138)}...</p>
+        <p>{(item.overview ?? "").slice(0, 138)}...</p>
         <div className="d-sm-flex align-items-center justify-content-between mt-auto">
           <div className="d-flex align-items-center">
             <Image src={verify} alt="icon" />

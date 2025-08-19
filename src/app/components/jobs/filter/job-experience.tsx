@@ -1,11 +1,11 @@
 import React from "react";
 import job_data from "@/data/job-data";
-import { setExperience } from "@/redux/features/filterSlice";
+//import { setExperience } from "@/redux/features/filterSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 
 export function JobExperienceItems({ showLength = true }: { showLength?: boolean }) {
   const dispatch = useAppDispatch();
-  const { experience } = useAppSelector((state) => state.filter);
+  // const { experience } = useAppSelector((state) => state.filter);
 
   // Filter out undefined values from experience
   const uniqueExperiences = [...new Set(
@@ -23,8 +23,8 @@ export function JobExperienceItems({ showLength = true }: { showLength?: boolean
             name="experience"
             id={`exp-${index}`}
             value={exp}
-            checked={experience.includes(exp)}
-            onChange={() => dispatch(setExperience(exp))}
+            // checked={experience.includes(exp)}
+            // onChange={() => dispatch(setExperience(exp))}
           />
           <label htmlFor={`exp-${index}`}>
             {exp}

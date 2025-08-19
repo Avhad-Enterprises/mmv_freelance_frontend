@@ -95,7 +95,7 @@ const JobListTwo = () => {
                         {item.title}
                       </Link>
                     </div>
-                    <div className="job-date">{item.date}</div>
+                    {/* <div className="job-date">{item.date}</div> */}
                     <div className="d-flex align-items-center justify-content-between">
                       <div className="job-location">
                         <Link href={`/job-details-v1/${item.id}`}>{item.location}</Link>

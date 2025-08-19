@@ -1,10 +1,11 @@
 "use client";
-import React,{useRef} from "react";
-import job_data from "@/data/job-data";
-import Slider from "react-slick";
-import JobGridItem from "./grid/job-grid-item";
 
-// slider setting
+import React, { useRef } from "react";
+import Slider from "react-slick";
+import job_data from "@/data/job-data";
+import JobGridItem from "./grid/job-grid-item";
+import { IJobType } from "@/types/job-data-type";
+
 const slider_setting = {
   dots: false,
   arrows: false,
@@ -28,11 +29,26 @@ const slider_setting = {
     },
   ],
 };
-const RelatedJobs = ({category}:{category:string[]}) => {
-  const job_items = job_data.filter((job) => {
-    return category.some((c) => job.category.includes(c));
-  });;
+
+interface RelatedJobsProps {
+  category: string[];
+}
+
+const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
   const sliderRef = useRef<Slider | null>(null);
+
+  // Debug logs
+  console.log("📦 Received category:", category);
+
+  const job_items: IJobType[] = job_data.filter((job) => {
+    if (!job.project_category) return false;
+
+    return category.some((c) =>
+      job.project_category.toLowerCase().trim() === c.toLowerCase().trim()
+    );
+  });
+
+  console.log("🔍 Filtered Related Jobs:", job_items);
 
   const sliderPrev = () => {
     sliderRef.current?.slickPrev();
@@ -41,6 +57,15 @@ const RelatedJobs = ({category}:{category:string[]}) => {
   const sliderNext = () => {
     sliderRef.current?.slickNext();
   };
+
+  if (job_items.length === 0) {
+    return (
+      <div className="text-center py-5 text-muted">
+        No related jobs found.
+      </div>
+    );
+  }
+
   return (
     <section className="related-job-section pt-90 lg-pt-70 pb-120 lg-pb-70">
       <div className="container">
@@ -51,7 +76,7 @@ const RelatedJobs = ({category}:{category:string[]}) => {
 
           <Slider {...slider_setting} ref={sliderRef} className="related-job-slider">
             {job_items.map((j) => (
-              <div key={j.id} className="item">
+              <div key={j.projects_task_id} className="item">
                 <JobGridItem item={j} />
               </div>
             ))}

@@ -74,7 +74,7 @@ const JobListThree = ({
           ? tags.some((t) => item.tags?.includes(t))
           : true
       )
-      .filter((item) => item.Budget >= priceValue[0] && item.Budget <= priceValue[1])
+      .filter((item) => (item.Budget ?? 0) >= priceValue[0] && (item.Budget ?? 0) <= priceValue[1])
       .filter((item) =>
         search_key
           ? item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||

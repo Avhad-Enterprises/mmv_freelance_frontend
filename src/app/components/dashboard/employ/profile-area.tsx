@@ -1,3 +1,4 @@
+
 "use client"
 import React from 'react';
 import Image from 'next/image';
@@ -145,7 +146,7 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
             <div className="col-md-6">
               <div className="dash-input-wrapper mb-30">
-                <label>Email*</label>
+                <label>Email</label>
                 <input value={userData?.email || ""} readOnly />
               </div>
             </div>
@@ -157,7 +158,7 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
             </div> */}
             <div className="col-md-6">
               <div className="dash-input-wrapper mb-30">
-                <label htmlFor="">Founded Date</label>
+                <label htmlFor="">Founded Date*</label>
                 <input
                   type="date"
                   value={
@@ -169,6 +170,7 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
                 />
               </div>
             </div>
+            {/* <div className="col-md-6">
             {/* <div className="col-md-6">
               <div className="dash-input-wrapper mb-30">
                 <label htmlFor="">Company Size*</label>
@@ -276,6 +278,10 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   value={selectedCity}
                   onChange={(val) => setSelectedCity(val)}
                 />
+                <label htmlFor="">Zip Code*</label>
+                <input type="number"
+                  value={userData?.pincode}
+                  placeholder="1708" />
               </div>
             </div>
             <div className="col-lg-3">
@@ -286,7 +292,6 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   placeholder="1708" />
               </div>
             </div>
-            
             {/* <div className="col-12">
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">Map Location*</label>

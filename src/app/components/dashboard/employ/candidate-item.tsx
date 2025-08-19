@@ -64,7 +64,7 @@ const CandidateItem = ({ item }: { item: ICandidate }) => {
                   >
                     <span></span>
                   </button>
-                  <ActionDropdown />
+                  {/* <ActionDropdown /> */}
                 </div>
               </div>
             </div>

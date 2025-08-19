@@ -10,7 +10,7 @@ const EmployDashboardSavedCandidatePage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* aside start */}
-        <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        <EmployAside/>
         {/* aside end  */}
 
         {/* saved candidate area start */}

@@ -15,7 +15,7 @@ const CandidateV1Area = ({ style_2 = false }: { style_2?: boolean }) => {
   //Filtered State 
   const [selectedSkill, setSelectedSkill] = useState<string>("");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-  
+
   //Pagination State 
   const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
@@ -101,7 +101,9 @@ const CandidateV1Area = ({ style_2 = false }: { style_2?: boolean }) => {
                 <div className="d-flex align-items-center">
                   <div className="short-filter d-flex align-items-center">
                     <div className="text-dark fw-500 me-2">Sort:</div>
-                    <ShortSelect />
+                    <ShortSelect onChange={function (value: string): void {
+                      throw new Error("Function not implemented.");
+                    }} />
                   </div>
                   <button
                     onClick={() => setJobType("list")}

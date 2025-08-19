@@ -22,9 +22,9 @@ const OpenPosition = () => {
           </div>
         </div>
         <div className="mt-50">
-          {job_items.map((item) => (
-            <ListItemTwo key={item.id} item={item} />
-          ))}
+          {/* {job_items.map((item) => (
+            <ListItemTwo key={item.projects_task_id} item={item} />
+          ))} */}
         </div>
       </div>
     </section>

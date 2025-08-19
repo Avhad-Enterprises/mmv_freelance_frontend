@@ -8,7 +8,7 @@ const EmployDashboardMain = () => {
   return (
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+      <EmployAside/>
       {/* aside end  */}
 
       {/* dashboard area start */}

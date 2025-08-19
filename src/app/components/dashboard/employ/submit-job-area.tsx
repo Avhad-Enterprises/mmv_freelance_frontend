@@ -675,4 +675,3 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
 };
 
 export default SubmitJobArea;
-

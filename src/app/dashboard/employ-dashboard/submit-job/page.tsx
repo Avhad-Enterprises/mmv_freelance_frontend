@@ -10,7 +10,7 @@ const EmployDashboardSubmitJobPage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* aside start */}
-        <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        <EmployAside />
         {/* aside end  */}
 
         {/* submit job area start */}
