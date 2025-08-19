@@ -51,6 +51,7 @@ type IUserData = {
 };
 
 const EmployAside: React.FC = () => {
+  
   const pathname = usePathname();
   const { isOpenSidebar } = useSidebar(); // use context
 

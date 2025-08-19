@@ -3,7 +3,7 @@ import slugify from 'slugify';
 import job_data from '@/data/job-data';
 import NiceSelect from '@/ui/nice-select';
 import { useAppDispatch } from "@/redux/hook";
-import { setLocation } from '@/redux/features/filterSlice';
+import  setLocation  from '@/redux/features/filterSlice';
 
 const JobLocations = () => {
   const dispatch = useAppDispatch();
@@ -16,7 +16,7 @@ const JobLocations = () => {
   )];
 
   const handleLocation = (item: { value: string; label: string }) => {
-    dispatch(setLocation(item.value));
+    // dispatch(setLocation(item.value));
   };
 
   const options = uniqueLocations.map((l) => {

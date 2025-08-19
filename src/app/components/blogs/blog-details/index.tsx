@@ -67,7 +67,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
   // Safe parsing (array or string dono handle hoga)
   const parsedTags: string[] = Array.isArray(item?.tags)
     ? item.tags
-    : parseJsonArray(item?.tags as string);
+    : parseJsonArray(item?.tags || "" as string);
 
   const parsedSections: string[] = Array.isArray(item?.sub_section)
     ? item.sub_section

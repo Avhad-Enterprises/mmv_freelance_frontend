@@ -7,12 +7,12 @@ export interface IJobType2 {
   duration: string;
   date: string;
   company: string;
-  location: string;
-  category: string[];
+  location?: string;
+  category?: string[];
   tags?: string[];
-  experience: string;
-  salary: number;
-  salary_duration: string;
-  english_fluency: string;
+  experience?: string;
+  salary?: number;
+  salary_duration?: string;
+  english_fluency?: string;
   overview: string;
 }

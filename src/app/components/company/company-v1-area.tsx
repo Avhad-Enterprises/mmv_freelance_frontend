@@ -52,7 +52,7 @@ const CompanyV1Area = ({ style_2 = false }: { style_2?: boolean }) => {
                 <div className="d-flex align-items-center">
                   <div className="short-filter d-flex align-items-center">
                     <div className="text-dark fw-500 me-2">Short:</div>
-                    <ShortSelect />
+                    <ShortSelect onChange={()=>''}/>
                   </div>
                   <button
                     onClick={() => setJobType("list")}

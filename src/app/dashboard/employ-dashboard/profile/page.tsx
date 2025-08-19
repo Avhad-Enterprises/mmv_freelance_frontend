@@ -11,7 +11,7 @@ const EmployDashboardProfilePage = () => {
 
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar}/>
+      <EmployAside />
       {/* aside end  */}
 
       {/* profile area start */}

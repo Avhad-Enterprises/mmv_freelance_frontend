@@ -258,8 +258,8 @@ const EmployProfileArea = ({ setIsOpenSidebar }: IProps) => {
               <div className="dash-input-wrapper mb-25">
                 <label htmlFor="">State*</label>
                 <StateSelect
-                  value={selectedState}
-                  onChange={(val) => setSelectedState(val)}
+                  // value={selectedState}
+                  // onChange={(val:any) => setSelectedState(val)}
                 />
               </div>
             </div>

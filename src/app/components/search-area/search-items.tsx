@@ -22,7 +22,8 @@ const SearchItems = () => {
 
         const filtered = data.filter((item: IJobType) => {
           if (!categoryNormalized) return true;
-          return item.project_category.toLowerCase().includes(categoryNormalized);
+          return (item.project_category ?? "").toLowerCase().includes(categoryNormalized);
+
         });
 
         setProjects(filtered);

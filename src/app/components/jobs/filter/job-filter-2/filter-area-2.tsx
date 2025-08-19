@@ -15,13 +15,13 @@
 // import { type } from "os";
 
 // // prop type
-// type IProps = {
-//   priceValue: number[];
-//   setPriceValue: React.Dispatch<React.SetStateAction<number[]>>;
-//   maxPrice: number;
-// };
+type IProps = {
+  priceValue: number[];
+  setPriceValue: React.Dispatch<React.SetStateAction<number[]>>;
+  maxPrice: number;
+};
 
-// const FilterAreaTwo = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
+const FilterAreaTwo = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 //   const dispatch = useAppDispatch();
 
 //   const handleExperienceChange = (experience: string, type: string) => {
@@ -42,7 +42,8 @@
 //     dispatch(resetFilter());
 //     setPriceValue([0,maxPrice])
 //   }
-//   return (
+  return (
+    <></>
 //     <div className="filter-area-tab">
 //       <div className="light-bg border-20 ps-4 pe-4">
 //         <a
@@ -107,9 +108,9 @@
 
 //         </div>
 //       </div>
-//     </div>
-//   );
-// };
+    // </div>
+  );
+};
 
-// export default FilterAreaTwo;
+export default FilterAreaTwo;
 

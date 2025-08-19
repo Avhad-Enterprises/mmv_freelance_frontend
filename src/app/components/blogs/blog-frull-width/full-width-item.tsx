@@ -13,7 +13,9 @@ const FullWidthItem = ({ blog }: { blog: IBlogDataType }) => {
     title,
   } = blog;
 
-  const formattedDate = new Date(created_at).toLocaleDateString();
+  const formattedDate = created_at
+  ? new Date(created_at).toLocaleDateString()
+  : "N/A";
 
   //Use featured_image directly (it's already a full URL)
   const imageUrl = featured_image;
@@ -24,18 +26,18 @@ const FullWidthItem = ({ blog }: { blog: IBlogDataType }) => {
       <figure className="post-img m0">
         <Link href={`/blog-details/${blog_id}`} className="w-100 d-block">
           <Image
-            src={imageUrl}
+            src={imageUrl || ""}
             alt="blog-img"
             width={600}
             height={400}
             className="lazy-img w-100 tran4s"
           />
         </Link>
-        {tags?.length > 0 && (
-          <Link href={`/blog-details/${blog_id}`} className="tags fw-500">
-            {tags[0]}
-          </Link>
-        )}
+        {tags?.[0] && (
+  <Link href={`/blog-details/${blog_id}`} className="tags fw-500">
+    {tags[0]}
+  </Link>
+)}
       </figure>
 
       <div className="post-data mt-35">

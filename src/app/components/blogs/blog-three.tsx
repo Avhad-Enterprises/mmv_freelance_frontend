@@ -3,9 +3,9 @@
 // import BlogItemThree from './blog-item/blog-item-3';
 // import Link from 'next/link';
 
-// const BlogThree = () => {
+const BlogThree = () => {
 //   const blog_items = blog_data.filter((b) => b.blog === "blog-three");
-//   return (
+  return (
 //     <section className="blog-section-one mt-160 xl-mt-130 lg-mt-100">
 //       <div className="container">
 //         <div className="position-relative">
@@ -31,7 +31,8 @@
 //         </div>
 //       </div>
 //     </section>
-//   );
-// };
+<></>
+  );
+};
 
-// export default BlogThree;
+export default BlogThree;

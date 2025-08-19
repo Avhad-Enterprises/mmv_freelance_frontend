@@ -111,7 +111,7 @@ const BlogSidebar = () => {
                 </Link>
               </h4>
               <div className="date">
-                {new Date(b.created_at).toLocaleDateString("en-US", {
+                {new Date(b.created_at || '').toLocaleDateString("en-US", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",

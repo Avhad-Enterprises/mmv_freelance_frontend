@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 const BlogItemTwo = ({ blog }: { blog: IBlogDataType }) => {
-  const formattedDate = new Date(blog.created_at).toLocaleDateString("en-US", {
+  const formattedDate = new Date(blog.created_at || '').toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",

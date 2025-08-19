@@ -16,14 +16,14 @@ const BlogItem = ({ blog, style_2 = false }: { blog: IBlogDataType; style_2?: bo
   // Use featured_image directly
   const imageUrl = featured_image;
 
-  const formattedDate = new Date(created_at).toLocaleDateString();
+  const formattedDate = new Date(created_at || '').toLocaleDateString();
 
   return (
     <article className={`blog-meta-two ${style_2 ? "mb-60" : "mb-75"} lg-mb-40`}>
       <figure className="post-img m0">
         <Link href={`/blog-details/${blog_id}`} className="w-100 d-block">
           <Image
-            src={imageUrl}
+            src={imageUrl || ''}
             alt="blog-img"
             width={500}
             height={300}

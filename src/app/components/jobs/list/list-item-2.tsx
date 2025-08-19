@@ -28,7 +28,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
           user_id: userId,
           projects_task_id: job.projects_task_id,
         });
-        dispatch(remove_from_wishlist(job.projects_task_id));
+        dispatch(remove_from_wishlist(job.projects_task_id || 0));
       } else {
         // Add to wishlist
         const payload = {
@@ -58,7 +58,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
               </Link>
               <Link href={`/job-details-v1/${item.projects_task_id}`} className="title fw-500 tran3s">
                 {item.project_title?.slice(0, 22)}
-                {item.project_title?.length > 20 ? ".." : ""}
+               {(item.project_title ?? "").length > 20 ? ".." : ""}
               </Link>
             </div>
           </div>

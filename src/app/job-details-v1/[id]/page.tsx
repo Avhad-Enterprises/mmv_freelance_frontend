@@ -51,7 +51,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
         <Header />
         <JobDetailsBreadcrumb />
         <JobDetailsV1Area job={job} />
-        <RelatedJobs category={[job.project_category]} />
+        <RelatedJobs category={[job.project_category || '']} />
         <JobPortalIntro />
         <FooterOne />
       </div>

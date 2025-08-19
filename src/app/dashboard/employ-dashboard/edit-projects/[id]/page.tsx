@@ -360,7 +360,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar || setIsOpenSidebarState} />
+        <EmployAside />
         <DashboardHeader setIsOpenSidebar={setIsOpenSidebar || setIsOpenSidebarState} />
         <h2 className="main-title">Edit Project</h2>
 

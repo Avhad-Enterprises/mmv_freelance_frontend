@@ -52,9 +52,10 @@ const AppliedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
     setLoading(true);
 
     try {
-      const appliedRes = await makeGetRequest("applied/lists", {
-        user_id: user.user_id,
-      });
+      const appliedRes = await makeGetRequest("applied/lists");
+      // , {
+      //   user_id: user.user_id,
+      // }
 
       const appliedData = appliedRes?.data?.data || [];
       const appliedIds = appliedData.map((item: any) => Number(item.projects_task_id));
@@ -130,7 +131,7 @@ const AppliedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
 
         <div className="short-filter d-flex align-items-center">
           <div className="text-dark fw-500 me-2">Sort by:</div>
-          <ShortSelect onChange={setSortType} />
+          <ShortSelect onChange={()=>''} /> 
         </div>
       </div>
 

@@ -86,7 +86,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
               </div>
 
               {/* Reference Links */}
-              {job.reference_links?.length > 0 && (
+              {job.reference_links?.length && (
                 <div className="post-block border-style mt-40 lg-mt-30">
                   <div className="d-flex align-items-center">
                     <div className="block-numb text-center fw-500 text-white rounded-circle me-2">4</div>
@@ -165,7 +165,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       <ApplyFormModal
         show={showModal}
         handleClose={() => setShowModal(false)}
-        projectId={job.projects_task_id}
+        projectId={job.projects_task_id || 0}
         // userId={job.client_id}
       />
     </section>

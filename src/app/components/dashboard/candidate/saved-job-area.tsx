@@ -34,10 +34,10 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
     setLoading(true);
 
     try {
-      const savedRes = await makeGetRequest("saved/listsave", {
-        user_id: user.user_id,
-      });
-
+      const savedRes = await makeGetRequest("saved/listsave");
+//  {
+      //   user_id: user.user_id,
+      // }
       const savedData = savedRes?.data?.data || [];
       const savedIds = savedData
         .filter((item: any) => !item.is_deleted)
@@ -111,7 +111,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
           <h2 className="main-title m0">Saved Jobs</h2>
           <div className="short-filter d-flex align-items-center">
             <div className="text-dark fw-500 me-2">Sort by:</div>
-            <ShortSelect onChange={setSortType} />
+            <ShortSelect  onChange={setSortType} />
           </div>
         </div>
 

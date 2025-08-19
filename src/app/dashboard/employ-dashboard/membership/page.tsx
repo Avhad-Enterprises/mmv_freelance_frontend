@@ -10,7 +10,7 @@ const EmployDashboardMembershipPage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* aside start */}
-        <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        <EmployAside/>
         {/* aside end  */}
 
         {/* membership area start */}

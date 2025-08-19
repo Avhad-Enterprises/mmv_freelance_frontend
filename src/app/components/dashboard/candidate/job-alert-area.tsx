@@ -19,7 +19,7 @@ const JobAlertArea = ({setIsOpenSidebar}:IProps) => {
           <h2 className="main-title m0">Job Alerts</h2>
           <div className="short-filter d-flex align-items-center">
             <div className="text-dark fw-500 me-2">Short by:</div>
-            <ShortSelect/>
+            <ShortSelect onChange={()=>''}/>
           </div>
         </div>
 
