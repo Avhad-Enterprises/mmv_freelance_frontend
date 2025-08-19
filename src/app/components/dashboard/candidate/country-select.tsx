@@ -1,33 +1,54 @@
-import NiceSelect from "@/ui/nice-select";
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
+import { makeGetRequest } from "@/utils/api";
 
-type CountrySelectProps = {
+interface Country {
+  country_id: number;
+  country_name: string;
+}
+
+interface Props {
   value?: string;
-  onChange: (value: string) => void;
-};
+  onChange: (val: string) => void;
+}
 
-const CountrySelect = ({ value, onChange }: CountrySelectProps) => {
-  const options = [
-    { value: "Afghanistan", label: "Afghanistan" },
-    { value: "Albania", label: "Albania" },
-    { value: "Belgium", label: "Belgium" },
-    { value: "Barbados", label: "Barbados" },
-    { value: "Australia", label: "Australia" },
-    { value: "Angola", label: "Angola" },
-    { value: "Austria", label: "Austria" },
-    { value: "London", label: "London" },
-  ];
+const CountrySelect: React.FC<Props> = ({ value, onChange }) => {
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const selectedIndex = options.findIndex(opt => opt.value === value);
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await makeGetRequest("location/countries");
+        if (res.data?.data) {
+          setCountries(res.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching countries:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  if (loading) return <p>Loading countries...</p>;
 
   return (
-    <NiceSelect
-      key={value} // ✅ force update when DB country changes
-      options={options}
-      defaultCurrent={selectedIndex >= 0 ? selectedIndex : 0}
-      onChange={(item) => onChange(item.value)}
-      name="Country"
-    />
+    <select
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      className="form-select"
+    >
+      <option value="">Select Country</option>
+      {countries.map((country) => (
+        <option key={country.country_id} value={country.country_name}>
+          {country.country_name}
+        </option>
+      ))}
+    </select>
   );
 };
+
 export default CountrySelect;
