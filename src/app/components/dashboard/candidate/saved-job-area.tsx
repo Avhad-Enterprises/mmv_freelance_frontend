@@ -7,44 +7,42 @@ import ShortSelect from "../../common/short-select";
 import { makeDeleteRequest, makeGetRequest } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { set_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
 
 // Types
-interface IProject {
-  projects_task_id: number;
-  project_title: string;
-  Budget: number;
-  Deadline: string;
-  project_category: string;
-  projects_type: string;
-  location?: string;
-}
-
 interface IProps {
   setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
-  const [savedJobs, setSavedJobs] = useState<IProject[]>([]);
+  const { wishlist } = useAppSelector((state) => state.wishlist);
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
   const [sortType, setSortType] = useState("New");
   const user = useDecodedToken();
 
+  // Fetch only login user's saved jobs
   const fetchSavedJobs = async () => {
     if (!user?.user_id) return;
     setLoading(true);
 
     try {
-      const savedRes = await makeGetRequest("saved/listsave");
-//  {
-      //   user_id: user.user_id,
-      // }
+      // Fixed: only 1 argument passed
+      const savedRes = await makeGetRequest(
+        `saved/listsave?user_id=${user.user_id}`
+      );
       const savedData = savedRes?.data?.data || [];
+
       const savedIds = savedData
-        .filter((item: any) => !item.is_deleted)
+        .filter(
+          (item: any) =>
+            !item.is_deleted && Number(item.user_id) === Number(user.user_id)
+        )
         .map((item: any) => Number(item.projects_task_id));
 
       if (savedIds.length === 0) {
-        setSavedJobs([]);
+        dispatch(set_wishlist([]));
         return;
       }
 
@@ -55,7 +53,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         savedIds.includes(Number(proj.projects_task_id))
       );
 
-      setSavedJobs(matched);
+      dispatch(set_wishlist(matched));
     } catch (err) {
       console.error("Error fetching saved jobs:", err);
       notifyError("Failed to load saved jobs.");
@@ -74,15 +72,15 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         user_id: user?.user_id,
         projects_task_id: jobId,
       });
+      dispatch(remove_from_wishlist(jobId));
       notifySuccess("Removed from saved jobs.");
-      fetchSavedJobs();
     } catch (err) {
       console.error("Remove error:", err);
       notifyError("Failed to remove job.");
     }
   };
 
-  const sortJobs = (jobs: IProject[], type: string) => {
+  const sortJobs = (jobs: any[], type: string) => {
     switch (type) {
       case "Budget":
         return [...jobs].sort((a, b) => b.Budget - a.Budget);
@@ -96,11 +94,11 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         );
       case "New":
       default:
-        return [...jobs]; // optionally sort by created_at
+        return [...jobs];
     }
   };
 
-  const sortedJobs = sortJobs(savedJobs, sortType);
+  const sortedJobs = sortJobs(wishlist, sortType);
 
   return (
     <div className="dashboard-body">
@@ -111,7 +109,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
           <h2 className="main-title m0">Saved Jobs</h2>
           <div className="short-filter d-flex align-items-center">
             <div className="text-dark fw-500 me-2">Sort by:</div>
-            <ShortSelect  onChange={setSortType} />
+            <ShortSelect onChange={setSortType} />
           </div>
         </div>
 
@@ -148,11 +146,12 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
                     <div className="job-category text-dark fw-500">
                       {j.project_category || "Uncategorized"}
                     </div>
-                    <div className="job-salary">
-                      ₹{j.Budget} / Fixed Budget
-                    </div>
+                    <div className="job-salary">₹{j.Budget} / Fixed Budget</div>
                     <div className="job-deadline text-muted">
-                      Deadline: {new Date(j.Deadline).toLocaleDateString()}
+                      Deadline:{" "}
+                      {j.Deadline
+                        ? new Date(j.Deadline).toLocaleDateString()
+                        : "N/A"}
                     </div>
                   </div>
 
@@ -177,7 +176,10 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
                       <ul className="dropdown-menu dropdown-menu-end">
                         <li>
                           <button
-                            onClick={() => handleRemove(j.projects_task_id)}
+                            onClick={() =>
+                              j.projects_task_id &&
+                              handleRemove(j.projects_task_id)
+                            }
                             className="dropdown-item"
                           >
                             Remove
