@@ -9,12 +9,12 @@ import Link from "next/link";
 
 type Props = {
   projectsTaskId: number;
-  deletedBy: number;
-  onDeleted?: (id: number) => void;
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // deletedBy: number;
+  // onDeleted?: (id: number) => void;
+  // setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const ActionDropdown = ({ projectsTaskId, deletedBy, onDeleted ,setIsOpenSidebar}: Props) => {
+const ActionDropdown = ({ projectsTaskId }: Props) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const userId = Number(localStorage.getItem("user_id"));
@@ -32,7 +32,7 @@ const ActionDropdown = ({ projectsTaskId, deletedBy, onDeleted ,setIsOpenSidebar
 
       if (response.status === 200 || response.status === 201) {
         alert("Project Deleted successfully!");
-        if (onDeleted) onDeleted(projectsTaskId);
+        // if (onDeleted) onDeleted(projectsTaskId);
       } else {
         alert("Failed to delete");
       }
