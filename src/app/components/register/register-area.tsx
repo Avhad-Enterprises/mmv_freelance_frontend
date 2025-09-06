@@ -28,7 +28,8 @@ const RegisterArea = () => {
                   aria-selected={activeTab === "candidate"}
                   tabIndex={-1}
                 >
-                  Candidates
+                  {/* Candidates */}
+                  Freelancer
                 </button>
               </li>
               <li className="nav-item" role="presentation">
@@ -41,7 +42,7 @@ const RegisterArea = () => {
                   aria-selected={activeTab === "employer"}
                   tabIndex={-1}
                 >
-                  Employer
+                  Client
                 </button>
               </li>
             </ul>
@@ -66,7 +67,7 @@ const RegisterArea = () => {
             <div className="row">
               <div className="col-sm-6">
                 <a
-                  href="#"
+                  href="coming-soon"
                   className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
                 >
                   <Image src={google} alt="google-img" />
@@ -75,7 +76,7 @@ const RegisterArea = () => {
               </div>
               <div className="col-sm-6">
                 <a
-                  href="#"
+                  href="coming-soon"
                   className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
                 >
                   <Image src={facebook} alt="facebook-img" />

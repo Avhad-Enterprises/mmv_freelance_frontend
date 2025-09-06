@@ -20,7 +20,7 @@ const menu_data:IMenuData[] = [
     link:'/job-list-v1',
     title:'Job',
     sub_menus:[
-      {link:'/job-list-v1',title:'Job List style -1'},
+      {link:'/coming-soon',title:'Job List style -1'},
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid-v1',title:'Job Grid style -1'},
@@ -41,11 +41,11 @@ const menu_data:IMenuData[] = [
         title:'Candidates',
         sub_menus:[
           // {title:'Candidates V-1',link:'/candidates-v1'},
-          {title:'Candidates V-2',link:'/candidates-v2'},
+          {title:'Candidates V-2',link:'/coming-soon'},
           // {title:'Candidates V-3',link:'/candidates-v3'},
           // {title:'Candidates V-4',link:'/candidates-v4'},
-          {title:'Candidates Details v-1',link:'/candidate-profile-v1'},
-          // {title:'Candidates Details v-2',link:'/candidate-profile-v2'},
+          {title:'Candidates Details v-1',link:'/coming-soon'},
+          // {title:'Candidates Details v-2',link:'/coming-soon'},
         ]
       },
       // {
@@ -77,7 +77,7 @@ const menu_data:IMenuData[] = [
     title:'Blog',
     sub_menus:[
       // {link:'/blog-v1',title:'Blog Standard'},
-      {link:'/blog-v2',title:'Blog Grid'},
+      {link:'/coming-soon',title:'Blog Grid'},
       // {link:'/blog-v3',title:'Full width'},
       // {link:'/blog-details',title:'Blog Details'},
     ]

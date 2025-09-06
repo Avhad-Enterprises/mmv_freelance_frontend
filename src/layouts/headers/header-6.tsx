@@ -2,8 +2,8 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import logo from '@/assets/images/logo/logo_06.png';
-import dark_logo from '@/assets/images/logo/logo_04.png';
+import logo from '@/assets/images/logo/logo_new.png';
+import dark_logo from '@/assets/images/logo/logo_new.png';
 import Menus from './component/menus';
 import useSticky from '@/hooks/use-sticky';
 import LoginModal from '@/app/components/common/popup/login-modal';
@@ -18,13 +18,21 @@ const HeaderSix = ({dark_style=false}:{dark_style?:boolean}) => {
           <div className="d-flex align-items-center justify-content-between">
             <div className="logo order-lg-0">
               <Link href="/" className="d-flex align-items-center">
-                <Image src={dark_style ? dark_logo : logo} alt="logo" priority />
+                {/* <Image src={dark_style ? dark_logo : logo} alt="logo" priority /> */}
+                <Image
+                    src={logo}
+                    alt="Logo"
+                    width={120}
+                    height={0}
+                    priority
+                    className="img-fluid"
+                  />
               </Link>
             </div>
             <div className="right-widget ms-auto ms-lg-0 order-lg-2">
               <ul className="d-flex align-items-center style-none">
                 <li><a href="#" className={`fw-500 login-btn-three ${dark_style?'dark-style':''} tran3s`} data-bs-toggle="modal" data-bs-target="#loginModal">Login/Sign up</a></li>
-                <li className="d-none d-md-block ms-3"><Link href="/register" className="btn-five">Post a job</Link></li>
+                <li className="d-none d-md-block ms-3"><Link href="/coming-soon" className="btn-five">Post a job</Link></li>
               </ul>
             </div>
 
@@ -38,14 +46,21 @@ const HeaderSix = ({dark_style=false}:{dark_style?:boolean}) => {
                 <ul className="navbar-nav">
                   <li className="d-block d-lg-none"><div className="logo">
                     <Link href="/" className="d-block">
-                      <Image src={dark_style ? dark_logo : logo} alt="logo" priority width="100" />
+                      <Image
+                    src={logo}
+                    alt="Logo"
+                    width={120}
+                    height={0}
+                    priority
+                    className="img-fluid"
+                  />
                     </Link>
                   </div>
                   </li>
                   {/* menus start */}
                   <Menus />
                   {/* menus end */}
-                  <li className="d-md-none mt-5"><Link href="/register" className="btn-five w-100">Post a job</Link></li>
+                  <li className="d-md-none mt-5"><Link href="/coming-soon" className="btn-five w-100">Post a job</Link></li>
                 </ul>
               </div>
             </nav>

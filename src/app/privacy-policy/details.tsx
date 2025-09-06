@@ -36,6 +36,10 @@ const PrivacyPolicy = () => {
           <Shield01Icon size={34} /> Privacy Policy
         </h1>
         <p className="text-muted mb-4">Last updated: 05/09/2025</p>
+        <p style={darkText}>
+          Make My Vid (“we,” “our,” or “us”) is committed to protecting the privacy of our clients, collaborators, and visitors who use our website, editing services, and production solutions (collectively referred to as the “Platform”).
+          This Privacy Policy explains how we collect, use, share, and protect your personal information, and outlines your rights in relation to that information. By using our Platform, you agree to the practices described below. If you do not agree, please refrain from using our Platform.
+        </p>
 
         {/* 1. Contact Details */}
         <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
@@ -64,14 +68,17 @@ const PrivacyPolicy = () => {
           <UserIcon size={28} /> 2. Information We Collect About You
         </h2>
         <p style={darkText}>
-          We collect information to deliver video production and editing services, ensure smooth workflows, and maintain a secure platform.
+          At Make My Vid, protecting your privacy is a core priority. To deliver high-quality video production and editing services, ensure smooth workflows, and maintain a secure platform, we collect and process certain categories of information. This collection happens when you use our website, contact us, share content for editing, or engage with us in any way.
         </p>
 
         {/* a) You Provide */}
-        <h5 className="fw-medium mt-4 mb-2" style={headingColor}>a) Information You Provide</h5>
+        <h5 className="fw-medium mt-4 mb-2" style={headingColor}>a) Information You Provide Directly</h5>
+        <p style={darkText}>You may provide personal and project-related information directly to us when you register, request services, or communicate with us.
+          This includes:</p>
         <ul className="list-unstyled d-flex flex-column gap-2" style={darkText}>
-          <li className="d-flex align-items-center gap-2"><UserIcon size={18} /> Account details: name, email, phone, password, profile info.</li>
-          <li className="d-flex align-items-center gap-2"><File01Icon size={18} /> Project details: raw footage, editing instructions, creative preferences.</li>
+          <li className="d-flex align-items-center gap-2"> Account Creation: When you sign up, we collect details such as your full name, email address, phone number, password, and any optional information you provide (e.g., display name, profile photo, company details).
+          </li>
+          <li className="d-flex align-items-center gap-2"> Project details: raw footage, editing instructions, creative preferences.</li>
           <li className="d-flex align-items-center gap-2"><Wallet01Icon size={18} /> Payment & billing info (processed securely by third-party providers).</li>
           <li className="d-flex align-items-center gap-2"><Message01Icon size={18} /> Customer support communications.</li>
           <li className="d-flex align-items-center gap-2"><Upload01Icon size={18} /> Uploaded files & creative materials.</li>
