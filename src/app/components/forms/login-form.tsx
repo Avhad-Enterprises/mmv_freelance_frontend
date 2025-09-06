@@ -7,7 +7,7 @@ import ErrorMsg from "../common/error-msg";
 import icon from "@/assets/images/icon/icon_60.svg";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { makePostRequest } from "@/utils/api"; // Make sure path is correct
+import { makePostRequest } from "@/utils/api";
 
 // form data type
 type IFormData = {
@@ -15,28 +15,30 @@ type IFormData = {
   password: string;
 };
 
-// schema
+// schema (email format removed)
 const schema = Yup.object().shape({
-  email: Yup.string().required().email().label("Email"),
-  password: Yup.string().required().min(6).label("Password"),
+  email: Yup.string().required("Email or username is required").label("Email or Username"),
+  password: Yup.string().required("Password is required").min(6, "Password must be at least 6 characters").label("Password"),
 });
 
 // resolver
 const resolver: Resolver<IFormData> = async (values) => {
+  const errors: any = {};
+  if (!values.email) {
+    errors.email = {
+      type: "required",
+      message: "Email or username is required.",
+    };
+  }
+  if (!values.password) {
+    errors.password = {
+      type: "required",
+      message: "Password is required.",
+    };
+  }
   return {
-    values: values.email ? values : {},
-    errors: !values.email
-      ? {
-          email: {
-            type: "required",
-            message: "Email is required.",
-          },
-          password: {
-            type: "required",
-            message: "Password is required.",
-          },
-        }
-      : {},
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
   };
 };
 
@@ -51,7 +53,6 @@ const LoginForm = () => {
     reset,
   } = useForm<IFormData>({ resolver });
 
-  //LOGIN API CALL
   const onSubmit = async (data: IFormData) => {
     try {
       const res = await makePostRequest("users/loginf", data);
@@ -60,7 +61,6 @@ const LoginForm = () => {
       toast.success("Login successful!");
       console.log("Login Response:", result);
 
-      //SAVE TOKEN
       const token = result?.data?.token;
       if (token) {
         localStorage.setItem("token", token);
@@ -69,7 +69,6 @@ const LoginForm = () => {
         console.warn("No token received.");
       }
 
-      // REDIRECT BASED ON ACCOUNT TYPE
       const accountType = result?.data?.user?.account_type;
       if (accountType === "freelancer") {
         router.push("/dashboard/candidate-dashboard");
@@ -91,10 +90,10 @@ const LoginForm = () => {
       <div className="row">
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Email*</label>
+            <label>Email or Username*</label>
             <input
-              type="email"
-              placeholder="james@example.com"
+              type="text"
+              placeholder="Enter email or username"
               {...register("email")}
               name="email"
             />

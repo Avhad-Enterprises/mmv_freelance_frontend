@@ -23,7 +23,7 @@ const EmployDashboardArea = ({setIsOpenSidebar}:IProps) => {
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
         {/* header end */}
 
         <h2 className="main-title">Dashboard</h2>

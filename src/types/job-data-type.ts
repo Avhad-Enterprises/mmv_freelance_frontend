@@ -5,9 +5,9 @@ export interface IJobType {
   editor_id?: number | null;
   project_title?: string;
   project_category?: string;
-  Deadline?: string; // ISO date string
+  deadline?: string; // ISO date string
   project_description?: string;
-  Budget?: number;
+  budget?: number;
   tags?: string[];
   skills_required?: string[];
   reference_links?: string[];

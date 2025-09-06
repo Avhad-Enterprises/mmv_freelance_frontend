@@ -28,12 +28,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ icon, main, time, i
 
 // Props type for DashboardHeader
 type DashboardHeaderProps = {
-  setIsOpenSidebar?: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ setIsOpenSidebar }) => {
   const handleOpenSidebar = () => {
-    setIsOpenSidebar?.(true);
+    setIsOpenSidebar(true);
   };
 
   return (

@@ -1,61 +1,64 @@
-"use client"
-import React from "react";
-import DashboardHeader from "../candidate/dashboard-header";
-import candidate_data from "@/data/candidate-data";
+"use client";
+import React, { useEffect, useState } from "react";
+// import DashboardHeader from "../candidate/dashboard-header";
 import CandidateItem from "./candidate-item";
 import EmployShortSelect from "./short-select";
+import { makePostRequest } from "@/utils/api";
+import useDecodedToken from "@/hooks/useDecodedToken";
 
-// props type 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
-}
+  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const SavedCandidateArea = ({setIsOpenSidebar}:IProps) => {
-  const candidate_items = candidate_data.slice(0, 4);
+const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
+  const decoded = useDecodedToken();
+  const [savedCandidates, setSavedCandidates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSavedCandidates = async () => {
+    if (!decoded) return;
+    setLoading(true);
+    try {
+      const res = await makePostRequest("favorites/freelance-info", {
+        user_id: Number(decoded.user_id),
+      });
+      const rawData = res.data.data || [];
+      setSavedCandidates(rawData);
+    } catch (err) {
+      console.error("Error fetching saved candidates:", err);
+    } finally {
+      setLoading(false);
+    }
+    console.log(decoded.user_id)
+  };
+
+  useEffect(() => {
+    fetchSavedCandidates();
+  }, [decoded]);
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
-        {/* header end */}
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
 
         <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">
-          <h2 className="main-title m0">Saved Candidate</h2>
+          <h2 className="main-title m0">Saved Candidates</h2>
           <div className="short-filter d-flex align-items-center">
-            <div className="text-dark fw-500 me-2">Short by:</div>
-            <EmployShortSelect/>
+            <div className="text-dark fw-500 me-2">Sort by:</div>
+            <EmployShortSelect />
           </div>
         </div>
 
         <div className="wrapper">
-          {candidate_items.map((item) => (
-            <CandidateItem key={item.id} item={item} />
-          ))}
-        </div>
+          {loading && <p>Loading saved candidates...</p>}
 
-        <div className="dash-pagination d-flex justify-content-end mt-30">
-          <ul className="style-none d-flex align-items-center">
-            <li>
-              <a href="#" className="active">
-                1
-              </a>
-            </li>
-            <li>
-              <a href="#">2</a>
-            </li>
-            <li>
-              <a href="#">3</a>
-            </li>
-            <li>..</li>
-            <li>
-              <a href="#">7</a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="bi bi-chevron-right"></i>
-              </a>
-            </li>
-          </ul>
+          {!loading && savedCandidates.length > 0 && savedCandidates.map((item, index) => (
+            <CandidateItem key={item.favorite_freelancer_id || index} item={item} />
+          ))}
+
+          {!loading && savedCandidates.length === 0 && (
+            <p>No saved candidates found.</p>
+          )}
         </div>
       </div>
     </div>

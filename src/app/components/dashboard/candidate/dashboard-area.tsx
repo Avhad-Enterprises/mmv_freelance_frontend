@@ -6,7 +6,7 @@ import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
 import icon_3 from "@/assets/dashboard/images/icon/icon_14.svg";
 import icon_4 from "@/assets/dashboard/images/icon/icon_15.svg";
 import main_graph from "@/assets/dashboard/images/main-graph.png";
-import DashboardHeader from "./dashboard-header";
+// import DashboardHeader from "./dashboard-header";
 import {
   makePostRequest,
   makeGetRequest,
@@ -116,7 +116,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
         <h2 className="main-title">Dashboard</h2>
 
         <div className="row">
@@ -184,7 +184,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
                           <li>
                             <a
                               className="dropdown-item"
-                              href={`http://localhost:3000/job-details-v1/${j.projects_task_id}`}
+                              href={`hhttp://13.235.113.131:8000/api/v1/${j.projects_task_id}`}
                             >
                               View Job
                             </a>

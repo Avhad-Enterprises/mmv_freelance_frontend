@@ -38,7 +38,7 @@ const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
   const sliderRef = useRef<Slider | null>(null);
 
   // Debug logs
-  console.log("📦 Received category:", category);
+  console.log("Received category:", category);
 
   const job_items: IJobType[] = job_data.filter((job) => {
     if (!job.project_category) return false;
@@ -48,7 +48,7 @@ const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
     );
   });
 
-  console.log("🔍 Filtered Related Jobs:", job_items);
+  console.log("Filtered Related Jobs:", job_items);
 
   const sliderPrev = () => {
     sliderRef.current?.slickPrev();

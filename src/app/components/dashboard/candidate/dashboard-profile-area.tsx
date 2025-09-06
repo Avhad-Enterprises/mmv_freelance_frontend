@@ -1,44 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import avatar from "@/assets/dashboard/images/avatar_02.jpg";
 import DashboardHeader from "./dashboard-header";
 import { makePostRequest } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
+import CityStateCountry from "../../common/country-state-city";
 
 type IProps = {
   setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-type Certification = {
-  name: string;
-  issued_by: string;
-  year: string;
-};
-
-type Education = {
-  degree: string;
-  institution: string;
-  year_of_completion: string;
-};
-
-type Experience = {
-  company: string;
-  role: string;
-  duration: string;
-};
-
-type Service = {
-  title: string;
-  rate: string;
-  currency: string;
-};
-
-type PreviousWork = {
-  title: string;
-  description: string;
-  url: string;
-};
+type Certification = { name: string; issued_by: string; year: string };
+type Education = { degree: string; institution: string; year_of_completion: string };
+type Experience = { company: string; role: string; duration: string };
+type Service = { title: string; rate: string; currency: string };
+type PreviousWork = { title: string; description: string; url: string };
 
 type FormData = {
   first_name: string;
@@ -57,35 +34,53 @@ type FormData = {
   previous_works: PreviousWork[];
 };
 
+const emptyForm: FormData = {
+  first_name: "",
+  last_name: "",
+  bio: "",
+  address_line_first: "",
+  city: "",
+  state: "",
+  country: "",
+  pincode: "",
+  skill: [],
+  certification: [],
+  education: [],
+  experience: [],
+  services: [],
+  previous_works: [],
+};
+
 const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
   const decodedToken = useDecodedToken();
-  const [formData, setFormData] = useState<FormData>({
-    first_name: "",
-    last_name: "",
-    bio: "",
-    address_line_first: "",
-    city: "",
-    state: "",
-    country: "",
-    pincode: "",
-    skill: [],
-    certification: [],
-    education: [],
-    experience: [],
-    services: [],
-    previous_works: [],
-  });
+  const [formData, setFormData] = useState<FormData>(emptyForm);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
+
+  // Utility: safely parse arrays that might come as JSON strings or arrays
+  const safeArray = <T,>(val: any, fallback: T[] = []): T[] => {
+    try {
+      if (Array.isArray(val)) return val as T[];
+      if (typeof val === "string" && val.trim().startsWith("[")) {
+        return JSON.parse(val) as T[];
+      }
+      return fallback;
+    } catch {
+      return fallback;
+    }
+  };
 
   useEffect(() => {
     if (decodedToken?.user_id) {
-      fetchUserData(decodedToken.user_id);
+      void fetchUserData(decodedToken.user_id);
     }
   }, [decodedToken?.user_id]);
 
   const fetchUserData = async (id: number) => {
     try {
+      setLoading(true);
       const res = await makePostRequest("users/get_user_by_id", { user_id: id });
-      const data = res.data?.data;
+      const data = res?.data?.data || {};
 
       setFormData({
         first_name: data.first_name || "",
@@ -96,49 +91,52 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
         state: data.state || "",
         country: data.country || "",
         pincode: data.pincode || "",
-        skill: Array.isArray(data.skill) ? data.skill : [],
-        certification: Array.isArray(data.certification) ? data.certification : [],
-        education: Array.isArray(data.education) ? data.education : [],
-        experience: Array.isArray(data.experience) ? data.experience : [],
-        services: Array.isArray(data.services) ? data.services : [],
-        previous_works: Array.isArray(data.previous_works) ? data.previous_works : [],
+        skill: safeArray<string>(data.skill),
+        certification: safeArray<Certification>(data.certification),
+        education: safeArray<Education>(data.education),
+        experience: safeArray<Experience>(data.experience),
+        services: safeArray<Service>(data.services),
+        previous_works: safeArray<PreviousWork>(data.previous_works),
       });
     } catch (err) {
       console.error("Failed to fetch user data", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleArrayChange = (field: keyof FormData, index: number, key: string, value: string) => {
-    const updated = [...(formData[field] as any[])];
-    updated[index] = {
-      ...updated[index],
-      [key]: value
-    };
-    handleChange(field, updated);
+  const handleArrayChange = (
+    field: keyof FormData,
+    index: number,
+    key: string,
+    value: string
+  ) => {
+    const list = (formData[field] as any[]).slice();
+    list[index] = { ...list[index], [key]: value };
+    handleChange(field as any, list as any);
   };
 
-  const handleAddMore = (field: keyof FormData, emptyItem: any) => {
-    handleChange(field, [...(formData[field] as any[]), emptyItem]);
+  const handleAddMore = (field: keyof FormData, emptyItem: Record<string, string>) => {
+    handleChange(field as any, ([...(formData[field] as any[]), emptyItem] as any) as any);
   };
 
   const handleDelete = (field: keyof FormData, index: number) => {
-    const updated = [...(formData[field] as any[])];
-    updated.splice(index, 1);
-    handleChange(field, updated);
+    const list = (formData[field] as any[]).slice();
+    list.splice(index, 1);
+    handleChange(field as any, list as any);
   };
 
   const handleSubmit = async () => {
     try {
+      setSaving(true);
       const payload = {
         ...formData,
         user_id: decodedToken?.user_id,
+        // stringify list fields as backend may expect strings
         skill: JSON.stringify(formData.skill),
         certification: JSON.stringify(formData.certification),
         education: JSON.stringify(formData.education),
@@ -152,6 +150,8 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
     } catch (err) {
       console.error("Update failed", err);
       alert("Update failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -164,10 +164,10 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
     <div className="bg-white card-box border-20 mt-30">
       <h4 className="dash-title-three">{label}</h4>
       {(formData[field] as any[]).map((item, index) => (
-        <div key={index} className="dash-input-wrapper mb-30">
+        <div key={`${label}-${index}`} className="dash-input-wrapper mb-30">
           <div className="vertical-input-group">
             {keys.map((key, i) => (
-              <div className="mb-3" key={i}>
+              <div className="mb-3" key={`${label}-${index}-${key}`}>
                 <label>{placeholders[i] || key}</label>
                 <input
                   type="text"
@@ -191,13 +191,21 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
         </div>
       ))}
       <button
-        onClick={() => handleAddMore(field, keys.reduce((acc, key) => ({ ...acc, [key]: "" }), {}))}
+        onClick={() =>
+          handleAddMore(
+            field,
+            keys.reduce((acc, key) => ({ ...acc, [key]: "" }), {} as Record<string, string>)
+          )
+        }
         className="dash-btn-two tran3s me-3"
+        type="button"
       >
         Add More {label}
       </button>
     </div>
   );
+
+  const isDisabled = useMemo(() => loading || saving, [loading, saving]);
 
   return (
     <div className="dashboard-body">
@@ -212,9 +220,11 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
             <Image src={avatar} alt="avatar" className="lazy-img user-img" />
             <div className="upload-btn position-relative tran3s ms-4 me-3">
               Upload new photo
-              <input type="file" />
+              <input type="file" disabled={isDisabled} />
             </div>
-            <button className="delete-btn tran3s">Delete</button>
+            <button className="delete-btn tran3s" disabled={isDisabled}>
+              Delete
+            </button>
           </div>
 
           <div className="row">
@@ -226,6 +236,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   className="form-control"
                   value={formData.first_name}
                   onChange={(e) => handleChange("first_name", e.target.value)}
+                  disabled={isDisabled}
                 />
               </div>
             </div>
@@ -237,6 +248,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   className="form-control"
                   value={formData.last_name}
                   onChange={(e) => handleChange("last_name", e.target.value)}
+                  disabled={isDisabled}
                 />
               </div>
             </div>
@@ -249,6 +261,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
               placeholder="Write something interesting about you...."
               value={formData.bio}
               onChange={(e) => handleChange("bio", e.target.value)}
+              disabled={isDisabled}
             />
           </div>
 
@@ -259,13 +272,20 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
               className="form-control"
               value={formData.skill.join(", ")}
               onChange={(e) =>
-                handleChange("skill", e.target.value.split(",").map((s) => s.trim()))
+                handleChange(
+                  "skill",
+                  e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                )
               }
+              disabled={isDisabled}
             />
           </div>
         </div>
 
-        {/* Dynamic Tabs */}
+        {/* Dynamic Sections */}
         {renderVerticalInputGroup(
           "Certifications",
           "certification",
@@ -301,7 +321,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
           ["Project Title", "Description", "URL"]
         )}
 
-        {/* Address Section */}
+        {/* Address Section with CityStateCountry */}
         <div className="bg-white card-box border-20 mt-40">
           <h4 className="dash-title-three">Address & Location</h4>
           <div className="row">
@@ -313,31 +333,21 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   className="form-control"
                   value={formData.address_line_first}
                   onChange={(e) => handleChange("address_line_first", e.target.value)}
+                  disabled={isDisabled}
                 />
               </div>
             </div>
-            <div className="col-md-6 col-lg-3">
-              <div className="dash-input-wrapper mb-25">
-                <label>Country*</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.country}
-                  onChange={(e) => handleChange("country", e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <div className="dash-input-wrapper mb-25">
-                <label>City*</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.city}
-                  onChange={(e) => handleChange("city", e.target.value)}
-                />
-              </div>
-            </div>
+
+            <CityStateCountry
+              country={formData.country}
+              state={formData.state}
+              city={formData.city}
+              onCountryChange={(val) => handleChange("country", val)}
+              onStateChange={(val) => handleChange("state", val)}
+              onCityChange={(val) => handleChange("city", val)}
+              disabled={isDisabled}
+            />
+
             <div className="col-md-6 col-lg-3">
               <div className="dash-input-wrapper mb-25">
                 <label>Zip Code*</label>
@@ -346,17 +356,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                   className="form-control"
                   value={formData.pincode}
                   onChange={(e) => handleChange("pincode", e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-3">
-              <div className="dash-input-wrapper mb-25">
-                <label>State*</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.state}
-                  onChange={(e) => handleChange("state", e.target.value)}
+                  disabled={isDisabled}
                 />
               </div>
             </div>
@@ -365,10 +365,17 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
         {/* Save Buttons */}
         <div className="button-group d-inline-flex align-items-center mt-30">
-          <button onClick={handleSubmit} className="dash-btn-two tran3s me-3">
-            Save Changes
+          <button
+            onClick={handleSubmit}
+            className="dash-btn-two tran3s me-3"
+            disabled={isDisabled}
+            type="button"
+          >
+            {saving ? "Saving..." : "Save Changes"}
           </button>
-          <button className="dash-cancel-btn tran3s">Cancel</button>
+          <button className="dash-cancel-btn tran3s" disabled={isDisabled} type="button">
+            Cancel
+          </button>
         </div>
       </div>
     </div>

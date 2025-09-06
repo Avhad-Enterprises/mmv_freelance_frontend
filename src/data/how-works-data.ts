@@ -12,7 +12,7 @@ export const how_works_data: how_works_type[] = [
     icon: icon_1,
     icon_white: icon_W_1,
     title: "Create Account",
-    sub_title: "It’s very easy to open an account and start your journey.",
+    sub_title: "Quick, simple, free.",
   },
   {
     id: 2,
@@ -20,7 +20,7 @@ export const how_works_data: how_works_type[] = [
     icon_white: icon_W_2,
     title: "Complete your profile",
     sub_title:
-      "Complete your profile with all the info to get attention of client.",
+      "Showcase your skills or define your project needs",
   },
   {
     id: 3,
@@ -28,6 +28,6 @@ export const how_works_data: how_works_type[] = [
     icon_white: icon_W_3,
     title: "Apply job or hire",
     sub_title:
-      "Apply & get your preferable jobs with all the requirements and get it.",
+      "Connect, collaborate, and create magic.",
   },
 ];

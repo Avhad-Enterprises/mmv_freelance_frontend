@@ -1,9 +1,9 @@
 import React from "react";
-import { ICandidate } from "@/data/candidate-data";
 import Image from "next/image";
 import Link from "next/link";
 
 type Candidate = {
+  user_id: number;
   username: any;
   first_name: string;
   last_name: string;
@@ -13,21 +13,34 @@ type Candidate = {
   profile_picture?: string;
   skill?: any[];
   total_earnings: number;
-  favorite: any;
+  favorite?: boolean;
   post: any;
-  salary_duration: any;
+  budget: any;
+};
+
+interface CandidateListItemProps {
+  item: Candidate;
+  style_2?: boolean;
+  isSaved: boolean;
+  onToggleSave: (id: number) => void;
 }
 
-const CandidateListItem = ({ item, style_2 = false }: { item: Candidate; style_2?: boolean }) => {
+const CandidateListItem: React.FC<CandidateListItemProps> = ({
+  item,
+  style_2 = false,
+  isSaved,
+  onToggleSave,
+}) => {
   return (
     <div
-      className={`candidate-profile-card ${item.favorite ? "favourite" : ""} ${style_2 ? 'border-0' : ''} list-layout mb-25`}
+      className={`candidate-profile-card ${isSaved ? "favourite" : ""} ${style_2 ? "border-0" : ""
+        } list-layout mb-25`}
     >
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
           <Link href="/candidate-profile-v2" className="rounded-circle">
             <Image
-              src={item.profile_picture || ""}
+              src={item.profile_picture || "/images/default-avatar.png"}
               alt="Candidate"
               width={80}
               height={80}
@@ -56,28 +69,40 @@ const CandidateListItem = ({ item, style_2 = false }: { item: Candidate; style_2
                 </ul>
               </div>
             </div>
+
             <div className="col-xl-3 col-md-4 col-sm-6">
               <div className="candidate-info">
-                <span>Salary</span>
+                <span>Budget</span>
                 <div>
-                  {item.total_earnings}/{item.salary_duration}
+                  {item.budget ? `${item.budget} / month` : "Negotiable"}
                 </div>
               </div>
             </div>
+
+
             <div className="col-xl-3 col-md-4 col-sm-6">
               <div className="candidate-info">
                 <span>Location</span>
                 <div>{`${item.city}, ${item.country}`}</div>
               </div>
             </div>
+
             <div className="col-xl-3 col-md-4">
               <div className="d-flex justify-content-lg-end">
-                {/* <Link href="/candidate-profile-v1"
+                {/*Heart Save Button */}
+                <button
+                  type="button"
                   className="save-btn text-center rounded-circle tran3s mt-10"
+                  onClick={() => onToggleSave(item.user_id)}
                 >
-                  <i className="bi bi-heart"></i>
-                </Link> */}
-                <Link href={`/candidate-profile/${item.username}`}
+                  <i
+                    className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"
+                      }`}
+                  ></i>
+                </button>
+
+                <Link
+                  href={`/candidate-profile/${item.username}`}
                   className="profile-btn tran3s ms-md-2 mt-10 sm-mt-20"
                 >
                   View Profile

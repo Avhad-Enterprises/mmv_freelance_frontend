@@ -11,13 +11,13 @@ const LogoutModal = () => {
     // Clear token / user data from storage
     localStorage.removeItem("token"); // example
     // Redirect to login or homepage
-    router.push("/login");
+    router.push("/");
   };
 
   return (
     <div
       className="modal fade"
-      id="deleteModal"
+      id="logoutModal"
       tabIndex={-1}
       aria-hidden="true"
     >

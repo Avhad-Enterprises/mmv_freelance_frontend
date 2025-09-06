@@ -9,7 +9,8 @@ const JobPortalIntro = ({top_border=false}:{top_border?:boolean}) => {
           <div className="row align-items-center">
             <div className="col-lg-7">
               <div className="text-center text-lg-start wow fadeInUp" data-wow-delay="0.3s">
-                <h2>Most complete job portal.</h2>
+                <h2>The most complete job portal for video.</h2>
+                <p>Whether you’re looking for your next project or your next hire, this is where bold ideas find bold creators.</p>
                 <p className="text-md m0 md-pb-20">
                   Signup and start find your job or talents.
                 </p>

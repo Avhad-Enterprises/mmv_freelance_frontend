@@ -130,11 +130,11 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                 <ul className="job-meta-data row style-none">
                   <li className="col-6">
                     <span>Budget</span>
-                    <div>${job.Budget}</div>
+                    <div>${job.budget}</div>
                   </li>
                   <li className="col-6">
                     <span>Deadline</span>
-                    <div>{job.Deadline?.slice(0, 10)}</div>
+                    <div>{job.deadline?.slice(0, 10)}</div>
                   </li>
                   <li className="col-6">
                     <span>Duration</span>

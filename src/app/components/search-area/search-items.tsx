@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { IJobType } from "@/types/job-data-type";
 import ListItemTwo from "../jobs/list/list-item-2";
 import JobGridItem from "../jobs/grid/job-grid-item";
-import { makeGetRequest } from "@/utils/api"; // 👈 your custom Axios wrapper
+import { makeGetRequest } from "@/utils/api";
 
 const SearchItems = () => {
   const searchParams = useSearchParams();
@@ -18,7 +18,7 @@ const SearchItems = () => {
     const fetchProjects = async () => {
       try {
         const response = await makeGetRequest("projectsTask/getallprojects_task");
-        const data = response.data?.data || []; // 👈 account for nested "data" key
+        const data = response.data?.data || []; //account for nested "data" key
 
         const filtered = data.filter((item: IJobType) => {
           if (!categoryNormalized) return true;

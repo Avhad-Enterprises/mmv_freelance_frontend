@@ -83,7 +83,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
   const sortJobs = (jobs: any[], type: string) => {
     switch (type) {
       case "Budget":
-        return [...jobs].sort((a, b) => b.Budget - a.Budget);
+        return [...jobs].sort((a, b) => b.budget - a.budget);
       case "Category":
         return [...jobs].sort((a, b) =>
           a.project_category.localeCompare(b.project_category)
@@ -146,11 +146,11 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
                     <div className="job-category text-dark fw-500">
                       {j.project_category || "Uncategorized"}
                     </div>
-                    <div className="job-salary">₹{j.Budget} / Fixed Budget</div>
+                    <div className="job-salary">₹{j.budget} / Fixed Budget</div>
                     <div className="job-deadline text-muted">
                       Deadline:{" "}
                       {j.Deadline
-                        ? new Date(j.Deadline).toLocaleDateString()
+                        ? new Date(j.deadline).toLocaleDateString()
                         : "N/A"}
                     </div>
                   </div>

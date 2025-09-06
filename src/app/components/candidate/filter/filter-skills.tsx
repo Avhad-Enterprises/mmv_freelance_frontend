@@ -8,10 +8,13 @@ const FilterSkills = ({
   skills: string[];
   onChange: (value: string) => void;
 }) => {
-  const options = skills.map((skill) => ({
-    value: skill,
-    label: skill,
-  }));
+  const options = [
+    { value: "", label: "Select Skill" }, // Default option
+    ...skills.map((skill) => ({
+      value: skill,
+      label: skill,
+    })),
+  ];
 
   return (
     <NiceSelect
@@ -25,4 +28,3 @@ const FilterSkills = ({
 };
 
 export default FilterSkills;
-

@@ -5,7 +5,7 @@ import { EB_Garamond } from "next/font/google";
 import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
 import { Toaster } from "react-hot-toast";
-import { SidebarProvider } from "@/context/SidebarContext"; // 👈 yaha import karna hai
+import { SidebarProvider } from "@/context/SidebarContext"; //
 
 const gordita = localFont({
   src: [
@@ -56,7 +56,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning={true} className={`${gordita.variable} ${garamond.variable}`}>
         <Providers>
-          <SidebarProvider> {/* 👈 yaha wrap kar diya */}
+          <SidebarProvider> {/*yaha wrap kar diya */}
             <Toaster position="top-right" />
             {children}
           </SidebarProvider>

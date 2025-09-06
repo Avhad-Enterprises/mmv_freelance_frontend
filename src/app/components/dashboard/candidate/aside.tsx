@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import DeleteAccountModal from "../../forms/DeleteAccountModal";
 import { usePathname } from "next/navigation";
 
 // Images & Icons
@@ -48,27 +49,27 @@ const nav_data = [
     link: "/dashboard/candidate-dashboard/profile",
     title: "My Profile",
   },
-  {
-    id: 3,
-    icon: nav_3,
-    icon_active: nav_3_active,
-    link: "/dashboard/candidate-dashboard/resume",
-    title: "Resume",
-  },
-  {
-    id: 4,
-    icon: nav_4,
-    icon_active: nav_4_active,
-    link: "/dashboard/candidate-dashboard/messages",
-    title: "Messages",
-  },
-  {
-    id: 5,
-    icon: nav_5,
-    icon_active: nav_5_active,
-    link: "/dashboard/candidate-dashboard/job-alert",
-    title: "Job Alert",
-  },
+  // {
+  //   id: 3,
+  //   icon: nav_3,
+  //   icon_active: nav_3_active,
+  //   link: "/dashboard/candidate-dashboard/resume",
+  //   title: "Resume",
+  // },
+  // {
+  //   id: 4,
+  //   icon: nav_4,
+  //   icon_active: nav_4_active,
+  //   link: "/dashboard/candidate-dashboard/messages",
+  //   title: "Messages",
+  // },
+  // {
+  //   id: 5,
+  //   icon: nav_5,
+  //   icon_active: nav_5_active,
+  //   link: "/dashboard/candidate-dashboard/job-alert",
+  //   title: "Job Alert",
+  // },
   {
     id: 6,
     icon: nav_6,
@@ -176,12 +177,12 @@ const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                     <span className="ms-2 ps-1">Account Settings</span>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <a className="dropdown-item d-flex align-items-center" href="#">
                     <Image src={profile_icon_3} alt="icon" className="lazy-img" />
                     <span className="ms-2 ps-1">Notification</span>
                   </a>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>
@@ -214,7 +215,7 @@ const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                   data-bs-toggle="modal"
                   data-bs-target="#deleteModal"
                 >
-                  <Image src={nav_8} alt="icon" className="lazy-img" />
+                  <Image src={nav_8} alt="Delete Account" className="lazy-img" />
                   <span>Delete Account</span>
                 </a>
               </li>
@@ -235,13 +236,14 @@ const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
             href="#"
             className="d-flex w-100 align-items-center logout-btn"
             data-bs-toggle="modal"
-            data-bs-target="#deleteModal"
+            data-bs-target="#logoutModal"
           >
             <Image src={logout} alt="icon" className="lazy-img" />
             <span>Logout</span>
           </a>
         </div>
       </aside>
+      <DeleteAccountModal />
       <LogoutModal />
     </>
   );

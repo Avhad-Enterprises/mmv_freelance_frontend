@@ -98,8 +98,11 @@ export default function ApplicationDetailsPage({
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <EmployAside /> {/* ❌ props ki zarurat nahi */}
-        <DashboardHeader /> {/* ❌ props ki zarurat nahi */}
+         <EmployAside
+        isOpenSidebar={isOpenSidebar}
+        setIsOpenSidebar={setIsOpenSidebar}
+      />
+        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
 
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <div className="d-flex align-items-center gap-2">

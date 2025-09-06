@@ -21,10 +21,9 @@ const ContactArea = () => {
                     <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
                       <Image src={icon_1} alt="icon" />
                     </div>
-                    <h5 className="title">Our Address</h5>
+                    <h5 className="title">Office Address</h5>
                     <p>
-                      Bass Hill Plaza Medical Centre <br />
-                      Sydney, Australia
+                      11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092.
                     </p>
                   </div>
                 </div>
@@ -34,10 +33,12 @@ const ContactArea = () => {
                       <Image src={icon_2} alt="icon" />
                     </div>
                     <h5 className="title">Contact Info</h5>
+                    <p> info@makemyvid.io</p>
                     <p>
                       Open a chat or give us call at <br />
-                      <a href="tel:310.841.5500" className="call">
-                        310.841.5500
+                    <p>+91 7977484292</p>
+                      <a href="tel:+44.7542550969" className="call">
+                        UK Enquiries: +44 7542550969
                       </a>
                     </p>
                   </div>
@@ -49,9 +50,9 @@ const ContactArea = () => {
                     </div>
                     <h5 className="title">Live Support</h5>
                     <p>
-                      live chat service <br />
+                      Editing Studio Address: <br />
                       <a href="#" className="webaddress">
-                        www.jobilivechat.com
+                        Gala 6, Navratna Apartment, Asara Colony Road, Dattapada, Borivali East, Mumbai 400066.
                       </a>
                     </p>
                   </div>

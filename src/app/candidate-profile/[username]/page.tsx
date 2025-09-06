@@ -38,7 +38,7 @@ const CandidateProfilePage = ({ params }: PageProps) => {
     useEffect(() => {
         const fetchFreelancer = async () => {
             try {
-                const response = await makePostRequest("users/getfreelaner", { username });
+                const response = await makePostRequest("users/getfreelaner", {username});
                 console.log("Full API Response: ", JSON.stringify(response, null, 2));
                 console.log("Response Data: ", JSON.stringify(response.data, null, 2));
                 if (response.data && typeof response.data === "object" && Object.keys(response.data).length > 0) {

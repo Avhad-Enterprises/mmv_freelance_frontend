@@ -11,7 +11,10 @@ const EmployDashboardMessagesPage = () => {
 
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <EmployAside />
+      <EmployAside
+          isOpenSidebar={isOpenSidebar}
+          setIsOpenSidebar={setIsOpenSidebar}
+        />
       {/* aside end  */}
 
       {/* messages area start */}

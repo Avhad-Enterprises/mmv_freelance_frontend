@@ -1,10 +1,10 @@
-import React from "react";
+import React, { ReactNode } from "react";
 
 // type
 type IPropType = {
   id:string;
   title:string;
-  desc:string;
+  desc:ReactNode;
   isShow?:boolean;
   parent:string;
 }

@@ -59,7 +59,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
                 href={`/job-details-v1/${item.projects_task_id}`}
                 className="job-duration fw-500"
               >
-                {item.Deadline?.slice(0, 10) || ""}
+                {item.deadline?.slice(0, 10) || ""}
               </Link>
               <Link
                 href={`/job-details-v1/${item.projects_task_id}`}
@@ -82,7 +82,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
             </Link>
           </div>
           <div className="job-salary">
-            <span className="fw-500 text-dark">${item.Budget ?? 0}</span> / Fixed Budget
+            <span className="fw-500 text-dark">${item.budget ?? 0}</span> / Fixed Budget
           </div>
         </div>
 

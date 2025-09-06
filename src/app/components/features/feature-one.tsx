@@ -66,14 +66,13 @@ const FeatureOne = () => {
           <div className="col-lg-5 order-lg-last">
             <div className="ps-xxl-4 wow fadeInRight">
               <div className="title-one">
-                <h2>Get over 50.000+ talented experts in jobi.</h2>
+                <h2>Get over 50,000+ creative experts on one stage.</h2>
               </div>
               <p className="mt-40 md-mt-20 mb-40 md-mb-20">
-                A full hybrid workforce management tools are yours to use, as
-                well as access to our top 1% of talent.{" "}
+                From indie filmmakers to top 3% video editors, our marketplace is loaded with talent you can trust.{" "}
               </p>
               <ul className="list-style-one style-none">
-                <li>Seamless searching</li>
+                <li>Seamless search & filters</li>
                 <li>Get top 3% experts for your project</li>
                 <li>Protected payments system</li>
               </ul>

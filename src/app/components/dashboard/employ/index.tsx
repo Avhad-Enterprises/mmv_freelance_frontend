@@ -4,12 +4,16 @@ import EmployAside from './aside';
 import EmployDashboardArea from './dashboard-area';
 
 const EmployDashboardMain = () => {
-  const [isOpenSidebar,setIsOpenSidebar] = useState<boolean>(false);
+  const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(false);
+
   return (
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <EmployAside/>
-      {/* aside end  */}
+     <EmployAside
+        isOpenSidebar={isOpenSidebar}
+        setIsOpenSidebar={setIsOpenSidebar}
+      />
+      {/* aside end */}
 
       {/* dashboard area start */}
       <EmployDashboardArea setIsOpenSidebar={setIsOpenSidebar} />

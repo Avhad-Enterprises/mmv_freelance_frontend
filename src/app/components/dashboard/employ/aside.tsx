@@ -1,10 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Image, { StaticImageData } from "next/image";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { toast } from "react-hot-toast";
-import { useSidebar } from "@/context/SidebarContext"; // 👈 import
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { makePostRequest } from "@/utils/api";
+import useDecodedToken from "@/hooks/useDecodedToken";
+import LogoutModal from "../../common/popup/logout-modal";
+import DeleteAccountModal from "../../forms/DeleteAccountModal";
+
+// Images & Icons
 import logo from "@/assets/dashboard/images/logo_01.png";
 import avatar from "@/assets/dashboard/images/avatar_03.jpg";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -25,84 +29,72 @@ import nav_6 from "@/assets/dashboard/images/icon/icon_6.svg";
 import nav_6_active from "@/assets/dashboard/images/icon/icon_6_active.svg";
 import nav_7 from "@/assets/dashboard/images/icon/icon_7.svg";
 import nav_7_active from "@/assets/dashboard/images/icon/icon_7_active.svg";
+import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
 import nav_9 from "@/assets/dashboard/images/icon/icon_40.svg";
 import nav_9_active from "@/assets/dashboard/images/icon/icon_40_active.svg";
-import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
-import LogoutModal from "../../common/popup/logout-modal";
-import { getLoggedInUser } from "@/utils/jwt";
-import { makePostRequest } from "@/utils/api";
 
-const nav_data: { id: number; icon: StaticImageData; icon_active: StaticImageData; link: string; title: string }[] = [
+const nav_data = [
   { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/employ-dashboard", title: "Dashboard" },
   { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/employ-dashboard/profile", title: "My Profile" },
   { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/employ-dashboard/jobs", title: "My Jobs" },
-  { id: 4, icon: nav_4, icon_active: nav_4_active, link: "/dashboard/employ-dashboard/messages", title: "Messages" },
+  // { id: 4, icon: nav_4, icon_active: nav_4_active, link: "/dashboard/employ-dashboard/messages", title: "Messages" },
   { id: 5, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/employ-dashboard/submit-job", title: "Submit Job" },
   { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/employ-dashboard/saved-candidate", title: "Saved Candidate" },
-  { id: 7, icon: nav_9, icon_active: nav_9_active, link: "/dashboard/employ-dashboard/membership", title: "Membership" },
+  // { id: 7, icon: nav_9, icon_active: nav_9_active, link: "/dashboard/employ-dashboard/membership", title: "Membership" },
   { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
 ];
 
-type IUserData = {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  profile_picture?: string;
+type IProps = {
+  isOpenSidebar: boolean;
+  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const EmployAside: React.FC = () => {
-  
+const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
   const pathname = usePathname();
-  const { isOpenSidebar } = useSidebar(); // use context
-
-  const [userData, setUserData] = useState<IUserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const decoded = useDecodedToken();
+  const [fullName, setFullName] = useState("Loading...");
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const decoded = getLoggedInUser();
-      const userId = decoded?.user_id;
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
+    const userId = decoded?.user_id;
+    if (!userId) return;
 
+    const fetchUser = async () => {
       try {
         const res = await makePostRequest("users/get_user_by_id", { user_id: userId });
-        if (res.data?.data) setUserData(res.data.data);
-        else toast.error("Failed to load user data.");
+        const user = res.data?.data;
+        if (user?.first_name || user?.last_name) {
+          setFullName(`${user.first_name} ${user.last_name}`);
+        } else {
+          setFullName("Unknown User");
+        }
       } catch {
-        toast.error("Error fetching user data.");
-      } finally {
-        setLoading(false);
+        setFullName("Error loading");
       }
     };
     fetchUser();
-  }, []);
-
-  const userFullName = userData ? `${userData.first_name} ${userData.last_name}`.trim() : "User";
+  }, [decoded]);
 
   return (
     <>
-      <aside className={`dash-aside-navbar ${isOpenSidebar ? "open" : "closed"}`}>
+      <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
         <div className="position-relative">
-          {/* Logo */}
+          {/* Logo + Close Button */}
           <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
             <Link href="/dashboard/employ-dashboard">
               <Image src={logo} alt="logo" priority />
             </Link>
+            <button
+              onClick={() => setIsOpenSidebar(false)}
+              className="close-btn d-block d-md-none"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
           </div>
 
           {/* User Info */}
           <div className="user-data">
             <div className="user-avatar online position-relative rounded-circle">
-              <Image
-                src={userData?.profile_picture || avatar}
-                alt="avatar"
-                width={75}
-                height={75}
-                style={{ objectFit: "cover", borderRadius: "50%" }}
-              />
+              <Image src={avatar} alt="avatar" className="lazy-img" />
             </div>
             <div className="user-name-data">
               <button
@@ -113,24 +105,24 @@ const EmployAside: React.FC = () => {
                 data-bs-auto-close="outside"
                 aria-expanded="false"
               >
-                {loading ? "Loading..." : userFullName}
+                {fullName}
               </button>
               <ul className="dropdown-menu" aria-labelledby="profile-dropdown">
                 <li>
                   <Link className="dropdown-item d-flex align-items-center" href="/dashboard/employ-dashboard/profile">
-                    <Image src={profile_icon_1} alt="icon" />
+                    <Image src={profile_icon_1} alt="icon" className="lazy-img" />
                     <span className="ms-2 ps-1">Profile</span>
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item d-flex align-items-center" href="/dashboard/employ-dashboard/profile">
-                    <Image src={profile_icon_2} alt="icon" />
+                  <Link className="dropdown-item d-flex align-items-center" href="/dashboard/employ-dashboard/setting">
+                    <Image src={profile_icon_2} alt="icon" className="lazy-img" />
                     <span className="ms-2 ps-1">Account Settings</span>
                   </Link>
                 </li>
                 <li>
                   <a className="dropdown-item d-flex align-items-center" href="#">
-                    <Image src={profile_icon_3} alt="icon" />
+                    <Image src={profile_icon_3} alt="icon" className="lazy-img" />
                     <span className="ms-2 ps-1">Notification</span>
                   </a>
                 </li>
@@ -144,20 +136,26 @@ const EmployAside: React.FC = () => {
               {nav_data.map((item) => {
                 const isActive = pathname === item.link;
                 return (
-                  <li key={item.id}>
+                  <li key={item.id} onClick={() => setIsOpenSidebar(false)}>
                     <Link
                       href={item.link}
                       className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}
                     >
-                      <Image src={isActive ? item.icon_active : item.icon} alt={item.title} />
+                      <Image src={isActive ? item.icon_active : item.icon} alt="icon" className="lazy-img" />
                       <span>{item.title}</span>
                     </Link>
                   </li>
                 );
               })}
+              {/* Delete Account */}
               <li>
-                <a href="#" className="d-flex w-100 align-items-center" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                  <Image src={nav_8} alt="Delete Account" />
+                <a
+                  href="#"
+                  className="d-flex w-100 align-items-center"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteModal"
+                >
+                  <Image src={nav_8} alt="Delete Account" className="lazy-img" />
                   <span>Delete Account</span>
                 </a>
               </li>
@@ -174,15 +172,22 @@ const EmployAside: React.FC = () => {
           </div>
 
           {/* Logout */}
-          <a href="#" className="d-flex w-100 align-items-center logout-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">
-            <Image src={logout} alt="Logout" />
+          <a
+            href="#"
+            className="d-flex w-100 align-items-center logout-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#logoutModal"
+          >
+            <Image src={logout} alt="Logout" className="lazy-img" />
             <span>Logout</span>
           </a>
         </div>
       </aside>
 
-      {/* Logout Modal */}
+      {/* Modals */}
+      <DeleteAccountModal />
       <LogoutModal />
+
     </>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import DashboardHeader from "../candidate/dashboard-header";
+// import DashboardHeader from "../candidate/dashboard-header";
 import EmployJobItem from "./job-item";
 import { getLoggedInUser } from "@/utils/jwt";
 import { makeGetRequest, makePostRequest } from "@/utils/api";
@@ -127,7 +127,7 @@ const EmployJobArea = ({ setIsOpenSidebar }: IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
 
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">My Jobs</h2>

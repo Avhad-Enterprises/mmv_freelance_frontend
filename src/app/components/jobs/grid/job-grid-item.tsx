@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { add_to_wishlist } from "@/redux/features/wishlist";
 
 const JobGridItem = ({ item, style_2 = true }: { item: IJobType; style_2?: boolean }) => {
-  const { projects_task_id, projects_type, Budget, project_title } = item || {};
+  const { projects_task_id, projects_type, budget, project_title } = item || {};
   const { wishlist } = useAppSelector(state => state.wishlist);
   const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
   const dispatch = useAppDispatch();
@@ -38,7 +38,7 @@ const JobGridItem = ({ item, style_2 = true }: { item: IJobType; style_2?: boole
       </div>
 
       <div className="job-salary">
-        <span className="fw-500 text-dark">${Budget}</span> / project
+        <span className="fw-500 text-dark">${budget}</span> / project
       </div>
 
       <div className="d-flex align-items-center justify-content-between mt-auto">

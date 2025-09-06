@@ -74,7 +74,7 @@ const JobListThree = ({
           ? tags.some((t) => item.tags?.includes(t))
           : true
       )
-      .filter((item) => (item.Budget ?? 0) >= priceValue[0] && (item.Budget ?? 0) <= priceValue[1])
+      .filter((item) => (item.budget ?? 0) >= priceValue[0] && (item.budget ?? 0) <= priceValue[1])
       .filter((item) =>
         search_key
           ? item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
@@ -84,9 +84,9 @@ const JobListThree = ({
 
     // Sorting
     if (shortValue === "price-low-to-high") {
-      filteredData = filteredData.slice().sort((a, b) => Number(a.Budget) - Number(b.Budget));
+      filteredData = filteredData.slice().sort((a, b) => Number(a.budget) - Number(b.budget));
     } else if (shortValue === "price-high-to-low") {
-      filteredData = filteredData.slice().sort((a, b) => Number(b.Budget) - Number(a.Budget));
+      filteredData = filteredData.slice().sort((a, b) => Number(b.budget) - Number(a.budget));
     }
 
     const endOffset = itemOffset + itemsPerPage;

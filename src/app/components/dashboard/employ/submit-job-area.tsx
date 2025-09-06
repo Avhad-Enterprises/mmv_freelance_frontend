@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import DashboardHeader from "../candidate/dashboard-header";
-import StateSelect from "../candidate/state-select";
-import CitySelect from "../candidate/city-select";
-import CountrySelect from "../candidate/country-select";
+// import DashboardHeader from "../candidate/dashboard-header";
+// import StateSelect from "../candidate/state-select";
+// import CitySelect from "../candidate/city-select";
+// import CountrySelect from "../candidate/country-select";
 import NiceSelect from "@/ui/nice-select";
 import { makeGetRequest, makePostRequest } from "@/utils/api";
 import { useRouter } from "next/navigation";
@@ -287,7 +287,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
       console.log("API response:", response);
 
       if (response.data.success || response.data.message === "inserted") {
-        toast.success("🎉 Project posted successfully!");
+        toast.success("Project posted successfully!");
 
         setFormData({
           project_title: "",
@@ -332,7 +332,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
         <h2 className="main-title">Add a New Project</h2>
 
         <form onSubmit={handleSubmit}>
@@ -405,18 +405,19 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
                 <div className="dash-input-wrapper mb-30">
                   <label htmlFor="">Budget</label>
                   <input
-                    type="text"
+                    type="number"
                     name="budget"
                     value={formData.budget}
                     onChange={handleInputChange}
                     placeholder="10000"
                     required
+                    min={0}
                   />
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="">Statu*s</label>
+                  <label htmlFor="">Status*</label>
                   <NiceSelect
                     options={[
                       { value: "0", label: "Inactive" },
@@ -454,7 +455,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setSkillInput(value);
-                  fetchSkill(value);  // 🔑 live query
+                  fetchSkill(value);  // live query
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
