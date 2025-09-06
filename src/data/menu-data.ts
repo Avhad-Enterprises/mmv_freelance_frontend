@@ -48,27 +48,27 @@ const menu_data:IMenuData[] = [
           // {title:'Candidates Details v-2',link:'/candidate-profile-v2'},
         ]
       },
-      {
-        id:2,
-        title:'Company',
-        sub_menus:[
-          {title:'Company V-1',link:'/company-v1'},
-          {title:'Company V-2',link:'/company-v2'},
-          {title:'Company V-3',link:'/company-v3'},
-          {title:'Company V-4',link:'/company-v4'},
-          {title:'Company Details',link:'/company-details'},
-        ]
-      },
-      {
-        id:3,
-        title:'Essential',
-        sub_menus:[
-          {title:'About Us',link:'/about-us'},
-          {title:'Pricing',link:'/pricing'},
-          {title:'FAQ',link:'/faq'},
-          {title:'Register',link:'/register'},
-        ]
-      },
+      // {
+      //   id:2,
+      //   title:'Company',
+      //   sub_menus:[
+      //     {title:'Company V-1',link:'/company-v1'},
+      //     {title:'Company V-2',link:'/company-v2'},
+      //     {title:'Company V-3',link:'/company-v3'},
+      //     {title:'Company V-4',link:'/company-v4'},
+      //     {title:'Company Details',link:'/company-details'},
+      //   ]
+      // },
+      // {
+      //   id:3,
+      //   title:'Essential',
+      //   sub_menus:[
+      //     {title:'About Us',link:'/about-us'},
+      //     {title:'Pricing',link:'/pricing'},
+      //     {title:'FAQ',link:'/faq'},
+      //     {title:'Register',link:'/register'},
+      //   ]
+      // },
     ]
   },
   {
@@ -87,15 +87,15 @@ const menu_data:IMenuData[] = [
     link:'/contact',
     title:'Contact'
   },
-  {
-    id:6,
-    link:'/dashboard/employer-dashboard',
-    title:'Dashboard',
-    sub_menus:[
-      {link:'/dashboard/candidate-dashboard',title:'Candidate Dashboard'},
-      {link:'/dashboard/employ-dashboard',title:'Employer Dashboard'},
-    ]
-  }
+  // {
+  //   id:6,
+  //   link:'/dashboard/employer-dashboard',
+  //   title:'Dashboard',
+  //   sub_menus:[
+  //     {link:'/dashboard/candidate-dashboard',title:'Candidate Dashboard'},
+  //     {link:'/dashboard/employ-dashboard',title:'Employer Dashboard'},
+  //   ]
+  // }
 ]
 
 export default menu_data;
