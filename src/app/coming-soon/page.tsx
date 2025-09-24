@@ -3,38 +3,44 @@ import Image from 'next/image';
 import Link from 'next/link';
 import icon from '@/assets/images/icon/icon_61.svg';
 import comingsoon_img from './coming_soon.png';
+import HeaderSix from "@/layouts/headers/header-6";
+import Wrapper from "@/layouts/wrapper";
 
 const ComingSoonPage = () => {
     return (
-        <div className="comingsoon-page d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+        <Wrapper>
+            {/* header start */}
+            <HeaderSix dark_style={true} />
+            {/* header end */}
+            
+            <div className="comingsoon-page d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+                {/* Image Section (Top) */}
+                <Image
+                    src={comingsoon_img}
+                    alt="comingsoon-img"
+                    width={400}
+                    height={400}
+                    className="img-fluid mx-auto d-block mb-4"
+                />
 
-            {/* Image Section (Top) */}
-            <Image
-                src={comingsoon_img}
-                alt="comingsoon-img"
-                width={400}
-                height={400}
-                className="img-fluid mx-auto d-block mb-4"
-            />
+                {/* Text Section (Below Image) */}
+                <h2>Coming Soon 🚀</h2>
+                <p className="text-md mb-4">
+                    We're working hard to bring you something amazing.
+                    Stay tuned and check back later!
+                </p>
 
-            {/* Text Section (Below Image) */}
-
-            <h2>Coming Soon 🚀</h2>
-            <p className="text-md mb-4">
-                We’re working hard to bring you something amazing.
-                Stay tuned and check back later!
-            </p>
-
-            {/* Button */}
-            <Link
-                href="/"
-                className="btn-one d-flex align-items-center justify-content-between mt-3"
-                style={{ maxWidth: "250px", width: "100%" }}
-            >
-                <span>GO BACK</span>
-                <Image src={icon} alt="icon" />
-            </Link>
-        </div>
+                {/* Button */}
+                <Link
+                    href="/"
+                    className="btn-one d-flex align-items-center justify-content-between mt-3"
+                    style={{ maxWidth: "250px", width: "100%" }}
+                >
+                    <span>GO BACK</span>
+                    <Image src={icon} alt="icon" />
+                </Link>
+            </div>
+        </Wrapper>
     );
 };
 

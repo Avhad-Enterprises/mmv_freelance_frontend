@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, { useEffect } from "react";
 import { Metadata } from "next";
 import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
@@ -11,6 +12,31 @@ export const metadata: Metadata = {
 };
 
 const RegisterPage = () => {
+  useEffect(() => {
+    // Clean up any modal/overlay elements
+    const cleanup = () => {
+      // Remove modal backdrop if exists
+      const modalBackdrop = document.querySelector('.modal-backdrop');
+      if (modalBackdrop) {
+        modalBackdrop.remove();
+      }
+
+      // Remove any custom overlays
+      const overlays = document.querySelectorAll('.overlay, .modal-overlay, .loading-overlay');
+      overlays.forEach(overlay => overlay.remove());
+
+      // Reset body styles that might have been set by modal
+      document.body.style.overflow = 'visible';
+      document.body.classList.remove('modal-open');
+    };
+
+    // Run cleanup on mount
+    cleanup();
+
+    // Also run cleanup on unmount
+    return () => cleanup();
+  }, []);
+
   return (
     <Wrapper>
       <div className="main-page-wrapper">

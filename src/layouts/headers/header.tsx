@@ -46,7 +46,7 @@ const Header = () => {
                     </a>
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/coming-soon" className="btn-one">
+                    <Link href="/candidates-v2" className="btn-one">
                       Hire Top Talents
                     </Link>
                   </li>
@@ -73,6 +73,7 @@ const Header = () => {
                         </Link>
                       </div>
                     </li>
+                    {/* Commented out category dropdown
                     <li className="nav-item dropdown category-btn mega-dropdown-sm">
                       <a
                         className="nav-link dropdown-toggle"
@@ -84,10 +85,8 @@ const Header = () => {
                       >
                         <i className="bi bi-grid-fill"></i> Category
                       </a>
-                      {/* CategoryDropdown start */}
-                      {/* <CategoryDropdown /> */}
-                      {/* CategoryDropdown end */}
-                    </li>
+                    </li> 
+                    */}
                     {/* menus start */}
                     <Menus />
                     {/* menus end */}

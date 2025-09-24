@@ -91,7 +91,7 @@ const HeaderThree = () => {
                       </ul>
                     </li>
                     <li className="nav-item dropdown">
-                      <Link className="nav-link" href="/job-list-v2" role="button">Find Job</Link>
+                      <Link className="nav-link" href="/coming-soon" role="button">Find Jobs</Link>
                     </li>
                     <li className="nav-item dropdown">
                       <Link className="nav-link" href="/candidates-v2" role="button">Find Talents</Link>
