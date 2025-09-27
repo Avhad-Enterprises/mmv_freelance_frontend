@@ -91,7 +91,7 @@ const FeedbackOne = ({ style_2 = false, style_3 = false, about_p = false }: { st
           <div className="col-lg-5 col-md-6">
             <div className="title-one text-center text-md-start mb-65 md-mb-50 wow fadeInUp" data-wow-delay="0.3s">
               <h2 className={style_3 ? 'main-font' : ''}>Trusted by leading startups.</h2>
-              <p style={{ marginTop: "20px" }}>From fresh creators to global brands—our community is where collaborations start and success stories grow.</p>
+              <p style={{ marginTop: "20px" }}>From fresh creators to global brands—our community is where <strong>collaborations start and success stories grow.</strong></p>
             </div>
           </div>
         </div>

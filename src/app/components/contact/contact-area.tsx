@@ -17,18 +17,7 @@ const ContactArea = () => {
             <div className="col-xl-10 m-auto">
               <div className="row">
                 <div className="col-md-4">
-                  <div className="address-block-one text-center mb-40 wow fadeInUp">
-                    <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
-                      <Image src={icon_1} alt="icon" />
-                    </div>
-                    <h5 className="title">Office Address</h5>
-                    <p>
-                      11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092.
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-4">
-                  <div className="address-block-one text-center mb-40 wow fadeInUp">
+                  {/* <div className="address-block-one text-center mb-40 wow fadeInUp">
                     <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
                       <Image src={icon_2} alt="icon" />
                     </div>
@@ -41,16 +30,61 @@ const ContactArea = () => {
                         UK Enquiries: +44 7542550969
                       </a>
                     </p>
+                  </div> */}
+
+                  <div className="address-block-one text-center mb-40 wow fadeInUp">
+  <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
+    <Image src={icon_2} alt="icon" />
+  </div>
+
+  <h5 className="title">Contact Info</h5>
+
+  {/* Email */}
+  <p>
+    <a href="mailto:info@makemyvid.io" className="email">
+      info@makemyvid.io
+    </a>
+  </p>
+
+  {/* India phone */}
+  <p>
+    Open a chat or give us a call at <br />
+    <a href="tel:+917977484292" className="call">
+      +91&nbsp;7977484292
+    </a>
+  </p>
+
+  {/* UK phone */}
+  <p>
+    <a href="tel:+447542550969" className="call">
+      UK Enquiries: +44&nbsp;7542550969
+    </a>
+  </p>
+</div>
+
+                </div>
+
+                <div className="col-md-4">
+                  <div className="address-block-one text-center mb-40 wow fadeInUp">
+                    <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
+                      <Image src={icon_1} alt="icon" />
+                    </div>
+                    <h5 className="title">Office Address</h5>
+                    <p>
+                      <a href="#" className="webaddress">
+                        11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092.
+                      </a> 
+                    </p>
                   </div>
                 </div>
+                
                 <div className="col-md-4">
                   <div className="address-block-one text-center mb-40 wow fadeInUp">
                     <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
                       <Image src={icon_3} alt="icon" />
                     </div>
-                    <h5 className="title">Live Support</h5>
+                    <h5 className="title">Editing Studio Address</h5>
                     <p>
-                      Editing Studio Address: <br />
                       <a href="#" className="webaddress">
                         Gala 6, Navratna Apartment, Asara Colony Road, Dattapada, Borivali East, Mumbai 400066.
                       </a>
