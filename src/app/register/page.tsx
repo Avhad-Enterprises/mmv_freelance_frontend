@@ -1,45 +1,28 @@
-"use client"
-import React, { useEffect } from "react";
-import { Metadata } from "next";
+"use client";
+import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
 import CompanyBreadcrumb from "../components/common/common-breadcrumb";
 import FooterOne from "@/layouts/footers/footer-one";
 import RegisterArea from "../components/register/register-area";
+import LoadingSpinner from "../components/common/loading-spinner";
 
-export const metadata: Metadata = {
-  title: "Register",
-};
+const PageTitle = "Register";
 
 const RegisterPage = () => {
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    // Clean up any modal/overlay elements
-    const cleanup = () => {
-      // Remove modal backdrop if exists
-      const modalBackdrop = document.querySelector('.modal-backdrop');
-      if (modalBackdrop) {
-        modalBackdrop.remove();
-      }
-
-      // Remove any custom overlays
-      const overlays = document.querySelectorAll('.overlay, .modal-overlay, .loading-overlay');
-      overlays.forEach(overlay => overlay.remove());
-
-      // Reset body styles that might have been set by modal
-      document.body.style.overflow = 'visible';
-      document.body.classList.remove('modal-open');
-    };
-
-    // Run cleanup on mount
-    cleanup();
-
-    // Also run cleanup on unmount
-    return () => cleanup();
+    // Simulate loading for 500ms, or set to false immediately if you want
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <Wrapper>
       <div className="main-page-wrapper">
+        {loading && <LoadingSpinner />}
         {/* header start */}
         <Header />
         {/* header end */}

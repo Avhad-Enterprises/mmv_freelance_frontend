@@ -1,0 +1,126 @@
+export const VIDEO_EDITOR_PROFICIENCY = [
+  "Short‑Form / Reels Editor",
+  "Corporate AV Editor",
+  "Documentary Editor",
+  "Event Highlight Editor",
+  "Wedding Film Editor",
+  "Commercial / Ad Spot Editor",
+  "Music Video Editor",
+  "Narrative / Short‑Film Editor",
+  "VFX / Compositing Editor",
+  "Motion‑Graphics / Explainer Editor",
+  "Gaming & Esports Editor",
+  "Sports Highlight Editor",
+  "Educational / eLearning Editor",
+  "Real‑Estate & Architecture Editor",
+  "Colourist / Finishing Editor"
+];
+
+export const VIDEOGRAPHER_PROFICIENCY = [
+  "Run‑and‑Gun Social Shooter",
+  "Corporate Interview / Talking‑Head Videographer",
+  "Documentary Field Cameraperson",
+  "Wedding Cinematographer",
+  "Event / Conference Coverage",
+  "Commercial Product Shooter",
+  "Music Video / Performance DP",
+  "Sports & Action Videographer",
+  "Aerial / Drone Operator",
+  "Real‑Estate & Architecture Videographer",
+  "Fashion & Beauty Cinematographer",
+  "Live‑Streaming / Multi‑Cam Operator",
+  "Nature & Wildlife Cameraperson",
+  "Slow‑Motion / High‑Speed Specialist",
+  "360º / VR Videographer"
+];
+
+export const TECHNICAL_SKILLS = [
+  // Pre-Production Skills
+  "Concept Development",
+  "Script Writing",
+  "Screenwriting",
+  "Storyboarding",
+  "Shot List Creation",
+  "Creative Direction",
+  "Mood Boards",
+  "Casting",
+  "Location Scouting",
+  "Production Planning",
+  "Budgeting",
+  "Scheduling",
+  "Pre-visualization (Previs)",
+  "Production Design",
+  "Costume Design",
+  "Prop Sourcing",
+  "Lighting Setup Planning",
+
+  // Production Skills
+  "Videography",
+  "Cinematography",
+  "Camera Operation",
+  "Drone Videography",
+  "Multi-Cam Setup",
+  "Lighting Setup",
+  "Sound Recording",
+  "Boom Operation",
+  "Green Screen Filming",
+  "Live Streaming",
+  "Event Filming",
+  "Interview Filming",
+  "Commercial Filming",
+  "Music Video Filming",
+  "Documentary Filming",
+
+  // Post-Production Skills
+  "Color Correction",
+  "Color Grading",
+  "LUTs Application",
+  "VFX (Visual Effects)",
+  "CGI",
+  "Rotoscoping",
+  "Green Screen Keying",
+  "Audio Editing",
+  "Sound Design",
+  "Foley",
+  "Voiceover Editing",
+  "ADR (Automated Dialogue Replacement)",
+  "Mixing & Mastering",
+  "Background Score",
+  "Subtitling",
+  "Closed Captioning",
+  "Multi-language Subtitles",
+  "Aspect Ratio Formatting",
+  "Video Compression & Export",
+  "YouTube Optimization",
+  "Social Media Video Formatting"
+];
+
+export const SOFTWARE_SKILLS = [
+  "Adobe Premiere Pro",
+  "Adobe After Effects",
+  "Adobe Audition",
+  "Final Cut Pro",
+  "DaVinci Resolve",
+  "Avid Media Composer",
+  "Blender",
+  "Cinema 4D",
+  "Maya",
+  "3ds Max",
+  "Pro Tools",
+  "Logic Pro",
+  "Audacity"
+];
+
+export const CONTENT_TYPES = [
+  "Short Films",
+  "Feature Films",
+  "TV Commercials",
+  "Corporate Videos",
+  "Social Media Ads",
+  "Wedding Films",
+  "Event Coverage",
+  "YouTube Content",
+  "Podcasts (Video + Audio Editing)",
+  "VR/360° Video",
+  "AR Video Content"
+];
