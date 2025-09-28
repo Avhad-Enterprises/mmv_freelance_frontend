@@ -1,13 +1,25 @@
 "use client";
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import RegisterForm from "../forms/register-form";
+import MultiStepRegisterForm from "../forms/MultiStepRegisterForm";
+import LoadingSpinner from "../common/loading-spinner";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
 
 const RegisterArea = () => {
   const [activeTab, setActiveTab] = useState<"candidate" | "employer">("candidate");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <section className="registration-section position-relative pt-100 lg-pt-80 pb-150 lg-pb-80">
@@ -28,7 +40,6 @@ const RegisterArea = () => {
                   aria-selected={activeTab === "candidate"}
                   tabIndex={-1}
                 >
-                  {/* Candidates */}
                   Freelancer
                 </button>
               </li>
@@ -47,55 +58,46 @@ const RegisterArea = () => {
               </li>
             </ul>
             <div className="tab-content mt-40">
-              <div
-                className={`tab-pane fade ${activeTab === "candidate" ? "show active" : ""}`}
-                role="tabpanel"
-                id="fc1"
-              >
-                <RegisterForm activeTab={activeTab} />
-              </div>
-              <div className={`tab-pane fade ${activeTab === "employer" ? "show active" : ""}`}>
-                <RegisterForm activeTab={activeTab} />
-              </div>
+              <MultiStepRegisterForm accountType={activeTab === "candidate" ? "freelancer" : "client"} />
             </div>
-
-            <div className="d-flex align-items-center mt-30 mb-10">
-              <div className="line"></div>
-              <span className="pe-3 ps-3">OR</span>
-              <div className="line"></div>
-            </div>
-            <div className="row">
-              <div className="col-sm-6">
-                <a
-                  href="coming-soon"
-                  className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-                >
-                  <Image src={google} alt="google-img" />
-                  <span className="ps-2">Signup with Google</span>
-                </a>
-              </div>
-              <div className="col-sm-6">
-                <a
-                  href="coming-soon"
-                  className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-                >
-                  <Image src={facebook} alt="facebook-img" />
-                  <span className="ps-2">Signup with Facebook</span>
-                </a>
-              </div>
-            </div>
-            <p className="text-center mt-10">
-              Have an account?{" "}
-              <a
-                href="#"
-                className="fw-500"
-                data-bs-toggle="modal"
-                data-bs-target="#loginModal"
-              >
-                Sign In
-              </a>
-            </p>
           </div>
+
+          <div className="d-flex align-items-center mt-30 mb-10">
+            <div className="line"></div>
+            <span className="pe-3 ps-3">OR</span>
+            <div className="line"></div>
+          </div>
+          <div className="row">
+            <div className="col-sm-6">
+              <a
+                href="coming-soon"
+                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+              >
+                <Image src={google} alt="google-img" />
+                <span className="ps-2">Signup with Google</span>
+              </a>
+            </div>
+            <div className="col-sm-6">
+              <a
+                href="coming-soon"
+                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+              >
+                <Image src={facebook} alt="facebook-img" />
+                <span className="ps-2">Signup with Facebook</span>
+              </a>
+            </div>
+          </div>
+          <p className="text-center mt-10">
+            Have an account?{" "}
+            <a
+              href="#"
+              className="fw-500"
+              data-bs-toggle="modal"
+              data-bs-target="#loginModal"
+            >
+              Sign In
+            </a>
+          </p>
         </div>
       </div>
     </section>
