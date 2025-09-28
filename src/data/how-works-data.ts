@@ -26,7 +26,7 @@ export const how_works_data: how_works_type[] = [
     id: 3,
     icon: icon_3,
     icon_white: icon_W_3,
-    title: "Apply job or hire",
+    title: "Hire or get hired",
     sub_title:
       "Connect, collaborate, and create magic.",
   },

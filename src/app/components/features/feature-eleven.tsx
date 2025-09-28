@@ -29,9 +29,9 @@ const FeatureEleven = () => {
                         parent="accordionOne"
                         desc={
                           <>
-                            We’re the world’s first dedicated marketplace for pre-production and post-production services.
-                            A space where videographers, editors, animators, and storytellers meet brands, startups, and creators who want to make an impact.
-                            Born out of the struggle to find reliable, specialized talent in the video industry, we set out to build a platform that makes collaboration seamless, creative, and global.
+                            We’re the world’s first <strong>dedicated marketplace for pre-production and post-production services.</strong>
+                            A space where <strong>videographers, editors, animators, and storytellers</strong> meet brands, startups, and creators who want to make an impact.
+                            Born out of the struggle to find <strong>reliable, specialized talent</strong> in the video industry, we set out to build a platform that makes collaboration seamless, creative, and global.
                           </>
                         }
                       />
@@ -45,10 +45,10 @@ const FeatureEleven = () => {
                             <p><strong>Our goal is simple:</strong></p>
                             <ul style={{ paddingLeft: '1rem', marginTop: '10px' }}>
                               <li>
-                                Empower freelancers and creators to turn their craft into thriving careers.
+                                Empower <strong>freelancers and creators</strong> to turn their craft into thriving careers.
                               </li>
                               <li>
-                                Help clients and brands find the perfect talent without the noise of generic marketplaces.
+                                Help <strong>clients and brands</strong> find the perfect talent without the noise of generic marketplaces.
                               </li>
                               <li>
                                 Build a community where creativity meets opportunity—and everyone wins.
@@ -64,9 +64,9 @@ const FeatureEleven = () => {
                         parent="accordionOne"
                         desc={
                           <>
-                            <p>To become the global hub for video services.</p>
+                            <p>To become the <strong>global hub for video services.</strong></p>
                             <p>
-                              Not just a job portal, but a creative ecosystem where stories are born, polished, and shared with the world.
+                              Not just a job portal, but a <strong>creative ecosystem</strong> where stories are born, polished, and shared with the world.
                             </p>
                           </>
                         }

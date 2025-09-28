@@ -72,9 +72,12 @@ const FeatureOne = () => {
                 From indie filmmakers to top 3% video editors, our marketplace is loaded with talent you can trust.{" "}
               </p>
               <ul className="list-style-one style-none">
-                <li>Seamless search & filters</li>
+                {/* <li>Seamless search & filters</li>
                 <li>Get top 3% experts for your project</li>
-                <li>Protected payments system</li>
+                <li>Protected payments system</li> */}
+                <li>Seamless search & filters</li>
+                <li>Verified top-tier creators</li>
+                <li>Protected escrow payments</li>
               </ul>
               <Link href='/register' className="btn-one lg mt-50 md-mt-30">
                 Post a Job
