@@ -6,6 +6,7 @@ import DashboardHeader from "./dashboard-header";
 import { makePostRequest } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import CityStateCountry from "../../common/country-state-city";
+import toast from "react-hot-toast";
 
 type IProps = {
   setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
@@ -146,64 +147,211 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
       };
 
       await makePostRequest("users/update_user_by_id", payload);
-      alert("Profile updated successfully");
+      toast.success("Profile updated successfully", {
+        duration: 3000,
+        position: "top-center",
+      });
     } catch (err) {
       console.error("Update failed", err);
-      alert("Update failed");
+      toast.error("Failed to update profile. Please try again.", {
+        duration: 3000,
+        position: "top-center",
+      });
     } finally {
       setSaving(false);
     }
   };
+
+  const [editingIndex, setEditingIndex] = useState<{ [key: string]: number | null }>({});
+  const [tempItem, setTempItem] = useState<{ [key: string]: any }>({});
 
   const renderVerticalInputGroup = (
     label: string,
     field: keyof FormData,
     keys: string[],
     placeholders: string[]
-  ) => (
-    <div className="bg-white card-box border-20 mt-30">
-      <h4 className="dash-title-three">{label}</h4>
-      {(formData[field] as any[]).map((item, index) => (
-        <div key={`${label}-${index}`} className="dash-input-wrapper mb-30">
-          <div className="vertical-input-group">
-            {keys.map((key, i) => (
-              <div className="mb-3" key={`${label}-${index}-${key}`}>
-                <label>{placeholders[i] || key}</label>
-                <input
-                  type="text"
-                  placeholder={placeholders[i] || key}
-                  className="form-control"
-                  value={item[key] || ""}
-                  onChange={(e) => handleArrayChange(field, index, key, e.target.value)}
-                />
-              </div>
-            ))}
-            <div className="d-flex justify-content-end">
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => handleDelete(field, index)}
-              >
-                Delete
-              </button>
+  ) => {
+    const isEditing = (index: number) => editingIndex[field] === index;
+    const isAddingNew = editingIndex[field] === -1;
+
+    const handleEdit = (index: number) => {
+      setEditingIndex({ ...editingIndex, [field]: index });
+      setTempItem({ ...tempItem, [field]: { ...(formData[field] as any[])[index] } });
+    };
+
+    const handleTempSave = () => {
+      const index = editingIndex[field];
+      if (index === -1) {
+        // Adding new item
+        handleChange(field as any, [
+          ...(formData[field] as any[]),
+          tempItem[field]
+        ] as any);
+        toast.success(`New ${label} entry added`);
+      } else if (index !== null) {
+        // Editing existing item
+        const newList = [...(formData[field] as any[])];
+        newList[index] = tempItem[field];
+        handleChange(field as any, newList as any);
+        toast.success(`${label} entry updated`);
+      }
+      setEditingIndex({ ...editingIndex, [field]: null });
+      setTempItem({ ...tempItem, [field]: {} });
+    };
+
+    const handleTempChange = (key: string, value: string) => {
+      setTempItem({
+        ...tempItem,
+        [field]: { ...(tempItem[field] || {}), [key]: value }
+      });
+    };
+
+    return (
+      <div className="bg-white card-box border-20 mt-30">
+        <h4 className="dash-title-three">{label}</h4>
+        
+        {/* List of saved items */}
+        {(formData[field] as any[]).map((item, index) => (
+          <div key={`${label}-${index}`} className="dash-input-wrapper mb-30">
+            <div className="vertical-input-group" style={{
+              background: isEditing(index) ? '#f8f9fa' : 'white',
+              padding: '15px',
+              borderRadius: '8px',
+              border: isEditing(index) ? '1px solid #dee2e6' : 'none'
+            }}>
+              {isEditing(index) ? (
+                <>
+                  {/* Edit mode */}
+                  {keys.map((key, i) => (
+                    <div className="mb-3" key={`${label}-${index}-${key}`}>
+                      <label>{placeholders[i] || key}</label>
+                      <input
+                        type="text"
+                        placeholder={placeholders[i] || key}
+                        className="form-control"
+                        value={tempItem[field]?.[key] || ""}
+                        onChange={(e) => handleTempChange(key, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                  <div className="d-flex justify-content-end gap-2">
+                    <button
+                      type="button"
+                      className="dash-btn-two tran3s"
+                      onClick={handleTempSave}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="dash-cancel-btn tran3s"
+                      onClick={() => setEditingIndex({ ...editingIndex, [field]: null })}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* View mode */}
+                  {keys.map((key, i) => (
+                    <div className="mb-2" key={`${label}-${index}-${key}`}>
+                      <strong>{placeholders[i] || key}:</strong> {item[key] || ""}
+                    </div>
+                  ))}
+                  <div className="d-flex justify-content-end gap-2">
+                    <button
+                      type="button"
+                      className="dash-btn-two tran3s"
+                      onClick={() => handleEdit(index)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger"
+                      onClick={() => handleDelete(field, index)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      ))}
-      <button
-        onClick={() =>
-          handleAddMore(
-            field,
-            keys.reduce((acc, key) => ({ ...acc, [key]: "" }), {} as Record<string, string>)
-          )
-        }
-        className="dash-btn-two tran3s me-3"
-        type="button"
-      >
-        Add More {label}
-      </button>
-    </div>
-  );
+        ))}
+
+        {/* Add new item form */}
+        {isAddingNew && (
+          <div className="dash-input-wrapper mb-30">
+            <div className="vertical-input-group" style={{
+              background: '#f8f9fa',
+              padding: '15px',
+              borderRadius: '8px',
+              border: '1px solid #dee2e6'
+            }}>
+              {keys.map((key, i) => (
+                <div className="mb-3" key={`new-${label}-${key}`}>
+                  <label>{placeholders[i] || key}</label>
+                  <input
+                    type="text"
+                    placeholder={placeholders[i] || key}
+                    className="form-control"
+                    value={tempItem[field]?.[key] || ""}
+                    onChange={(e) => handleTempChange(key, e.target.value)}
+                  />
+                </div>
+              ))}
+              <div className="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  className="dash-btn-two tran3s"
+                  onClick={handleTempSave}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="dash-cancel-btn tran3s"
+                  onClick={() => {
+                    setEditingIndex({ ...editingIndex, [field]: null });
+                    setTempItem({ ...tempItem, [field]: {} });
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add new button */}
+        {!isAddingNew && (
+          <button
+            onClick={() => {
+              setEditingIndex({ ...editingIndex, [field]: -1 });
+              setTempItem({ ...tempItem, [field]: {} });
+            }}
+            className="dash-btn-two tran3s me-3"
+            type="button"
+          >
+            Add New {label}
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const clearForm = () => {
+    setFormData(emptyForm);
+    setEditingIndex({});
+    setTempItem({});
+    toast.success('Form cleared successfully');
+    // Refetch the original data
+    if (decodedToken?.user_id) {
+      void fetchUserData(decodedToken.user_id);
+    }
+  };
 
   const isDisabled = useMemo(() => loading || saving, [loading, saving]);
 
@@ -211,6 +359,42 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+
+        {/* Bottom Fixed Save Button Bar */}
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000,
+          background: 'white',
+          padding: '12px 24px',
+          borderRadius: '30px',
+          boxShadow: '0 2px 15px rgba(0,0,0,0.15)',
+          display: 'flex',
+          gap: '10px',
+          minWidth: '300px',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={handleSubmit}
+            className="dash-btn-two tran3s"
+            disabled={isDisabled}
+            type="button"
+            style={{ minWidth: '120px' }}
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+          <button 
+            className="dash-cancel-btn tran3s" 
+            onClick={clearForm}
+            type="button"
+            style={{ minWidth: '80px' }}
+          >
+            Cancel
+          </button>
+        </div>
+
         <h2 className="main-title">My Profile</h2>
 
         {/* Basic Info */}
@@ -361,21 +545,6 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Save Buttons */}
-        <div className="button-group d-inline-flex align-items-center mt-30">
-          <button
-            onClick={handleSubmit}
-            className="dash-btn-two tran3s me-3"
-            disabled={isDisabled}
-            type="button"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
-          <button className="dash-cancel-btn tran3s" disabled={isDisabled} type="button">
-            Cancel
-          </button>
         </div>
       </div>
     </div>

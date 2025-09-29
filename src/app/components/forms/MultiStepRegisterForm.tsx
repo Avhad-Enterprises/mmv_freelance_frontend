@@ -1,10 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Step1 from "./steps/Step1";
 import Step2 from "./steps/Step2";
 import Step3 from "./steps/Step3";
 import Step4 from "./steps/Step4";
 import FinalReview from "./steps/FinalReview";
+import ClientStep1 from "./steps/client/ClientStep1";
+import ClientStep2 from "./steps/client/ClientStep2";
+import ClientStep3 from "./steps/client/ClientStep3";
+import ClientStep4 from "./steps/client/ClientStep4";
+import ClientFinalReview from "./steps/client/ClientFinalReview";
 
 interface MultiStepRegisterFormProps {
   accountType: "client" | "freelancer";
@@ -12,43 +17,87 @@ interface MultiStepRegisterFormProps {
 
 const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountType }) => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    // Step 1 data
+  const [previousAccountType, setPreviousAccountType] = useState(accountType);
+
+  const initialFormState = {
+    // Common fields
     username: "",
     first_name: "",
     last_name: "",
     email: "",
     password: "",
-    // Step 2 data (for freelancer)
-    profile_title: "",
-    category: "",
-    technical_skills: [] as string[],
-    software_skills: [] as string[],
-    content_types: [] as string[],
-    editor_proficiency: [] as string[],
-    videographer_proficiency: [] as string[],
-    experience_level: "",
-    portfolio_links: "",
-    hourly_rate: "",
-    // Step 3 data
     phone_number: "",
     location: "",
     country: "",
     id_type: "",
     id_document: "",
-    // Step 4 data
-    availability: "",
-    work_type: "",
-    hours_per_week: "",
-    timezone: "",
-    languages: [] as string[],
-    // Additional fields
     account_type: accountType,
-  });
 
-  // Removed skill management state since we're using MultipleSelectionField
+    // Freelancer specific
+    ...(accountType === "freelancer" && {
+      profile_title: "",
+      category: "",
+      technical_skills: [] as string[],
+      software_skills: [] as string[],
+      content_types: [] as string[],
+      editor_proficiency: [] as string[],
+      videographer_proficiency: [] as string[],
+      experience_level: "",
+      portfolio_links: "",
+      hourly_rate: "",
+      availability: "",
+      work_type: "",
+      hours_per_week: "",
+      timezone: "",
+      languages: [] as string[],
+    }),
 
-  const nextStep = (data: any) => {
+    // Client specific
+    ...(accountType === "client" && {
+      company_name: "",
+      industry: "",
+      website: "",
+      social_links: [] as string[],
+      company_size: "",
+      services_required: [] as string[],
+      budget_range: "",
+      tax_id: "",
+      address: "",
+      city: "",
+      state: "",
+      pincode: "",
+      work_arrangement: "",
+      project_frequency: "",
+      hiring_preferences: [] as string[],
+      expected_start_date: "",
+      project_duration: "",
+      payment_method: "",
+      account_name: "",
+      bank_name: "",
+      account_number: "",
+      paypal_email: "",
+      upi_id: "",
+      card_number: "",
+      card_expiry: "",
+    }),
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+
+  // Reset when accountType changes mid-way
+  useEffect(() => {
+    if (previousAccountType !== accountType && step > 1) {
+      setStep(1);
+      setFormData({
+        ...initialFormState,
+        account_type: accountType,
+      });
+    }
+    setPreviousAccountType(accountType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountType]);
+
+  const nextStep = (data: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
     setStep((prevStep) => prevStep + 1);
   };
@@ -57,62 +106,62 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
     setStep((prevStep) => prevStep - 1);
   };
 
-  const handleRegister = async (data: any) => {
+  const handleRegister = async (data: typeof formData) => {
     try {
-      // Implement your registration logic here
       console.log("Form submitted:", data);
-      // You can make an API call here to register the user
+      // API call for registration can go here
     } catch (error) {
       console.error("Registration error:", error);
     }
   };
 
-  // Functions for skill management
-  // Removed old skill management functions since we're using MultipleSelectionField
-
   const renderStep = () => {
-    switch (step) {
-      case 1:
-        return <Step1 nextStep={nextStep} formData={formData} />;
-      case 2:
-        return accountType === "freelancer" ? (
-          <Step2
-            nextStep={nextStep}
-            prevStep={prevStep}
-            formData={formData}
-            // Using MultipleSelectionField instead of manual skill management
-          />
-        ) : (
-          <Step3 nextStep={nextStep} prevStep={prevStep} formData={formData} />
-        );
-      case 3:
-        return accountType === "freelancer" ? (
-          <Step3 nextStep={nextStep} prevStep={prevStep} formData={formData} />
-        ) : (
-          <Step4 nextStep={nextStep} prevStep={prevStep} formData={formData} />
-        );
-      case 4:
-        return accountType === "freelancer" ? (
-          <Step4 nextStep={nextStep} prevStep={prevStep} formData={formData} />
-        ) : (
-          <FinalReview
-            formData={formData}
-            prevStep={prevStep}
-            handleRegister={handleRegister}
-          />
-        );
-      case 5:
-        return accountType === "freelancer" ? (
-          <FinalReview
-            formData={formData}
-            prevStep={prevStep}
-            handleRegister={handleRegister}
-          />
-        ) : null;
-      default:
-        return <Step1 nextStep={nextStep} formData={formData} />;
+    if (accountType === "freelancer") {
+      switch (step) {
+        case 1:
+          return <Step1 nextStep={nextStep} formData={formData} />;
+        case 2:
+          return <Step2 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 3:
+          return <Step3 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 4:
+          return <Step4 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 5:
+          return (
+            <FinalReview
+              formData={formData}
+              prevStep={prevStep}
+              handleRegister={handleRegister}
+            />
+          );
+        default:
+          return <Step1 nextStep={nextStep} formData={formData} />;
+      }
+    } else {
+      switch (step) {
+        case 1:
+          return <ClientStep1 nextStep={nextStep} formData={formData} />;
+        case 2:
+          return <ClientStep2 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 3:
+          return <ClientStep3 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 4:
+          return <ClientStep4 nextStep={nextStep} prevStep={prevStep} formData={formData} />;
+        case 5:
+          return (
+            <ClientFinalReview
+              formData={formData}
+              prevStep={prevStep}
+              handleRegister={handleRegister}
+            />
+          );
+        default:
+          return <ClientStep1 nextStep={nextStep} formData={formData} />;
+      }
     }
   };
+
+  const totalSteps = 5;
 
   return (
     <div className="multi-step-form">
@@ -121,7 +170,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         <div
           className="progress"
           style={{
-            width: `${(step / (accountType === "freelancer" ? 5 : 4)) * 100}%`,
+            width: `${(step / totalSteps) * 100}%`,
           }}
         ></div>
       </div>
@@ -129,7 +178,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
       {/* Step indicators */}
       <div className="steps-indicator mb-4">
         <div className="d-flex justify-content-between">
-          {Array.from({ length: accountType === "freelancer" ? 5 : 4 }).map((_, index) => (
+          {Array.from({ length: totalSteps }).map((_, index) => (
             <div
               key={index}
               className={`step-circle ${step > index ? "completed" : ""} ${

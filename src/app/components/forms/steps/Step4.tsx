@@ -73,26 +73,6 @@ const Step4: React.FC<{ nextStep: (data: any) => void; prevStep: () => void; for
           </div>
         </div>
 
-        {/* Preferred Time Zone */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Preferred Time Zone*</label>
-            <select 
-              className="form-control"
-              {...register("timezone", { required: "Time zone is required" })}
-            >
-              <option value="">Select Time Zone</option>
-              <option value="UTC-12">UTC-12</option>
-              <option value="UTC-11">UTC-11</option>
-              {/* Add more time zones */}
-              <option value="UTC+12">UTC+12</option>
-            </select>
-            {errors.timezone && (
-              <div className="error">{String(errors.timezone.message)}</div>
-            )}
-          </div>
-        </div>
-
         {/* Languages */}
         <div className="col-12">
           <MultipleSelectionField

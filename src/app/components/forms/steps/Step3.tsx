@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Country, State, City } from "country-state-city";
 
 const Step3: React.FC<{ nextStep: (data: any) => void; prevStep: () => void; formData: any }> = ({ nextStep, prevStep, formData }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: formData });
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({ defaultValues: formData });
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -33,18 +34,18 @@ const Step3: React.FC<{ nextStep: (data: any) => void; prevStep: () => void; for
           </div>
         </div>
 
-        {/* Location */}
+        {/* Address */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Location*</label>
+            <label>Street Address*</label>
             <input 
               type="text" 
-              placeholder="City, Country" 
+              placeholder="Enter your street address" 
               className="form-control"
-              {...register("location", { required: "Location is required" })}
+              {...register("street_address", { required: "Street address is required" })}
             />
-            {errors.location && (
-              <div className="error">{String(errors.location.message)}</div>
+            {errors.street_address && (
+              <div className="error">{String(errors.street_address.message)}</div>
             )}
           </div>
         </div>
@@ -55,17 +56,94 @@ const Step3: React.FC<{ nextStep: (data: any) => void; prevStep: () => void; for
             <label>Country*</label>
             <select 
               className="form-control"
-              {...register("country", { required: "Country is required" })}
+              {...register("country", { 
+                required: "Country is required",
+                onChange: (e) => {
+                  const countryCode = e.target.value;
+                  const states = State.getStatesOfCountry(countryCode);
+                  setValue("state", "");
+                  setValue("city", "");
+                }
+              })}
             >
               <option value="">Select Country</option>
-              <option value="US">United States</option>
-              <option value="UK">United Kingdom</option>
-              <option value="CA">Canada</option>
-              <option value="AU">Australia</option>
-              {/* Add more countries as needed */}
+              {Country.getAllCountries().map((country) => (
+                <option key={country.isoCode} value={country.isoCode}>
+                  {country.name}
+                </option>
+              ))}
             </select>
             {errors.country && (
               <div className="error">{String(errors.country.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* State */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>State/Province*</label>
+            <select 
+              className="form-control"
+              {...register("state", { 
+                required: "State is required",
+                onChange: (e) => {
+                  setValue("city", "");
+                }
+              })}
+            >
+              <option value="">Select State</option>
+              {watch("country") && State.getStatesOfCountry(watch("country")).map((state) => (
+                <option key={state.isoCode} value={state.isoCode}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+            {errors.state && (
+              <div className="error">{String(errors.state.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* City */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>City*</label>
+            <select 
+              className="form-control"
+              {...register("city", { required: "City is required" })}
+            >
+              <option value="">Select City</option>
+              {watch("state") && City.getCitiesOfState(watch("country"), watch("state")).map((city) => (
+                <option key={city.name} value={city.name}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+            {errors.city && (
+              <div className="error">{String(errors.city.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Zip/Postal Code */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Zip/Postal Code*</label>
+            <input 
+              type="text" 
+              placeholder="Enter zip/postal code" 
+              className="form-control"
+              {...register("zip_code", { 
+                required: "Zip/Postal code is required",
+                pattern: {
+                  value: /^[0-9]{6}$/,
+                  message: "Please enter a valid 6-digit postal code"
+                }
+              })}
+            />
+            {errors.zip_code && (
+              <div className="error">{String(errors.zip_code.message)}</div>
             )}
           </div>
         </div>
@@ -97,9 +175,14 @@ const Step3: React.FC<{ nextStep: (data: any) => void; prevStep: () => void; for
               type="file" 
               className="form-control"
               accept="image/*,.pdf"
+              disabled={!watch("id_type")}
               {...register("id_document", { required: "ID document is required" })}
             />
-            <small className="text-muted">Upload a clear photo/scan of your ID (Max 5MB)</small>
+            <small className="text-muted">
+              {!watch("id_type") 
+                ? "Please select an ID type first" 
+                : "Upload a clear photo/scan of your ID (Max 5MB)"}
+            </small>
             {errors.id_document && (
               <div className="error">{String(errors.id_document.message)}</div>
             )}

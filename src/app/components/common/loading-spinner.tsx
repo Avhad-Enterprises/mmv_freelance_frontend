@@ -15,6 +15,8 @@ const LoadingSpinner = () => {
         alignItems: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.8)',
         zIndex: 9999,
+        pointerEvents: 'none', // Allow interaction with the page
+        visibility: 'hidden', // Ensure the overlay is hidden when not needed
       }}
     >
       <div className="loading-spinner">
