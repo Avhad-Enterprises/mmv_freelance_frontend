@@ -101,8 +101,15 @@ const Step1: React.FC<{ nextStep: (data: any) => void; formData: any }> = ({ nex
             <span 
               className="placeholder_icon"
               onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '80%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer'
+              }}
             >
-              <span className={`pass-icon ${showPassword ? 'eye-slash' : 'eye'}`}></span>
+              <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
             </span>
             {errors.password && (
               <div className="error">{String(errors.password.message)}</div>

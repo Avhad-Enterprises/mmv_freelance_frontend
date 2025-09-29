@@ -1,6 +1,7 @@
 import "./globals.scss";
 import { Metadata } from "next";
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import { EB_Garamond } from "next/font/google";
 import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
@@ -53,6 +54,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>
       <body suppressHydrationWarning={true} className={`${gordita.variable} ${garamond.variable}`}>
         <Providers>

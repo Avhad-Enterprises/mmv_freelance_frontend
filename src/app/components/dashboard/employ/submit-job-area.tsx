@@ -339,7 +339,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
           <div className="bg-white card-box border-20 mb-50 p-5">
             <h4 className="dash-title-three">Project Details</h4>
             <div className="dash-input-wrapper mb-30">
-              <label htmlFor="project_title">Title*</label>
+              <label htmlFor="project_title">Title *</label>
               <input
                 type="text"
                 name="project_title"
@@ -350,7 +350,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               />
             </div>
             <div className="dash-input-wrapper mb-30">
-              <label htmlFor="project_description">Description</label>
+              <label htmlFor="project_description">Description *</label>
               <textarea
                 className="size-lg"
                 name="project_description"
@@ -390,7 +390,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               </div> */}
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="project_format">Project Format</label>
+                  <label htmlFor="project_format">Project Format *</label>
                   <input
                     type="text"
                     name="project_format"
@@ -403,7 +403,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               </div>
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="">Budget</label>
+                  <label htmlFor="">Budget *</label>
                   <input
                     type="number"
                     name="budget"
@@ -417,7 +417,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               </div>
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="">Status*</label>
+                  <label htmlFor="">Status *</label>
                   <NiceSelect
                     options={[
                       { value: "0", label: "Inactive" },
@@ -431,7 +431,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
               </div>
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="deadline">Deadline*</label>
+                  <label htmlFor="deadline">Deadline *</label>
                   <input
                     type="date"
                     name="deadline"
@@ -445,7 +445,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
           </div>
 
           <div className="bg-white card-box border-20 mb-50 p-5">
-            <h4 className="dash-title-three">Skills*</h4>
+            <h4 className="dash-title-three">Skills *</h4>
             <div className="dash-input-wrapper mb-30">
               <label htmlFor="">Skills</label>
               <input
@@ -526,7 +526,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
           </div>
 
           <div className="bg-white card-box border-20 mb-50 p-5">
-            <h4 className="dash-title-three">Reference Link</h4>
+            <h4 className="dash-title-three">Reference Link (Optional)</h4>
             <div className="dash-input-wrapper mb-30">
               <label htmlFor="">Reference Link</label>
               <textarea
@@ -542,14 +542,13 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
 
             <div className="dash-input-wrapper mb-30">
-              <label htmlFor="additional_notes">Additional Notes</label>
+              <label htmlFor="additional_notes">Additional Notes (Optional)</label>
               <textarea
                 className="size-lg"
                 name="additional_notes"
                 value={formData.additional_notes}
                 onChange={handleInputChange}
                 placeholder="Write about the additonal notes in details..."
-                required
               ></textarea>
             </div>
           </div>
@@ -559,7 +558,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
             <div className="row align-items-end">
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="">URL*</label>
+                  <label htmlFor="">URL *</label>
                   <input
                     type="text"
                     name="url"
@@ -573,7 +572,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
 
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
-                  <label htmlFor="project_format">Meta Title*</label>
+                  <label htmlFor="project_format">Meta Title *</label>
                   <input
                     type="text"
                     name="meta_title"
@@ -587,7 +586,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
             </div>
 
             <div className="dash-input-wrapper mb-30">
-              <label htmlFor="">Meta Description*</label>
+              <label htmlFor="">Meta Description *</label>
               <textarea
                 className="size-lg"
                 name="meta_description"

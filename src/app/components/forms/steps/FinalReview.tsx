@@ -1,4 +1,5 @@
 import React from "react";
+import toast from "react-hot-toast";
 
 interface ReviewSectionProps {
   title: string;
@@ -34,6 +35,31 @@ const FinalReview: React.FC<{
   prevStep, 
   handleRegister 
 }) => {
+  const handleSubmit = async () => {
+    const loadingToast = toast.loading('Submitting registration...');
+    try {
+      // TODO: Replace with actual API URL
+      const response = await fetch('', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Registration failed');
+      }
+
+      const data = await response.json();
+      await handleRegister(data);
+      toast.success('Registration completed successfully!', { id: loadingToast });
+    } catch (error) {
+      console.error('Error during registration:', error);
+      toast.error('Registration failed. Please try again.', { id: loadingToast });
+    }
+  };
+
   const sections = {
     "Basic Information": {
       username: formData.username,
@@ -64,12 +90,6 @@ const FinalReview: React.FC<{
       timezone: formData.timezone,
       languages: formData.languages,
     },
-    "Payment Information": {
-      payment_method: formData.payment_method,
-      account_name: formData.account_name,
-      bank_name: formData.bank_name,
-      account_number: "****" + formData.account_number?.slice(-4),
-    },
   };
 
   return (
@@ -96,7 +116,7 @@ const FinalReview: React.FC<{
           <button 
             type="button" 
             className="btn-one"
-            onClick={() => handleRegister(formData)}
+            onClick={handleSubmit}
           >
             Submit Registration
           </button>

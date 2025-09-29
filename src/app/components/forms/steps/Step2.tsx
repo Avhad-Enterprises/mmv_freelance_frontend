@@ -99,15 +99,21 @@ const Step2: React.FC<{
         {/* Hourly Rate */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Hourly Rate (USD)*</label>
+            <label>Hourly Rate (INR)*</label>
             <input 
               type="number" 
-              placeholder="e.g. 25" 
+              placeholder="e.g. 500" 
               className="form-control"
+              min="0"
+              onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (e.target.value < "0") {
+                  e.target.value = "0";
+                }
+              }}
               {...register("hourly_rate", { 
                 required: "Hourly rate is required",
-                min: { value: 5, message: "Minimum rate is $5/hour" },
-                max: { value: 1000, message: "Maximum rate is $1000/hour" }
+                min: { value: 100, message: "Minimum rate is ₹100/hour" },
+                max: { value: 10000, message: "Maximum rate is ₹10,000/hour" }
               })}
             />
             {errors.hourly_rate && (

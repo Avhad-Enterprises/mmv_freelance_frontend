@@ -1,4 +1,5 @@
 import React from "react";
+import toast from "react-hot-toast";
 
 interface ReviewSectionProps {
   title: string;
@@ -14,7 +15,12 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ title, data }) => (
           <div key={key} className="review-item mb-2">
             <strong>{key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</strong>
             <span className="ms-2">
-              {Array.isArray(value) ? value.join(', ') : value.toString()}
+              {Array.isArray(value) 
+                ? value.join(', ') 
+                : value === null || value === undefined 
+                  ? 'Not provided'
+                  : String(value)
+              }
             </span>
           </div>
         ))}
@@ -32,6 +38,37 @@ const ClientFinalReview: React.FC<{
   prevStep,
   handleRegister
 }) => {
+  const handleSubmitRegistration = async () => {
+    const loadingToast = toast.loading('Submitting registration...');
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          account_type: 'client',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      await handleRegister(data);
+      toast.success('Registration completed successfully!', { id: loadingToast });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(
+        error.message || 'Registration failed. Please try again.', 
+        { id: loadingToast }
+      );
+    }
+  };
+
   const sections = {
     "Basic Information": {
       username: formData.username,
@@ -60,25 +97,7 @@ const ClientFinalReview: React.FC<{
       hiring_preferences: formData.hiring_preferences,
       expected_start_date: formData.expected_start_date || "Flexible",
       project_duration: formData.project_duration || "Flexible",
-    },
-    "Payment Information": {
-      payment_method: formData.payment_method,
-      ...(formData.payment_method === "bank_transfer" && {
-        account_name: formData.account_name,
-        bank_name: formData.bank_name,
-        account_number: "****" + formData.account_number?.slice(-4),
-      }),
-      ...(formData.payment_method === "paypal" && {
-        paypal_email: formData.paypal_email,
-      }),
-      ...(formData.payment_method === "upi" && {
-        upi_id: formData.upi_id,
-      }),
-      ...((formData.payment_method === "credit_card" || formData.payment_method === "debit_card") && {
-        card_number: "****" + formData.card_number?.slice(-4),
-        card_expiry: formData.card_expiry,
-      }),
-    },
+    },    
   };
 
   return (
@@ -105,7 +124,7 @@ const ClientFinalReview: React.FC<{
           <button 
             type="button" 
             className="btn-one"
-            onClick={() => handleRegister(formData)}
+            onClick={handleSubmitRegistration}
           >
             Submit Registration
           </button>

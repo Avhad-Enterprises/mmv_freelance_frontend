@@ -1,28 +1,34 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
 import CompanyBreadcrumb from "../components/common/common-breadcrumb";
 import FooterOne from "@/layouts/footers/footer-one";
 import RegisterArea from "../components/register/register-area";
-import LoadingSpinner from "../components/common/loading-spinner";
 
 const PageTitle = "Register";
 
 const RegisterPage = () => {
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    // Simulate loading for 500ms, or set to false immediately if you want
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
+    // Cleanup any lingering modal-backdrop elements and modal-open class
+    const removeBackdropsAndModalOpen = () => {
+      const backdrops = document.querySelectorAll(".modal-backdrop");
+      backdrops.forEach((backdrop) => backdrop.remove());
+
+      document.body.classList.remove("modal-open"); // Remove modal-open class
+      document.body.style.overflow = ""; // Reset overflow style
+    };
+
+    removeBackdropsAndModalOpen();
+
+    // Optional: Clean up on unmount
+    return () => removeBackdropsAndModalOpen();
   }, []);
 
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {loading && <LoadingSpinner />}
         {/* header start */}
         <Header />
         {/* header end */}

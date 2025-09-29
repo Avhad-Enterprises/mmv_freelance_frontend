@@ -34,7 +34,7 @@ const menu_data:IMenuData[] = [
   {
     id: 3,
     link: '/candidates-v2',
-    title: 'Explore',
+    title: 'Candidates',
     sub_menus: [
       {link: '/candidates-v2', title: 'Candidates'}
     ]
