@@ -39,8 +39,7 @@ const BlogTwo = () => {
   }
 
   return (
-    <section className="blog-section-two pt-180 xl-pt-150 lg-pt-100 pb-150 xl-pb-130 lg-pb-80">
-      <div className="container">
+    <section className="blog-section-two pt-0 xl-pt-0 lg-pt-0 pb-0 xl-pb-0 lg-pb-0 mt-0 mb-0">      <div className="container">
         <div className="position-relative">
           <div
             className="title-one text-center mb-30 lg-mb-10 wow fadeInUp"
