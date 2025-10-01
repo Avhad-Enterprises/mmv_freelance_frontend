@@ -17,7 +17,7 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       const fd = new FormData();
 
       // Basic Information (required)
-      fd.append('username', data.username || data.full_name?.split(' ')?.[0] || '');
+      fd.append('username', data.username || '');
       fd.append('first_name', data.first_name || data.full_name?.split(' ')?.[0] || '');
       fd.append('last_name', data.last_name || data.full_name?.split(' ')?.slice(1).join(' ') || '');
       fd.append('email', data.email || '');
