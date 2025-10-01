@@ -10,7 +10,7 @@ const FreelancerAuth: React.FC<FreelancerAuthProps> = ({ children }) => {
   return (
     <AuthMiddleware 
       allowedAccountTypes={['freelancer']}
-      redirectTo="/login"
+      redirectTo="/"
     >
       {children}
     </AuthMiddleware>
@@ -18,3 +18,5 @@ const FreelancerAuth: React.FC<FreelancerAuthProps> = ({ children }) => {
 };
 
 export default FreelancerAuth;
+
+

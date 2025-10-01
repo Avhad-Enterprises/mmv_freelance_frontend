@@ -12,7 +12,7 @@ interface AuthMiddlewareProps {
 const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({ 
   children, 
   allowedAccountTypes = ['freelancer', 'client'], 
-  redirectTo = '/login' 
+  redirectTo = '/' 
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -116,3 +116,5 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
 };
 
 export default AuthMiddleware;
+
+

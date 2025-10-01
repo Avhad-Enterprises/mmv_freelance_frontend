@@ -20,7 +20,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     if (isLoggedIn) {
       setShowModal(true);
     } else {
-      router.push('/login');
+      router.push('/');
     }
   };
 
