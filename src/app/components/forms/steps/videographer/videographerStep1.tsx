@@ -30,7 +30,7 @@ const videographerBaseSkills = [
 const videographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep }) => {
   // 'role' state is no longer needed as 'account_type' from MultiStepRegisterForm dictates this.
   // We explicitly use 'base_skills' from formData for videographer skills.
-  const { full_name = "", email = "", password = "", base_skills = [] } = formData || {};
+  const { username = "", full_name = "", email = "", password = "", base_skills = [] } = formData || {};
 
   const [query, setQuery] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -62,7 +62,17 @@ const videographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep })
       <h4 className="mb-3">Register as a Videographer</h4> {/* Updated title */}
 
       {/* Removed the "I am Videographer / Video Editor" buttons */}
-
+    <div className="input-group-meta position-relative mb-25">
+        <label>Username</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Enter your full name"
+          value={username}
+          onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+        />
+        
+      </div>
       <div className="input-group-meta position-relative mb-25">
         <label>Full Name*</label>
         <input
