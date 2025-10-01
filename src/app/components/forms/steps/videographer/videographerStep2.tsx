@@ -1,4 +1,3 @@
-// steps/videographer/VideographerStep2.tsx
 "use client";
 import React from "react";
 import { Country, City } from "country-state-city";
@@ -10,48 +9,77 @@ type Props = {
   prevStep: () => void;
 };
 
-// Only videographerSuperpowers are relevant here
-const videographerSuperpowers = [
-  "Reels & Short-Form Video",
-  "Podcast Videography",
-  "Smartphone & Mobile-First Videography",
-  "Wedding Films",
-  "Corporate Interviews & Testimonials",
-  "Live-Streaming & Multi-Cam Operator",
-  "Product & E-commerce Videography",
-  "Fashion & Beauty Cinematography",
-  "Real Estate & Architecture Videography",
-  "Aerial / Drone Operation",
-  "Business & Industrial Videography (Corporate AV, Factory Shoot, Trade Shows)",
-  "Commercials & Ad Films (Digital & Broadcast)",
-  "Music Videos & Live Performance Coverage",
-  "Documentary & Narrative Storytelling",
-  "Event & Conference Coverage",
-  "360º / VR Videography",
-  "Food & Beverage Videography",
-  "Travel & Lifestyle Videography",
-  "Educational & Explainer Videos",
-];
-
-// Helper to validate YouTube URLs
+// Utility function to check for a valid YouTube URL.
 const isYouTubeUrl = (url: string) => {
   if (!url) return false;
-  try {
-    const u = new URL(url);
-    return u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be");
-  } catch {
-    return false;
-  }
+  // A simple regex is more robust for checking YouTube URLs
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+  return youtubeRegex.test(url);
 };
 
-const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
-  const { full_name = "", superpowers = [], portfolio_links = ["", "", ""], rate_amount = "", rate_currency = "INR" } = formData || {};
+const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
+  // --- HOOKS MOVED INSIDE THE COMPONENT ---
+  // State for skills and categories
+  const [allSkills, setAllSkills] = React.useState<string[]>([]);
+  const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
+  const [skillError, setSkillError] = React.useState<string | null>(null);
+  const [skillQuery, setSkillQuery] = React.useState("");
+  const [skillOpen, setSkillOpen] = React.useState(false);
+  
+  // State to store the videographer categories fetched from the API
+  const [videographerSuperpowers, setVideographerSuperpowers] = React.useState<string[]>([]);
 
+  // Fetch skills from API
+  React.useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/v1/tags/getallskill');
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const result = await response.json();
+        if (result.data && Array.isArray(result.data)) {
+          const skillNames = result.data.map((skill: any) => skill.skill_name);
+          setAllSkills(skillNames);
+        } else {
+          throw new Error('Invalid data format from API');
+        }
+      } catch (error) {
+        console.error("Failed to fetch skills:", error);
+        setSkillError("Could not load skills. Please try again later.");
+      } finally {
+        setIsLoadingSkills(false);
+      }
+    };
+
+    fetchSkills();
+  }, []);
+
+  // Effect to fetch categories when the component mounts
+  React.useEffect(() => {
+    fetch('http://localhost:8000/api/v1/category/getallcategorys')
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then(data => {
+        const categories = data?.data || [];
+        const videographerCategories = categories
+          .filter((cat: any) => cat.category_type === 'videographer' && cat.is_active)
+          .map((cat: any) => cat.category_name);
+        setVideographerSuperpowers(videographerCategories);
+      })
+      .catch(err => console.error('Error fetching videographer categories:', err));
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  const { full_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", coordinates = { lat: "", lng: "" } } = formData || {};
   const list: string[] = videographerSuperpowers;
 
-  // Dropdown-like selector state for superpowers (max 3)
+  // State for the superpower selection dropdown
   const [spQuery, setSpQuery] = React.useState("");
   const [spOpen, setSpOpen] = React.useState(false);
+
   const spFiltered: string[] = (list || []).filter(
     (s: string) => !(superpowers || []).includes(s) && s.toLowerCase().includes(spQuery.toLowerCase())
   );
@@ -66,15 +94,40 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
   const removeSuperpower = (skill: string) => {
     setFormData((prev) => ({ ...prev, superpowers: (prev.superpowers || []).filter((x: string) => x !== skill) }));
   };
+  
+  const addSkillTag = (tag: string) => {
+    if (tag && !(skill_tags || []).includes(tag)) {
+        setFormData((prev) => ({ ...prev, skill_tags: [...(prev.skill_tags || []), tag] }));
+    }
+  };
+
+  const removeSkillTag = (tagToRemove: string) => {
+    setFormData((prev) => ({...prev, skill_tags: prev.skill_tags.filter((tag: string) => tag !== tagToRemove)}));
+  };
+  
+  const handlePortfolioChange = (index: number, value: string) => {
+    const updated = [...portfolio_links];
+    updated[index] = value;
+    setFormData(prev => ({ ...prev, portfolio_links: updated }));
+  };
+
+  const handlePortfolioBlur = (index: number, value: string) => {
+     if (value && !isYouTubeUrl(value)) {
+        console.error("Only YouTube links are accepted.");
+        const updated = [...portfolio_links];
+        updated[index] = ""; // Clear the invalid link
+        setFormData(prev => ({...prev, portfolio_links: updated}));
+     }
+  };
 
   // Validation for location specific to videographer
-  const isLocationValid = !!formData.country && !!formData.city && !!formData.coordinates?.lat && !!formData.coordinates?.lng;
+  const isLocationValid = !!country && !!city && !!coordinates?.lat && !!coordinates?.lng;
 
   return (
     <div>
       <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
       <p className="mb-1">My Superpowers are*:</p>
-      <small>(Select any of the 3 categories mentioned below)</small>
+      <small>(Select up to 3 categories that best describe your skills)</small>
 
       {/* Selected superpowers as chips */}
       <div className="d-flex flex-wrap gap-2 mt-3">
@@ -86,6 +139,7 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               className="btn btn-sm btn-link text-white p-0 m-0"
               onClick={() => removeSuperpower(s)}
               aria-label={`Remove ${s}`}
+               style={{textDecoration: 'none', lineHeight: 1}}
             >
               ×
             </button>
@@ -98,15 +152,15 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         <input
           type="text"
           className="form-control"
-          placeholder={(superpowers || []).length >= 3 ? "You reached the 3 categories limit" : "Type to search categories"}
+          placeholder={(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Type to search categories"}
           value={spQuery}
           onChange={(e) => { setSpQuery(e.target.value); setSpOpen(true); }}
           onFocus={() => setSpOpen(true)}
-          onBlur={() => setTimeout(() => setSpOpen(false), 150)}
+          onBlur={() => setTimeout(() => setSpOpen(false), 200)}
           disabled={(superpowers || []).length >= 3}
         />
         {spOpen && spFiltered.length > 0 && (
-          <div className="border bg-white mt-1 rounded" style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 240, overflowY: "auto" }}>
+          <div className="border bg-white mt-1 rounded shadow-sm" style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 240, overflowY: "auto" }}>
             {spFiltered.map((s: string) => (
               <button
                 type="button"
@@ -132,7 +186,7 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               <label>Country*</label>
               <select
                 className="form-control"
-                value={formData.country || ""}
+                value={country}
                 onChange={(e) => setFormData((prev) => ({ 
                     ...prev, 
                     country: e.target.value, 
@@ -154,11 +208,10 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               <label>City*</label>
               <select
                 className="form-control"
-                value={formData.city || ""}
-                // --- FIX APPLIED HERE ---
+                value={city}
                 onChange={(e) => {
                   const cityName = e.target.value;
-                  const cities = formData.country ? City.getCitiesOfCountry(formData.country) : [];
+                  const cities = country ? City.getCitiesOfCountry(country) : [];
                   const selectedCity = cities?.find(c => c.name === cityName);
 
                   setFormData((prev) => ({
@@ -170,10 +223,10 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
                     },
                   }));
                 }}
-                disabled={!formData.country}
+                disabled={!country}
               >
                 <option value="">Select City</option>
-                {formData.country && City.getCitiesOfCountry(formData.country).map((ct) => (
+                {country && (City.getCitiesOfCountry(country) || []).map((ct) => (
                   <option key={`${ct.name}-${ct.latitude}`} value={ct.name}>
                     {ct.name}
                   </option>
@@ -188,71 +241,94 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
                 type="text"
                 className="form-control"
                 placeholder="Auto-filled from city"
-                value={`${formData.coordinates?.lat || ""}${formData.coordinates?.lat && formData.coordinates?.lng ? "," : ""}${formData.coordinates?.lng || ""}`}
-                readOnly // Make it read-only as it's auto-populated
+                value={coordinates?.lat && coordinates?.lng ? `${coordinates.lat}, ${coordinates.lng}` : ""}
+                readOnly
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Skill Tags */}
+      {/* Skills Section */}
       <div className="mt-3">
-        <h5>Skill Tags*</h5>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Type a tag and press Enter"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              const val = (e.target as HTMLInputElement).value.trim();
-              if (val) {
-                setFormData((prev) => ({ ...prev, skill_tags: [...(prev.skill_tags || []), val] }));
-                (e.target as HTMLInputElement).value = "";
-              }
-            }
-          }}
-        />
+        <h5>Skills*</h5>
+        <small className="d-block">(Select up to 15 skills that you're proficient in)</small>
+
         <div className="d-flex flex-wrap gap-2 mt-2">
-          {(formData.skill_tags || []).map((t: string) => (
-            <span key={t} className="badge bg-secondary">
-              {t}
+          {(skill_tags || []).map((s: string) => (
+            <span key={s} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
+              {s}
               <button
                 type="button"
-                className="btn btn-sm btn-link text-white"
-                onClick={() => setFormData((prev) => ({ ...prev, skill_tags: prev.skill_tags.filter((x: string) => x !== t) }))}
+                className="btn btn-sm btn-link text-white p-0 m-0"
+                onClick={() => removeSkillTag(s)}
+                aria-label={`Remove ${s}`}
+                style={{textDecoration: 'none', lineHeight: 1}}
               >
-                x
+                ×
               </button>
             </span>
           ))}
         </div>
-      </div>
 
+        <div className="position-relative">
+          <input
+            type="text"
+            className="form-control mt-2"
+            placeholder={isLoadingSkills ? "Loading skills..." : (skill_tags || []).length >= 15 ? "Maximum skills reached" : "Type to search skills"}
+            value={skillQuery}
+            onChange={(e) => {
+              setSkillQuery(e.target.value);
+              setSkillOpen(true);
+            }}
+            onFocus={() => setSkillOpen(true)}
+            onBlur={() => setTimeout(() => setSkillOpen(false), 150)}
+            disabled={isLoadingSkills || !!skillError || (skill_tags || []).length >= 15}
+          />
+
+          {skillOpen && allSkills.filter(s => !(skill_tags || []).includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase())).length > 0 && (
+            <div
+              className="border bg-white mt-1 rounded shadow-sm"
+              style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 220, overflowY: "auto" }}
+            >
+              {allSkills
+                .filter(s => !(skill_tags || []).includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase()))
+                .map((s: string) => (
+                  <button
+                    type="button"
+                    key={s}
+                    className="dropdown-item w-100 text-start"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      if ((skill_tags || []).length < 15) {
+                        addSkillTag(s);
+                        setSkillQuery("");
+                        setSkillOpen(false);
+                      }
+                    }}
+                  >
+                    {s}
+                  </button>
+                ))}
+            </div>
+          )}
+        </div>
+        {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
+        <small className="text-muted d-block mt-1">Selected {(skill_tags || []).length}/15 skills</small>
+      </div>
+      
       {/* Portfolio (YouTube links only) */}
       <div className="mt-3">
         <h5>Portfolio (YouTube links only)*</h5>
         {portfolio_links.map((link: string, idx: number) => (
-          <div key={idx} className="input-group-meta position-relative mb-10">
+          <div key={idx} className="input-group-meta position-relative mb-2">
             <input
               type="url"
-              className="form-control"
+              className={`form-control ${link && !isYouTubeUrl(link) ? 'is-invalid' : ''}`}
               placeholder="https://www.youtube.com/..."
               value={link}
-              onChange={(e) => {
-                const updated = [...(formData.portfolio_links || [])];
-                updated[idx] = e.target.value;
-                setFormData((prev) => ({ ...prev, portfolio_links: updated }));
-              }}
-              onBlur={(e) => {
-                if (e.target.value && !isYouTubeUrl(e.target.value)) {
-                  alert("Only YouTube links are accepted.");
-                  const updated = [...(formData.portfolio_links || [])];
-                  updated[idx] = "";
-                  setFormData((prev) => ({ ...prev, portfolio_links: updated }));
-                }
-              }}
+              onChange={(e) => handlePortfolioChange(idx, e.target.value)}
+              onBlur={(e) => handlePortfolioBlur(idx, e.target.value)}
             />
           </div>
         ))}
@@ -263,7 +339,7 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         >
           + Add more
         </button>
-        <small className="d-block mt-1">Minimum one YouTube link is mandatory.</small>
+        <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
       </div>
 
       {/* Rate section */}
@@ -304,7 +380,7 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
           type="button"
           className="btn-one"
           onClick={() => nextStep({})}
-          disabled={(superpowers || []).length !== 3 || !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || !rate_amount || !isLocationValid}
+          disabled={(superpowers || []).length === 0 || (superpowers || []).length > 3 || !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || !rate_amount || !isLocationValid}
         >
           Next
         </button>
@@ -313,4 +389,4 @@ const videographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
   );
 };
 
-export default videographerStep2;
+export default VideographerStep2;

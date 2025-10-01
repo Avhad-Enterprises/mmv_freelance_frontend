@@ -9,7 +9,7 @@ interface FreelancerAuthProps {
 const FreelancerAuth: React.FC<FreelancerAuthProps> = ({ children }) => {
   return (
     <AuthMiddleware 
-      allowedAccountTypes={['freelancer']}
+      allowedRoles={['VIDEOGRAPHER', 'VIDEO_EDITOR']}
       redirectTo="/"
     >
       {children}

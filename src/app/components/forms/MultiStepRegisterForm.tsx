@@ -297,7 +297,6 @@ interface FormDataCommon {
 interface FreelancerCommonFields {
   first_name: string;
   last_name: string;
-  full_name: string;
   base_skills: string[];
   superpowers: string[];
   skill_tags: string[];
@@ -489,14 +488,12 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         ...baseCommon,
         ...freelancerCommon,
         account_type: "videoEditor",
-        full_name: "", // Initial empty, can be set from first/last name later
       } as VideoEditorFormData;
     } else if (currentAccountType === "videographer") {
       return {
         ...baseCommon,
         ...freelancerCommon,
         account_type: "videographer",
-        full_name: "", // Initial empty, can be set from first/last name later
         city: "", // Specific to videographer
         country: "", // Specific to videographer
         coordinates: { lat: "", lng: "" }, // Specific to videographer

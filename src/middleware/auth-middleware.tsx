@@ -5,13 +5,13 @@ import useDecodedToken from '@/hooks/useDecodedToken';
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
-  allowedAccountTypes?: string[];
+  allowedRoles?: string[];
   redirectTo?: string;
 }
 
 const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({ 
   children, 
-  allowedAccountTypes = ['freelancer', 'client'], 
+  allowedRoles = ['VIDEOGRAPHER', 'VIDEO_EDITOR', 'CLIENT'], 
   redirectTo = '/' 
 }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,15 +39,18 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
         return;
       }
 
-      // Check if user has required account type
-      if (allowedAccountTypes.length > 0 && !allowedAccountTypes.includes(decoded.account_type)) {
-        console.log(`User account type '${decoded.account_type}' not allowed. Allowed types:`, allowedAccountTypes);
+      // Check if user has required role
+      const userRoles = decoded.roles || [];
+      const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+      
+      if (allowedRoles.length > 0 && !hasAllowedRole) {
+        console.log(`User roles '${userRoles.join(', ')}' not allowed. Allowed roles:`, allowedRoles);
         
-        // Redirect based on account type
-        if (decoded.account_type === 'freelancer') {
-          router.push('/dashboard/candidate-dashboard');
-        } else if (decoded.account_type === 'client') {
+        // Redirect based on role
+        if (userRoles.includes('CLIENT')) {
           router.push('/dashboard/employ-dashboard');
+        } else if (userRoles.includes('VIDEOGRAPHER') || userRoles.includes('VIDEO_EDITOR')) {
+          router.push('/dashboard/candidate-dashboard');
         } else {
           router.push(redirectTo);
         }
@@ -64,7 +67,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
     const timeoutId = setTimeout(checkAuth, 100);
     
     return () => clearTimeout(timeoutId);
-  }, [decoded, allowedAccountTypes, redirectTo, router]);
+  }, [decoded, allowedRoles, redirectTo, router]);
 
   // Show loading spinner while checking auth
   if (isLoading) {
