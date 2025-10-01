@@ -67,9 +67,12 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
   // Fetch job list
   useEffect(() => {
     const fetchJobs = async () => {
-      if (!decoded?.user_id) return;
+      if (!decoded?.user_id) {
+        setLoading(false);
+        return;
+      }
       try {
-        const res = await makePostRequest("applications/my-applications", {
+        const res = await makePostRequest("users/get_user_by_id", {
           user_id: decoded.user_id,
         });
         setJobItems(res?.data?.data || []);
@@ -87,9 +90,9 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
     const fetchCount = async () => {
       if (!decoded?.user_id) return;
       try {
-        const res = await makeGetRequest(
-          `applications/count/${decoded.user_id}`
-        );
+        const res = await makePostRequest("users/get_user_by_id", {
+          user_id: decoded.user_id,
+        });
         setAppliedCount(res?.data?.data || 0);
       } catch (error) {
         console.error("Error fetching count:", error);
