@@ -38,25 +38,89 @@ const FinalReview: React.FC<{
   const handleSubmit = async () => {
     const loadingToast = toast.loading('Submitting registration...');
     try {
-      // TODO: Replace with actual API URL
-      const response = await fetch('', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Registration failed');
+      // Create FormData for file uploads
+      const formDataToSend = new FormData();
+      
+      // Add all form fields to FormData
+      formDataToSend.append('username', formData.username);
+      formDataToSend.append('first_name', formData.first_name);
+      formDataToSend.append('last_name', formData.last_name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('account_type', 'freelancer');
+      
+      // Professional Details
+      if (formData.profile_title) formDataToSend.append('profile_title', formData.profile_title);
+      
+      // Skills - ensure it's an array with at least 1 element
+      const skills = Array.isArray(formData.technical_skills) && formData.technical_skills.length > 0 
+        ? formData.technical_skills 
+        : (formData.technical_skills ? [formData.technical_skills] : ['General Skills']);
+      formDataToSend.append('skills', JSON.stringify(skills));
+      
+      if (formData.experience_level) formDataToSend.append('experience_level', formData.experience_level);
+      if (formData.portfolio_links) formDataToSend.append('portfolio_links', formData.portfolio_links);
+      if (formData.hourly_rate) formDataToSend.append('hourly_rate', formData.hourly_rate.toString());
+      
+      // Contact & Location
+      if (formData.phone_number) formDataToSend.append('phone_number', formData.phone_number);
+      if (formData.location || formData.street_address) formDataToSend.append('street_address', formData.location || formData.street_address);
+      if (formData.country) formDataToSend.append('country', formData.country);
+      if (formData.state) formDataToSend.append('state', formData.state);
+      if (formData.city) formDataToSend.append('city', formData.city);
+      if (formData.zip_code) formDataToSend.append('zip_code', formData.zip_code);
+      if (formData.id_type) formDataToSend.append('id_type', formData.id_type);
+      
+      // Work Preferences
+      if (formData.availability) formDataToSend.append('availability', formData.availability);
+      
+      // Send hours_per_week as string enum values per API documentation
+      if (formData.hours_per_week) {
+        formDataToSend.append('hours_per_week', formData.hours_per_week);
+      }
+      
+      if (formData.work_type) formDataToSend.append('work_type', formData.work_type);
+      
+      // Languages - ensure it's an array with at least 1 element
+      const languages = Array.isArray(formData.languages) && formData.languages.length > 0 
+        ? formData.languages 
+        : (formData.languages ? [formData.languages] : ['English']);
+      formDataToSend.append('languages', JSON.stringify(languages));
+      
+      // Add file uploads if they exist
+      if (formData.id_document && formData.id_document.length > 0) {
+        formDataToSend.append('id_document', formData.id_document[0]);
       }
 
+      // Debug: Log the form data being sent
+      console.log('Form data being sent:');
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+
+      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'x-test-mode': 'true', // Bypass rate limiting during development
+          // Don't set Content-Type header - let browser set it with boundary for FormData
+        },
+        body: formDataToSend,
+      });
+
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
       await handleRegister(data);
       toast.success('Registration completed successfully!', { id: loadingToast });
-    } catch (error) {
-      console.error('Error during registration:', error);
-      toast.error('Registration failed. Please try again.', { id: loadingToast });
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(
+        error.message || 'Registration failed. Please try again.', 
+        { id: loadingToast }
+      );
     }
   };
 
@@ -69,25 +133,24 @@ const FinalReview: React.FC<{
     },
     "Professional Details": {
       profile_title: formData.profile_title,
-      technical_skills: formData.technical_skills,
-      software_skills: formData.software_skills,
-      editor_proficiency: formData.editor_proficiency,
-      videographer_proficiency: formData.videographer_proficiency,
-      content_types: formData.content_types,
+      skills: formData.technical_skills,
       experience_level: formData.experience_level,
       portfolio_links: formData.portfolio_links,
       hourly_rate: `$${formData.hourly_rate}/hr`,
     },
     "Contact Details": {
       phone_number: formData.phone_number,
-      location: formData.location,
+      street_address: formData.location || formData.street_address,
       country: formData.country,
+      state: formData.state,
+      city: formData.city,
+      zip_code: formData.zip_code,
+      id_type: formData.id_type,
     },
     "Work Preferences": {
       availability: formData.availability,
       work_type: formData.work_type,
-      hours_per_week: formData.hours_per_week,
-      timezone: formData.timezone,
+      hours_per_week: formData.hours_per_week, // Keep original string value for display
       languages: formData.languages,
     },
   };
