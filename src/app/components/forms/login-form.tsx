@@ -55,7 +55,7 @@ const LoginForm = () => {
 
   const onSubmit = async (data: IFormData) => {
     try {
-      const res = await makePostRequest("users/loginf", data);
+      const res = await makePostRequest("auth/login", data);
       const result = res.data;
 
       toast.success("Login successful!");
@@ -69,13 +69,18 @@ const LoginForm = () => {
         console.warn("No token received.");
       }
 
-      const accountType = result?.data?.user?.account_type;
-      if (accountType === "freelancer") {
-        router.push("/dashboard/candidate-dashboard");
-      } else if (accountType === "client") {
+      const userRoles = result?.data?.user?.roles;
+      if (!userRoles || userRoles.length === 0) {
+        alert("No roles assigned. Cannot redirect.");
+        return;
+      }
+
+      if (userRoles.includes('CLIENT')) {
         router.push("/dashboard/employ-dashboard");
+      } else if (userRoles.includes('VIDEOGRAPHER') || userRoles.includes('VIDEO_EDITOR')) {
+        router.push("/dashboard/candidate-dashboard");
       } else {
-        alert("Unknown account type. Cannot redirect.");
+        alert("Unknown role type. Cannot redirect.");
       }
     } catch (error: any) {
       console.error("API Error:", error);

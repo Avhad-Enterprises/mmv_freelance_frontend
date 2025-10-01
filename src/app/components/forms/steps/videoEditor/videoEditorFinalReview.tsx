@@ -18,6 +18,7 @@ const videoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       const fd = new FormData();
     console.log(fd);
       // Basic Information (required)
+      fd.append('profile_title',data.username || '');
       fd.append('username',  data.username || '');
 
 //       const username = data.full_name?.split(" ")?.[0] || "";
@@ -25,8 +26,8 @@ const videoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
 // fd.append("username", username);
 
       
-      fd.append('first_name', data.full_name?.split(' ')?.[0] || '');
-      fd.append('last_name',  data.full_name?.split(' ')?.slice(1).join(' ') || '');
+      fd.append('first_name', data.first_name);
+      fd.append('last_name',  data.last_name);
       fd.append('email', data.email || '');
       fd.append('password', data.password || '');
       fd.append('account_type', 'videoEditor'); // This will still be 'freelancer'
@@ -78,7 +79,7 @@ const videoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
 
       // Submit
-      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/register/videoeditor', {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',
@@ -102,7 +103,8 @@ const videoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
   const sections: Record<string, Record<string, any>> = {
     Basic: {
       role: data.role, // This will reflect 'video_editor' if set in form data
-      full_name: data.full_name,
+      first_name: data.first_name,
+      last_name: data.last_name,
       base_skills: data.base_skills,
     },
     "Superpowers & Location": {

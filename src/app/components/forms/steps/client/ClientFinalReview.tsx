@@ -113,7 +113,7 @@ if (formData.business_documents && formData.business_documents.length > 0) {
         console.log(key, value);
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/auth/register', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/register/client', {
         method: 'POST',
         headers: {
           'x-test-mode': 'true', // Bypass rate limiting during development

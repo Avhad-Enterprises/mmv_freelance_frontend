@@ -9,7 +9,7 @@ interface DashboardAuthProps {
 const DashboardAuth: React.FC<DashboardAuthProps> = ({ children }) => {
   return (
     <AuthMiddleware 
-      allowedAccountTypes={['freelancer', 'client']}
+      allowedRoles={['CLIENT', 'VIDEOGRAPHER', 'VIDEO_EDITOR']}
       redirectTo="/"
     >
       {children}

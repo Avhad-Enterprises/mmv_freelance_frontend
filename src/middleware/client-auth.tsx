@@ -9,7 +9,7 @@ interface ClientAuthProps {
 const ClientAuth: React.FC<ClientAuthProps> = ({ children }) => {
   return (
     <AuthMiddleware 
-      allowedAccountTypes={['client']}
+      allowedRoles={['CLIENT']}
       redirectTo="/login"
     >
       {children}

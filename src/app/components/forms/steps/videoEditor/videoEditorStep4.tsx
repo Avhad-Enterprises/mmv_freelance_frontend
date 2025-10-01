@@ -9,6 +9,15 @@ type Props = {
 };
 
 const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
+  const [languageQuery, setLanguageQuery] = React.useState("");
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = React.useState(false);
+
+  // Common languages list
+  const availableLanguages = [
+    "English", "Hindi", "Marathi", "Gujarati", "Bengali", "Telugu", "Tamil", 
+    "Kannada", "Malayalam", "Punjabi", "Urdu", "Sanskrit", "Spanish", "French", 
+    "German", "Chinese", "Japanese", "Korean", "Arabic", "Russian"
+  ];
   return (
     <div>
       <h4 className="mb-3">Short description about yourself*</h4>
@@ -42,31 +51,64 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
         <div className="col-md-6">
           <div className="input-group-meta position-relative mb-25">
             <label>Languages Spoken*</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Type a language and press Enter"
-              onKeyDown={(e) => {
-                if ((e as any).key === "Enter") {
-                  e.preventDefault();
-                  const val = (e.target as HTMLInputElement).value.trim();
-                  if (val) {
-                    setFormData((prev) => ({ ...prev, languages: [...(prev.languages || []), val] }));
-                    (e.target as HTMLInputElement).value = "";
-                  }
-                }
-              }}
-            />
+            <div className="position-relative">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Type to search languages"
+                value={languageQuery}
+                onChange={(e) => {
+                  setLanguageQuery(e.target.value);
+                  setIsLanguageDropdownOpen(true);
+                }}
+                onFocus={() => setIsLanguageDropdownOpen(true)}
+                onBlur={() => setTimeout(() => setIsLanguageDropdownOpen(false), 150)}
+              />
+              {isLanguageDropdownOpen && (
+                <div
+                  className="border bg-white mt-1 rounded shadow-sm"
+                  style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 200, overflowY: "auto" }}
+                >
+                  {availableLanguages
+                    .filter(lang => 
+                      lang.toLowerCase().includes(languageQuery.toLowerCase()) &&
+                      !(formData.languages || []).includes(lang)
+                    )
+                    .map(lang => (
+                      <button
+                        key={lang}
+                        type="button"
+                        className="dropdown-item w-100 text-start"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            languages: [...(prev.languages || []), lang]
+                          }));
+                          setLanguageQuery("");
+                          setIsLanguageDropdownOpen(false);
+                        }}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
             <div className="d-flex flex-wrap gap-2 mt-2">
-              {(formData.languages || []).map((t: string) => (
-                <span key={t} className="badge bg-secondary">
-                  {t}
+              {(formData.languages || []).map((lang: string) => (
+                <span key={lang} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
+                  {lang}
                   <button
                     type="button"
-                    className="btn btn-sm btn-link text-white"
-                    onClick={() => setFormData((prev) => ({ ...prev, languages: prev.languages.filter((x: string) => x !== t) }))}
+                    className="btn btn-sm btn-link text-white p-0 m-0"
+                    onClick={() => setFormData((prev) => ({ 
+                      ...prev, 
+                      languages: prev.languages.filter((x: string) => x !== lang)
+                    }))}
+                    style={{textDecoration: 'none', lineHeight: 1}}
                   >
-                    x
+                    ×
                   </button>
                 </span>
               ))}
