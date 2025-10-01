@@ -10,7 +10,7 @@ const DashboardAuth: React.FC<DashboardAuthProps> = ({ children }) => {
   return (
     <AuthMiddleware 
       allowedAccountTypes={['freelancer', 'client']}
-      redirectTo="/login"
+      redirectTo="/"
     >
       {children}
     </AuthMiddleware>
@@ -18,3 +18,5 @@ const DashboardAuth: React.FC<DashboardAuthProps> = ({ children }) => {
 };
 
 export default DashboardAuth;
+
+

@@ -100,10 +100,11 @@ const ClientFinalReview: React.FC<{
       }
       
       // Add file uploads if they exist (for business documents)
-      if (formData.business_documents && formData.business_documents.length > 0) {
-        formData.business_documents.forEach((file: File) => {
-          formDataToSend.append('business_documents', file);
-        });
+if (formData.business_documents && formData.business_documents.length > 0) {
+  for (let i = 0; i < formData.business_documents.length; i++) {
+    formDataToSend.append('business_documents', formData.business_documents[i]);
+  }
+
       }
 
       // Debug: Log the form data being sent
