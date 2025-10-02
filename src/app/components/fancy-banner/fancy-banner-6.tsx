@@ -25,7 +25,7 @@ const FancyBannerSix = () => {
                   </Link>
                 </li>
                 <li className="ms-2 ms-2 ms-lg-0">
-                  <Link href="/candidates-v2" className="btn-five border6">
+                  <Link href="/coming-soon" className="btn-five border6">
                     Start Hiring
                   </Link>
                 </li>

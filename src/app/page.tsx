@@ -148,7 +148,7 @@ const HomeSix = () => {
 
 
         {/* footer start */}
-        <FooterOne style_3={true} />
+        <FooterOne />
         {/* footer end */}
       </div>
     </Wrapper>

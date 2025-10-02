@@ -18,7 +18,7 @@ const FeatureEight = () => {
                 <AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
                 <AccordionItem id='three' title='Protected payments, every time' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
               </div>
-              <Link href="/candidates-v2" className="btn-five border6 mt-45">Learn More</Link>
+              <Link href="/coming-soon" className="btn-five border6 mt-45">Learn More</Link>
             </div>
           </div>
           <div className="col-lg-6 order-lg-first">

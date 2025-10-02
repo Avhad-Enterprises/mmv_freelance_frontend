@@ -48,7 +48,7 @@ const ExpertSectionOne = () => {
 					</div>
 					<div className="col-lg-5">
 						<div className="d-flex justify-content-lg-end">
-							<Link href="/candidates-v2" className="btn-six d-none d-lg-inline-block">Explore all</Link>
+							<Link href="/coming-soon" className="btn-six d-none d-lg-inline-block">Explore all</Link>
 						</div>
 					</div>
 				</div>
@@ -67,7 +67,7 @@ const ExpertSectionOne = () => {
           ))}
 				</Slider>
 				<div className="text-center mt-40 d-lg-none">
-					<Link href="/candidates-v2" className="btn-six">Explore all</Link>
+					<Link href="/coming-soon" className="btn-six">Explore all</Link>
 				</div>
 			</div>
 		</section>  

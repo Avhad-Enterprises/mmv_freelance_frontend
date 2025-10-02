@@ -123,7 +123,7 @@ hr {opacity: 0.09; margin: 5px 0;}
   font-size: 25px;
   cursor: pointer;
   border-radius: 50%;
-  background: $color-three;
+  background: $color-one;
   transition: all 0.3s ease-in-out;
     &:after {
     position: absolute;
@@ -238,11 +238,11 @@ hr {opacity: 0.09; margin: 5px 0;}
   text-align: center;
   border-radius: 50px;
   color: #fff;
-  background: $color-three;
+  background: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
   @include transition(0.3s);
   &:hover {
-    background: $color-one;
-    color: #fff;
+    background: $color-two; // Changed hover to lime for better contrast
+    color: $color-one;
   }
 }
 .btn-five.border6 {
@@ -250,18 +250,19 @@ hr {opacity: 0.09; margin: 5px 0;}
 }
 .btn-six {
   font-weight: 500;
-  color: $color-three;
+  color: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
   position: relative;
   padding-right: 12px;
-  border-bottom: 2px solid $color-three;
+  border-bottom: 2px solid $color-one; // Changed to match text color
   @include transition(0.3s);
   &:hover {
-    color: $color-three;
+    color: $color-two; // Changed hover to lime
+    border-bottom-color: $color-two;
     letter-spacing: 0.2px;
   }
   &:after {
-    border-bottom: 2px solid $color-three;
-    border-right: 2px solid $color-three;
+    border-bottom: 2px solid $color-one; // Changed to dark green
+    border-right: 2px solid $color-one; // Changed to dark green
     content: "";
     display: block;
     margin-top: -4px;
@@ -273,6 +274,10 @@ hr {opacity: 0.09; margin: 5px 0;}
     transition: all .15s ease-in-out;
     height: 8px;
     width: 8px;
+  }
+  &:hover:after {
+    border-bottom-color: $color-two;
+    border-right-color: $color-two;
   }
   &.dark {
     color: #000;

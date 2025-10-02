@@ -24,7 +24,7 @@ const FeatureSeven = () => {
                   <AccordionItem id='one' isShow={true} title='Seamless Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
                   <AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
                 </div>
-                <Link href="/candidates-v2" className="btn-seven border6 mt-70 lg-mt-40">Find Talents</Link>
+                <Link href="/coming-soon" className="btn-seven border6 mt-70 lg-mt-40">Find Talents</Link>
               </div>
             </div>
             <div className="col-lg-7 col-md-8 m-auto order-lg-first">

@@ -239,7 +239,7 @@
 }
 // Hero Banner Seven
 .hero-banner-seven {
-    background: #fff;
+    background: $light-bg; // Changed from #fff to light green background
     z-index: 1;
     h1 {
         font-family: var(--gorditas-font);
@@ -527,7 +527,7 @@
         height: 55px;
         border-radius: 6px;
         overflow: hidden;
-        background: $color-three;
+        background: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
         cursor: pointer;
         @include transition(0.2s);
         #uploadCV {

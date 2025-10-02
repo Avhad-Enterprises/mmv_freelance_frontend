@@ -190,7 +190,7 @@
     background: #212121;
 }
 .menu-style-two .navbar .nav-item .nav-link {color: #fff;}
-.menu-style-two .navbar .nav-item:hover .nav-link {color:$color-three;}
+.menu-style-two .navbar .nav-item:hover .nav-link {color:$color-one;}
 // Mega Menu
 .theme-main-menu .mega-dropdown,.theme-main-menu .navbar {position: static;}
 .navbar [class*="mega-dropdown"] .dropdown-menu {
@@ -257,15 +257,15 @@
     color: #fff;
     border-radius: 50px;
     &:hover {
-        background: $color-three;
-        border-color: $color-three;
+        background: $color-one;
+        border-color: $color-one;
     }
     &.dark-style {
         border-color: #000;
         color: #000;
         &:hover {
-            background: $color-three;
-            border-color: $color-three;
+            background: $color-one;
+            border-color: $color-one;
             color: #fff;
         }
     }

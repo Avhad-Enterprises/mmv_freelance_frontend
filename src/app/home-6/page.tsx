@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import Wrapper from "@/layouts/wrapper";
-import HeaderSix from "@/layouts/headers/header-6";
+import Header from "@/layouts/headers/header";
 import HeroBannerSix from "../components/hero-banners/hero-banner-six";
 import PartnersSlider from "../components/partners/partners-slider";
 import CategorySectionSix from "../components/category/category-section-6";
@@ -26,7 +26,7 @@ const HomeSix = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* header start */}
-        <HeaderSix />
+        <Header />
         {/* header end */}
 
         {/* hero banner start */}

@@ -94,7 +94,7 @@ const HeaderThree = () => {
                       <Link className="nav-link" href="/coming-soon" role="button">Find Jobs</Link>
                     </li>
                     <li className="nav-item dropdown">
-                      <Link className="nav-link" href="/candidates-v2" role="button">Find Talents</Link>
+                      <Link className="nav-link" href="/coming-soon" role="button">Find Talents</Link>
                     </li>
                     <li className="nav-item dropdown">
                       <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">Pages</a>

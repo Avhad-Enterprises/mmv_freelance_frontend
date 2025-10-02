@@ -27,8 +27,6 @@
 
 "use client"
 import React, { useState } from "react";
-import Image from "next/image";
-import shape from "@/assets/images/shape/shape_02.svg";
 
 type MapLocations = 'office' | 'editing';
 
@@ -47,11 +45,7 @@ const MapArea: React.FC = () => {
 
   return (
     <>
-      <div className="inner-banner-one position-relative pb-0">
-        <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
-      </div>
-      
-      <div className="container mt-5 mb-4">
+      <div className="container mt-5 mb-4" style={{ marginTop: '120px' }}>
         <div className="d-flex justify-content-center gap-3">
           <button 
             className={`btn-five ${activeMap === 'office' ? 'active-map-btn' : ''}`}

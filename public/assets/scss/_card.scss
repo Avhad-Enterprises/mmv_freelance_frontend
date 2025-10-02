@@ -86,7 +86,7 @@
         margin: 28px 0 25px;
     }
     &:hover .title {
-        color: $color-three;
+        color: $color-one;
     }
     .total-job {
         font-size: 16px;
@@ -94,7 +94,7 @@
     }
     &.bg-color {
         box-shadow: none;
-        background: $color-three;
+        background: $color-one;
         a {
             padding: 10px 40px 20px;
         }
@@ -115,7 +115,7 @@
     position: absolute;
     width: 100%;
     height: 1px;
-    background: $color-three;
+    background: $color-one;
     left: 0;
     bottom: 0;
     @include transition(0.2s);
@@ -144,7 +144,7 @@
     width: 42px;
     height: 42px;
     border-radius: 10px;
-    background: $color-three;
+    background: $color-one;
     color: #fff;
     font-size: 15px;
     line-height: initial;
@@ -152,7 +152,7 @@
 .card-style-five .icon {
     width: 80px;
     height: 80px;
-    background: $color-three;
+    background: $color-one;
 }
 // Card Six
 .card-style-six {

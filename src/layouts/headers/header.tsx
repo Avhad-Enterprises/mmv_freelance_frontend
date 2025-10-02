@@ -44,7 +44,7 @@ const Header = () => {
                     </a>
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/candidates-v2" className="btn-one">
+                    <Link href="/coming-soon" className="btn-one">
                       Hire Top Talents
                     </Link>
                   </li>
