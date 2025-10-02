@@ -12,7 +12,7 @@ import ProjectFilterSidebar from './components/ProjectFilterSidebar';
 import ProjectListing from './components/ProjectListing';
 import Pagination from './components/Pagination';
 // import BackToTopButton from './components/BackToTopButton';
-import HeaderSix from "@/layouts/headers/header-6";
+import Header from "@/layouts/headers/header";
 
 export default function ProjectsListPage() {
   return (
@@ -59,7 +59,7 @@ export default function ProjectsListPage() {
       </div>
 
       <div id="wrapper-container" className="wrapper-container">
-        <HeaderSix dark_style={true} />
+        <Header />
 
         {/* ✅ NO margin-top here now */}
         <div id="apus-main-content">

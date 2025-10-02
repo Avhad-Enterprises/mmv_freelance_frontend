@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
-import HeaderSix from "@/layouts/headers/header-6";
+import Header from "@/layouts/headers/header";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
@@ -39,7 +39,7 @@ const HomeSix = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* header start */}
-        <HeaderSix dark_style={true} />
+        <Header />
         {/* header end */}
 
         {/* hero banner start */}

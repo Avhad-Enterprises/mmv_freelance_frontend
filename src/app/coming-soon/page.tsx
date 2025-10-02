@@ -3,14 +3,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import icon from '@/assets/images/icon/icon_61.svg';
 import comingsoon_img from './coming_soon.png';
-import HeaderSix from "@/layouts/headers/header-6";
+import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
 
 const ComingSoonPage = () => {
     return (
         <Wrapper>
             {/* header start */}
-            <HeaderSix dark_style={true} />
+            <Header />
             {/* header end */}
             
             <div className="comingsoon-page d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
