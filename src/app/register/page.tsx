@@ -61,7 +61,6 @@ import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
-import CompanyBreadcrumb from "../components/common/common-breadcrumb";
 import FooterOne from "@/layouts/footers/footer-one";
 import RegisterArea from "../components/register/register-area";
 
@@ -84,10 +83,6 @@ const RegisterPage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         <Header />
-        <CompanyBreadcrumb
-          title="Register"
-          subtitle="Create an account as a Video Editor, Videographer, or Client"
-        />
         <RegisterArea />
         <FooterOne />
       </div>

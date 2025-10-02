@@ -6,13 +6,11 @@ import Menus from "./component/menus";
 import logo from "@/assets/images/logo/logo_new.png";
 import CategoryDropdown from "./component/category-dropdown";
 import LoginModal from "@/app/components/common/popup/login-modal";
-import useSticky from "@/hooks/use-sticky";
 
 const Header = () => {
-  const { sticky } = useSticky()
   return (
     <>
-      <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu ${sticky ? 'fixed' : ''}`}>
+      <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
         <div className="inner-content position-relative">
           <div className="top-header">
             <div className="d-flex align-items-center">
