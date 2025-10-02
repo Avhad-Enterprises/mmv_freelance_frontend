@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 
 type Props = {
   formData: any;
@@ -7,115 +8,132 @@ type Props = {
   nextStep: (data: Partial<any>) => void;
 };
 
-// Define a type for the skill object received from the API
-type Skill = {
-  skill_id: number;
-  skill_name: string;
-};
-
 const VideoEditorStep1: React.FC<Props> = ({ formData, setFormData, nextStep }) => {
-  const { username = "", first_name = "", last_name = "", email = "", password = "" } = formData || {};
-
-  // UI State
+  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: formData });
   const [showPassword, setShowPassword] = useState(false);
 
-  // Simple validations
-  const emailValid = !!email && /.+@.+\..+/.test(email);
-  const passwordValid = !!password && password.length >= 6;
-  const firstNameValid = !!first_name && first_name.trim().length >= 2;
-  const lastNameValid = !!last_name && last_name.trim().length >= 2;
+  const onSubmit = (data: any) => {
+    // Update the parent formData with the validated data
+    setFormData((prev: any) => ({ ...prev, ...data }));
+    nextStep(data);
+  };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="row">
+        {/* Username */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Username*</label>
+            <input 
+              type="text" 
+              placeholder="Enter user name" 
+              className="form-control" 
+              {...register("username", { required: "Username is required" })}
+            />
+            {errors.username && (
+              <div className="error">{String(errors.username.message)}</div>
+            )}
+          </div>
+        </div>
 
-      <div className="input-group-meta position-relative mb-25">
-        <label>Username</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter your username"
-          value={username}
-          onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
-        />
+        {/* First Name */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>First Name*</label>
+            <input 
+              type="text" 
+              placeholder="James" 
+              className="form-control"
+              {...register("first_name", { required: "First Name is required" })}
+            />
+            {errors.first_name && (
+              <div className="error">{String(errors.first_name.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Last Name */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Last Name*</label>
+            <input 
+              type="text" 
+              placeholder="Brower" 
+              className="form-control"
+              {...register("last_name", { required: "Last Name is required" })}
+            />
+            {errors.last_name && (
+              <div className="error">{String(errors.last_name.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Email */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Email*</label>
+            <input 
+              type="email" 
+              placeholder="james@example.com" 
+              className="form-control"
+              {...register("email", { 
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address"
+                }
+              })}
+            />
+            {errors.email && (
+              <div className="error">{String(errors.email.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Password */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Password*</label>
+            <input 
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter Password" 
+              className="form-control"
+              {...register("password", { 
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters"
+                }
+              })}
+            />
+            <span 
+              className="placeholder_icon"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '80%',
+                transform: 'translateY(-50%)',
+                cursor: 'pointer'
+              }}
+            >
+              <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </span>
+            {errors.password && (
+              <div className="error">{String(errors.password.message)}</div>
+            )}
+          </div>
+        </div>
+
+        {/* Next Button */}
+        <div className="col-12">
+          <button type="submit" className="btn-one tran3s w-100 mt-30">
+            Next
+          </button>
+        </div>
       </div>
-
-      <div className="input-group-meta position-relative mb-25">
-        <label>First Name*</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter your first name"
-          value={first_name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, first_name: e.target.value }))}
-        />
-        {!firstNameValid && (
-          <small className="text-danger">First name is required</small>
-        )}
-      </div>
-
-      <div className="input-group-meta position-relative mb-25">
-        <label>Last Name*</label>
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter your last name"
-          value={last_name}
-          onChange={(e) => setFormData((prev) => ({ ...prev, last_name: e.target.value }))}
-        />
-        {!lastNameValid && (
-          <small className="text-danger">Last name is required</small>
-        )}
-      </div>
-
-      <div className="input-group-meta position-relative mb-25">
-        <label>Email*</label>
-        <input
-          type="email"
-          className="form-control"
-          placeholder="james@example.com"
-          value={email}
-          onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-        />
-        {!emailValid && (
-          <small className="text-danger">Valid email is required</small>
-        )}
-      </div>
-
-      <div className="input-group-meta position-relative mb-25">
-        <label>Password*</label>
-        <input
-          type={showPassword ? "text" : "password"}
-          className="form-control"
-          placeholder="Enter Password"
-          value={password}
-          onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-        />
-        <span
-          className="placeholder_icon"
-          onClick={() => setShowPassword(!showPassword)}
-          style={{ position: 'absolute', right: '15px', top: '80%', transform: 'translateY(-50%)', cursor: 'pointer' }}
-          aria-label="Toggle password visibility"
-        >
-          <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-        </span>
-        {!passwordValid && (
-          <small className="text-danger">Password must be at least 6 characters</small>
-        )}
-      </div>
-
-
-
-      <div className="d-flex justify-content-end mt-4">
-        <button
-          type="button"
-          className="btn-one"
-          onClick={() => nextStep({})}
-          disabled={!firstNameValid || !lastNameValid || !emailValid || !passwordValid}
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    </form>
   );
 };
 

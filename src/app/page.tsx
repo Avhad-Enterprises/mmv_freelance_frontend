@@ -1,5 +1,6 @@
-import React from "react";
-import { Metadata } from "next";
+"use client";
+import React, { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
@@ -17,12 +18,22 @@ import BlogFive from "./components/blogs/blog-two";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
 
-
-export const metadata: Metadata = {
-  title: "Home seven",
-};
-
 const HomeSix = () => {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check if login parameter is present
+    if (searchParams.get('login') === 'true') {
+      // Trigger login modal after a short delay to ensure page is loaded
+      setTimeout(() => {
+        const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+        if (loginButton) {
+          loginButton.click();
+        }
+      }, 100);
+    }
+  }, [searchParams]);
+
   return (
 
     <Wrapper>

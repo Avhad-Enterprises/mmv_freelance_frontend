@@ -73,17 +73,13 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
   const list: string[] = role === "videographer" ? videographerSuperpowers : editorSuperpowers;
 
   // Dropdown-like selector state for superpowers (max 3)
-  const [spQuery, setSpQuery] = React.useState("");
-  const [spOpen, setSpOpen] = React.useState(false);
   const spFiltered: string[] = (list || []).filter(
-    (s: string) => !(superpowers || []).includes(s) && s.toLowerCase().includes(spQuery.toLowerCase())
+    (s: string) => !(superpowers || []).includes(s)
   );
 
   const addSuperpower = (skill: string) => {
     if ((superpowers || []).length >= 3) return;
     setFormData((prev) => ({ ...prev, superpowers: [...(prev.superpowers || []), skill] }));
-    setSpQuery("");
-    setSpOpen(false);
   };
 
   const removeSuperpower = (skill: string) => {
@@ -113,33 +109,28 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
         ))}
       </div>
 
-      {/* Input with dropdown for selecting superpowers */}
-      <div className="mt-2" style={{ position: "relative" }}>
-        <input
-          type="text"
+      {/* Dropdown for selecting superpowers */}
+      <div className="mt-2">
+        <select
           className="form-control"
-          placeholder={(superpowers || []).length >= 3 ? "You reached the 3 categories limit" : "Type to search categories"}
-          value={spQuery}
-          onChange={(e) => { setSpQuery(e.target.value); setSpOpen(true); }}
-          onFocus={() => setSpOpen(true)}
-          onBlur={() => setTimeout(() => setSpOpen(false), 150)}
+          value=""
+          onChange={(e) => {
+            if (e.target.value) {
+              addSuperpower(e.target.value);
+              e.target.value = ""; // Reset select after selection
+            }
+          }}
           disabled={(superpowers || []).length >= 3}
-        />
-        {spOpen && spFiltered.length > 0 && (
-          <div className="border bg-white mt-1 rounded" style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 240, overflowY: "auto" }}>
-            {spFiltered.map((s: string) => (
-              <button
-                type="button"
-                key={s}
-                className="dropdown-item w-100 text-start"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => addSuperpower(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
+        >
+          <option value="">
+            {(superpowers || []).length >= 3 ? "You reached the 3 categories limit" : "Select a category"}
+          </option>
+          {spFiltered.map((category: string) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
         <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
       </div>
 
@@ -157,7 +148,7 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
                   disabled={!formData.country}
                 >
                   <option value="">Select City</option>
-                  {formData.country && City.getCitiesOfCountry(formData.country).map((ct) => (
+                  {formData.country && (City.getCitiesOfCountry(formData.country) || []).map((ct) => (
                     <option key={`${ct.name}-${ct.latitude}-${ct.longitude}`} value={ct.name}>
                       {ct.name}
                     </option>
@@ -277,11 +268,15 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
               type="number"
               className="form-control"
               min={0}
+              max={10000}
               step={1}
               value={rate_amount}
               onChange={(e) => setFormData((prev) => ({ ...prev, rate_amount: e.target.value }))}
-              placeholder="Enter amount"
+              placeholder="Enter amount (max 10,000)"
             />
+            {rate_amount && parseInt(rate_amount) > 10000 && (
+              <small className="text-danger">Rate cannot exceed 10,000</small>
+            )}
           </div>
         </div>
         <div className="col-md-6">
@@ -306,7 +301,12 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
           type="button"
           className="btn-one"
           onClick={() => nextStep({})}
-          disabled={(superpowers || []).length !== 3 || !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || !rate_amount}
+          disabled={
+            (superpowers || []).length !== 3 || 
+            !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || 
+            !rate_amount ||
+            parseInt(rate_amount) > 10000
+          }
         >
           Next
         </button>

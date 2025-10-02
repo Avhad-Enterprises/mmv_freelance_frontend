@@ -100,11 +100,14 @@ const ClientFinalReview: React.FC<{
       }
       
       // Add file uploads if they exist (for business documents)
-if (formData.business_documents && formData.business_documents.length > 0) {
-  for (let i = 0; i < formData.business_documents.length; i++) {
-    formDataToSend.append('business_documents', formData.business_documents[i]);
-  }
-
+      if (formData.business_document && formData.business_document instanceof File && formData.business_document.size > 0) {
+        // Validate file before appending
+        if (formData.business_document.name !== 'Unknown.pdf' && formData.business_document.name !== 'blob') {
+          formDataToSend.append('business_document', formData.business_document);
+          console.log(`✅ Business document attached: ${formData.business_document.name} (${formData.business_document.size} bytes)`);
+        } else {
+          console.warn('⚠️ Invalid business document detected, skipping upload');
+        }
       }
 
       // Debug: Log the form data being sent
