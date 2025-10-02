@@ -24,8 +24,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   const [editorSuperpowers, setEditorSuperpowers] = React.useState<string[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
   const [skillError, setSkillError] = React.useState<string | null>(null);
-  const [skillQuery, setSkillQuery] = React.useState("");
-  const [skillOpen, setSkillOpen] = React.useState(false);
+  const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
   // Fetch skills from API
   React.useEffect(() => {
@@ -89,19 +88,15 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   };
 
   // State for the superpower selection dropdown
-  const [spQuery, setSpQuery] = React.useState("");
-  const [spOpen, setSpOpen] = React.useState(false);
   
-  // Filter available superpowers based on search query and what's already selected
+  // Filter available superpowers based on what's already selected
   const spFiltered: string[] = (list || []).filter(
-    (s: string) => !(superpowers || []).includes(s) && s.toLowerCase().includes(spQuery.toLowerCase())
+    (s: string) => !(superpowers || []).includes(s)
   );
 
   const addSuperpower = (skill: string) => {
     if ((superpowers || []).length >= 3) return;
     setFormData((prev) => ({ ...prev, superpowers: [...(prev.superpowers || []), skill] }));
-    setSpQuery("");
-    setSpOpen(false);
   };
 
   const removeSuperpower = (skill: string) => {
@@ -135,53 +130,55 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   };
 
   // --- RENDER ---
+  const handleNext = () => {
+    setShowErrors(true);
+    const isValid = 
+      (superpowers || []).length > 0 && 
+      (superpowers || []).length <= 3 && 
+      (portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && 
+      rate_amount && 
+      parseInt(rate_amount) <= 10000 &&
+      skill_tags.length > 0;
+    
+    if (isValid) {
+      nextStep({});
+    }
+  };
+
   return (
     <div>
-      <h4 className="mb-2">Hi, I am {`${first_name} ${last_name}` || "[Your Name]"}</h4>
+      <h4 className="mb-2">Hi, I am {first_name || last_name ? `${first_name} ${last_name}`.trim() : "[Your Name]"}</h4>
 
       <div className="mt-3">
         <h5>Skills*</h5>
         <div className="position-relative">
-          <input
-            type="text"
+          <select
             className="form-control"
-            placeholder={isLoadingSkills ? "Loading skills..." : "Type to search and select skills"}
-            value={skillQuery}
+            value=""
             onChange={(e) => {
-              setSkillQuery(e.target.value);
-              setSkillOpen(true);
+              if (e.target.value) {
+                addSkillTag(e.target.value);
+                e.target.value = ""; // Reset select after selection
+              }
             }}
-            onFocus={() => setSkillOpen(true)}
-            onBlur={() => setTimeout(() => setSkillOpen(false), 150)}
             disabled={isLoadingSkills || !!skillError}
-          />
-
-          {skillOpen && allSkills.filter(s => !skill_tags.includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase())).length > 0 && (
-            <div
-              className="border bg-white mt-1 rounded shadow-sm"
-              style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 220, overflowY: "auto" }}
-            >
-              {allSkills
-                .filter(s => !skill_tags.includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase()))
-                .map((s: string) => (
-                  <button
-                    type="button"
-                    key={s}
-                    className="dropdown-item w-100 text-start"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      addSkillTag(s);
-                      setSkillQuery("");
-                      setSkillOpen(false);
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-            </div>
-          )}
+          >
+            <option value="">
+              {isLoadingSkills ? "Loading skills..." : "Select a skill"}
+            </option>
+            {allSkills
+              .filter(s => !skill_tags.includes(s))
+              .map((skill: string) => (
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
+              ))}
+          </select>
         </div>
         {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
+        {showErrors && skill_tags.length === 0 && (
+          <small className="text-danger d-block mt-1">At least one skill is required</small>
+        )}
         
         <div className="d-flex flex-wrap gap-2 mt-2">
           {skill_tags.map((t: string) => (
@@ -200,7 +197,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
         </div>
       </div>
 
-      <p className="mb-1">My Superpowers are*:</p>
+      <h5>My Superpowers are*</h5>
       <small>(Select up to 3 categories that best describe your skills)</small>
 
       {/* Selected superpowers as chips */}
@@ -221,34 +218,35 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
         ))}
       </div>
 
-      {/* Input with dropdown for selecting superpowers */}
-      <div className="mt-2" style={{ position: "relative" }}>
-        <input
-          type="text"
+      {/* Dropdown for selecting superpowers */}
+      <div className="mt-2">
+        <select
           className="form-control"
-          placeholder={(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Type to search categories"}
-          value={spQuery}
-          onChange={(e) => { setSpQuery(e.target.value); setSpOpen(true); }}
-          onFocus={() => setSpOpen(true)}
-          onBlur={() => setTimeout(() => setSpOpen(false), 200)} // Increased delay for better click handling
+          value=""
+          onChange={(e) => {
+            if (e.target.value) {
+              addSuperpower(e.target.value);
+              e.target.value = ""; // Reset select after selection
+            }
+          }}
           disabled={(superpowers || []).length >= 3}
-        />
-        {spOpen && spFiltered.length > 0 && (
-          <div className="border bg-white mt-1 rounded shadow-sm" style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 240, overflowY: "auto" }}>
-            {spFiltered.map((s: string) => (
-              <button
-                type="button"
-                key={s}
-                className="dropdown-item w-100 text-start"
-                onMouseDown={(e) => e.preventDefault()} // Prevents blur event from firing before click
-                onClick={() => addSuperpower(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
+        >
+          <option value="">
+            {(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Select a category"}
+          </option>
+          {spFiltered.map((category: string) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
         <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
+        {showErrors && (superpowers || []).length === 0 && (
+          <small className="text-danger d-block">At least 1 superpower is required</small>
+        )}
+        {showErrors && (superpowers || []).length > 3 && (
+          <small className="text-danger d-block">Maximum 3 superpowers allowed</small>
+        )}
       </div>
 
 
@@ -275,6 +273,9 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           + Add more
         </button>
         <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
+        {showErrors && !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && (
+          <small className="text-danger d-block">At least one valid YouTube link is required</small>
+        )}
       </div>
 
       <div className="row mt-3">
@@ -285,11 +286,18 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               type="number"
               className="form-control"
               min={0}
+              max={10000}
               step={1}
               value={rate_amount}
               onChange={(e) => setFormData((prev) => ({ ...prev, rate_amount: e.target.value }))}
-              placeholder="Enter amount"
+              placeholder="Enter amount (max 10,000)"
             />
+            {rate_amount && parseInt(rate_amount) > 10000 && (
+              <small className="text-danger">Rate cannot exceed 10,000</small>
+            )}
+            {showErrors && !rate_amount && (
+              <small className="text-danger">Rate amount is required</small>
+            )}
           </div>
         </div>
         <div className="col-md-6">
@@ -313,8 +321,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
         <button
           type="button"
           className="btn-one"
-          onClick={() => nextStep({})}
-          disabled={(superpowers || []).length === 0 || (superpowers || []).length > 3 || !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || !rate_amount}
+          onClick={handleNext}
         >
           Next
         </button>

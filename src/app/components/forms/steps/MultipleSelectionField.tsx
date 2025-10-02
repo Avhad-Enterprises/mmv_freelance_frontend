@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface MultipleSelectionFieldProps {
   label: string;
@@ -15,44 +15,21 @@ const MultipleSelectionField: React.FC<MultipleSelectionFieldProps> = ({
   options,
   selectedItems,
   onChange,
-  placeholder = "Search and select options...",
+  placeholder = "Select an option...",
   required = false,
   error
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const filteredOptions = options.filter(option => 
-    option.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !selectedItems.includes(option)
-  );
 
   const handleSelect = (item: string) => {
     if (!selectedItems.includes(item)) {
       onChange([...selectedItems, item]);
-    }
-    setSearchTerm("");
-    if (inputRef.current) {
-      inputRef.current.focus();
     }
   };
 
   const handleRemove = (item: string) => {
     onChange(selectedItems.filter(i => i !== item));
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
     <div className="input-group-meta position-relative mb-25">
@@ -73,44 +50,27 @@ const MultipleSelectionField: React.FC<MultipleSelectionFieldProps> = ({
         ))}
       </div>
 
-      {/* Search Input and Dropdown */}
+      {/* Dropdown Select */}
       <div className="position-relative" ref={dropdownRef}>
-        <input
-          ref={inputRef}
-          type="text"
+        <select
           className="form-control"
-          placeholder={placeholder}
-          value={searchTerm}
+          value=""
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setIsOpen(true);
+            if (e.target.value) {
+              handleSelect(e.target.value);
+              e.target.value = ""; // Reset select after selection
+            }
           }}
-          onFocus={() => setIsOpen(true)}
-        />
-
-        {isOpen && filteredOptions.length > 0 && (
-          <div 
-            className="position-absolute w-100 bg-white border rounded-bottom py-2 shadow-sm" 
-            style={{ 
-              maxHeight: '200px', 
-              overflowY: 'auto', 
-              zIndex: 1000,
-              top: '100%'
-            }}
-          >
-            {filteredOptions.map(option => (
-              <div
-                key={option}
-                className="px-3 py-1 cursor-pointer hover:bg-light"
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSelect(option)}
-                onMouseDown={(e) => e.preventDefault()} // Prevent input blur
-              >
+        >
+          <option value="">{placeholder}</option>
+          {options
+            .filter(option => !selectedItems.includes(option))
+            .map(option => (
+              <option key={option} value={option}>
                 {option}
-              </div>
+              </option>
             ))}
-          </div>
-        )}
+        </select>
       </div>
 
       {error && <div className="error">{error}</div>}

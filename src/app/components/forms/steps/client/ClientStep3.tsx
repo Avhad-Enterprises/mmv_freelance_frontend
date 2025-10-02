@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Country, State, City } from "country-state-city";
 
@@ -12,9 +12,58 @@ const ClientStep3: React.FC<{
   formData
 }) => {
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({ defaultValues: formData });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string>("");
+
+  // File validation function
+  const validateBusinessDocument = (file: File | null): boolean => {
+    if (!file) return true; // Optional field
+    
+    if (file.size === 0) {
+      setFileError('Selected file is empty. Please choose a valid document.');
+      return false;
+    }
+
+    if (file.name === 'Unknown.pdf' || file.name === 'blob') {
+      setFileError('File selection failed. Please try selecting the file again.');
+      return false;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      setFileError('File size must be less than 10MB.');
+      return false;
+    }
+
+    setFileError('');
+    return true;
+  };
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    
+    if (file && file.size > 0) {
+      console.log(`✅ File selected: ${file.name} (${file.size} bytes)`);
+      validateBusinessDocument(file);
+    } else {
+      console.warn('⚠️ No valid file selected');
+    }
+  };
 
   const onSubmit = (data: any) => {
-    nextStep(data);
+    // Validate file before submission
+    if (selectedFile && !validateBusinessDocument(selectedFile)) {
+      return; // Stop submission if file validation fails
+    }
+
+    // Include the selected file in the data
+    const submissionData = {
+      ...data,
+      business_document: selectedFile // Use singular form
+    };
+
+    nextStep(submissionData);
   };
 
   return (
@@ -163,16 +212,24 @@ const ClientStep3: React.FC<{
             <input 
               type="file" 
               className="form-control"
-              accept=".pdf,.doc,.docx,image/*"
-              multiple
-              {...register("business_documents")}
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              name="business_document"
+              onChange={handleFileChange}
             />
             <small className="text-muted">
               Upload business registration documents. This will be mandatory before your first payout.
-              Accepted formats: PDF, DOC, DOCX, Images
+              Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
             </small>
-            {errors.business_documents && (
-              <div className="error">{String(errors.business_documents.message)}</div>
+            {selectedFile && (
+              <small className="text-success d-block mt-1">
+                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+              </small>
+            )}
+            {fileError && (
+              <div className="error">{fileError}</div>
+            )}
+            {errors.business_document && (
+              <div className="error">{String(errors.business_document.message)}</div>
             )}
           </div>
         </div>

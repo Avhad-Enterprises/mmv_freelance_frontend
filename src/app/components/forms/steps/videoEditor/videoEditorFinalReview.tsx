@@ -53,17 +53,17 @@ const videoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
         fd.append('street_address', `${data.coordinates?.lat || ''},${data.coordinates?.lng || ''}`);
       }
 
-      // ID Verification
+      // ID Verification - correct backend field name
       if (data.id_type) fd.append('id_type', data.id_type);
       if (data.id_document) {
         // accept File or array
         const file = Array.isArray(data.id_document) ? data.id_document[0] : data.id_document;
-        if (file) fd.append('id_document', file as File);
+        if (file) fd.append('id_document', file as File);  // Backend expects singular
       }
 
-      // Profile photo upload
+      // Profile photo upload - correct backend field name
       if (data.profile_photo) {
-        fd.append('profile_picture', data.profile_photo as File);
+        fd.append('profile_picture', data.profile_photo as File);  // Backend expects profile_picture
       }
 
       // Work Preferences

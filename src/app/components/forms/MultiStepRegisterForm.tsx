@@ -250,6 +250,7 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 // Client-specific steps
 import ClientStep1 from "./steps/client/ClientStep1";
@@ -352,7 +353,7 @@ export interface ClientFormData extends FormDataCommon {
   bank_name: string; // Added as per ClientStep5
   account_number: string; // Added as per ClientStep5
   swift_iban: string; // Added as per ClientStep5
-  business_documents: File[] | null; // Added as per ClientStep3
+  business_document: File | null; // Changed from business_documents to business_document (singular)
   tax_id: string; // Added as per ClientStep3
   city: string; // Added to ClientFormData for consistency with ClientStep3
   country: string; // Added to ClientFormData for consistency with ClientStep3
@@ -451,6 +452,7 @@ export const videoEditor_SUPERPOWERS = [
 // =========================================================
 
 const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountType }) => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [previousAccountType, setPreviousAccountType] = useState(accountType);
 
@@ -533,7 +535,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         bank_name: "",
         account_number: "",
         swift_iban: "",
-        business_documents: null,
+        business_document: null,
         tax_id: "",
         city: "", // Added
         country: "", // Added
@@ -573,7 +575,11 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
   const handleRegister = async <T extends AllFormData>(data: T) => {
     try {
       console.log("Form submitted:", data);
-      // TODO: Implement actual API call for registration here
+      // After successful registration, redirect to home page and trigger login modal
+      // Add a small delay to let the user see the success toast
+      setTimeout(() => {
+        router.push("/?login=true");
+      }, 2000); // 2 second delay
     } catch (error) {
       console.error("Registration error:", error);
     }

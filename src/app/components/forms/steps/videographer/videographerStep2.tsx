@@ -23,8 +23,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
   const [allSkills, setAllSkills] = React.useState<string[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
   const [skillError, setSkillError] = React.useState<string | null>(null);
-  const [skillQuery, setSkillQuery] = React.useState("");
-  const [skillOpen, setSkillOpen] = React.useState(false);
+  const [showErrors, setShowErrors] = React.useState<boolean>(false);
   
   // State to store the videographer categories fetched from the API
   const [videographerSuperpowers, setVideographerSuperpowers] = React.useState<string[]>([]);
@@ -73,22 +72,18 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
       .catch(err => console.error('Error fetching videographer categories:', err));
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  const { full_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", coordinates = { lat: "", lng: "" } } = formData || {};
+  const { first_name = "", last_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", coordinates = { lat: "", lng: "" } } = formData || {};
   const list: string[] = videographerSuperpowers;
 
   // State for the superpower selection dropdown
-  const [spQuery, setSpQuery] = React.useState("");
-  const [spOpen, setSpOpen] = React.useState(false);
 
   const spFiltered: string[] = (list || []).filter(
-    (s: string) => !(superpowers || []).includes(s) && s.toLowerCase().includes(spQuery.toLowerCase())
+    (s: string) => !(superpowers || []).includes(s)
   );
 
   const addSuperpower = (skill: string) => {
     if ((superpowers || []).length >= 3) return;
     setFormData((prev) => ({ ...prev, superpowers: [...(prev.superpowers || []), skill] }));
-    setSpQuery("");
-    setSpOpen(false);
   };
 
   const removeSuperpower = (skill: string) => {
@@ -123,10 +118,80 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
   // Validation for location specific to videographer
   const isLocationValid = !!country && !!city && !!coordinates?.lat && !!coordinates?.lng;
 
+  const handleNext = () => {
+    setShowErrors(true);
+    const isValid = 
+      (superpowers || []).length > 0 && 
+      (superpowers || []).length <= 3 && 
+      (portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && 
+      rate_amount && 
+      isLocationValid &&
+      parseInt(rate_amount) <= 10000 &&
+      (skill_tags || []).length > 0;
+    
+    if (isValid) {
+      nextStep({});
+    }
+  };
+
   return (
     <div>
-      <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
-      <p className="mb-1">My Superpowers are*:</p>
+      <h4 className="mb-2">Hi, I am {first_name || last_name ? `${first_name} ${last_name}`.trim() : "[Your Name]"}</h4>
+
+      {/* Skills Section */}
+      <div className="mt-3">
+        <h5>Skills*</h5>
+        <small className="d-block">(Select up to 15 skills that you're proficient in)</small>
+
+        <div className="d-flex flex-wrap gap-2 mt-2">
+          {(skill_tags || []).map((s: string) => (
+            <span key={s} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
+              {s}
+              <button
+                type="button"
+                className="btn btn-sm btn-link text-white p-0 m-0"
+                onClick={() => removeSkillTag(s)}
+                aria-label={`Remove ${s}`}
+                style={{textDecoration: 'none', lineHeight: 1}}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+
+        <div className="position-relative">
+          <select
+            className="form-control mt-2"
+            value=""
+            onChange={(e) => {
+              if (e.target.value && (skill_tags || []).length < 15) {
+                addSkillTag(e.target.value);
+                e.target.value = ""; // Reset select after selection
+              }
+            }}
+            disabled={isLoadingSkills || !!skillError || (skill_tags || []).length >= 15}
+          >
+            <option value="">
+              {isLoadingSkills ? "Loading skills..." : (skill_tags || []).length >= 15 ? "Maximum skills reached" : "Select a skill"}
+            </option>
+            {allSkills
+              .filter(s => !(skill_tags || []).includes(s))
+              .map((skill: string) => (
+                <option key={skill} value={skill}>
+                  {skill}
+                </option>
+              ))}
+          </select>
+        </div>
+        {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
+        <small className="text-muted d-block mt-1">Selected {(skill_tags || []).length}/15 skills</small>
+        {showErrors && (skill_tags || []).length === 0 && (
+          <small className="text-danger d-block mt-1">At least one skill is required</small>
+        )}
+      </div>
+
+      <h5 className="mt-4">My Superpowers are*</h5>
       <small>(Select up to 3 categories that best describe your skills)</small>
 
       {/* Selected superpowers as chips */}
@@ -147,34 +212,35 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         ))}
       </div>
 
-      {/* Input with dropdown for selecting superpowers */}
-      <div className="mt-2" style={{ position: "relative" }}>
-        <input
-          type="text"
+      {/* Dropdown for selecting superpowers */}
+      <div className="mt-2">
+        <select
           className="form-control"
-          placeholder={(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Type to search categories"}
-          value={spQuery}
-          onChange={(e) => { setSpQuery(e.target.value); setSpOpen(true); }}
-          onFocus={() => setSpOpen(true)}
-          onBlur={() => setTimeout(() => setSpOpen(false), 200)}
+          value=""
+          onChange={(e) => {
+            if (e.target.value) {
+              addSuperpower(e.target.value);
+              e.target.value = ""; // Reset select after selection
+            }
+          }}
           disabled={(superpowers || []).length >= 3}
-        />
-        {spOpen && spFiltered.length > 0 && (
-          <div className="border bg-white mt-1 rounded shadow-sm" style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 240, overflowY: "auto" }}>
-            {spFiltered.map((s: string) => (
-              <button
-                type="button"
-                key={s}
-                className="dropdown-item w-100 text-start"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => addSuperpower(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
+        >
+          <option value="">
+            {(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Select a category"}
+          </option>
+          {spFiltered.map((category: string) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
         <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
+        {showErrors && (superpowers || []).length === 0 && (
+          <small className="text-danger d-block">At least 1 superpower is required</small>
+        )}
+        {showErrors && (superpowers || []).length > 3 && (
+          <small className="text-danger d-block">Maximum 3 superpowers allowed</small>
+        )}
       </div>
 
       {/* Location details */}
@@ -247,74 +313,9 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Skills Section */}
-      <div className="mt-3">
-        <h5>Skills*</h5>
-        <small className="d-block">(Select up to 15 skills that you're proficient in)</small>
-
-        <div className="d-flex flex-wrap gap-2 mt-2">
-          {(skill_tags || []).map((s: string) => (
-            <span key={s} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
-              {s}
-              <button
-                type="button"
-                className="btn btn-sm btn-link text-white p-0 m-0"
-                onClick={() => removeSkillTag(s)}
-                aria-label={`Remove ${s}`}
-                style={{textDecoration: 'none', lineHeight: 1}}
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-
-        <div className="position-relative">
-          <input
-            type="text"
-            className="form-control mt-2"
-            placeholder={isLoadingSkills ? "Loading skills..." : (skill_tags || []).length >= 15 ? "Maximum skills reached" : "Type to search skills"}
-            value={skillQuery}
-            onChange={(e) => {
-              setSkillQuery(e.target.value);
-              setSkillOpen(true);
-            }}
-            onFocus={() => setSkillOpen(true)}
-            onBlur={() => setTimeout(() => setSkillOpen(false), 150)}
-            disabled={isLoadingSkills || !!skillError || (skill_tags || []).length >= 15}
-          />
-
-          {skillOpen && allSkills.filter(s => !(skill_tags || []).includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase())).length > 0 && (
-            <div
-              className="border bg-white mt-1 rounded shadow-sm"
-              style={{ position: "absolute", zIndex: 10, width: "100%", maxHeight: 220, overflowY: "auto" }}
-            >
-              {allSkills
-                .filter(s => !(skill_tags || []).includes(s) && s.toLowerCase().includes(skillQuery.toLowerCase()))
-                .map((s: string) => (
-                  <button
-                    type="button"
-                    key={s}
-                    className="dropdown-item w-100 text-start"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      if ((skill_tags || []).length < 15) {
-                        addSkillTag(s);
-                        setSkillQuery("");
-                        setSkillOpen(false);
-                      }
-                    }}
-                  >
-                    {s}
-                  </button>
-                ))}
-            </div>
-          )}
-        </div>
-        {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
-        <small className="text-muted d-block mt-1">Selected {(skill_tags || []).length}/15 skills</small>
+        {showErrors && !isLocationValid && (
+          <small className="text-danger d-block mt-1">Please select country, city and ensure coordinates are filled</small>
+        )}
       </div>
       
       {/* Portfolio (YouTube links only) */}
@@ -340,6 +341,9 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
           + Add more
         </button>
         <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
+        {showErrors && !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && (
+          <small className="text-danger d-block">At least one valid YouTube link is required</small>
+        )}
       </div>
 
       {/* Rate section */}
@@ -351,11 +355,18 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               type="number"
               className="form-control"
               min={0}
+              max={10000}
               step={1}
               value={rate_amount}
               onChange={(e) => setFormData((prev) => ({ ...prev, rate_amount: e.target.value }))}
-              placeholder="Enter amount"
+              placeholder="Enter amount (max 10,000)"
             />
+            {rate_amount && parseInt(rate_amount) > 10000 && (
+              <small className="text-danger">Rate cannot exceed 10,000</small>
+            )}
+            {showErrors && !rate_amount && (
+              <small className="text-danger">Rate amount is required</small>
+            )}
           </div>
         </div>
         <div className="col-md-6">
@@ -379,8 +390,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         <button
           type="button"
           className="btn-one"
-          onClick={() => nextStep({})}
-          disabled={(superpowers || []).length === 0 || (superpowers || []).length > 3 || !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) || !rate_amount || !isLocationValid}
+          onClick={handleNext}
         >
           Next
         </button>

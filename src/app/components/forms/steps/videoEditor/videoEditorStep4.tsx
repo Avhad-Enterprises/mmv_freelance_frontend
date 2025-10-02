@@ -12,23 +12,42 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   const [languageQuery, setLanguageQuery] = React.useState("");
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = React.useState(false);
 
+  // State to track which fields have been touched/interacted with
+  const [touched, setTouched] = React.useState({
+    description: false,
+    availability: false,
+    languages: false
+  });
+
   // Common languages list
   const availableLanguages = [
     "English", "Hindi", "Marathi", "Gujarati", "Bengali", "Telugu", "Tamil", 
     "Kannada", "Malayalam", "Punjabi", "Urdu", "Sanskrit", "Spanish", "French", 
     "German", "Chinese", "Japanese", "Korean", "Arabic", "Russian"
   ];
+
+  // Validation
+  const shortDescriptionValid = !!formData.short_description && formData.short_description.trim().length >= 10;
+  const availabilityValid = !!formData.availability;
+  const languagesValid = !!(formData.languages && formData.languages.length > 0);
+
   return (
     <div>
       <h4 className="mb-3">Short description about yourself*</h4>
       <div className="input-group-meta position-relative mb-25">
-        <label>Short description</label>
+        <label>Short description (minimum 10 characters)*</label>
         <textarea
           className="form-control"
           rows={4}
           value={formData.short_description || ""}
           onChange={(e) => setFormData((prev) => ({ ...prev, short_description: e.target.value }))}
+          onBlur={() => setTouched(prev => ({ ...prev, description: true }))}
+          onFocus={() => setTouched(prev => ({ ...prev, description: true }))}
+          placeholder="Tell us about your experience and skills..."
         />
+        {touched.description && formData.short_description && !shortDescriptionValid && (
+          <small className="text-danger">Description must be at least 10 characters long</small>
+        )}
       </div>
 
       <div className="row">
@@ -39,13 +58,18 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               className="form-control"
               value={formData.availability || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
+              onBlur={() => setTouched(prev => ({ ...prev, availability: true }))}
+              onFocus={() => setTouched(prev => ({ ...prev, availability: true }))}
             >
-              <option value="">Select</option>
+              <option value="">Select Availability</option>
               <option value="part_time">Part-time</option>
               <option value="full_time">Full-time</option>
               <option value="flexible">Flexible</option>
               <option value="on_demand">On-Demand</option>
             </select>
+            {touched.availability && !availabilityValid && (
+              <small className="text-danger">Availability is required</small>
+            )}
           </div>
         </div>
         <div className="col-md-6">
@@ -60,9 +84,16 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                 onChange={(e) => {
                   setLanguageQuery(e.target.value);
                   setIsLanguageDropdownOpen(true);
+                  setTouched(prev => ({ ...prev, languages: true }));
                 }}
-                onFocus={() => setIsLanguageDropdownOpen(true)}
-                onBlur={() => setTimeout(() => setIsLanguageDropdownOpen(false), 150)}
+                onFocus={() => {
+                  setIsLanguageDropdownOpen(true);
+                  setTouched(prev => ({ ...prev, languages: true }));
+                }}
+                onBlur={() => {
+                  setTimeout(() => setIsLanguageDropdownOpen(false), 150);
+                  setTouched(prev => ({ ...prev, languages: true }));
+                }}
               />
               {isLanguageDropdownOpen && (
                 <div
@@ -113,6 +144,9 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                 </span>
               ))}
             </div>
+            {touched.languages && !languagesValid && (
+              <small className="text-danger">At least one language is required</small>
+            )}
           </div>
         </div>
       </div>
@@ -125,7 +159,7 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           type="button"
           className="btn-one"
           onClick={() => nextStep({})}
-          disabled={!formData.short_description || !formData.availability}
+          disabled={!shortDescriptionValid || !availabilityValid || !languagesValid}
         >
           Next
         </button>
