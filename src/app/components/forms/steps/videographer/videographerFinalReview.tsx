@@ -60,7 +60,7 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
 
       // Profile photo upload
       if (data.profile_photo) {
-        fd.append('profile_picture', data.profile_photo as File);
+        fd.append('profile_photo', data.profile_photo as File);
       }
 
       // Work Preferences
@@ -68,6 +68,7 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (Array.isArray(data.languages) && data.languages.length > 0) {
         fd.append('languages', JSON.stringify(data.languages));
       }
+      if (data.short_description) fd.append('short_description', data.short_description);
 
       // Extra fields
       if (data.role) fd.append('role', data.role);
