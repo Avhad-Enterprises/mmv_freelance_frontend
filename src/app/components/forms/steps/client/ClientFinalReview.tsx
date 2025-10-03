@@ -1,5 +1,6 @@
 import React from "react";
 import toast from "react-hot-toast";
+import { Country } from "country-state-city";
 
 interface ReviewSectionProps {
   title: string;
@@ -15,9 +16,9 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ title, data }) => (
           <div key={key} className="review-item mb-2">
             <strong>{key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}:</strong>
             <span className="ms-2">
-              {Array.isArray(value) 
-                ? value.join(', ') 
-                : value === null || value === undefined 
+              {Array.isArray(value)
+                ? value.join(', ')
+                : value === null || value === undefined
                   ? 'Not provided'
                   : String(value)
               }
@@ -28,6 +29,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ title, data }) => (
     </div>
   </div>
 );
+
+const getCountryName = (isoCode: string) => {
+  const country = Country.getAllCountries().find(c => c.isoCode === isoCode);
+  return country ? country.name : isoCode;
+};
 
 const ClientFinalReview: React.FC<{
   formData: any;
@@ -42,34 +48,26 @@ const ClientFinalReview: React.FC<{
     console.log(formData);
     const loadingToast = toast.loading('Submitting registration...');
     try {
-      // Create FormData for potential file uploads
       const formDataToSend = new FormData();
-      
-      // Add all form fields to FormData
-      formDataToSend.append('username', formData.username);
-      formDataToSend.append('first_name', formData.first_name);
-      formDataToSend.append('last_name', formData.last_name);
+
+      // Basic Information
+      formDataToSend.append('full_name', formData.full_name); // Changed
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('account_type', 'client');
-      
+
       // Company Information
       if (formData.company_name) formDataToSend.append('company_name', formData.company_name);
       if (formData.industry) formDataToSend.append('industry', formData.industry);
       if (formData.website) formDataToSend.append('website', formData.website);
       if (formData.social_links) formDataToSend.append('social_links', formData.social_links);
       if (formData.company_size) formDataToSend.append('company_size', formData.company_size);
-      
-      // Transform services_required to required_services - ensure it's an array with at least 1 element
-      const requiredServices = Array.isArray(formData.services_required) && formData.services_required.length > 0 
-        ? formData.services_required 
-        : (formData.services_required ? [formData.services_required] : ['General Services']);
+
+      const requiredServices = Array.isArray(formData.required_services) && formData.required_services.length > 0
+        ? formData.required_services
+        : (formData.required_services ? [formData.required_services] : ['General Services']);
       formDataToSend.append('required_services', JSON.stringify(requiredServices));
-      
-      // Budget fields
-      if (formData.budget_min) formDataToSend.append('budget_min', formData.budget_min.toString());
-      if (formData.budget_max) formDataToSend.append('budget_max', formData.budget_max.toString());
-      
+
       // Contact Details
       if (formData.phone_number) formDataToSend.append('phone_number', formData.phone_number);
       if (formData.address) formDataToSend.append('address', formData.address);
@@ -77,31 +75,14 @@ const ClientFinalReview: React.FC<{
       if (formData.country) formDataToSend.append('country', formData.country);
       if (formData.pincode) formDataToSend.append('pincode', formData.pincode);
       if (formData.tax_id) formDataToSend.append('tax_id', formData.tax_id);
-      
+
       // Work Preferences
       if (formData.work_arrangement) formDataToSend.append('work_arrangement', formData.work_arrangement);
       if (formData.project_frequency) formDataToSend.append('project_frequency', formData.project_frequency);
       if (formData.hiring_preferences) formDataToSend.append('hiring_preferences', formData.hiring_preferences);
-      if (formData.expected_start_date) formDataToSend.append('expected_start_date', formData.expected_start_date);
-      if (formData.project_duration) formDataToSend.append('project_duration', formData.project_duration);
-      
-      // Additional client fields - ensure they're arrays with at least 1 element
-      const requiredSkills = Array.isArray(formData.required_skills) && formData.required_skills.length > 0 
-        ? formData.required_skills 
-        : (formData.required_skills ? [formData.required_skills] : ['General Skills']);
-      formDataToSend.append('required_skills', JSON.stringify(requiredSkills));
-      
-      if (formData.required_editor_proficiencies && Array.isArray(formData.required_editor_proficiencies) && formData.required_editor_proficiencies.length > 0) {
-        formDataToSend.append('required_editor_proficiencies', JSON.stringify(formData.required_editor_proficiencies));
-      }
-      
-      if (formData.required_videographer_proficiencies && Array.isArray(formData.required_videographer_proficiencies) && formData.required_videographer_proficiencies.length > 0) {
-        formDataToSend.append('required_videographer_proficiencies', JSON.stringify(formData.required_videographer_proficiencies));
-      }
-      
-      // Add file uploads if they exist (for business documents)
+
+      // Business Document
       if (formData.business_document && formData.business_document instanceof File && formData.business_document.size > 0) {
-        // Validate file before appending
         if (formData.business_document.name !== 'Unknown.pdf' && formData.business_document.name !== 'blob') {
           formDataToSend.append('business_document', formData.business_document);
           console.log(`✅ Business document attached: ${formData.business_document.name} (${formData.business_document.size} bytes)`);
@@ -110,7 +91,6 @@ const ClientFinalReview: React.FC<{
         }
       }
 
-      // Debug: Log the form data being sent
       console.log('Client form data being sent:');
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
@@ -119,14 +99,12 @@ const ClientFinalReview: React.FC<{
       const response = await fetch('http://localhost:8000/api/v1/auth/register/client', {
         method: 'POST',
         headers: {
-          'x-test-mode': 'true', // Bypass rate limiting during development
-          // Don't set Content-Type header - let browser set it with boundary for FormData
+          'x-test-mode': 'true',
         },
         body: formDataToSend,
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
@@ -136,7 +114,7 @@ const ClientFinalReview: React.FC<{
     } catch (error: any) {
       console.error('Registration error:', error);
       toast.error(
-        error.message || 'Registration failed. Please try again.', 
+        error.message || 'Registration failed. Please try again.',
         { id: loadingToast }
       );
     }
@@ -144,9 +122,7 @@ const ClientFinalReview: React.FC<{
 
   const sections = {
     "Basic Information": {
-      username: formData.username,
-      first_name: formData.first_name,
-      last_name: formData.last_name,
+      full_name: formData.full_name, // Changed
       email: formData.email,
     },
     "Company Information": {
@@ -155,25 +131,22 @@ const ClientFinalReview: React.FC<{
       website: formData.website,
       social_links: formData.social_links,
       company_size: formData.company_size,
-      services_required: formData.services_required,
-      budget_min: formData.budget_min,
-      budget_max: formData.budget_max,
+      "Required Services": formData.required_services,
     },
     "Contact Details": {
       phone_number: formData.phone_number,
       address: formData.address,
       city: formData.city,
-      country: formData.country,
-      pincode: formData.pincode,
+      country: formData.country
+        ? `${getCountryName(formData.country)} (${formData.country})`
+        : 'Not provided',
       tax_id: formData.tax_id || "Not provided",
     },
     "Work Preferences": {
       work_arrangement: formData.work_arrangement,
       project_frequency: formData.project_frequency,
       hiring_preferences: formData.hiring_preferences,
-      expected_start_date: formData.expected_start_date || "Flexible",
-      project_duration: formData.project_duration || "Flexible",
-    },    
+    },
   };
 
   return (
@@ -188,17 +161,16 @@ const ClientFinalReview: React.FC<{
           <ReviewSection key={title} title={title} data={data} />
         ))}
 
-        {/* Navigation Buttons */}
         <div className="col-12 d-flex justify-content-between mt-4">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-one"
             onClick={prevStep}
           >
             Previous
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-one"
             onClick={handleSubmitRegistration}
           >

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Wrapper from '@/layouts/wrapper';
 import CandidateDashboardMain from '@/app/components/dashboard/candidate';
 import FreelancerAuth from '@/middleware/freelancer-auth';
+import Header from '@/layouts/headers/headerDash';
 
 const CandidateDashboardPage = () => {
   useEffect(() => {
@@ -24,7 +25,12 @@ const CandidateDashboardPage = () => {
   return (
     <FreelancerAuth>
       <Wrapper>
-        <CandidateDashboardMain />
+        {/* Header added here */}
+        <Header />
+        <div className="dashboard-layout">
+          {/* Sidebar and dashboard area below header */}
+          <CandidateDashboardMain />
+        </div>
       </Wrapper>
     </FreelancerAuth>
   );

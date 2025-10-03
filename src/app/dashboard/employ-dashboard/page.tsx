@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Wrapper from '@/layouts/wrapper';
 import EmployDashboardMain from '@/app/components/dashboard/employ';
 import ClientAuth from '@/middleware/client-auth';
+import Header from '@/layouts/headers/header';
 
 const EmployDashboardPage = () => {
   useEffect(() => {
@@ -24,7 +25,9 @@ const EmployDashboardPage = () => {
   return (
     <ClientAuth>
       <Wrapper>
-        <EmployDashboardMain/>
+        {/* Header added here */}
+        <Header />
+        <EmployDashboardMain />
       </Wrapper>
     </ClientAuth>
   );

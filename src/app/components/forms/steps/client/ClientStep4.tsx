@@ -23,7 +23,7 @@ const ClientStep4: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Preferred Work Arrangement*</label>
-            <select 
+            <select
               className="form-control"
               {...register("work_arrangement", { required: "Work arrangement is required" })}
             >
@@ -42,7 +42,7 @@ const ClientStep4: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Project Frequency*</label>
-            <select 
+            <select
               className="form-control"
               {...register("project_frequency", { required: "Project frequency is required" })}
             >
@@ -61,7 +61,7 @@ const ClientStep4: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Hiring Preferences*</label>
-            <select 
+            <select
               className="form-control"
               {...register("hiring_preferences", { required: "Hiring preference is required" })}
             >
@@ -76,47 +76,17 @@ const ClientStep4: React.FC<{
           </div>
         </div>
 
-        {/* Expected Start Date */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Expected Project Start Date</label>
-            <input 
-              type="date" 
-              className="form-control"
-              {...register("expected_start_date")}
-            />
-          </div>
-        </div>
-
-        {/* Project Duration */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Typical Project Duration</label>
-            <select 
-              className="form-control"
-              {...register("project_duration")}
-            >
-              <option value="">Select Project Duration</option>
-              <option value="less_than_week">Less than a week</option>
-              <option value="1_2_weeks">1-2 weeks</option>
-              <option value="2_4_weeks">2-4 weeks</option>
-              <option value="1_3_months">1-3 months</option>
-              <option value="3_plus_months">3+ months</option>
-            </select>
-          </div>
-        </div>
-
         {/* Navigation Buttons */}
         <div className="col-12 d-flex justify-content-between">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-one"
             onClick={prevStep}
           >
             Previous
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-one"
           >
             Next

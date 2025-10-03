@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import toast from "react-hot-toast";
+import { Country } from "country-state-city";
 
 type Props = {
   formData: any;
@@ -8,7 +9,12 @@ type Props = {
   handleRegister: (data: any) => Promise<void> | void;
 };
 
-const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
+const getCountryName = (isoCode: string) => {
+  const country = Country.getAllCountries().find(c => c.isoCode === isoCode);
+  return country ? country.name : isoCode;
+};
+
+const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
   const data = formData as any;
 
   const handleSubmit = async () => {
@@ -17,10 +23,8 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       const fd = new FormData();
 
       // Basic Information (required)
-      fd.append('profile_title',data.username || '');
-      fd.append('username', data.username || '');
-      fd.append('first_name', data.first_name || '');
-      fd.append('last_name', data.last_name || '');
+      fd.append('full_name', data.full_name || '');
+      fd.append('profile_title', data.full_name || ''); // Use full_name for profile title
       fd.append('email', data.email || '');
       fd.append('password', data.password || '');
       fd.append('account_type', 'freelancer');
@@ -32,25 +36,24 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       // Experience (optional in our flow)
       if (data.experience_level) fd.append('experience_level', data.experience_level);
 
-      // Portfolio (YouTube only) - send as comma or JSON
+      // Portfolio (YouTube only)
       const portfolioLinks: string[] = (data.portfolio_links || []).filter((l: string) => !!l);
       if (portfolioLinks.length > 0) fd.append('portfolio_links', JSON.stringify(portfolioLinks));
 
       // Rate
       if (data.rate_amount) fd.append('hourly_rate', String(data.rate_amount));
 
-      // Contact & Location (always included for videographer)
+      // Contact & Location
       if (data.phone_number) fd.append('phone_number', data.phone_number);
       if (data.city) fd.append('city', data.city);
       if (data.country) fd.append('country', data.country);
-      if (data.coordinates?.lat || data.coordinates?.lng) {
-        fd.append('street_address', `${data.coordinates?.lat || ''},${data.coordinates?.lng || ''}`);
+      if (data.full_address) {
+        fd.append('street_address', data.full_address);
       }
 
       // ID Verification
       if (data.id_type) fd.append('id_type', data.id_type);
       if (data.id_document) {
-        // accept File or array
         const file = Array.isArray(data.id_document) ? data.id_document[0] : data.id_document;
         if (file) fd.append('id_document', file as File);
       }
@@ -66,8 +69,7 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
         fd.append('languages', JSON.stringify(data.languages));
       }
 
-      // Extra: Save role/superpowers/tags for server-side mapping if needed
-      // Assuming 'role' will be set to 'videographer' in previous steps
+      // Extra fields
       if (data.role) fd.append('role', data.role);
       if (Array.isArray(data.superpowers)) fd.append('superpowers', JSON.stringify(data.superpowers));
       if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
@@ -96,17 +98,15 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
 
   const sections: Record<string, Record<string, any>> = {
     Basic: {
-      role: data.role, // This will reflect 'videographer' if set in form data
-      first_name: data.first_name,
-      last_name: data.last_name,
+      role: data.role,
+      full_name: data.full_name,
       base_skills: data.base_skills,
     },
     "Superpowers & Location": {
       superpowers: data.superpowers,
-      // Removed the conditional check `data.role === "videographer"` as this component is specifically for videographers
       city: data.city,
-      country: data.country,
-      coordinates: `${data.coordinates?.lat || ""}${data.coordinates?.lat && data.coordinates?.lng ? ", " : ""}${data.coordinates?.lng || ""}`,
+      country: data.country ? `${getCountryName(data.country)} (${data.country})` : undefined,
+      full_address: data.full_address,
       skill_tags: data.skill_tags,
       rate: data.rate_amount ? `${data.rate_currency} ${data.rate_amount}` : undefined,
     },
@@ -133,7 +133,7 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
           <h5 className="mb-2">{title}</h5>
           <div className="p-3 border rounded">
             {Object.entries(values)
-              .filter(([, v]) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0)) // Also filter empty arrays
+              .filter(([, v]) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0))
               .map(([k, v]) => (
                 <div key={k} className="mb-1">
                   <strong>
@@ -165,4 +165,4 @@ const videographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
   );
 };
 
-export default videographerFinalReview;
+export default VideographerFinalReview;

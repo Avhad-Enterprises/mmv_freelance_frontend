@@ -72,10 +72,8 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
       .catch(err => console.error('Error fetching videographer categories:', err));
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  const { first_name = "", last_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", coordinates = { lat: "", lng: "" } } = formData || {};
+  const { first_name = "", last_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", full_address = "" } = formData || {};
   const list: string[] = videographerSuperpowers;
-
-  // State for the superpower selection dropdown
 
   const spFiltered: string[] = (list || []).filter(
     (s: string) => !(superpowers || []).includes(s)
@@ -108,15 +106,15 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
 
   const handlePortfolioBlur = (index: number, value: string) => {
      if (value && !isYouTubeUrl(value)) {
-        console.error("Only YouTube links are accepted.");
-        const updated = [...portfolio_links];
-        updated[index] = ""; // Clear the invalid link
-        setFormData(prev => ({...prev, portfolio_links: updated}));
+       console.error("Only YouTube links are accepted.");
+       const updated = [...portfolio_links];
+       updated[index] = ""; // Clear the invalid link
+       setFormData(prev => ({...prev, portfolio_links: updated}));
      }
   };
 
   // Validation for location specific to videographer
-  const isLocationValid = !!country && !!city && !!coordinates?.lat && !!coordinates?.lng;
+  const isLocationValid = !!country && !!city && !!full_address.trim();
 
   const handleNext = () => {
     setShowErrors(true);
@@ -204,7 +202,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               className="btn btn-sm btn-link text-white p-0 m-0"
               onClick={() => removeSuperpower(s)}
               aria-label={`Remove ${s}`}
-               style={{textDecoration: 'none', lineHeight: 1}}
+              style={{textDecoration: 'none', lineHeight: 1}}
             >
               ×
             </button>
@@ -247,7 +245,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
       <div className="mt-4">
         <h5>Location details*</h5>
         <div className="row">
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="input-group-meta position-relative mb-25">
               <label>Country*</label>
               <select
@@ -269,7 +267,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               </select>
             </div>
           </div>
-          <div className="col-md-4">
+          <div className="col-md-6">
             <div className="input-group-meta position-relative mb-25">
               <label>City*</label>
               <select
@@ -300,21 +298,20 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               </select>
             </div>
           </div>
-          <div className="col-md-4">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Map coordinates*</label>
-              <input
-                type="text"
+        </div>
+        <div className="input-group-meta position-relative mt-2 mb-25">
+            <label>Full Address*</label>
+            <textarea
                 className="form-control"
-                placeholder="Auto-filled from city"
-                value={coordinates?.lat && coordinates?.lng ? `${coordinates.lat}, ${coordinates.lng}` : ""}
-                readOnly
-              />
-            </div>
-          </div>
+                placeholder="e.g., 123 Main St, Anytown, State, 12345"
+                value={full_address}
+                onChange={(e) => setFormData((prev) => ({ ...prev, full_address: e.target.value }))}
+                rows={3}
+                required
+            />
         </div>
         {showErrors && !isLocationValid && (
-          <small className="text-danger d-block mt-1">Please select country, city and ensure coordinates are filled</small>
+          <small className="text-danger d-block mt-1">Please select a country, city, and enter your full address.</small>
         )}
       </div>
       
