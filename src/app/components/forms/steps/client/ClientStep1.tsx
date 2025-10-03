@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { useForm } from "react-hook-form";
 
@@ -12,50 +13,18 @@ const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="row">
-        {/* Username */}
+        {/* Full Name */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Username*</label>
+            <label>Full Name*</label>
             <input 
               type="text" 
-              placeholder="Enter user name" 
+              placeholder="Enter your full name" 
               className="form-control" 
-              {...register("username", { required: "Username is required" })}
+              {...register("full_name", { required: "Full Name is required" })}
             />
-            {errors.username && (
-              <div className="error">{String(errors.username.message)}</div>
-            )}
-          </div>
-        </div>
-
-        {/* First Name */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>First Name*</label>
-            <input 
-              type="text" 
-              placeholder="James" 
-              className="form-control"
-              {...register("first_name", { required: "First Name is required" })}
-            />
-            {errors.first_name && (
-              <div className="error">{String(errors.first_name.message)}</div>
-            )}
-          </div>
-        </div>
-
-        {/* Last Name */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Last Name*</label>
-            <input 
-              type="text" 
-              placeholder="Brower" 
-              className="form-control"
-              {...register("last_name", { required: "Last Name is required" })}
-            />
-            {errors.last_name && (
-              <div className="error">{String(errors.last_name.message)}</div>
+            {errors.full_name && (
+              <div className="error">{String(errors.full_name.message)}</div>
             )}
           </div>
         </div>

@@ -91,6 +91,7 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       toast.error(error.message || 'Registration failed. Please try again.', { id: loadingToast });
     }
   };
+
   const sections: Record<string, Record<string, any>> = {
     Basic: {
       role: data.role,
@@ -100,7 +101,9 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
     "Superpowers & Location": {
       superpowers: data.superpowers,
       city: data.role === "videographer" ? data.city : undefined,
-      country: data.role === "videographer" ? data.country : undefined,
+      country: data.role === "videographer" && data.country
+        ? `${data.country} (${data.country})`
+        : undefined,
       coordinates:
         data.role === "videographer"
           ? `${data.coordinates?.lat || ""}, ${data.coordinates?.lng || ""}`

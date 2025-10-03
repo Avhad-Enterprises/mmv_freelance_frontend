@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import MultipleSelectionField from "../MultipleSelectionField";
-import { videoProductionSkills } from "./skillsList";
-import { videoEditorProficiencies, videographerProficiencies } from "./proficiencyList";
 
 const ClientStep2: React.FC<{
   nextStep: (data: any) => void;
@@ -13,18 +11,11 @@ const ClientStep2: React.FC<{
   prevStep,
   formData
 }) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({ 
-    defaultValues: formData 
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
+    defaultValues: formData
   });
-  
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(formData?.required_skills || []);
+
   const [selectedServices, setSelectedServices] = useState<string[]>(formData?.required_services || []);
-  const [selectedEditorProficiencies, setSelectedEditorProficiencies] = useState<string[]>(
-    formData?.required_editor_proficiencies || []
-  );
-  const [selectedVideographerProficiencies, setSelectedVideographerProficiencies] = useState<string[]>(
-    formData?.required_videographer_proficiencies || []
-  );
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -37,8 +28,8 @@ const ClientStep2: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Company/Brand Name*</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Enter your company name"
               className="form-control"
               {...register("company_name", { required: "Company name is required" })}
@@ -53,7 +44,7 @@ const ClientStep2: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Industry*</label>
-            <select 
+            <select
               className="form-control"
               {...register("industry", { required: "Industry is required" })}
             >
@@ -75,14 +66,14 @@ const ClientStep2: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Website / Social Links</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="https://your-website.com"
               className="form-control mb-2"
               {...register("website")}
             />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Social media links"
               className="form-control"
               {...register("social_links")}
@@ -94,7 +85,7 @@ const ClientStep2: React.FC<{
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Company Size*</label>
-            <select 
+            <select
               className="form-control"
               {...register("company_size", { required: "Company size is required" })}
             >
@@ -137,112 +128,17 @@ const ClientStep2: React.FC<{
           />
         </div>
 
-        {/* Required Skills */}
-        <div className="col-12">
-          <MultipleSelectionField
-            label="Required Skills"
-            options={videoProductionSkills}
-            selectedItems={selectedSkills}
-            onChange={(skills) => {
-              setSelectedSkills(skills);
-              setValue('required_skills', skills);
-            }}
-            required={true}
-            error={errors.required_skills?.message as string}
-            placeholder="Search for required skills"
-          />
-        </div>
-
-        {/* Editor Proficiencies Required */}
-        <div className="col-12">
-          <MultipleSelectionField
-            label="Required Editor Proficiencies"
-            options={videoEditorProficiencies}
-            selectedItems={selectedEditorProficiencies}
-            onChange={(proficiencies) => {
-              setSelectedEditorProficiencies(proficiencies);
-              setValue('required_editor_proficiencies', proficiencies);
-            }}
-            required={true}
-            error={errors.required_editor_proficiencies?.message as string}
-            placeholder="Search for required editor proficiencies"
-          />
-        </div>
-
-        {/* Videographer Proficiencies Required */}
-        <div className="col-12">
-          <MultipleSelectionField
-            label="Required Videographer Proficiencies"
-            options={videographerProficiencies}
-            selectedItems={selectedVideographerProficiencies}
-            onChange={(proficiencies) => {
-              setSelectedVideographerProficiencies(proficiencies);
-              setValue('required_videographer_proficiencies', proficiencies);
-            }}
-            required={true}
-            error={errors.required_videographer_proficiencies?.message as string}
-            placeholder="Search for required videographer proficiencies"
-          />
-        </div>
-
-        {/* Budget Range */}
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Project Budget Range*</label>
-            <div className="row">
-              <div className="col-6">
-                <input 
-                  type="number" 
-                  placeholder="Minimum Budget"
-                  className="form-control"
-                  {...register("budget_min", { 
-                    required: "Minimum budget is required",
-                    min: { 
-                      value: 0, 
-                      message: "Budget cannot be negative" 
-                    }
-                  })}
-                />
-              </div>
-              <div className="col-6">
-                <input 
-                  type="number" 
-                  placeholder="Maximum Budget"
-                  className="form-control"
-                  {...register("budget_max", { 
-                    required: "Maximum budget is required",
-                    min: { 
-                      value: 0, 
-                      message: "Budget cannot be negative" 
-                    },
-                    validate: {
-                      greaterThanMin: (value) => 
-                        parseInt(value) > parseInt(watch("budget_min")) || 
-                        "Maximum budget must be greater than minimum budget"
-                    }
-                  })}
-                />
-              </div>
-            </div>
-            {(errors.budget_min || errors.budget_max) && (
-              <div className="error">
-                {errors.budget_min?.message as string || errors.budget_max?.message as string}
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Navigation Buttons */}
         <div className="col-12 d-flex justify-content-between">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-one"
             onClick={prevStep}
           >
             Previous
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-one"
           >
             Next

@@ -4,16 +4,19 @@ import CandidateAside from './aside';
 import DashboardArea from './dashboard-area';
 
 const CandidateDashboardMain = () => {
-  const [isOpenSidebar,setIsOpenSidebar] = useState<boolean>(false);
+  const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(false);
   return (
     <div className='main-page-wrapper'>
-      {/* aside start */}
-      <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
-      {/* aside end  */}
+      {/* dashboard layout with header on top */}
+      <div className='dashboard-layout'>
+        {/* aside start */}
+        <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        {/* aside end  */}
 
-      {/* dashboard area start */}
-      <DashboardArea setIsOpenSidebar={setIsOpenSidebar} />
-      {/* dashboard area end */}
+        {/* dashboard area start */}
+        <DashboardArea setIsOpenSidebar={setIsOpenSidebar} />
+        {/* dashboard area end */}
+      </div>
     </div>
   );
 };
