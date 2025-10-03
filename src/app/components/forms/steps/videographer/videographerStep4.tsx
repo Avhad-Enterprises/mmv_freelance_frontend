@@ -41,10 +41,10 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
               onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
             >
               <option value="">Select</option>
-              <option value="part_time">Part-time</option>
-              <option value="full_time">Full-time</option>
+              <option value="part-time">Part-time</option>
+              <option value="full-time">Full-time</option>
               <option value="flexible">Flexible</option>
-              <option value="on_demand">On-Demand</option>
+              <option value="on-demand">On-Demand</option>
             </select>
           </div>
         </div>

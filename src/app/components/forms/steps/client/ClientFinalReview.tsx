@@ -58,6 +58,7 @@ const ClientFinalReview: React.FC<{
 
       // Company Information
       if (formData.company_name) formDataToSend.append('company_name', formData.company_name);
+      if (formData.company_description) formDataToSend.append('company_description', formData.company_description);
       if (formData.industry) formDataToSend.append('industry', formData.industry);
       if (formData.website) formDataToSend.append('website', formData.website);
       if (formData.social_links) formDataToSend.append('social_links', formData.social_links);
@@ -72,7 +73,9 @@ const ClientFinalReview: React.FC<{
       if (formData.phone_number) formDataToSend.append('phone_number', formData.phone_number);
       if (formData.address) formDataToSend.append('address', formData.address);
       if (formData.city) formDataToSend.append('city', formData.city);
+      if (formData.state) formDataToSend.append('state', formData.state);
       if (formData.country) formDataToSend.append('country', formData.country);
+      if (formData.zip_code) formDataToSend.append('zip_code', formData.zip_code);
       if (formData.pincode) formDataToSend.append('pincode', formData.pincode);
       if (formData.tax_id) formDataToSend.append('tax_id', formData.tax_id);
 
@@ -80,6 +83,17 @@ const ClientFinalReview: React.FC<{
       if (formData.work_arrangement) formDataToSend.append('work_arrangement', formData.work_arrangement);
       if (formData.project_frequency) formDataToSend.append('project_frequency', formData.project_frequency);
       if (formData.hiring_preferences) formDataToSend.append('hiring_preferences', formData.hiring_preferences);
+
+      // Project Information
+      if (formData.project_title) formDataToSend.append('project_title', formData.project_title);
+      if (formData.project_description) formDataToSend.append('project_description', formData.project_description);
+      if (formData.project_category) formDataToSend.append('project_category', formData.project_category);
+      if (formData.project_budget) formDataToSend.append('project_budget', formData.project_budget);
+      if (formData.project_timeline) formDataToSend.append('project_timeline', formData.project_timeline);
+
+      // Terms and Privacy
+      if (formData.terms_accepted !== undefined) formDataToSend.append('terms_accepted', formData.terms_accepted);
+      if (formData.privacy_policy_accepted !== undefined) formDataToSend.append('privacy_policy_accepted', formData.privacy_policy_accepted);
 
       // Business Document
       if (formData.business_document && formData.business_document instanceof File && formData.business_document.size > 0) {
