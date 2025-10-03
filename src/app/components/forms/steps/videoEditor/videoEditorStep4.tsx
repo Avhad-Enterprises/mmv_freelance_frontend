@@ -12,13 +12,6 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   const [languageQuery, setLanguageQuery] = React.useState("");
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = React.useState(false);
 
-  // State to track which fields have been touched/interacted with
-  const [touched, setTouched] = React.useState({
-    description: false,
-    availability: false,
-    languages: false
-  });
-
   // Common languages list
   const availableLanguages = [
     "English", "Hindi", "Marathi", "Gujarati", "Bengali", "Telugu", "Tamil", 
@@ -41,11 +34,9 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           rows={4}
           value={formData.short_description || ""}
           onChange={(e) => setFormData((prev) => ({ ...prev, short_description: e.target.value }))}
-          onBlur={() => setTouched(prev => ({ ...prev, description: true }))}
-          onFocus={() => setTouched(prev => ({ ...prev, description: true }))}
           placeholder="Tell us about your experience and skills..."
         />
-        {touched.description && formData.short_description && !shortDescriptionValid && (
+        {formData.short_description && !shortDescriptionValid && (
           <small className="text-danger">Description must be at least 10 characters long</small>
         )}
       </div>
@@ -58,16 +49,14 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               className="form-control"
               value={formData.availability || ""}
               onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
-              onBlur={() => setTouched(prev => ({ ...prev, availability: true }))}
-              onFocus={() => setTouched(prev => ({ ...prev, availability: true }))}
             >
               <option value="">Select Availability</option>
-              <option value="part_time">Part-time</option>
-              <option value="full_time">Full-time</option>
+              <option value="part-time">Part-time</option>
+              <option value="full-time">Full-time</option>
               <option value="flexible">Flexible</option>
-              <option value="on_demand">On-Demand</option>
+              <option value="on-demand">On-Demand</option>
             </select>
-            {touched.availability && !availabilityValid && (
+            {!availabilityValid && (
               <small className="text-danger">Availability is required</small>
             )}
           </div>
@@ -84,16 +73,9 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                 onChange={(e) => {
                   setLanguageQuery(e.target.value);
                   setIsLanguageDropdownOpen(true);
-                  setTouched(prev => ({ ...prev, languages: true }));
                 }}
-                onFocus={() => {
-                  setIsLanguageDropdownOpen(true);
-                  setTouched(prev => ({ ...prev, languages: true }));
-                }}
-                onBlur={() => {
-                  setTimeout(() => setIsLanguageDropdownOpen(false), 150);
-                  setTouched(prev => ({ ...prev, languages: true }));
-                }}
+                onFocus={() => setIsLanguageDropdownOpen(true)}
+                onBlur={() => setTimeout(() => setIsLanguageDropdownOpen(false), 150)}
               />
               {isLanguageDropdownOpen && (
                 <div
@@ -144,7 +126,7 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                 </span>
               ))}
             </div>
-            {touched.languages && !languagesValid && (
+            {!languagesValid && (
               <small className="text-danger">At least one language is required</small>
             )}
           </div>

@@ -42,7 +42,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (portfolioLinks.length > 0) fd.append('portfolio_links', JSON.stringify(portfolioLinks));
       
       // Rate
-      if (data.rate_amount) fd.append('hourly_rate', String(data.rate_amount));
+      if (data.rate_amount) fd.append('rate_amount', String(data.rate_amount));
 
       // Contact & Location
       if (data.phone_number) fd.append('phone_number', data.phone_number);
@@ -60,7 +60,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
 
       // Profile photo upload
       if (data.profile_photo) {
-        fd.append('profile_picture', data.profile_photo as File);
+        fd.append('profile_photo', data.profile_photo as File);
       }
 
       // Work Preferences
@@ -68,6 +68,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (Array.isArray(data.languages) && data.languages.length > 0) {
         fd.append('languages', JSON.stringify(data.languages));
       }
+      if (data.short_description) fd.append('short_description', data.short_description);
 
       // Extra fields
       if (data.role) fd.append('role', data.role);

@@ -41,14 +41,15 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (portfolioLinks.length > 0) fd.append('portfolio_links', JSON.stringify(portfolioLinks));
 
       // Rate
-      if (data.rate_amount) fd.append('hourly_rate', String(data.rate_amount));
+      if (data.rate_amount) fd.append('rate_amount', String(data.rate_amount));
+      if (data.rate_currency) fd.append('rate_currency', data.rate_currency);
 
       // Contact & Location
       if (data.phone_number) fd.append('phone_number', data.phone_number);
       if (data.city) fd.append('city', data.city);
       if (data.country) fd.append('country', data.country);
       if (data.full_address) {
-        fd.append('street_address', data.full_address);
+        fd.append('full_address', data.full_address);
       }
 
       // ID Verification
@@ -60,7 +61,7 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
 
       // Profile photo upload
       if (data.profile_photo) {
-        fd.append('profile_picture', data.profile_photo as File);
+        fd.append('profile_photo', data.profile_photo as File);
       }
 
       // Work Preferences
@@ -68,6 +69,7 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (Array.isArray(data.languages) && data.languages.length > 0) {
         fd.append('languages', JSON.stringify(data.languages));
       }
+      if (data.short_description) fd.append('short_description', data.short_description);
 
       // Extra fields
       if (data.role) fd.append('role', data.role);
