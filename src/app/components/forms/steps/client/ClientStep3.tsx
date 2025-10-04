@@ -10,9 +10,9 @@ type Props = {
 };
 
 const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch, clearErrors } = useForm({ 
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch, clearErrors } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -254,7 +254,6 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           <button 
             type="submit" 
             className="btn-one"
-            disabled={!isValid}
           >
             Next
           </button>

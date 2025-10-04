@@ -21,7 +21,7 @@ const isYouTubeUrl = (url: string) => {
 const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
 
   // State for skills and categories (keeping these as they are API-dependent)
@@ -329,7 +329,6 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         <button
           type="submit"
           className="btn-one"
-          disabled={!isValid}
         >
           Next
         </button>

@@ -11,7 +11,7 @@ type Props = {
 const videoEditorStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
 
   const [languageQuery, setLanguageQuery] = React.useState("");
@@ -170,7 +170,6 @@ const videoEditorStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
         <button
           type="submit"
           className="btn-one"
-          disabled={!isValid}
         >
           Next
         </button>

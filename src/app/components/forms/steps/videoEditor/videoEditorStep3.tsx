@@ -12,7 +12,7 @@ type Props = {
 const videoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
   const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(null);
@@ -238,7 +238,6 @@ const videoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
           <button
             type="submit"
             className="btn-one"
-            disabled={!isValid}
           >
             Next
           </button>

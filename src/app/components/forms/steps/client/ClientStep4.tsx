@@ -9,12 +9,10 @@ type Props = {
 };
 
 const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
+  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
-  });
-
-  const onSubmit = (data: any) => {
+    mode: 'onChange'
+  });  const onSubmit = (data: any) => {
     nextStep(data);
   };
 
@@ -93,7 +91,6 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           <button
             type="submit"
             className="btn-one"
-            disabled={!isValid}
           >
             Next
           </button>

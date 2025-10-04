@@ -11,7 +11,7 @@ type Props = {
 const videographerStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
 
   // Register languages array with validation
@@ -169,7 +169,6 @@ const videographerStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         <button
           type="submit"
           className="btn-one"
-          disabled={!isValid}
         >
           Next
         </button>

@@ -10,7 +10,7 @@ type Props = {
 const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
     defaultValues: formData,
-    mode: 'onSubmit' // Validate only on submit
+    mode: 'onChange' // Real-time validation
   });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -99,7 +99,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
 
         {/* Next Button */}
         <div className="col-12">
-          <button type="submit" className="btn-one tran3s w-100 mt-30" disabled={!isValid}>
+          <button type="submit" className="btn-one tran3s w-100 mt-30">
             Next
           </button>
         </div>

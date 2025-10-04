@@ -11,7 +11,7 @@ type Props = {
 const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, watch, formState: { errors, isValid }, clearErrors } = useForm({ 
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
   const paymentMethod = watch("payment_method");
 
@@ -248,7 +248,6 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           <button
             type="submit"
             className="btn-one"
-            disabled={!isValid}
           >
             Next
           </button>

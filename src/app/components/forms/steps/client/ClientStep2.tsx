@@ -12,7 +12,7 @@ type Props = {
 const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors } = useForm({
     defaultValues: formData,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
 
   const [selectedServices, setSelectedServices] = useState<string[]>(formData?.required_services || []);
@@ -144,7 +144,6 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           <button
             type="submit"
             className="btn-one"
-            disabled={!isValid}
           >
             Next
           </button>
