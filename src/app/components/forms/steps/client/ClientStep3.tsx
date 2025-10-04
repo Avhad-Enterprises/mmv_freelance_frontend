@@ -1,62 +1,41 @@
+"use client";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Country, State, City } from "country-state-city";
 
-const ClientStep3: React.FC<{
-  nextStep: (data: any) => void;
-  prevStep: () => void;
+type Props = {
   formData: any;
-}> = ({
-  nextStep,
-  prevStep,
-  formData
-}) => {
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({ defaultValues: formData });
+  nextStep: (data: Partial<any>) => void;
+  prevStep: () => void;
+};
+
+const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch, clearErrors } = useForm({ 
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string>("");
 
   // File validation function
-  const validateBusinessDocument = (file: File | null): boolean => {
+  const validateBusinessDocument = (file: File | null): boolean | string => {
     if (!file) return true; // Optional field
     
     if (file.size === 0) {
-      setFileError('Selected file is empty. Please choose a valid document.');
-      return false;
+      return 'Selected file is empty. Please choose a valid document.';
     }
 
     if (file.name === 'Unknown.pdf' || file.name === 'blob') {
-      setFileError('File selection failed. Please try selecting the file again.');
-      return false;
+      return 'File selection failed. Please try selecting the file again.';
     }
 
     if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      setFileError('File size must be less than 10MB.');
-      return false;
+      return 'File size must be less than 10MB.';
     }
 
-    setFileError('');
     return true;
   };
 
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-    
-    if (file && file.size > 0) {
-      console.log(`✅ File selected: ${file.name} (${file.size} bytes)`);
-      validateBusinessDocument(file);
-    } else {
-      console.warn('⚠️ No valid file selected');
-    }
-  };
-
   const onSubmit = (data: any) => {
-    // Validate file before submission
-    if (selectedFile && !validateBusinessDocument(selectedFile)) {
-      return; // Stop submission if file validation fails
-    }
-
     // Include the selected file in the data
     const submissionData = {
       ...data,
@@ -84,6 +63,7 @@ const ClientStep3: React.FC<{
                   message: "Please enter a valid 10-digit phone number"
                 }
               })}
+              onChange={() => clearErrors("phone_number")}
             />
             {errors.phone_number && (
               <div className="error">{String(errors.phone_number.message)}</div>
@@ -100,6 +80,7 @@ const ClientStep3: React.FC<{
               className="form-control"
               rows={3}
               {...register("address", { required: "Address is required" })}
+              onChange={() => clearErrors("address")}
             />
             {errors.address && (
               <div className="error">{String(errors.address.message)}</div>
@@ -120,6 +101,7 @@ const ClientStep3: React.FC<{
                   const states = State.getStatesOfCountry(countryCode);
                   setValue("state", "");
                   setValue("city", "");
+                  clearErrors("country");
                 }
               })}
             >
@@ -146,6 +128,7 @@ const ClientStep3: React.FC<{
                 required: "State is required",
                 onChange: (e) => {
                   setValue("city", "");
+                  clearErrors("state");
                 }
               })}
             >
@@ -169,6 +152,7 @@ const ClientStep3: React.FC<{
             <select 
               className="form-control"
               {...register("city", { required: "City is required" })}
+              onChange={() => clearErrors("city")}
             >
               <option value="">Select City</option>
               {watch("state") && City.getCitiesOfState(watch("country"), watch("state")).map((city) => (
@@ -198,6 +182,7 @@ const ClientStep3: React.FC<{
                   message: "Please enter a valid pincode/ZIP code"
                 }
               })}
+              onChange={() => clearErrors("pincode")}
             />
             {errors.pincode && (
               <div className="error">{String(errors.pincode.message)}</div>
@@ -213,8 +198,18 @@ const ClientStep3: React.FC<{
               type="file" 
               className="form-control"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              name="business_document"
-              onChange={handleFileChange}
+              {...register("business_document", { 
+                validate: (value) => {
+                  if (!value || value.length === 0) return true; // Optional
+                  const file = value[0];
+                  return validateBusinessDocument(file);
+                }
+              })}
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setSelectedFile(file);
+                clearErrors("business_document");
+              }}
             />
             <small className="text-muted">
               Upload business registration documents. This will be mandatory before your first payout.
@@ -224,9 +219,6 @@ const ClientStep3: React.FC<{
               <small className="text-success d-block mt-1">
                 Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
               </small>
-            )}
-            {fileError && (
-              <div className="error">{fileError}</div>
             )}
             {errors.business_document && (
               <div className="error">{String(errors.business_document.message)}</div>
@@ -262,6 +254,7 @@ const ClientStep3: React.FC<{
           <button 
             type="submit" 
             className="btn-one"
+            disabled={!isValid}
           >
             Next
           </button>

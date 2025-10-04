@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
+import { useForm } from "react-hook-form";
 // Assuming you might still need these for other parts, but they aren't used in this snippet.
 // import { Country, State, City } from "country-state-city";
 
 type Props = {
   formData: any;
-  setFormData: (updater: (prev: any) => any) => void;
   nextStep: (data: Partial<any>) => void;
   prevStep: () => void;
 };
@@ -18,13 +18,41 @@ const isYouTubeUrl = (url: string) => {
   return youtubeRegex.test(url);
 };
 
-const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
-  // State for skills and categories
+const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
+
+  // Register arrays with validation
+  React.useEffect(() => {
+    register("skill_tags", {
+      validate: (value) => {
+        const tags = value || [];
+        return tags.length > 0 || "At least one skill is required";
+      }
+    });
+    register("superpowers", {
+      validate: (value) => {
+        const powers = value || [];
+        if (powers.length === 0) return "At least 1 superpower is required";
+        if (powers.length > 3) return "Maximum 3 superpowers allowed";
+        return true;
+      }
+    });
+    register("portfolio_links", {
+      validate: (value) => {
+        const links = value || [];
+        return links.some((l: string) => isYouTubeUrl(l)) || "At least one valid YouTube link is required";
+      }
+    });
+  }, [register]);
+
+  // State for skills and categories (keeping these as they are API-dependent)
   const [allSkills, setAllSkills] = React.useState<string[]>([]);
   const [editorSuperpowers, setEditorSuperpowers] = React.useState<string[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
   const [skillError, setSkillError] = React.useState<string | null>(null);
-  const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
   // Fetch skills from API
   React.useEffect(() => {
@@ -72,82 +100,81 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
   }, []); // Empty dependency array ensures this runs only once on mount
 
   const { 
-    first_name = "",
-    last_name = "", 
+    full_name = "",
     superpowers = [], 
     portfolio_links = ["", "", ""], 
     rate_amount = "", 
     rate_currency = "INR", 
     skill_tags = []
-  } = formData || {};
-  const list: string[] = editorSuperpowers;
+  } = watch() || formData;
 
   // Skills management functions
   const removeSkill = (skill: string) => {
-    setFormData((prev) => ({ ...prev, base_skills: (prev.base_skills || []).filter((x: string) => x !== skill) }));
+    const currentSkills = watch("skill_tags") || [];
+    setValue("skill_tags", currentSkills.filter((x: string) => x !== skill));
   };
 
-  // State for the superpower selection dropdown
-  
   // Filter available superpowers based on what's already selected
-  const spFiltered: string[] = (list || []).filter(
+  const spFiltered: string[] = (editorSuperpowers || []).filter(
     (s: string) => !(superpowers || []).includes(s)
   );
 
   const addSuperpower = (skill: string) => {
     if ((superpowers || []).length >= 3) return;
-    setFormData((prev) => ({ ...prev, superpowers: [...(prev.superpowers || []), skill] }));
+    const currentSuperpowers = watch("superpowers") || [];
+    const newSuperpowers = [...currentSuperpowers, skill];
+    setValue("superpowers", newSuperpowers);
+    clearErrors("superpowers");
   };
 
   const removeSuperpower = (skill: string) => {
-    setFormData((prev) => ({ ...prev, superpowers: (prev.superpowers || []).filter((x: string) => x !== skill) }));
+    const currentSuperpowers = watch("superpowers") || [];
+    const newSuperpowers = currentSuperpowers.filter((x: string) => x !== skill);
+    setValue("superpowers", newSuperpowers);
+    clearErrors("superpowers");
   };
 
   const addSkillTag = (tag: string) => {
     if (tag && !(skill_tags || []).includes(tag)) {
-        setFormData((prev) => ({ ...prev, skill_tags: [...(prev.skill_tags || []), tag] }));
+      const currentTags = watch("skill_tags") || [];
+      const newTags = [...currentTags, tag];
+      setValue("skill_tags", newTags);
+      clearErrors("skill_tags");
     }
   };
 
   const removeSkillTag = (tagToRemove: string) => {
-    setFormData((prev) => ({...prev, skill_tags: prev.skill_tags.filter((tag: string) => tag !== tagToRemove)}));
+    const currentTags = watch("skill_tags") || [];
+    const newTags = currentTags.filter((tag: string) => tag !== tagToRemove);
+    setValue("skill_tags", newTags);
+    clearErrors("skill_tags");
   };
 
   const handlePortfolioChange = (index: number, value: string) => {
-    const updated = [...portfolio_links];
+    const currentLinks = watch("portfolio_links") || ["", "", ""];
+    const updated = [...currentLinks];
     updated[index] = value;
-    setFormData(prev => ({ ...prev, portfolio_links: updated }));
+    setValue("portfolio_links", updated);
+    clearErrors("portfolio_links");
   };
 
   const handlePortfolioBlur = (index: number, value: string) => {
      if (value && !isYouTubeUrl(value)) {
-        // Instead of alert(), you could show an error message in the UI
         console.error("Only YouTube links are accepted.");
-        const updated = [...portfolio_links];
+        const currentLinks = watch("portfolio_links") || ["", "", ""];
+        const updated = [...currentLinks];
         updated[index] = ""; // Clear the invalid link
-        setFormData(prev => ({...prev, portfolio_links: updated}));
+        setValue("portfolio_links", updated);
      }
   };
 
-  // --- RENDER ---
-  const handleNext = () => {
-    setShowErrors(true);
-    const isValid = 
-      (superpowers || []).length > 0 && 
-      (superpowers || []).length <= 3 && 
-      (portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && 
-      rate_amount && 
-      parseInt(rate_amount) <= 10000 &&
-      skill_tags.length > 0;
-    
-    if (isValid) {
-      nextStep({});
-    }
+  const onSubmit = (data: any) => {
+    nextStep(data);
   };
 
   return (
-    <div>
-      <h4 className="mb-2">Hi, I am {first_name || last_name ? `${first_name} ${last_name}`.trim() : "[Your Name]"}</h4>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
 
       <div className="mt-3">
         <h5>Skills*</h5>
@@ -176,8 +203,8 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           </select>
         </div>
         {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
-        {showErrors && skill_tags.length === 0 && (
-          <small className="text-danger d-block mt-1">At least one skill is required</small>
+        {errors.skill_tags && (
+          <div className="error">{String(errors.skill_tags.message)}</div>
         )}
         
         <div className="d-flex flex-wrap gap-2 mt-2">
@@ -241,11 +268,8 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           ))}
         </select>
         <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
-        {showErrors && (superpowers || []).length === 0 && (
-          <small className="text-danger d-block">At least 1 superpower is required</small>
-        )}
-        {showErrors && (superpowers || []).length > 3 && (
-          <small className="text-danger d-block">Maximum 3 superpowers allowed</small>
+        {errors.superpowers && (
+          <div className="error">{String(errors.superpowers.message)}</div>
         )}
       </div>
 
@@ -268,13 +292,17 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
         <button
           type="button"
           className="btn btn-outline-primary btn-sm mt-2"
-          onClick={() => setFormData((prev) => ({ ...prev, portfolio_links: [...(prev.portfolio_links || []), ""] }))}
+          onClick={() => {
+            const currentLinks = watch("portfolio_links") || ["", "", ""];
+            setValue("portfolio_links", [...currentLinks, ""]);
+            clearErrors("portfolio_links");
+          }}
         >
           + Add more
         </button>
         <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
-        {showErrors && !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && (
-          <small className="text-danger d-block">At least one valid YouTube link is required</small>
+        {errors.portfolio_links && (
+          <div className="error">{String(errors.portfolio_links.message)}</div>
         )}
       </div>
 
@@ -288,15 +316,16 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               min={0}
               max={10000}
               step={1}
-              value={rate_amount}
-              onChange={(e) => setFormData((prev) => ({ ...prev, rate_amount: e.target.value }))}
+              {...register("rate_amount", {
+                required: "Rate amount is required",
+                min: { value: 0, message: "Rate cannot be negative" },
+                max: { value: 10000, message: "Rate cannot exceed 10,000" },
+                onChange: () => clearErrors("rate_amount")
+              })}
               placeholder="Enter amount (max 10,000)"
             />
-            {rate_amount && parseInt(rate_amount) > 10000 && (
-              <small className="text-danger">Rate cannot exceed 10,000</small>
-            )}
-            {showErrors && !rate_amount && (
-              <small className="text-danger">Rate amount is required</small>
+            {errors.rate_amount && (
+              <div className="error">{String(errors.rate_amount.message)}</div>
             )}
           </div>
         </div>
@@ -305,13 +334,18 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
             <label>Currency*</label>
             <select
               className="form-control"
-              value={rate_currency}
-              onChange={(e) => setFormData((prev) => ({ ...prev, rate_currency: e.target.value }))}
+              {...register("rate_currency", {
+                required: "Currency is required",
+                onChange: () => clearErrors("rate_currency")
+              })}
             >
               <option value="INR">INR</option>
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
             </select>
+            {errors.rate_currency && (
+              <div className="error">{String(errors.rate_currency.message)}</div>
+            )}
           </div>
         </div>
       </div>
@@ -319,14 +353,14 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pr
       <div className="d-flex justify-content-between mt-4">
         <button type="button" className="btn-one" onClick={prevStep}>Previous</button>
         <button
-          type="button"
+          type="submit"
           className="btn-one"
-          onClick={handleNext}
+          disabled={!isValid}
         >
           Next
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

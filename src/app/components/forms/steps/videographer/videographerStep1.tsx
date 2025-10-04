@@ -4,17 +4,17 @@ import { useForm } from "react-hook-form";
 
 type Props = {
   formData: any;
-  setFormData: (updater: (prev: any) => any) => void;
   nextStep: (data: Partial<any>) => void;
 };
 
-const VideographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: formData });
+const VideographerStep1: React.FC<Props> = ({ formData, nextStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
+    defaultValues: formData,
+    mode: 'onSubmit' // Validate only on submit
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = (data: any) => {
-    // Update the parent formData with the validated data
-    setFormData((prev: any) => ({ ...prev, ...data }));
     nextStep(data);
   };
 
@@ -30,6 +30,7 @@ const VideographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep })
               placeholder="Enter your full name" 
               className="form-control"
               {...register("full_name", { required: "Full Name is required" })}
+              onChange={() => clearErrors("full_name")}
             />
             {errors.full_name && (
               <div className="error">{String(errors.full_name.message)}</div>
@@ -52,6 +53,7 @@ const VideographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep })
                   message: "Invalid email address"
                 }
               })}
+              onChange={() => clearErrors("email")}
             />
             {errors.email && (
               <div className="error">{String(errors.email.message)}</div>
@@ -74,6 +76,7 @@ const VideographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep })
                   message: "Password must be at least 6 characters"
                 }
               })}
+              onChange={() => clearErrors("password")}
             />
             <span 
               className="placeholder_icon"
@@ -96,7 +99,7 @@ const VideographerStep1: React.FC<Props> = ({ formData, setFormData, nextStep })
 
         {/* Next Button */}
         <div className="col-12">
-          <button type="submit" className="btn-one tran3s w-100 mt-30">
+          <button type="submit" className="btn-one tran3s w-100 mt-30" disabled={!isValid}>
             Next
           </button>
         </div>

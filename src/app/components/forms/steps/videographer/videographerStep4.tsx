@@ -1,14 +1,29 @@
 "use client";
 import React from "react";
+import { useForm } from "react-hook-form";
 
 type Props = {
   formData: any;
-  setFormData: (updater: (prev: any) => any) => void;
   nextStep: (data: Partial<any>) => void;
   prevStep: () => void;
 };
 
-const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
+const videographerStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
+
+  // Register languages array with validation
+  React.useEffect(() => {
+    register("languages", {
+      validate: (value) => {
+        const langs = value || [];
+        return langs.length > 0 || "At least one language is required";
+      }
+    });
+  }, [register]);
+
   const [languageQuery, setLanguageQuery] = React.useState("");
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = React.useState(false);
 
@@ -18,17 +33,45 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
     "Kannada", "Malayalam", "Punjabi", "Urdu", "Sanskrit", "Spanish", "French", 
     "German", "Chinese", "Japanese", "Korean", "Arabic", "Russian"
   ];
+
+  const { languages = [] } = watch() || formData;
+
+  const addLanguage = (lang: string) => {
+    if (lang && !languages.includes(lang)) {
+      const currentLanguages = watch("languages") || [];
+      const newLanguages = [...currentLanguages, lang];
+      setValue("languages", newLanguages);
+      clearErrors("languages");
+    }
+  };
+
+  const removeLanguage = (langToRemove: string) => {
+    const currentLanguages = watch("languages") || [];
+    const newLanguages = currentLanguages.filter((lang: string) => lang !== langToRemove);
+    setValue("languages", newLanguages);
+    clearErrors("languages");
+  };
+
+  const onSubmit = (data: any) => {
+    nextStep(data);
+  };
+
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <h4 className="mb-3">Short description about yourself*</h4>
       <div className="input-group-meta position-relative mb-25">
         <label>Short description</label>
         <textarea
           className="form-control"
           rows={4}
-          value={formData.short_description || ""}
-          onChange={(e) => setFormData((prev) => ({ ...prev, short_description: e.target.value }))}
+          {...register("short_description", {
+            required: "Short description is required",
+            onChange: () => clearErrors("short_description")
+          })}
         />
+        {errors.short_description && (
+          <div className="error">{String(errors.short_description.message)}</div>
+        )}
       </div>
 
       <div className="row">
@@ -37,8 +80,10 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
             <label>Availability*</label>
             <select
               className="form-control"
-              value={formData.availability || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
+              {...register("availability", {
+                required: "Availability is required",
+                onChange: () => clearErrors("availability")
+              })}
             >
               <option value="">Select</option>
               <option value="part-time">Part-time</option>
@@ -46,6 +91,9 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
               <option value="flexible">Flexible</option>
               <option value="on-demand">On-Demand</option>
             </select>
+            {errors.availability && (
+              <div className="error">{String(errors.availability.message)}</div>
+            )}
           </div>
         </div>
         <div className="col-md-6">
@@ -72,7 +120,7 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
                   {availableLanguages
                     .filter(lang => 
                       lang.toLowerCase().includes(languageQuery.toLowerCase()) &&
-                      !(formData.languages || []).includes(lang)
+                      !languages.includes(lang)
                     )
                     .map(lang => (
                       <button
@@ -81,10 +129,7 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
                         className="dropdown-item w-100 text-start"
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            languages: [...(prev.languages || []), lang]
-                          }));
+                          addLanguage(lang);
                           setLanguageQuery("");
                           setIsLanguageDropdownOpen(false);
                         }}
@@ -96,16 +141,13 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
               )}
             </div>
             <div className="d-flex flex-wrap gap-2 mt-2">
-              {(formData.languages || []).map((lang: string) => (
+              {languages.map((lang: string) => (
                 <span key={lang} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
                   {lang}
                   <button
                     type="button"
                     className="btn btn-sm btn-link text-white p-0 m-0"
-                    onClick={() => setFormData((prev) => ({ 
-                      ...prev, 
-                      languages: prev.languages.filter((x: string) => x !== lang)
-                    }))}
+                    onClick={() => removeLanguage(lang)}
                     style={{textDecoration: 'none', lineHeight: 1}}
                   >
                     ×
@@ -113,6 +155,9 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
                 </span>
               ))}
             </div>
+            {errors.languages && (
+              <div className="error">{String(errors.languages.message)}</div>
+            )}
           </div>
         </div>
       </div>
@@ -122,15 +167,14 @@ const videographerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, p
           Previous
         </button>
         <button
-          type="button"
+          type="submit"
           className="btn-one"
-          onClick={() => nextStep({})}
-          disabled={!formData.short_description || !formData.availability || !(formData.languages || []).length}
+          disabled={!isValid}
         >
           Next
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

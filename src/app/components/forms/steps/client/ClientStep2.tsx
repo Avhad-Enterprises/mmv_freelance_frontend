@@ -1,18 +1,18 @@
+"use client";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import MultipleSelectionField from "../MultipleSelectionField";
 
-const ClientStep2: React.FC<{
-  nextStep: (data: any) => void;
-  prevStep: () => void;
+type Props = {
   formData: any;
-}> = ({
-  nextStep,
-  prevStep,
-  formData
-}) => {
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm({
-    defaultValues: formData
+  nextStep: (data: Partial<any>) => void;
+  prevStep: () => void;
+};
+
+const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors } = useForm({
+    defaultValues: formData,
+    mode: 'onSubmit'
   });
 
   const [selectedServices, setSelectedServices] = useState<string[]>(formData?.required_services || []);
@@ -33,6 +33,7 @@ const ClientStep2: React.FC<{
               placeholder="Enter your company name"
               className="form-control"
               {...register("company_name", { required: "Company name is required" })}
+              onChange={() => clearErrors("company_name")}
             />
             {errors.company_name && (
               <div className="error">{String(errors.company_name.message)}</div>
@@ -47,6 +48,7 @@ const ClientStep2: React.FC<{
             <select
               className="form-control"
               {...register("industry", { required: "Industry is required" })}
+              onChange={() => clearErrors("industry")}
             >
               <option value="">Select Industry</option>
               <option value="film">Film</option>
@@ -88,6 +90,7 @@ const ClientStep2: React.FC<{
             <select
               className="form-control"
               {...register("company_size", { required: "Company size is required" })}
+              onChange={() => clearErrors("company_size")}
             >
               <option value="">Select Company Size</option>
               <option value="1-10">1-10 employees</option>
@@ -122,6 +125,7 @@ const ClientStep2: React.FC<{
             onChange={(services) => {
               setSelectedServices(services);
               setValue('required_services', services);
+              clearErrors('required_services');
             }}
             required={true}
             error={errors.required_services?.message as string}
@@ -140,6 +144,7 @@ const ClientStep2: React.FC<{
           <button
             type="submit"
             className="btn-one"
+            disabled={!isValid}
           >
             Next
           </button>

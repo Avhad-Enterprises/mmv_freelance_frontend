@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
-import { Country, City } from "country-state-city";
+import { useForm } from "react-hook-form";
+// Assuming you might still need these for other parts, but they aren't used in this snippet.
+// import { Country, State, City } from "country-state-city";
 
 type Props = {
   formData: any;
-  setFormData: (updater: (prev: any) => any) => void;
   nextStep: (data: Partial<any>) => void;
   prevStep: () => void;
 };
@@ -17,16 +18,17 @@ const isYouTubeUrl = (url: string) => {
   return youtubeRegex.test(url);
 };
 
-const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
-  // --- HOOKS MOVED INSIDE THE COMPONENT ---
-  // State for skills and categories
+const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
+
+  // State for skills and categories (keeping these as they are API-dependent)
   const [allSkills, setAllSkills] = React.useState<string[]>([]);
+  const [videographerSuperpowers, setVideographerSuperpowers] = React.useState<string[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
   const [skillError, setSkillError] = React.useState<string | null>(null);
-  const [showErrors, setShowErrors] = React.useState<boolean>(false);
-  
-  // State to store the videographer categories fetched from the API
-  const [videographerSuperpowers, setVideographerSuperpowers] = React.useState<string[]>([]);
 
   // Fetch skills from API
   React.useEffect(() => {
@@ -72,7 +74,15 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
       .catch(err => console.error('Error fetching videographer categories:', err));
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  const { first_name = "", last_name = "", superpowers = [], portfolio_links = ["", ""], rate_amount = "", rate_currency = "INR", skill_tags = [], country = "", city = "", full_address = "" } = formData || {};
+  const { 
+    full_name = "",
+    superpowers = [], 
+    portfolio_links = ["", ""], 
+    rate_amount = "", 
+    rate_currency = "INR", 
+    skill_tags = []
+  } = watch() || formData;
+
   const list: string[] = videographerSuperpowers;
 
   const spFiltered: string[] = (list || []).filter(
@@ -81,60 +91,60 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
 
   const addSuperpower = (skill: string) => {
     if ((superpowers || []).length >= 3) return;
-    setFormData((prev) => ({ ...prev, superpowers: [...(prev.superpowers || []), skill] }));
+    const currentSuperpowers = watch("superpowers") || [];
+    const newSuperpowers = [...currentSuperpowers, skill];
+    setValue("superpowers", newSuperpowers);
+    clearErrors("superpowers");
   };
 
   const removeSuperpower = (skill: string) => {
-    setFormData((prev) => ({ ...prev, superpowers: (prev.superpowers || []).filter((x: string) => x !== skill) }));
+    const currentSuperpowers = watch("superpowers") || [];
+    const newSuperpowers = currentSuperpowers.filter((x: string) => x !== skill);
+    setValue("superpowers", newSuperpowers);
+    clearErrors("superpowers");
   };
   
   const addSkillTag = (tag: string) => {
     if (tag && !(skill_tags || []).includes(tag)) {
-        setFormData((prev) => ({ ...prev, skill_tags: [...(prev.skill_tags || []), tag] }));
+      const currentTags = watch("skill_tags") || [];
+      const newTags = [...currentTags, tag];
+      setValue("skill_tags", newTags);
+      clearErrors("skill_tags");
     }
   };
 
   const removeSkillTag = (tagToRemove: string) => {
-    setFormData((prev) => ({...prev, skill_tags: prev.skill_tags.filter((tag: string) => tag !== tagToRemove)}));
+    const currentTags = watch("skill_tags") || [];
+    const newTags = currentTags.filter((tag: string) => tag !== tagToRemove);
+    setValue("skill_tags", newTags);
+    clearErrors("skill_tags");
   };
   
   const handlePortfolioChange = (index: number, value: string) => {
-    const updated = [...portfolio_links];
+    const currentLinks = watch("portfolio_links") || ["", ""];
+    const updated = [...currentLinks];
     updated[index] = value;
-    setFormData(prev => ({ ...prev, portfolio_links: updated }));
+    setValue("portfolio_links", updated);
+    clearErrors("portfolio_links");
   };
 
   const handlePortfolioBlur = (index: number, value: string) => {
      if (value && !isYouTubeUrl(value)) {
-       console.error("Only YouTube links are accepted.");
-       const updated = [...portfolio_links];
-       updated[index] = ""; // Clear the invalid link
-       setFormData(prev => ({...prev, portfolio_links: updated}));
+        console.error("Only YouTube links are accepted.");
+        const currentLinks = watch("portfolio_links") || ["", ""];
+        const updated = [...currentLinks];
+        updated[index] = ""; // Clear the invalid link
+        setValue("portfolio_links", updated);
      }
   };
 
-  // Validation for location specific to videographer
-  const isLocationValid = !!country && !!city && !!full_address.trim();
-
-  const handleNext = () => {
-    setShowErrors(true);
-    const isValid = 
-      (superpowers || []).length > 0 && 
-      (superpowers || []).length <= 3 && 
-      (portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && 
-      rate_amount && 
-      isLocationValid &&
-      parseInt(rate_amount) <= 10000 &&
-      (skill_tags || []).length > 0;
-    
-    if (isValid) {
-      nextStep({});
-    }
+  const onSubmit = (data: any) => {
+    nextStep(data);
   };
 
   return (
-    <div>
-      <h4 className="mb-2">Hi, I am {first_name || last_name ? `${first_name} ${last_name}`.trim() : "[Your Name]"}</h4>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
 
       {/* Skills Section */}
       <div className="mt-3">
@@ -184,8 +194,8 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         </div>
         {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
         <small className="text-muted d-block mt-1">Selected {(skill_tags || []).length}/15 skills</small>
-        {showErrors && (skill_tags || []).length === 0 && (
-          <small className="text-danger d-block mt-1">At least one skill is required</small>
+        {errors.skill_tags && (
+          <div className="error">{String(errors.skill_tags.message)}</div>
         )}
       </div>
 
@@ -233,88 +243,11 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
           ))}
         </select>
         <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
-        {showErrors && (superpowers || []).length === 0 && (
-          <small className="text-danger d-block">At least 1 superpower is required</small>
-        )}
-        {showErrors && (superpowers || []).length > 3 && (
-          <small className="text-danger d-block">Maximum 3 superpowers allowed</small>
+        {errors.superpowers && (
+          <div className="error">{String(errors.superpowers.message)}</div>
         )}
       </div>
 
-      {/* Location details */}
-      <div className="mt-4">
-        <h5>Location details*</h5>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Country*</label>
-              <select
-                className="form-control"
-                value={country}
-                onChange={(e) => setFormData((prev) => ({ 
-                    ...prev, 
-                    country: e.target.value, 
-                    city: "", // Reset city on country change
-                    coordinates: { lat: "", lng: "" } // Reset coordinates as well
-                }))}
-              >
-                <option value="">Select Country</option>
-                {Country.getAllCountries().map((c) => (
-                  <option key={c.isoCode} value={c.isoCode}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>City*</label>
-              <select
-                className="form-control"
-                value={city}
-                onChange={(e) => {
-                  const cityName = e.target.value;
-                  const cities = country ? City.getCitiesOfCountry(country) : [];
-                  const selectedCity = cities?.find(c => c.name === cityName);
-
-                  setFormData((prev) => ({
-                    ...prev,
-                    city: cityName,
-                    coordinates: {
-                      lat: selectedCity?.latitude || "",
-                      lng: selectedCity?.longitude || "",
-                    },
-                  }));
-                }}
-                disabled={!country}
-              >
-                <option value="">Select City</option>
-                {country && (City.getCitiesOfCountry(country) || []).map((ct) => (
-                  <option key={`${ct.name}-${ct.latitude}`} value={ct.name}>
-                    {ct.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="input-group-meta position-relative mt-2 mb-25">
-            <label>Full Address*</label>
-            <textarea
-                className="form-control"
-                placeholder="e.g., 123 Main St, Anytown, State, 12345"
-                value={full_address}
-                onChange={(e) => setFormData((prev) => ({ ...prev, full_address: e.target.value }))}
-                rows={3}
-                required
-            />
-        </div>
-        {showErrors && !isLocationValid && (
-          <small className="text-danger d-block mt-1">Please select a country, city, and enter your full address.</small>
-        )}
-      </div>
-      
       {/* Portfolio (YouTube links only) */}
       <div className="mt-3">
         <h5>Portfolio (YouTube links only)*</h5>
@@ -333,17 +266,20 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
         <button
           type="button"
           className="btn btn-outline-primary btn-sm mt-2"
-          onClick={() => setFormData((prev) => ({ ...prev, portfolio_links: [...(prev.portfolio_links || []), ""] }))}
+          onClick={() => {
+            const currentLinks = watch("portfolio_links") || ["", ""];
+            setValue("portfolio_links", [...currentLinks, ""]);
+            clearErrors("portfolio_links");
+          }}
         >
           + Add more
         </button>
         <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
-        {showErrors && !(portfolio_links || []).some((l: string) => isYouTubeUrl(l)) && (
-          <small className="text-danger d-block">At least one valid YouTube link is required</small>
+        {errors.portfolio_links && (
+          <div className="error">{String(errors.portfolio_links.message)}</div>
         )}
       </div>
 
-      {/* Rate section */}
       <div className="row mt-3">
         <div className="col-md-6">
           <div className="input-group-meta position-relative mb-25">
@@ -354,15 +290,16 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
               min={0}
               max={10000}
               step={1}
-              value={rate_amount}
-              onChange={(e) => setFormData((prev) => ({ ...prev, rate_amount: e.target.value }))}
+              {...register("rate_amount", {
+                required: "Rate amount is required",
+                min: { value: 0, message: "Rate cannot be negative" },
+                max: { value: 10000, message: "Rate cannot exceed 10,000" },
+                onChange: () => clearErrors("rate_amount")
+              })}
               placeholder="Enter amount (max 10,000)"
             />
-            {rate_amount && parseInt(rate_amount) > 10000 && (
-              <small className="text-danger">Rate cannot exceed 10,000</small>
-            )}
-            {showErrors && !rate_amount && (
-              <small className="text-danger">Rate amount is required</small>
+            {errors.rate_amount && (
+              <div className="error">{String(errors.rate_amount.message)}</div>
             )}
           </div>
         </div>
@@ -371,13 +308,18 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
             <label>Currency*</label>
             <select
               className="form-control"
-              value={rate_currency}
-              onChange={(e) => setFormData((prev) => ({ ...prev, rate_currency: e.target.value }))}
+              {...register("rate_currency", {
+                required: "Currency is required",
+                onChange: () => clearErrors("rate_currency")
+              })}
             >
               <option value="INR">INR</option>
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
             </select>
+            {errors.rate_currency && (
+              <div className="error">{String(errors.rate_currency.message)}</div>
+            )}
           </div>
         </div>
       </div>
@@ -385,14 +327,14 @@ const VideographerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, p
       <div className="d-flex justify-content-between mt-4">
         <button type="button" className="btn-one" onClick={prevStep}>Previous</button>
         <button
-          type="button"
+          type="submit"
           className="btn-one"
-          onClick={handleNext}
+          disabled={!isValid}
         >
           Next
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

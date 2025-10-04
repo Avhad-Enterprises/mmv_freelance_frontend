@@ -1,16 +1,18 @@
+"use client";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const ClientStep4: React.FC<{
-  nextStep: (data: any) => void;
-  prevStep: () => void;
+type Props = {
   formData: any;
-}> = ({
-  nextStep,
-  prevStep,
-  formData
-}) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: formData });
+  nextStep: (data: Partial<any>) => void;
+  prevStep: () => void;
+};
+
+const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -26,6 +28,7 @@ const ClientStep4: React.FC<{
             <select
               className="form-control"
               {...register("work_arrangement", { required: "Work arrangement is required" })}
+              onChange={() => clearErrors("work_arrangement")}
             >
               <option value="">Select Work Arrangement</option>
               <option value="remote">Remote</option>
@@ -45,6 +48,7 @@ const ClientStep4: React.FC<{
             <select
               className="form-control"
               {...register("project_frequency", { required: "Project frequency is required" })}
+              onChange={() => clearErrors("project_frequency")}
             >
               <option value="">Select Project Frequency</option>
               <option value="one_time">One-time Project</option>
@@ -64,6 +68,7 @@ const ClientStep4: React.FC<{
             <select
               className="form-control"
               {...register("hiring_preferences", { required: "Hiring preference is required" })}
+              onChange={() => clearErrors("hiring_preferences")}
             >
               <option value="">Select Hiring Preference</option>
               <option value="individuals">Individual Freelancers</option>
@@ -88,6 +93,7 @@ const ClientStep4: React.FC<{
           <button
             type="submit"
             className="btn-one"
+            disabled={!isValid}
           >
             Next
           </button>

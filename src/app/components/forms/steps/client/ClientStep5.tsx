@@ -1,16 +1,18 @@
+"use client";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const ClientStep5: React.FC<{
-  nextStep: (data: any) => void;
-  prevStep: () => void;
+type Props = {
   formData: any;
-}> = ({
-  nextStep,
-  prevStep,
-  formData
-}) => {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({ defaultValues: formData });
+  nextStep: (data: Partial<any>) => void;
+  prevStep: () => void;
+};
+
+const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, watch, formState: { errors, isValid }, clearErrors } = useForm({ 
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
   const paymentMethod = watch("payment_method");
 
   const onSubmit = (data: any) => {
@@ -27,6 +29,7 @@ const ClientStep5: React.FC<{
             <select 
               className="form-control"
               {...register("payment_method", { required: "Payment method is required" })}
+              onChange={() => clearErrors("payment_method")}
             >
               <option value="">Select Payment Method</option>
               <option value="credit_card">Credit Card</option>
@@ -58,6 +61,7 @@ const ClientStep5: React.FC<{
                       message: "Please enter a valid 16-digit card number"
                     }
                   })}
+                  onChange={() => clearErrors("card_number")}
                 />
                 {errors.card_number && (
                   <div className="error">{String(errors.card_number.message)}</div>
@@ -79,6 +83,7 @@ const ClientStep5: React.FC<{
                       message: "Please enter a valid expiry date (MM/YY)"
                     }
                   })}
+                  onChange={() => clearErrors("card_expiry")}
                 />
                 {errors.card_expiry && (
                   <div className="error">{String(errors.card_expiry.message)}</div>
@@ -100,6 +105,7 @@ const ClientStep5: React.FC<{
                       message: "Please enter a valid CVV"
                     }
                   })}
+                  onChange={() => clearErrors("card_cvv")}
                 />
                 {errors.card_cvv && (
                   <div className="error">{String(errors.card_cvv.message)}</div>
@@ -239,9 +245,10 @@ const ClientStep5: React.FC<{
           >
             Previous
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-one"
+            disabled={!isValid}
           >
             Next
           </button>

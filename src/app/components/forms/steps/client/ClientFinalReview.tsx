@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import toast from "react-hot-toast";
 import { Country } from "country-state-city";
@@ -35,15 +36,13 @@ const getCountryName = (isoCode: string) => {
   return country ? country.name : isoCode;
 };
 
-const ClientFinalReview: React.FC<{
+type Props = {
   formData: any;
   prevStep: () => void;
   handleRegister: (data: any) => Promise<void>;
-}> = ({
-  formData,
-  prevStep,
-  handleRegister
-}) => {
+};
+
+const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
   const handleSubmitRegistration = async () => {
     console.log(formData);
     const loadingToast = toast.loading('Submitting registration...');

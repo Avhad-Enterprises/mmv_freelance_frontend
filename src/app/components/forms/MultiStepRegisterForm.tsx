@@ -165,6 +165,7 @@ export interface VideographerFinalReviewProps extends Pick<FreelancerStepCompone
 const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountType }) => {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const [visitedSteps, setVisitedSteps] = useState<Set<number>>(new Set([1]));
   const [previousAccountType, setPreviousAccountType] = useState(accountType);
 
   const getInitialFormState = (currentAccountType: MultiStepRegisterFormProps['accountType']): AllFormData => {
@@ -261,6 +262,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
     if (accountType !== previousAccountType) {
       setFormData(getInitialFormState(accountType));
       setStep(1);
+      setVisitedSteps(new Set([1]));
       setPreviousAccountType(accountType);
     }
   }, [accountType, previousAccountType]);
@@ -271,11 +273,22 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
 
   const nextStep = <T extends AllFormData>(data: Partial<T>) => {
     setFormData((prev: AllFormData) => ({ ...prev, ...data }));
-    setStep((prevStep) => prevStep + 1);
+    setStep((prevStep) => {
+      const newStep = prevStep + 1;
+      setVisitedSteps(prev => new Set([...prev, newStep]));
+      return newStep;
+    });
   };
 
   const prevStep = () => {
     setStep((prevStep) => prevStep - 1);
+  };
+
+  const handleStepClick = (targetStep: number) => {
+    // Allow going to any step that has been visited
+    if (visitedSteps.has(targetStep)) {
+      setStep(targetStep);
+    }
   };
 
   const handleRegister = async <T extends AllFormData>(data: T) => {
@@ -298,12 +311,12 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         const veHandleRegister = handleRegister as HandleRegister<VideoEditorFormData>;
 
         switch (step) {
-          case 1: return <VideoEditorStep1 formData={veFormData} setFormData={veSetFormData} nextStep={veNextStep} />;
-          case 2: return <VideoEditorStep2 formData={veFormData} setFormData={veSetFormData} nextStep={veNextStep} prevStep={prevStep} />;
-          case 3: return <VideoEditorStep3 formData={veFormData} setFormData={veSetFormData} nextStep={veNextStep} prevStep={prevStep} />;
-          case 4: return <VideoEditorStep4 formData={veFormData} setFormData={veSetFormData} nextStep={veNextStep} prevStep={prevStep} />;
+          case 1: return <VideoEditorStep1 formData={veFormData} nextStep={veNextStep} />;
+          case 2: return <VideoEditorStep2 formData={veFormData} nextStep={veNextStep} prevStep={prevStep} />;
+          case 3: return <VideoEditorStep3 formData={veFormData} nextStep={veNextStep} prevStep={prevStep} />;
+          case 4: return <VideoEditorStep4 formData={veFormData} nextStep={veNextStep} prevStep={prevStep} />;
           case 5: return <VideoEditorFinalReview formData={veFormData} prevStep={prevStep} handleRegister={veHandleRegister} />;
-          default: return <VideoEditorStep1 formData={veFormData} setFormData={veSetFormData} nextStep={veNextStep} />;
+          default: return <VideoEditorStep1 formData={veFormData} nextStep={veNextStep} />;
         }
       case "videographer":
         const vgFormData = formData as VideographerFormData;
@@ -312,12 +325,12 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         const vgHandleRegister = handleRegister as HandleRegister<VideographerFormData>;
 
         switch (step) {
-          case 1: return <VideographerStep1 formData={vgFormData} setFormData={vgSetFormData} nextStep={vgNextStep} />;
-          case 2: return <VideographerStep2 formData={vgFormData} setFormData={vgSetFormData} nextStep={vgNextStep} prevStep={prevStep} />;
-          case 3: return <VideographerStep3 formData={vgFormData} setFormData={vgSetFormData} nextStep={vgNextStep} prevStep={prevStep} />;
-          case 4: return <VideographerStep4 formData={vgFormData} setFormData={vgSetFormData} nextStep={vgNextStep} prevStep={prevStep} />;
+          case 1: return <VideographerStep1 formData={vgFormData} nextStep={vgNextStep} />;
+          case 2: return <VideographerStep2 formData={vgFormData} nextStep={vgNextStep} prevStep={prevStep} />;
+          case 3: return <VideographerStep3 formData={vgFormData} nextStep={vgNextStep} prevStep={prevStep} />;
+          case 4: return <VideographerStep4 formData={vgFormData} nextStep={vgNextStep} prevStep={prevStep} />;
           case 5: return <VideographerFinalReview formData={vgFormData} prevStep={prevStep} handleRegister={vgHandleRegister} />;
-          default: return <VideographerStep1 formData={vgFormData} setFormData={vgSetFormData} nextStep={vgNextStep} />;
+          default: return <VideographerStep1 formData={vgFormData} nextStep={vgNextStep} />;
         }
       case "client":
         const clientFormData = formData as ClientFormData;
@@ -349,7 +362,8 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
           {Array.from({ length: totalSteps }).map((_, index) => (
             <div
               key={index}
-              className={`step-circle ${step > index ? "completed" : ""} ${step === index + 1 ? "active" : ""}`}
+              className={`step-circle ${visitedSteps.has(index + 1) ? "completed" : ""} ${step === index + 1 ? "active" : ""} ${visitedSteps.has(index + 1) ? "clickable" : ""}`}
+              onClick={() => handleStepClick(index + 1)}
             >
               {index + 1}
             </div>
@@ -387,9 +401,12 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
           background-color: #28a745;
           color: white;
         }
-        .step-circle.active {
-          background-color: #007bff;
-          color: white;
+        .step-circle.clickable {
+          cursor: pointer;
+        }
+        .step-circle.clickable:hover {
+          transform: scale(1.1);
+          transition: transform 0.2s ease;
         }
       `}</style>
     </div>

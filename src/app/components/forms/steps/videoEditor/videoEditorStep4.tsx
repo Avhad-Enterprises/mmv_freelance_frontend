@@ -1,14 +1,19 @@
 "use client";
 import React from "react";
+import { useForm } from "react-hook-form";
 
 type Props = {
   formData: any;
-  setFormData: (updater: (prev: any) => any) => void;
   nextStep: (data: Partial<any>) => void;
   prevStep: () => void;
 };
 
-const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
+const videoEditorStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+    defaultValues: formData,
+    mode: 'onSubmit'
+  });
+
   const [languageQuery, setLanguageQuery] = React.useState("");
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = React.useState(false);
 
@@ -19,25 +24,58 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
     "German", "Chinese", "Japanese", "Korean", "Arabic", "Russian"
   ];
 
-  // Validation
-  const shortDescriptionValid = !!formData.short_description && formData.short_description.trim().length >= 10;
-  const availabilityValid = !!formData.availability;
-  const languagesValid = !!(formData.languages && formData.languages.length > 0);
+  const languages = watch("languages") || [];
+
+  // Register languages with validation
+  React.useEffect(() => {
+    register("languages", {
+      validate: (value) => {
+        const langs = value || [];
+        return langs.length > 0 || "At least one language is required";
+      }
+    });
+  }, [register]);
+
+  const addLanguage = (lang: string) => {
+    if (!languages.includes(lang)) {
+      const newLanguages = [...languages, lang];
+      setValue("languages", newLanguages);
+      clearErrors("languages");
+    }
+    setLanguageQuery("");
+    setIsLanguageDropdownOpen(false);
+  };
+
+  const removeLanguage = (lang: string) => {
+    const newLanguages = languages.filter((x: string) => x !== lang);
+    setValue("languages", newLanguages);
+    clearErrors("languages");
+  };
+
+  const onSubmit = (data: any) => {
+    nextStep(data);
+  };
 
   return (
-    <div>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <h4 className="mb-3">Short description about yourself*</h4>
       <div className="input-group-meta position-relative mb-25">
         <label>Short description (minimum 10 characters)*</label>
         <textarea
           className="form-control"
           rows={4}
-          value={formData.short_description || ""}
-          onChange={(e) => setFormData((prev) => ({ ...prev, short_description: e.target.value }))}
+          {...register("short_description", {
+            required: "Short description is required",
+            minLength: {
+              value: 10,
+              message: "Description must be at least 10 characters long"
+            },
+            onChange: () => clearErrors("short_description")
+          })}
           placeholder="Tell us about your experience and skills..."
         />
-        {formData.short_description && !shortDescriptionValid && (
-          <small className="text-danger">Description must be at least 10 characters long</small>
+        {errors.short_description && (
+          <div className="error">{String(errors.short_description.message)}</div>
         )}
       </div>
 
@@ -47,8 +85,10 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
             <label>Availability*</label>
             <select
               className="form-control"
-              value={formData.availability || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
+              {...register("availability", {
+                required: "Availability is required",
+                onChange: () => clearErrors("availability")
+              })}
             >
               <option value="">Select Availability</option>
               <option value="part-time">Part-time</option>
@@ -56,8 +96,8 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               <option value="flexible">Flexible</option>
               <option value="on-demand">On-Demand</option>
             </select>
-            {!availabilityValid && (
-              <small className="text-danger">Availability is required</small>
+            {errors.availability && (
+              <div className="error">{String(errors.availability.message)}</div>
             )}
           </div>
         </div>
@@ -85,7 +125,7 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                   {availableLanguages
                     .filter(lang => 
                       lang.toLowerCase().includes(languageQuery.toLowerCase()) &&
-                      !(formData.languages || []).includes(lang)
+                      !languages.includes(lang)
                     )
                     .map(lang => (
                       <button
@@ -93,14 +133,7 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                         type="button"
                         className="dropdown-item w-100 text-start"
                         onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            languages: [...(prev.languages || []), lang]
-                          }));
-                          setLanguageQuery("");
-                          setIsLanguageDropdownOpen(false);
-                        }}
+                        onClick={() => addLanguage(lang)}
                       >
                         {lang}
                       </button>
@@ -109,16 +142,13 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
               )}
             </div>
             <div className="d-flex flex-wrap gap-2 mt-2">
-              {(formData.languages || []).map((lang: string) => (
+              {languages.map((lang: string) => (
                 <span key={lang} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
                   {lang}
                   <button
                     type="button"
                     className="btn btn-sm btn-link text-white p-0 m-0"
-                    onClick={() => setFormData((prev) => ({ 
-                      ...prev, 
-                      languages: prev.languages.filter((x: string) => x !== lang)
-                    }))}
+                    onClick={() => removeLanguage(lang)}
                     style={{textDecoration: 'none', lineHeight: 1}}
                   >
                     ×
@@ -126,8 +156,8 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
                 </span>
               ))}
             </div>
-            {!languagesValid && (
-              <small className="text-danger">At least one language is required</small>
+            {errors.languages && (
+              <div className="error">{String(errors.languages.message)}</div>
             )}
           </div>
         </div>
@@ -138,15 +168,14 @@ const videoEditorStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pr
           Previous
         </button>
         <button
-          type="button"
+          type="submit"
           className="btn-one"
-          onClick={() => nextStep({})}
-          disabled={!shortDescriptionValid || !availabilityValid || !languagesValid}
+          disabled={!isValid}
         >
           Next
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

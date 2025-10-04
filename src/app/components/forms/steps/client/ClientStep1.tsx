@@ -1,10 +1,18 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
-const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = ({ nextStep, formData }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({ defaultValues: formData });
-  const [showPassword, setShowPassword] = React.useState(false);
+type Props = {
+  formData: any;
+  nextStep: (data: Partial<any>) => void;
+};
+
+const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
+  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
+    defaultValues: formData,
+    mode: 'onSubmit' // Validate only on submit
+  });
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -22,6 +30,7 @@ const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = 
               placeholder="Enter your full name" 
               className="form-control" 
               {...register("full_name", { required: "Full Name is required" })}
+              onChange={() => clearErrors("full_name")}
             />
             {errors.full_name && (
               <div className="error">{String(errors.full_name.message)}</div>
@@ -44,6 +53,7 @@ const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = 
                   message: "Invalid email address"
                 }
               })}
+              onChange={() => clearErrors("email")}
             />
             {errors.email && (
               <div className="error">{String(errors.email.message)}</div>
@@ -66,6 +76,7 @@ const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = 
                   message: "Password must be at least 6 characters"
                 }
               })}
+              onChange={() => clearErrors("password")}
             />
             <span 
               className="placeholder_icon"
@@ -88,7 +99,7 @@ const ClientStep1: React.FC<{ nextStep: (data: any) => void; formData: any }> = 
 
         {/* Next Button */}
         <div className="col-12">
-          <button type="submit" className="btn-one tran3s w-100 mt-30">
+          <button type="submit" className="btn-one tran3s w-100 mt-30" disabled={!isValid}>
             Next
           </button>
         </div>
