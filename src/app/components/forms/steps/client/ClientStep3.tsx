@@ -85,7 +85,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         {/* Upload Profile Photo */}
         <div className="col-12">
           <h4 className="mb-2">Upload Profile Photo*</h4>
-          <small className="d-block mb-2">{note}</small>
+          <small className="d-block mb-2" style={{ color: "blue" }}>{note}</small>
           <input
             type="file"
             accept="image/*"
@@ -249,7 +249,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                 clearErrors("business_document");
               }}
             />
-            <small className="text-muted">
+            <small style={{ color: "blue" }}>
               Upload business registration documents. This will be mandatory before your first payout.
               Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
             </small>
@@ -274,7 +274,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               className="form-control"
               {...register("tax_id")}
             />
-            <small className="text-muted">
+            <small style={{ color: "blue" }}>
               This information helps us prepare accurate invoices and tax documents
             </small>
           </div>

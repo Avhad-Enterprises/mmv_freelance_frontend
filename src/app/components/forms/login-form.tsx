@@ -85,6 +85,7 @@ const LoginForm = () => {
     } catch (error: any) {
       console.error("API Error:", error);
       toast.error(error.response?.data?.message || "Login failed");
+      router.push("/");
     }
 
     reset();

@@ -92,7 +92,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     // Pass the new onSubmit handler to the form
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* Phone Number, Profile Photo, ID Verification sections (no changes) */}
-      <h4 className="mb-3">Phone Number & OTP Verification*</h4>
+      <h4 className="mb-3">Phone Number</h4>
       <div className="row">
         <div className="col-md-6">
           <div className="input-group-meta position-relative mb-25">
@@ -118,7 +118,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
       </div>
 
       <h4 className="mb-2">Upload Profile Photo*</h4>
-      <small className="d-block mb-2">{note}</small>
+      <small className="d-block mb-2" style={{ color: "blue" }}>{note}</small>
       <input
         type="file"
         accept="image/*"

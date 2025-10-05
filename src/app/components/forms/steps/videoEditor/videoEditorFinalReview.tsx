@@ -51,6 +51,11 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (data.country) fd.append('country', data.country);
       if (data.pincode) fd.append('pincode', data.pincode);
 
+      if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+        fd.append('latitude', String(data.coordinates.lat));
+        fd.append('longitude', String(data.coordinates.lng));
+      }
+
       // ID Verification
       if (data.id_type) fd.append('id_type', data.id_type);
       if (data.id_document) {

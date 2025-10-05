@@ -268,7 +268,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
         const { user, profile, userType: type } = response.data;
         setUserType(type);
 
-        const countryObj = Country.getAllCountries().find(c => c.name === user.country);
+        const countryObj = Country.getCountryByCode(user.country);
         const stateObj = countryObj ? State.getStatesOfCountry(countryObj.isoCode).find(s => s.name === user.state) : null;
         
         const data: ProfileData = {
@@ -280,7 +280,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
           address_line_second: user.address_line_second || "",
           city: user.city || "",
           state: stateObj?.isoCode || "",
-          country: countryObj?.isoCode || "",
+          country: user.country || "",
           pincode: user.pincode || "",
           skills: safeArray<string>(profile?.skills),
           superpowers: safeArray<string>(profile?.superpowers),
@@ -774,27 +774,29 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                           <option key={country.isoCode} value={country.isoCode}>{country.name}</option>
                       ))}
                     </select>
-                  ) : (Country.getCountryByCode(profileData.country)?.name)}
+                  ) : (Country.getCountryByCode(displayData.country)?.name)}
                 </div>
               </div>
 
-              <div className="row mb-3">
-                <div className="col-md-4"><strong>State:</strong></div>
-                <div className="col-md-8">
-                  {isEditModeFor("address") ? (
-                    <select className="form-select" value={editedData.state || ''} onChange={(e) => {
-                        handleInputChange('state', e.target.value);
-                        setSelectedStateCode(e.target.value);
-                        handleInputChange('city', '');
-                    }} disabled={!editedData.country}>
-                      <option value="">Select State</option>
-                      {states.map(state => (
-                          <option key={state.isoCode} value={state.isoCode}>{state.name}</option>
-                      ))}
-                    </select>
-                  ) : (State.getStateByCodeAndCountry(profileData.state, profileData.country)?.name)}
+              {(isEditModeFor("address") || displayData.state) && (
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>State:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("address") ? (
+                      <select className="form-select" value={editedData.state || ''} onChange={(e) => {
+                          handleInputChange('state', e.target.value);
+                          setSelectedStateCode(e.target.value);
+                          handleInputChange('city', '');
+                      }} disabled={!editedData.country}>
+                        <option value="">Select State</option>
+                        {states.map(state => (
+                            <option key={state.isoCode} value={state.isoCode}>{state.name}</option>
+                        ))}
+                      </select>
+                    ) : (State.getStateByCodeAndCountry(displayData.state, displayData.country)?.name)}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="row mb-3">
                 <div className="col-md-4"><strong>City:</strong></div>
@@ -806,11 +808,11 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                           <option key={city.name} value={city.name}>{city.name}</option>
                       ))}
                     </select>
-                  ) : (profileData.city)}
+                  ) : (displayData.city)}
                 </div>
               </div>
               
-              <InfoRow label="Zip/Pin Code" value={profileData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+              <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
             </InfoSection>
 
           </>

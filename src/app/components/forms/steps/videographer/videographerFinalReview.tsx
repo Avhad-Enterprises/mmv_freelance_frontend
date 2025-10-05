@@ -51,6 +51,12 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (data.full_address) {
         fd.append('full_address', data.full_address);
       }
+      
+      // *** FIX: Append latitude and longitude from Step 3 ***
+      if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+        fd.append('latitude', String(data.coordinates.lat));
+        fd.append('longitude', String(data.coordinates.lng));
+      }
 
       // ID Verification
       if (data.id_type) fd.append('id_type', data.id_type);
