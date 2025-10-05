@@ -99,7 +99,7 @@ const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSa
         <h4 className="dash-title-three">{title}</h4>
         <div>
           {!editingSection ? (
-            <button className="btn btn-primary" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
+            <button className="dash-btn-two" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
               Edit
             </button>
           ) : isEditingThisSection && (
@@ -494,7 +494,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
               animation: 'slideUp 0.3s ease-out'
             }}>
               <button
-                className="btn btn-primary btn-lg"
+                className="dash-btn-two btn-lg"
                 onClick={saveAllChanges}
                 disabled={saving}
                 style={{
@@ -568,7 +568,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
                               <button className="btn btn-outline-danger" type="button" onClick={() => removeSocialLink(index)}>Remove</button>
                             </div>
                           ))}
-                          <button className="btn btn-outline-primary mt-2" type="button" onClick={addSocialLink}>+ Add Social Link</button>
+                          <button className="btn btn-outline-success mt-2" type="button" onClick={addSocialLink}>+ Add Social Link</button>
                         </div>
                       ) : (
                         (displayData.social_links || []).map((link: string, index: number) => (
