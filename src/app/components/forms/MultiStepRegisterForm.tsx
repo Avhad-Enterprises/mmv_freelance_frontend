@@ -84,7 +84,7 @@ export interface ClientFormData extends FormDataCommon {
   address: string;
   state: string;
   pincode: string;
-  profile_logo: File | null;
+  profile_photo: File | null;
   work_arrangement: "Remote" | "On-site" | "Hybrid" | "";
   project_frequency: "One-time" | "Occasional" | "Ongoing" | "";
   hiring_preferences: string[];
@@ -226,7 +226,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         address: "",
         state: "",
         pincode: "",
-        profile_logo: null,
+        profile_photo: null,
         work_arrangement: "",
         project_frequency: "",
         hiring_preferences: [],

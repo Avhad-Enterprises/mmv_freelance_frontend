@@ -15,6 +15,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
     mode: 'onChange'
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
+
+  const note = "Upload your original profile photo only. If fake images are detected, your profile will be de-activated immediately.";
 
   // File validation function
   const validateBusinessDocument = (file: File | null): boolean | string => {
@@ -35,11 +38,19 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
     return true;
   };
 
+  const validateProfilePhoto = (file: File | null): boolean | string => {
+    if (!file) return "Profile photo is required";
+    if (file.size === 0) return "Selected file is empty. Please choose a valid image.";
+    if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB.";
+    return true;
+  };
+
   const onSubmit = (data: any) => {
     // Include the selected file in the data
     const submissionData = {
       ...data,
-      business_document: selectedFile // Use singular form
+      business_document: selectedFile, // Use singular form
+      profile_photo: selectedProfilePhoto
     };
 
     nextStep(submissionData);
@@ -69,6 +80,33 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <div className="error">{String(errors.phone_number.message)}</div>
             )}
           </div>
+        </div>
+
+        {/* Upload Profile Photo */}
+        <div className="col-12">
+          <h4 className="mb-2">Upload Profile Photo*</h4>
+          <small className="d-block mb-2">{note}</small>
+          <input
+            type="file"
+            accept="image/*"
+            {...register("profile_photo", {
+              validate: (value) => validateProfilePhoto(value?.[0] || selectedProfilePhoto)
+            })}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setSelectedProfilePhoto(file);
+              setValue("profile_photo", e.target.files);
+              clearErrors("profile_photo");
+            }}
+          />
+          {selectedProfilePhoto && (
+            <small className="text-success d-block mt-1">
+              Selected: {selectedProfilePhoto.name} ({(selectedProfilePhoto.size / 1024).toFixed(1)} KB)
+            </small>
+          )}
+          {errors.profile_photo && (
+            <div className="error">{String(errors.profile_photo.message)}</div>
+          )}
         </div>
 
         {/* Address */}

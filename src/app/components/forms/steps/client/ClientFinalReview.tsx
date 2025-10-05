@@ -104,6 +104,11 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         }
       }
 
+      // Profile photo upload
+      if (formData.profile_photo) {
+        formDataToSend.append('profile_picture', formData.profile_photo as File);
+      }
+
       console.log('Client form data being sent:');
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
