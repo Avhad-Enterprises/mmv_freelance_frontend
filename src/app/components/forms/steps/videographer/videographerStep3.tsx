@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Country, City } from "country-state-city";
+// 1. Import the server action
+import { geocodeAddress } from "@/lib/actions/latlongaction"; // Adjust this path if your folder structure is different
 
 type Props = {
   formData: any;
@@ -9,42 +11,86 @@ type Props = {
   prevStep: () => void;
 };
 
-const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors }, // We don't need `isValid` if submitting triggers all validations
+    setValue, 
+    clearErrors, 
+    watch,
+    setError // Import setError to display API errors
+  } = useForm({
     defaultValues: formData,
     mode: 'onChange'
   });
+
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
   const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(null);
-  const note =
-    "Upload your original profile photo only. If fake images are detected, your profile will be de-activated immediately.";
+  // 2. Add loading state for the geocoding process
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const note = "Upload your original profile photo only. If fake images are detected, your profile will be de-activated immediately.";
 
-  // File validation functions
+  // File validation functions (no changes needed here)
   const validateProfilePhoto = (file: File | null): boolean | string => {
     if (!file) return "Profile photo is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid image.";
-    if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB."; // 5MB limit for profile photos
+    if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB."; // 5MB limit
     return true;
   };
 
   const validateIdDocument = (file: File | null): boolean | string => {
     if (!file) return "ID document is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid document.";
-    if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB."; // 10MB limit for documents
+    if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB."; // 10MB limit
     return true;
   };
 
-  const onSubmit = (data: any) => {
-    // Include the selected files in the data
+  // 3. Update the onSubmit handler to be async and call the server action
+  const onSubmit = async (data: any) => {
+    setIsGeocoding(true);
+    clearErrors("full_address"); // Clear previous geocoding errors
+
+    // Combine address parts for a more accurate geocoding query
+    const countryName = Country.getCountryByCode(data.country)?.name || '';
+    const fullAddressToGeocode = `${data.full_address}, ${data.city}, ${countryName}`;
+    
+    // Call the server action
+    const geocodeResult = await geocodeAddress(fullAddressToGeocode);
+
+    // Handle potential errors from the API
+    if (geocodeResult.error) {
+      setError("full_address", {
+        type: "manual",
+        message: geocodeResult.error
+      });
+      setIsGeocoding(false);
+      return; // Stop the submission process
+    }
+
+    // If successful, combine all data and proceed
     const submissionData = {
       ...data,
       profile_photo: selectedProfilePhoto,
-      id_document: selectedIdDocument
+      id_document: selectedIdDocument,
+      // Add the retrieved coordinates to the submission data
+      coordinates: {
+        lat: geocodeResult.data?.lat,
+        lng: geocodeResult.data?.lng,
+      },
+      // Optionally save the API-formatted address for consistency
+      formatted_address: geocodeResult.data?.formatted_address
     };
+
     nextStep(submissionData);
+    setIsGeocoding(false);
   };
 
+  // Watch for country changes to dynamically update the city list
+  const selectedCountry = watch("country");
+
   return (
+    // Pass the new async onSubmit handler to the form
     <form onSubmit={handleSubmit(onSubmit)}>
       <h4 className="mb-3">Phone Number & OTP Verification*</h4>
       <div className="row">
@@ -61,7 +107,6 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                   message: "Please enter a valid 10-digit phone number"
                 }
               })}
-              onChange={() => clearErrors("phone_number")}
               placeholder="Enter 10-digit phone number"
               maxLength={10}
             />
@@ -70,18 +115,6 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
             )}
           </div>
         </div>
-        {/* <div className="col-md-6">
-          <div className="input-group-meta position-relative mb-25">
-            <label>OTP*</label>
-            <input
-              type="text"
-              className="form-control"
-              value={formData.otp || ""}
-              onChange={(e) => setFormData((prev) => ({ ...prev, otp: e.target.value }))}
-              placeholder="Enter OTP"
-            />
-          </div>
-        </div> */}
       </div>
 
       <h4 className="mb-2">Upload Profile Photo*</h4>
@@ -95,6 +128,7 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         onChange={(e) => {
           const file = e.target.files?.[0] || null;
           setSelectedProfilePhoto(file);
+          setValue("profile_photo", e.target.files); // Update RHF state for validation
           clearErrors("profile_photo");
         }}
       />
@@ -114,7 +148,6 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
             <select
               className="form-control mb-2"
               {...register("id_type", { required: "ID type is required" })}
-              onChange={() => clearErrors("id_type")}
             >
               <option value="">Select ID Type*</option>
               <option value="passport">Passport</option>
@@ -135,6 +168,7 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
               onChange={(e) => {
                 const file = e.target.files?.[0] || null;
                 setSelectedIdDocument(file);
+                setValue("id_document", e.target.files); // Update RHF state for validation
                 clearErrors("id_document");
               }}
             />
@@ -161,10 +195,7 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                 {...register("country", {
                   required: "Country is required",
                   onChange: (e) => {
-                    const countryCode = e.target.value;
-                    setValue("city", "");
-                    setValue("coordinates", { lat: "", lng: "" });
-                    clearErrors("country");
+                    setValue("city", ""); // Reset city when country changes
                   }
                 })}
               >
@@ -187,23 +218,14 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                 className="form-control"
                 {...register("city", {
                   required: "City is required",
-                  onChange: (e) => {
-                    const cityName = e.target.value;
-                    const cities = watch("country") ? City.getCitiesOfCountry(watch("country")) : [];
-                    const selectedCity = cities?.find(c => c.name === cityName);
-
-                    setValue("coordinates", {
-                      lat: selectedCity?.latitude || "",
-                      lng: selectedCity?.longitude || "",
-                    });
-                    clearErrors("city");
-                  }
+                  // 4. Removed the coordinate-setting logic from here.
+                  // Geocoding on submit is more accurate.
                 })}
-                disabled={!watch("country")}
+                disabled={!selectedCountry}
               >
                 <option value="">Select City</option>
-                {watch("country") && (City.getCitiesOfCountry(watch("country")) || []).map((ct) => (
-                  <option key={`${ct.name}-${ct.latitude}`} value={ct.name}>
+                {selectedCountry && (City.getCitiesOfCountry(selectedCountry) || []).map((ct) => (
+                  <option key={`${ct.name}-${ct.stateCode}`} value={ct.name}>
                     {ct.name}
                   </option>
                 ))}
@@ -215,37 +237,37 @@ const videographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
           </div>
         </div>
         <div className="input-group-meta position-relative mt-2 mb-25">
-            <label>Full Address*</label>
-            <textarea
-                className="form-control"
-                placeholder="e.g., 123 Main St, Anytown, State, 12345"
-                {...register("full_address", {
-                  required: "Full address is required",
-                  onChange: () => clearErrors("full_address")
-                })}
-                rows={3}
-            />
-            {errors.full_address && (
-              <div className="error">{String(errors.full_address.message)}</div>
-            )}
+          <label>Full Address*</label>
+          <textarea
+            className="form-control"
+            placeholder="e.g., 123 Main St, Anytown, State, 12345"
+            {...register("full_address", {
+              required: "Full address is required",
+            })}
+            rows={3}
+          />
+          {/* This will now show validation errors AND any API errors from geocoding */}
+          {errors.full_address && (
+            <div className="error">{String(errors.full_address.message)}</div>
+          )}
         </div>
       </div>
 
       <div className="d-flex justify-content-between mt-4">
-        <button type="button" className="btn-one" onClick={prevStep}>
+        <button type="button" className="btn-one" onClick={prevStep} disabled={isGeocoding}>
           Previous
         </button>
         <button
           type="submit"
           className="btn-one"
+          // 5. Disable the button and show a loading message during the API call
+          disabled={isGeocoding}
         >
-          Next
+          {isGeocoding ? "Verifying Address..." : "Next"}
         </button>
       </div>
     </form>
   );
 };
 
-export default videographerStep3;
-
-
+export default VideographerStep3;
