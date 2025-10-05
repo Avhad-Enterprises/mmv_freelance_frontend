@@ -38,6 +38,8 @@ type IProps = {
 const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
     const pathname = usePathname();
     const [fullName, setFullName] = useState("Loading...");
+    // 1. Add state to store the profile picture URL
+    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -65,6 +67,11 @@ const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                     } else {
                         setFullName("User");
                     }
+
+                    // 2. Set the profile picture URL from the API response
+                    if (user?.profile_picture) {
+                        setProfilePictureUrl(user.profile_picture);
+                    }
                 }
             } catch (err) {
                 console.error("Failed to fetch user profile:", err);
@@ -84,15 +91,28 @@ const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                         <div className="user-avatar online position-relative rounded-circle" style={{
                             width: '50px',
                             height: '50px',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            // Apply background only if there is no picture
+                            background: profilePictureUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '20px',
                             fontWeight: 'bold',
-                            color: 'white'
+                            color: 'white',
+                            overflow: 'hidden' // Ensures the image corners are clipped
                         }}>
-                            {fullName.charAt(0).toUpperCase()}
+                            {/* 3. Conditionally render the Image or the initial */}
+                            {profilePictureUrl ? (
+                                <Image
+                                    src={profilePictureUrl}
+                                    alt="Profile Picture"
+                                    width={50}
+                                    height={50}
+                                    style={{ objectFit: 'cover' }}
+                                />
+                            ) : (
+                                fullName.charAt(0).toUpperCase()
+                            )}
                         </div>
                         <div className="user-name-data">
                             <button className="user-name dropdown-toggle" type="button" id="profile-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
