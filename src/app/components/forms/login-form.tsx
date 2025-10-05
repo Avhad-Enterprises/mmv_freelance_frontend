@@ -17,7 +17,7 @@ type IFormData = {
 
 // schema (email format removed)
 const schema = Yup.object().shape({
-  email: Yup.string().required("Email or username is required").label("Email or Username"),
+  email: Yup.string().required("Email is required").label("Email"),
   password: Yup.string().required("Password is required").min(6, "Password must be at least 6 characters").label("Password"),
 });
 
@@ -27,7 +27,7 @@ const resolver: Resolver<IFormData> = async (values) => {
   if (!values.email) {
     errors.email = {
       type: "required",
-      message: "Email or username is required.",
+      message: "Email is required.",
     };
   }
   if (!values.password) {
@@ -95,10 +95,10 @@ const LoginForm = () => {
       <div className="row">
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Email or Username*</label>
+            <label>Email*</label>
             <input
               type="text"
-              placeholder="Enter email or username"
+              placeholder="Enter email"
               {...register("email")}
               name="email"
             />
