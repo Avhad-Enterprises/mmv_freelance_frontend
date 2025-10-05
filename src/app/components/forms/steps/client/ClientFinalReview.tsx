@@ -64,7 +64,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.company_name) formDataToSend.append('company_name', formData.company_name);
       if (formData.company_description) formDataToSend.append('company_description', formData.company_description);
       if (formData.industry) formDataToSend.append('industry', formData.industry);
-      if (formData.website) formDataToSend.append('website', formData.website);
+      if (formData.website) formDataToSend.append('company_website', formData.website);
       if (formData.social_links) formDataToSend.append('social_links', formData.social_links);
       if (formData.company_size) formDataToSend.append('company_size', formData.company_size);
 
@@ -82,6 +82,12 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.zip_code) formDataToSend.append('zip_code', formData.zip_code);
       if (formData.pincode) formDataToSend.append('pincode', formData.pincode);
       if (formData.tax_id) formDataToSend.append('tax_id', formData.tax_id);
+
+      // Latitude and Longitude
+      if (formData.coordinates && formData.coordinates.lat && formData.coordinates.lng) {
+        formDataToSend.append('latitude', String(formData.coordinates.lat));
+        formDataToSend.append('longitude', String(formData.coordinates.lng));
+      }
 
       // Work Preferences
       // These lines are correct, but they will only run if the values exist in `formData`.

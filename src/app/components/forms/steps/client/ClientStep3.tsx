@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Country, State, City } from "country-state-city";
+// 1. Import the server action
+import { geocodeAddress } from "@/lib/actions/latlongaction"; // Adjust path if needed
 
 type Props = {
   formData: any;
@@ -10,12 +12,14 @@ type Props = {
 };
 
 const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch, clearErrors } = useForm({
+  const { register, handleSubmit, formState: { errors, isValid }, setValue, watch, clearErrors, setError } = useForm({
     defaultValues: formData,
     mode: 'onChange'
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
+  // 2. Add loading state for the geocoding process
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const note = "Upload your original profile photo only. If fake images are detected, your profile will be de-activated immediately.";
 
@@ -35,6 +39,15 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
       return 'File size must be less than 10MB.';
     }
 
+    // Check MIME types for allowed file formats
+    const allowedMimeTypes = [
+      'application/pdf' // PDF files only (backend limitation)
+    ];
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return 'Invalid file type. Only PDF files are currently supported.';
+    }
+
     return true;
   };
 
@@ -45,15 +58,43 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
     return true;
   };
 
-  const onSubmit = (data: any) => {
-    // Include the selected file in the data
+    const onSubmit = async (data: any) => {
+    setIsGeocoding(true);
+    clearErrors("address"); // Clear previous geocoding errors
+
+    // Combine address parts for a more accurate geocoding query
+    const countryName = Country.getCountryByCode(data.country)?.name || '';
+    const fullAddress = `${data.address}, ${data.city}, ${data.state}, ${countryName}`;
+    
+    // Call the server action
+    const geocodeResult = await geocodeAddress(fullAddress);
+
+    if (geocodeResult.error) {
+      // If the API returns an error, display it on the address field
+      setError("address", {
+        type: "manual",
+        message: geocodeResult.error
+      });
+      setIsGeocoding(false);
+      return; // Stop the submission process
+    }
+
+    // If successful, combine all data and proceed
     const submissionData = {
       ...data,
       business_document: selectedFile, // Use singular form
-      profile_photo: selectedProfilePhoto
+      profile_photo: selectedProfilePhoto,
+      // Add the retrieved coordinates to the submission data
+      coordinates: {
+        lat: geocodeResult.data?.lat,
+        lng: geocodeResult.data?.lng,
+      },
+      // Optionally save the API-formatted address
+      formatted_address: geocodeResult.data?.formatted_address
     };
 
     nextStep(submissionData);
+    setIsGeocoding(false);
   };
 
   return (
@@ -235,7 +276,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <input 
               type="file" 
               className="form-control"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              accept=".pdf"
               {...register("business_document", { 
                 validate: (value) => {
                   if (!value || value.length === 0) return true; // Optional
@@ -246,12 +287,26 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               onChange={(e) => {
                 const file = e.target.files?.[0] || null;
                 setSelectedFile(file);
-                clearErrors("business_document");
+                
+                // Validate file type immediately on upload
+                if (file) {
+                  const validationResult = validateBusinessDocument(file);
+                  if (validationResult !== true) {
+                    setError("business_document", {
+                      type: "manual",
+                      message: validationResult as string
+                    });
+                  } else {
+                    clearErrors("business_document");
+                  }
+                } else {
+                  clearErrors("business_document");
+                }
               }}
             />
             <small style={{ color: "blue" }}>
               Upload business registration documents. This will be mandatory before your first payout.
-              Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
+              Accepted format: PDF (Max 10MB)
             </small>
             {selectedFile && (
               <small className="text-success d-block mt-1">
@@ -282,18 +337,20 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
 
         {/* Navigation Buttons */}
         <div className="col-12 d-flex justify-content-between">
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="btn-one"
             onClick={prevStep}
+            disabled={isGeocoding}
           >
             Previous
           </button>
           <button 
             type="submit" 
             className="btn-one"
+            disabled={isGeocoding}
           >
-            Next
+            {isGeocoding ? "Verifying Address..." : "Next"}
           </button>
         </div>
       </div>

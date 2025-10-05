@@ -43,7 +43,8 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       if (data.city) fd.append('city', data.city);
       if (data.country) fd.append('country', data.country);
       if (data.coordinates?.lat || data.coordinates?.lng) {
-        fd.append('street_address', `${data.coordinates?.lat || ''},${data.coordinates?.lng || ''}`);
+        fd.append('latitude', String(data.coordinates?.lat || ''));
+        fd.append('longitude', String(data.coordinates?.lng || ''));
       }
 
       // ID Verification

@@ -110,6 +110,7 @@ export interface ClientFormData extends FormDataCommon {
   tax_id: string;
   city: string;
   country: string;
+  coordinates: { lat: string; lng: string };
 }
 
 export type AllFormData = VideoEditorFormData | VideographerFormData | ClientFormData;
@@ -256,6 +257,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         tax_id: "",
         city: "",
         country: "",
+        coordinates: { lat: "", lng: "" },
       } as ClientFormData;
     }
   };
