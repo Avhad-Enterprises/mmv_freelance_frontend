@@ -44,13 +44,18 @@ type Props = {
 
 const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
   const handleSubmitRegistration = async () => {
-    console.log(formData);
+    // ------------------- DEBUGGING STEP 1 -------------------
+    // Check your browser's console for this log.
+    // It will show you exactly what data this component received.
+    // The 'work_arrangement', 'project_frequency', and 'hiring_preferences' fields are likely missing here.
+    console.log('Initial formData received by Review component:', formData);
+
     const loadingToast = toast.loading('Submitting registration...');
     try {
       const formDataToSend = new FormData();
 
       // Basic Information
-      formDataToSend.append('full_name', formData.full_name); // Changed
+      formDataToSend.append('full_name', formData.full_name);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('account_type', 'client');
@@ -79,6 +84,9 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.tax_id) formDataToSend.append('tax_id', formData.tax_id);
 
       // Work Preferences
+      // These lines are correct, but they will only run if the values exist in `formData`.
+      // If the values are missing from the log above, these `if` statements will evaluate to false,
+      // and the data will not be appended to the request.
       if (formData.work_arrangement) formDataToSend.append('work_arrangement', formData.work_arrangement);
       if (formData.project_frequency) formDataToSend.append('project_frequency', formData.project_frequency);
       if (formData.hiring_preferences) formDataToSend.append('hiring_preferences', formData.hiring_preferences);
@@ -108,8 +116,11 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.profile_photo) {
         formDataToSend.append('profile_picture', formData.profile_photo as File);
       }
-
-      console.log('Client form data being sent:');
+      
+      // ------------------- DEBUGGING STEP 2 -------------------
+      // This log shows what is ACTUALLY being sent to the backend.
+      // If the fields are missing from the first log, they will also be missing here.
+      console.log('Client form data being sent to API:');
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
       }
@@ -140,7 +151,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
 
   const sections = {
     "Basic Information": {
-      full_name: formData.full_name, // Changed
+      full_name: formData.full_name,
       email: formData.email,
     },
     "Company Information": {

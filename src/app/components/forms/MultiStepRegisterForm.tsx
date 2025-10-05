@@ -168,6 +168,10 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
   const [visitedSteps, setVisitedSteps] = useState<Set<number>>(new Set([1]));
   const [previousAccountType, setPreviousAccountType] = useState(accountType);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
   const getInitialFormState = (currentAccountType: MultiStepRegisterFormProps['accountType']): AllFormData => {
     const baseCommon: Omit<FormDataCommon, 'account_type'> = {
       full_name: "", // Changed from username
