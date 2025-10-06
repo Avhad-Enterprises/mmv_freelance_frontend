@@ -367,13 +367,13 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
   // This function compares the original and edited data objects and returns
   // an object containing only the key-value pairs that have been modified.
   const getChangedFields = (original: ProfileData, edited: ProfileData): Partial<ProfileData> => {
-      const changes = {} as Partial<ProfileData>;
+      const changes: Partial<ProfileData> = {};
       (Object.keys(edited) as Array<keyof ProfileData>).forEach(key => {
           const originalValue = original[key];
           const editedValue = edited[key];
 
           if (!_.isEqual(originalValue, editedValue)) {
-              changes[key] = editedValue;
+              (changes as any)[key] = editedValue;
           }
       });
       return changes;
