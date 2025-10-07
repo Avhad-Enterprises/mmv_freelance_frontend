@@ -48,7 +48,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/v1/users/me', {
+                const res = await fetch('https://api.makemyvid.io/api/v1/users/me', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
