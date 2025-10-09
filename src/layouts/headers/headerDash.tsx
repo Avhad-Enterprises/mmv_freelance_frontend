@@ -2,11 +2,23 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Menus from "./component/menus";
 import logo from "@/assets/images/logo/logo_new.png";
-// LoginModal import is removed as it's no longer used
 
 const Header = () => {
+  const router = useRouter();
+
+  // --- LOGOUT HANDLER ---
+  const handleLogout = () => {
+    // 1. Remove the token from localStorage
+    localStorage.removeItem('token');
+    
+    // 2. Redirect to the homepage to refresh the session state
+    // Using window.location.href ensures a full page reload to clear all states
+    window.location.href = '/'; 
+  };
+
   return (
     <>
       <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
@@ -27,14 +39,11 @@ const Header = () => {
                 </Link>
               </div>
 
-              {/* The right-widget containing login/post buttons has been completely removed. */}
-
-              {/* CHANGE: Added ms-auto to push the nav to the right */}
+              {/* Navigation */}
               <nav className="navbar navbar-expand-lg p0 ms-auto order-lg-2">
                 <button
                   className="navbar-toggler d-block d-lg-none"
                   type="button"
-
                   data-bs-toggle="collapse"
                   data-bs-target="#navbarNav"
                   aria-controls="navbarNav"
@@ -53,10 +62,35 @@ const Header = () => {
                       </div>
                     </li>
                     
-                    {/* Menus component is kept */}
+                    {/* --- DASHBOARD BUTTON (DESKTOP) --- */}
+                    <li className="nav-item d-none d-lg-block">
+                      <Link href="/dashboard/candidate-dashboard" className="btn btn-primary rounded-pill">
+                        Dashboard
+                      </Link>
+                    </li>
+                    
+                    {/* --- DASHBOARD BUTTON (MOBILE) --- */}
+                    <li className="nav-item d-block d-lg-none">
+                      <Link href="/dashboard/candidate-dashboard" className="btn btn-primary w-100">
+                        Dashboard
+                      </Link>
+                    </li>
+
                     <Menus />
                     
-                    {/* CHANGE: Removed the mobile-only "Post Job" and "Hire Top Talents" buttons */}
+                    {/* --- LOGOUT BUTTONS --- */}
+                    <li className="nav-item d-block d-lg-none">
+                      {/* Mobile Logout Button */}
+                      <button onClick={handleLogout} className="btn btn-danger w-100 mt-10">
+                        Logout
+                      </button>
+                    </li>
+                     <li className="nav-item d-none d-lg-block">
+                      {/* Desktop Logout Button */}
+                      <button onClick={handleLogout} className="btn btn-danger rounded-pill ms-3">
+                        Logout
+                      </button>
+                    </li>
                   </ul>
                 </div>
               </nav>
@@ -64,8 +98,6 @@ const Header = () => {
           </div>
         </div>
       </header>
-
-      {/* The login modal has been removed */}
     </>
   );
 };

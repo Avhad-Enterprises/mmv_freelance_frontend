@@ -1,14 +1,25 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import slugify from "slugify";
 import FilterArea from "../filter/filter-area";
 import ListItemTwo from "./list-item-2";
-import { IJobType } from "@/types/job-data-type";
-import Pagination from "@/ui/pagination";
 import JobGridItem from "../grid/job-grid-item";
-import { useAppSelector } from "@/redux/hook";
+import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
-import {makeGetRequest} from "@/utils/api";
+import { useAppSelector } from "@/redux/hook";
+import { IJobType } from "@/types/job-data-type";
+import { makeGetRequest } from "@/utils/api";
+
+// Define simple types for categories and skills for clarity
+interface ICategory {
+  category_id: number;
+  category_name: string;
+}
+
+// Corrected ISkill interface to match your API data
+interface ISkill {
+  skill_id: number;
+  skill_name: string;
+}
 
 const JobListThree = ({
   itemsPerPage,
@@ -17,76 +28,93 @@ const JobListThree = ({
   itemsPerPage: number;
   grid_style?: boolean;
 }) => {
+  // Component State
   const [all_jobs, setAllJobs] = useState<IJobType[]>([]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [skills, setSkills] = useState<ISkill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentItems, setCurrentItems] = useState<IJobType[] | null>(null);
   const [filterItems, setFilterItems] = useState<IJobType[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
-  const [jobType, setJobType] = useState(grid_style ? "grid" : "list");
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
+  // The 'jobType' state has been removed as it's no longer needed.
 
-  //Redux filter state
-  const {
-    project_category,
-    projects_type,
-    tags,
-    search_key,
-  } = useAppSelector((state) => state.filter);
+  // Redux filter state from the store
+  const { project_category, projects_type, tags, search_key } = useAppSelector(
+    (state) => state.filter
+  );
 
-  // Fetch jobs
+  // --- Data Fetching Effect ---
   useEffect(() => {
-  const fetchJobs = async () => {
-    try {
-      const res = await makeGetRequest("projectsTask/getallprojects_task");
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        const [jobsRes, categoriesRes, skillsRes] = await Promise.all([
+          makeGetRequest("/projectsTask/getallprojectlisting-public"),
+          makeGetRequest("/category/getallcategorys"),
+          makeGetRequest("/tags/getallskill"),
+        ]);
 
-      const data = res.data;
-      setAllJobs(data.data || []);
+        const jobsData = jobsRes.data.data || [];
+        setAllJobs(jobsData);
+        const maxBudget = Math.max(...jobsData.map((j: any) => j.budget || 0), 0);
+        setPriceValue([0, maxBudget || 10000]);
 
-      const maxBudget = Math.max(...(data.data || []).map((j: any) => j.Budget), 0);
-      setPriceValue([0, maxBudget || 10000]);
-    } catch (error) {
-      console.error("Error fetching job data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setCategories(categoriesRes.data.data || []);
+        setSkills(skillsRes.data.data || []);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchJobs();
-}, []);
+    fetchInitialData();
+  }, []);
 
-  //  Filter logic
+  // --- Filtering and Sorting Effect ---
   useEffect(() => {
-    let filteredData = all_jobs
-      .filter((item) =>
-        project_category.length
-          ? project_category.some((c) => item.project_category?.toLowerCase() === c.toLowerCase())
-          : true
-      )
-      .filter((item) =>
-        projects_type
-          ? item.projects_type?.toLowerCase() === projects_type.toLowerCase()
-          : true
-      )
-      .filter((item) =>
-        tags.length
-          ? tags.some((t) => item.tags?.includes(t))
-          : true
-      )
-      .filter((item) => (item.budget ?? 0) >= priceValue[0] && (item.budget ?? 0) <= priceValue[1])
-      .filter((item) =>
-        search_key
-          ? item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
-            item.project_description?.toLowerCase().includes(search_key.toLowerCase())
-          : true
+    let filteredData = all_jobs;
+
+    if (project_category.length > 0) {
+      filteredData = filteredData.filter((item) =>
+        project_category.some((c) => item.project_category?.toLowerCase() === c.toLowerCase())
       );
+    }
 
-    // Sorting
+    if (projects_type) {
+      filteredData = filteredData.filter(
+        (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
+      );
+    }
+
+    if (tags.length > 0) {
+      filteredData = filteredData.filter((item) =>
+        tags.some((selectedSkill) =>
+          selectedSkill && item.skills_required?.some(
+            (jobSkill) => jobSkill && jobSkill.toLowerCase() === selectedSkill.toLowerCase()
+          )
+        )
+      );
+    }
+
+    filteredData = filteredData.filter(
+      (item) => (item.budget ?? 0) >= priceValue[0] && (item.budget ?? 0) <= priceValue[1]
+    );
+
+    if (search_key) {
+      filteredData = filteredData.filter((item) =>
+        item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
+        item.project_description?.toLowerCase().includes(search_key.toLowerCase())
+      );
+    }
+
     if (shortValue === "price-low-to-high") {
-      filteredData = filteredData.slice().sort((a, b) => Number(a.budget) - Number(b.budget));
+      filteredData = filteredData.slice().sort((a, b) => (a.budget ?? 0) - (b.budget ?? 0));
     } else if (shortValue === "price-high-to-low") {
-      filteredData = filteredData.slice().sort((a, b) => Number(b.budget) - Number(a.budget));
+      filteredData = filteredData.slice().sort((a, b) => (b.budget ?? 0) - (a.budget ?? 0));
     }
 
     const endOffset = itemOffset + itemsPerPage;
@@ -94,26 +122,22 @@ const JobListThree = ({
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset,
-    itemsPerPage,
-    project_category,
-    projects_type,
-    tags,
-    all_jobs,
-    priceValue,
-    shortValue,
-    search_key,
+    itemOffset, itemsPerPage, project_category, projects_type,
+    tags, all_jobs, priceValue, shortValue, search_key,
   ]);
 
+  // --- Event Handlers ---
   const handlePageClick = (event: { selected: number }) => {
-    const newOffset = (event.selected * itemsPerPage) % all_jobs.length;
+    const newOffset = (event.selected * itemsPerPage) % (filterItems.length || 1);
     setItemOffset(newOffset);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleShort = (item: { value: string; label: string }) => {
     setShortValue(item.value);
   };
 
+  // --- Render Logic ---
   if (loading) {
     return (
       <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
@@ -138,14 +162,20 @@ const JobListThree = ({
               <i className="bi bi-funnel"></i>
               Filter
             </button>
-            <FilterArea priceValue={priceValue} setPriceValue={setPriceValue} maxPrice={priceValue[1]} />
+            <FilterArea
+              priceValue={priceValue}
+              setPriceValue={setPriceValue}
+              maxPrice={priceValue[1]}
+              all_categories={categories}
+              all_skills={skills}
+            />
           </div>
 
           <div className="col-xl-9 col-lg-8">
             <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
               <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
                 <div className="total-job-found">
-                  All <span className="text-dark">{filterItems.length}</span> jobs found
+                  All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
                 </div>
                 <div className="d-flex align-items-center">
                   <div className="short-filter d-flex align-items-center">
@@ -161,29 +191,16 @@ const JobListThree = ({
                       name="Price Sort"
                     />
                   </div>
-                  <button
-                    onClick={() => setJobType("list")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
-                    title="List View"
-                  >
-                    <i className="bi bi-list"></i>
-                  </button>
-                  <button
-                    onClick={() => setJobType("grid")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
-                    title="Grid View"
-                  >
-                    <i className="bi bi-grid"></i>
-                  </button>
+                  {/* --- REMOVED --- The List/Grid view buttons were here */}
                 </div>
               </div>
 
-              <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
-                {currentItems &&
-                  currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} />)}
+              {/* View now depends directly on the 'grid_style' prop */}
+              <div className={`accordion-box list-style ${!grid_style ? "show" : ""}`}>
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} />)}
               </div>
 
-              <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
+              <div className={`accordion-box grid-style ${grid_style ? "show" : ""}`}>
                 <div className="row">
                   {currentItems &&
                     currentItems.map((job) => (
@@ -194,15 +211,20 @@ const JobListThree = ({
                 </div>
               </div>
 
-              {currentItems && (
+              {currentItems && currentItems.length === 0 && (
+                <div className="text-center mt-5">
+                  <h3>No jobs found</h3>
+                  <p>Try adjusting your filters to find what you're looking for.</p>
+                </div>
+              )}
+
+              {currentItems && currentItems.length > 0 && (
                 <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
                   <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                    Showing{" "}
-                    <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
+                    Showing <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
                     <span className="text-dark fw-500">
                       {Math.min(itemOffset + itemsPerPage, filterItems.length)}
-                    </span>{" "}
-                    of <span className="text-dark fw-500">{filterItems.length}</span>
+                    </span> of <span className="text-dark fw-500">{filterItems.length}</span>
                   </p>
                   {filterItems.length > itemsPerPage && (
                     <Pagination pageCount={pageCount} handlePageClick={handlePageClick} />

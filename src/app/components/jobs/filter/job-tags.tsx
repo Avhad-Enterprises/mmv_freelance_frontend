@@ -11,7 +11,7 @@ const JobTags = () => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const res = await makeGetRequest("projectsTask/getallprojects_task");
+        const res = await makeGetRequest("projectsTask/getallprojectlisting-public");
         const projects = res.data?.data || [];
 
         const allTags = (projects as { tags?: string[] }[]).flatMap(

@@ -1,23 +1,36 @@
+// @/components/filter/filter-area.tsx (Updated)
+
 "use client"
 import React from 'react';
 import JobType from './job-type';
 import JobCategory from './job-category';
-import JobTags from './job-tags';
+import JobSkills from './job-skills'; // <-- IMPORT the new component
 import JobPrices from './job-prices';
 import { useAppDispatch } from '@/redux/hook';
 import { resetFilter } from '@/redux/features/filterSlice';
-import { setBudgetRange } from '@/redux/features/filterSlice';
 
+// Define types for the data we expect from parent
+interface ICategory {
+  id: number;
+  name: string;
+}
+interface ISkill {
+  id: number;
+  name: string;
+}
+
+// Update props to accept categories and skills lists
 type IProps = {
   priceValue: [number, number];
   setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>;
   maxPrice: number;
+  all_categories: ICategory[]; // <-- ADDED
+  all_skills: ISkill[];       // <-- ADDED
 };
 
-const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
+const FilterArea = ({ priceValue, setPriceValue, maxPrice, all_categories, all_skills }: IProps) => {
   const dispatch = useAppDispatch();
   
-
   const handleReset = () => {
     dispatch(resetFilter());
     setPriceValue([0, maxPrice]);
@@ -37,7 +50,7 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
           </div>
         </div>
 
-        {/* Salary */}
+        {/* Budget */}
         <div className="filter-block bottom-line pb-25 mt-25">
           <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseSalary" role="button" aria-expanded="false">Budget</a>
           <div className="collapse show" id="collapseSalary">
@@ -49,15 +62,17 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
         <div className="filter-block bottom-line pb-25 mt-25">
           <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="false">Category</a>
           <div className="collapse" id="collapseCategory">
-            <JobCategory />
+            {/* Pass categories down as a prop */}
+            <JobCategory all_categories={all_categories} />
           </div>
         </div>
 
-        {/* Tags */}
+        {/* Skills Section (Replaces old Tags) */}
         <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseTag" role="button" aria-expanded="false">Tags</a>
-          <div className="collapse" id="collapseTag">
-            <JobTags />
+          <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseSkills" role="button" aria-expanded="false">Skills</a>
+          <div className="collapse" id="collapseSkills">
+             {/* Pass skills down as a prop */}
+            <JobSkills all_skills={all_skills} />
           </div>
         </div>
 
@@ -71,4 +86,3 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
 };
 
 export default FilterArea;
-

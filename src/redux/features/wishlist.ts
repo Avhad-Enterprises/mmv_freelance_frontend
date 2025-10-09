@@ -34,9 +34,6 @@ export const wishlistSlice = createSlice({
       const removedItem = state.wishlist.find(
         (item) => item.projects_task_id === payload
       );
-      if (removedItem) {
-        notifyError(`${removedItem.project_title} removed from wishlist`);
-      }
       state.wishlist = state.wishlist.filter(
         (item) => item.projects_task_id !== payload
       );
