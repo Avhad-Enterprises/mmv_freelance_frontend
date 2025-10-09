@@ -17,7 +17,7 @@ const SearchItems = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await makeGetRequest("projectsTask/getallprojects_task");
+        const response = await makeGetRequest("projectsTask/getallprojectlisting-public");
         const data = response.data?.data || []; //account for nested "data" key
 
         const filtered = data.filter((item: IJobType) => {

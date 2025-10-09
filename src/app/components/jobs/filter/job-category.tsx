@@ -1,72 +1,51 @@
-import React, { useEffect, useState } from "react";
+// @/components/list/job-category.tsx (Corrected)
+
+import React from "react";
 import { setProjectCategory } from "@/redux/features/filterSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { makeGetRequest } from "@/utils/api";
 
-interface ProjectType {
-  project_category?: string;
+// Define the type to match your API response
+interface ICategory {
+  category_id: number;
+  category_name: string;
 }
 
-export function JobCategoryItems({ showLength = true }: { showLength?: boolean }) {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [projects, setProjects] = useState<ProjectType[]>([]);
+interface IJobCategoryItemsProps {
+    all_categories: ICategory[];
+}
 
+export function JobCategoryItems({ all_categories }: IJobCategoryItemsProps) {
   const { project_category } = useAppSelector((state) => state.filter);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await makeGetRequest("projectsTask/getallprojects_task");
-        const data = res.data?.data || [];
-
-        setProjects(data);
-
-        const allCategories = (data as ProjectType[])
-          .map((job) => job.project_category)
-          .filter((c): c is string => Boolean(c));
-
-        const unique = [...new Set(allCategories)];
-        setCategories(unique);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
+  
   return (
     <>
-      {categories.map((c, index) => (
-        <li key={index}>
+      {all_categories.map((cat) => (
+        <li key={cat.category_id}> {/* <-- CHANGED from cat.id */}
           <input
-            onChange={() => dispatch(setProjectCategory(c))}
+            onChange={() => dispatch(setProjectCategory(cat.category_name))} 
             type="checkbox"
-            name={c}
-            id={`cat-${index}`}
-            value={c}
-            checked={project_category.includes(c)}
+            name={cat.category_name} 
+            id={`cat-${cat.category_id}`} 
+            value={cat.category_name} 
+            checked={project_category.includes(cat.category_name)} 
           />
-          <label htmlFor={`cat-${index}`}>
-            {c}
-            {showLength && (
-              <span>
-                {projects.filter((job) => job.project_category === c).length}
-              </span>
-            )}
-          </label>
+          <label htmlFor={`cat-${cat.category_id}`}>{cat.category_name}</label> 
         </li>
       ))}
     </>
   );
 }
 
-const JobCategory = () => {
+interface IJobCategoryProps {
+    all_categories: ICategory[];
+}
+
+const JobCategory = ({ all_categories }: IJobCategoryProps) => {
   return (
     <div className="main-body">
       <ul className="style-none filter-input">
-        <JobCategoryItems />
+        <JobCategoryItems all_categories={all_categories} />
       </ul>
     </div>
   );

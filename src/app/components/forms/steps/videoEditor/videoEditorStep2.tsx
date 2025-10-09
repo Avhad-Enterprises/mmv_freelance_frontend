@@ -58,7 +58,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
   React.useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('https://api.makemyvid.io/api/v1/tags/getallskill');
+        const response = await fetch('http://localhost:8000/api/v1/tags/getallskill');
         if (!response.ok) throw new Error('Network response was not ok');
         
         const result = await response.json();
@@ -81,7 +81,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
 
   // Fetch categories when the component mounts
   React.useEffect(() => {
-    fetch('https://api.makemyvid.io/api/v1/category/getallcategorys')
+    fetch('http://localhost:8000/api/v1/category/getallcategorys')
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');

@@ -1,249 +1,114 @@
-import React, { useState, useEffect } from "react";
-// import DashboardHeader from "../candidate/dashboard-header";
-import EmployJobItem from "./job-item";
-import { getLoggedInUser } from "@/utils/jwt";
-import { makeGetRequest, makePostRequest } from "@/utils/api";
+'use client'; // This component uses state and effects, so it's a client component
 
-// props type 
-type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
+import React, { useState, useEffect, useCallback, type FC } from "react";
+import EmployJobItem from "./job-item"; 
+import PostJobForm from "./PostJobForm";
+import { makeGetRequest, makePostRequest } from "@/utils/api";
+import type { ProjectSummary } from "@/types/project"; // Import shared type
+
+interface IProps {
+  setIsOpenSidebar: (isOpen: boolean) => void;
 }
 
-type ProjectTask = {
-  projects_task_id: number;
-  id: number;
-  project_title: string;
-  country: string;
-  count: string;
-  created_at: string;
-  // status: "active" | "pending" | "expired";
-};
+const EmployJobArea: FC<IProps> = ({ setIsOpenSidebar }) => {
+  const [isPostingJob, setIsPostingJob] = useState(false);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-const EmployJobArea = ({ setIsOpenSidebar }: IProps) => {
+  const fetchClientData = useCallback(async () => {
+    if (isPostingJob) return;
 
-  const [idata, setiData] = useState<ProjectTask[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [statusFilter, setStatusFilter] = useState<null | number>(null);
-
-
-
-  const fetchProjectTask = async () => {
-    const decoded = getLoggedInUser();
-    const clientId = decoded?.user_id;
-
-    if (!clientId) {
-      console.error("No user_id found in token");
-      // toast.error("Please log in to view your profile.");
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
+    setError(null);
     try {
-      const response = await makeGetRequest(`projectsTask/tasks-with-client/${clientId}`);
-      console.log("response",response);
+      const meResponse = await makeGetRequest("/users/me");
+      const userId = meResponse.data?.data?.user?.user_id;
 
-      if (response.data?.data?.length) {
-        const projects = response.data.data.map((project: ProjectTask) => ({
-          ...project,
-          applicants: 0,
+      if (!userId) throw new Error("Could not find User ID. Please log in.");
+      
+      const userProfileResponse = await makePostRequest("/users/get_user_by_id", { user_id: userId });
+      const createdProjects = userProfileResponse.data?.projects_created;
+
+      if (createdProjects && createdProjects.length > 0) {
+        // Map the raw data to our ProjectSummary type
+        const processedData: ProjectSummary[] = createdProjects.map((p: any) => ({
+          project_id: p.project_id,
+          title: p.title,
+          date_created: p.date_created,
+          count: 0,
         }));
-
-        for (const project of projects) {
-          try {
-            const countRes = await makePostRequest(
-              "applications/projects/get-application-count",
-              { projects_task_id: project.projects_task_id }
-            );
-            project.count = countRes.data?.count || 0;
-          } catch (err) {
-            console.error(`Failed to get count for project ${project.projects_task_id}`, err);
-            project.count = 0;
-          }
-        }
-        console.log("Project Data: ", projects)
-        setiData(projects);
+        setProjects(processedData);
       } else {
-        console.error("No data found");
-        setiData([]);
+        setProjects([]);
       }
-    } catch (err) {
-      console.error("Error fetching project task:", err);
-      setiData([]);
-    }
-  };
-
-  const fetchProjectByStatus = async (status: number) => {
-    const decoded = getLoggedInUser();
-    const clientId = decoded?.user_id;
-
-    if (!clientId) {
-      console.error("No user_id found in token");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await makePostRequest(
-        `applications/getStatus`,
-        { client_id: clientId, status: status }
-      );
-      console.log(`Status ${status} projects response:`, response.data);
-
-      if (response.data?.data?.length) {
-        const projects = response.data.data.map((project: ProjectTask) => ({
-          ...project,
-          applicants: 0,
-        }));
-
-        for (const project of projects) {
-          try {
-            const countRes = await makePostRequest(
-              "applications/projects/get-application-count",
-              { projects_task_id: project.projects_task_id }
-            );
-            project.count = countRes.data?.count || 0;
-          } catch (err) {
-            console.error(`Failed to get count for project ${project.projects_task_id}`, err);
-            project.count = 0;
-          }
-        }
-
-        setiData(projects);
-      } else {
-        setiData([]);
-      }
-
-    } catch (err) {
-      console.error("Error fetching projects by status:", err);
-      setiData([]);
+    } catch (err: unknown) {
+      let message = "Failed to load your jobs.";
+      if (err instanceof Error) message = err.message;
+      setError(message);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isPostingJob]);
 
   useEffect(() => {
-    fetchProjectTask();
-  }, []);
+    fetchClientData();
+  }, [fetchClientData]);
+
+  // When form submission is successful or canceled, switch view
+  const handleReturnToList = () => {
+    setIsPostingJob(false);
+    // The useEffect dependency on `isPostingJob` will trigger a re-fetch automatically.
+  };
 
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
-
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
-          <h2 className="main-title m0">My Jobs</h2>
-          <div className="d-flex ms-auto xs-mt-30">
-            <div
-              className="nav nav-tabs tab-filter-btn me-4"
-              id="nav-tab"
-              role="tablist"
-            >
-              <button
-                className={`nav-link ${statusFilter === null ? "active" : ""}`}
-                data-bs-toggle="tab"
-                data-bs-target="#a1"
-                type="button"
-                role="tab"
-                aria-selected="true"
-                onClick={() => {
-                  setStatusFilter(null);
-                  fetchProjectTask();
-                }}
-              >
-                All
-              </button>
-              <button className="nav-link" data-bs-toggle="tab" data-bs-target="#a1" type="button" role="tab" aria-selected="false">New</button>
-              <button
-                className={`nav-link ${statusFilter === 0 ? "active" : ""}`}
-                data-bs-toggle="tab"
-                data-bs-target="#a1"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                onClick={() => {
-                  setStatusFilter(0);
-                  fetchProjectByStatus(0);
-                }}
-              >
-                On Going
-              </button>
-              <button
-                className={`nav-link ${statusFilter === 1 ? "active" : ""}`}
-                data-bs-toggle="tab"
-                data-bs-target="#a1"
-                type="button"
-                role="tab"
-                aria-selected="false"
-                onClick={() => {
-                  setStatusFilter(1);
-                  fetchProjectByStatus(1);
-                }}
-              >
-                Completed
-              </button>
-            </div>
-            {/* <div className="short-filter d-flex align-items-center ms-auto">
-              <div className="text-dark fw-500 me-2">Short by:</div>
-              <EmployShortSelect />
-            </div> */}
-          </div>
+          <h2 className="main-title m0">{isPostingJob ? "Post a New Job" : "My Jobs"}</h2>
+          {!isPostingJob && (
+             <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
+                Post a Job
+             </button>
+          )}
         </div>
 
-        <div className="bg-white card-box border-20">
-          <div className="tab-content" id="nav-tabContent">
-            <div className="tab-pane fade show active" id="a1" role="tabpanel">
-              <div className="table-responsive">
-                <table className="table job-alert-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Title</th>
-                      <th scope="col">Job Created</th>
-                      <th scope="col">Applicants</th>
-                      {/* <th scope="col">Status</th> */}
-                      <th scope="col">Action</th>
+        {isPostingJob ? (
+          <PostJobForm onBackToList={handleReturnToList} />
+        ) : (
+          <div className="bg-white card-box border-20">
+            <div className="table-responsive">
+              <table className="table job-alert-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Date Created</th>
+                    <th scope="col">Applicants</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading && <tr><td colSpan={4} className="text-center">Loading...</td></tr>}
+                  {error && <tr><td colSpan={4} className="text-center text-danger">{error}</td></tr>}
+                  {!loading && !error && projects.length === 0 && (
+                    <tr><td colSpan={4} className="text-center">No jobs found. Post one to get started!</td></tr>
+                  )}
+                  {!loading && !error && projects.map((project) => (
+                    // You'll need a simplified EmployJobItem that accepts a ProjectSummary
+                    // <EmployJobItem key={project.project_id} project={project} />
+                    <tr key={project.project_id}>
+                        <td>{project.title}</td>
+                        <td>{new Date(project.date_created).toLocaleDateString()}</td>
+                        <td>{project.count}</td>
+                        <td>...</td>
                     </tr>
-                  </thead>
-                  <tbody className="border-0">
-                    {idata.length > 0 ? (
-                      idata.map((project) => (
-                        <EmployJobItem
-                          key={project.id}
-                          title={project.project_title}
-                          info={project.country}
-                          application={project.count}
-                          date={new Date(project.created_at).toLocaleDateString('en-US', {
-                            day: '2-digit',
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                          projectsTaskId={project.projects_task_id}
-                        // status={project.status}
-                        />
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5}>No applied projects found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div className="tab-pane fade" id="a2" role="tabpanel">
-              {/* New tab content here */}
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-
-        <div className="dash-pagination d-flex justify-content-end mt-30">
-          <ul className="style-none d-flex align-items-center">
-            <li><a href="#" className="active">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-            <li>..</li>
-            <li><a href="#">7</a></li>
-            <li><a href="#"><i className="bi bi-chevron-right"></i></a></li>
-          </ul>
-        </div>
+        )}
       </div>
     </div>
   );

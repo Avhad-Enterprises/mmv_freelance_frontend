@@ -14,10 +14,16 @@ type Props = {
 };
 
 const ApplyFormModal = ({ show, handleClose, projectId }: Props) => {
-  const { register, handleSubmit, reset } = useForm();
+  const { register, reset } = useForm();
   const decoded = useDecodedToken();
   const userId = decoded?.user_id;
 
+  const handleSubmit = async () => {
+  const response = await makePostRequest('applications/projects/apply', {
+    user_id: userId,
+    projects_task_id: projectId
+  });
+};
   const onSubmit = async (data: any) => {
     if (!userId) {
       toast.error("Please login to apply.");

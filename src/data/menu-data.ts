@@ -20,7 +20,7 @@ const menu_data:IMenuData[] = [
     link:'/job-list-v1',
     title:'Jobs',
     sub_menus:[
-      {link:'/coming-soon',title:'Job List style -1'},
+      {link:'/job-list-v1',title:'Job List style -1'},
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid-v1',title:'Job Grid style -1'},

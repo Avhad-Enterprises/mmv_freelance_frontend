@@ -13,7 +13,7 @@ export function JobTypeItems({ showLength = true }: { showLength?: boolean }) {
   useEffect(() => {
     const fetchJobTypes = async () => {
       try {
-        const res = await makeGetRequest("projectsTask/getallprojects_task");
+        const res = await makeGetRequest("projectsTask/getallprojectlisting-public");
         const data = res.data?.data || [];
 
         setProjects(data);

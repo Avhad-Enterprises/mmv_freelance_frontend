@@ -1,76 +1,62 @@
-import React, { useState } from "react";
-import InputRange from "@/ui/input-range";
+// @/components/list/job-prices.tsx (Updated with Button-Style Ranges)
 
-// prop type
+import React from 'react';
+
+// Prop type remains the same
 type IProps = {
-  priceValue: [number, number]; // Tuple type for salary range
-  setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>; // Tuple setter
+  priceValue: [number, number];
+  setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>;
   maxPrice: number;
 };
 
-// Salary Range Slider
-export function SalaryRangeSlider({ priceValue, setPriceValue, maxPrice }: IProps) {
-  // handleChanges
-  const handleChanges = (val: [number, number]) => {
-    setPriceValue(val);
-  };
-  return (
-    <div className="salary-slider">
-      <div className="price-input d-flex align-items-center pt-5">
-        <div className="field d-flex align-items-center">
-          <input
-            type="number"
-            className="input-min"
-            defaultValue={priceValue[0]}
-            readOnly
-          />
-        </div>
-        <div className="pe-1 ps-1">-</div>
-        <div className="field d-flex align-items-center">
-          <input
-            type="number"
-            className="input-max"
-            defaultValue={priceValue[1]}
-            readOnly
-          />
-        </div>
-        <div className="currency ps-1">USD</div>
-      </div>
-      <div className="range-input mb-10">
-        <InputRange
-          MAX={maxPrice}
-          MIN={0}
-          STEP={1}
-          values={priceValue}
-          handleChanges={handleChanges}
-        />
-      </div>
-    </div>
-  );
-}
-
 const JobPrices = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
+  // You can still customize the price ranges here
+  const priceRanges = [
+    { label: 'Any Price', value: [0, maxPrice] as [number, number] },
+    { label: 'Under $1,000', value: [0, 1000] as [number, number] },
+    { label: '$1,000 - $5,000', value: [1000, 5000] as [number, number] },
+    { label: '$5,000 - $10,000', value: [5000, 10000] as [number, number] },
+    { label: 'Over $10,000', value: [10000, maxPrice] as [number, number] },
+  ];
+
+  const handleRangeChange = (range: [number, number]) => {
+    setPriceValue(range);
+  };
+
+  // Helper function to check if a range is currently selected
+  const isSelected = (rangeValue: [number, number]) => {
+    return JSON.stringify(priceValue) === JSON.stringify(rangeValue);
+  };
+
   return (
     <div className="main-body">
-      <SalaryRangeSlider
-        maxPrice={maxPrice}
-        priceValue={priceValue}
-        setPriceValue={setPriceValue}
-      />
-      <ul className="style-none d-flex flex-wrap justify-content-between radio-filter mb-5">
-        <li>
-          <input type="radio" name="jobDuration" defaultValue="01" />
-          <label>Weekly</label>
-        </li>
-        <li>
-          <input type="radio" name="jobDuration" defaultValue="02" />
-          <label>Monthly</label>
-        </li>
-        <li>
-          <input type="radio" name="jobDuration" defaultValue="03" />
-          <label>Hourly</label>
-        </li>
-      </ul>
+      <div className="d-flex flex-wrap gap-2">
+        {priceRanges.map((range) => (
+          // We use the label as a key since it's unique
+          <div key={range.label}>
+            {/* The actual radio input is now visually hidden but still functional */}
+            <input
+              type="radio"
+              name="budgetRange"
+              id={range.label}
+              checked={isSelected(range.value)}
+              onChange={() => handleRangeChange(range.value)}
+              style={{ display: 'none' }}
+            />
+            
+            {/* The label is styled to look and act like a button */}
+            <label
+              htmlFor={range.label}
+              className={`btn btn-sm ${
+                isSelected(range.value) ? 'btn-dark' : 'btn-outline-secondary'
+              }`}
+              style={{ cursor: 'pointer' }}
+            >
+              {range.label}
+            </label>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

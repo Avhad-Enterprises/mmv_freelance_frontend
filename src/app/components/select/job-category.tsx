@@ -19,7 +19,7 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await makeGetRequest("projectsTask/getallprojects_task");
+        const res = await makeGetRequest("projectsTask/getallprojectlisting-public");
         const projects: ProjectTask[] = res.data?.data || [];
 
         const uniqueCategories = [
