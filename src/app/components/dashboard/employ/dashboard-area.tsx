@@ -27,12 +27,12 @@ const EmployDashboardArea = ({setIsOpenSidebar}:IProps) => {
         {/* header end */}
 
         <h2 className="main-title">Dashboard</h2>
-        <div className="row">
+        {/* <div className="row">
           <CardItem img={icon_1} title="Total Visitor" value="1.7k+" />
           <CardItem img={icon_2} title="Shortlisted" value="03" />
           <CardItem img={icon_3} title="Views" value="2.1k" />
           <CardItem img={icon_4} title="Applied Job" value="07" />
-        </div>
+        </div> */}
 
         <div className="row d-flex pt-50 lg-pt-10">
           <div className="col-xl-7 col-lg-6 d-flex flex-column">

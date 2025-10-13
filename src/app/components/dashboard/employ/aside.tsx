@@ -32,7 +32,7 @@ const nav_data = [
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/employ-dashboard/jobs", title: "My Jobs" },
     { id: 5, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/employ-dashboard/submit-job", title: "Submit Job" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/employ-dashboard/saved-candidate", title: "Saved Candidate" },
-    { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
+    // { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
 ];
 
 type IProps = {
@@ -177,7 +177,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                                     </li>
                                 );
                             })}
-                            <li>
+                            {/* <li>
                                 <a
                                     href="#"
                                     className="d-flex w-100 align-items-center"
@@ -187,7 +187,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                                     <Image src={nav_8} alt="Delete Account" className="lazy-img" />
                                     <span>Delete Account</span>
                                 </a>
-                            </li>
+                            </li> */}
                             {/* Logout */}
                             <li>
                                 <a
@@ -213,7 +213,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                 </div>
             </aside>
 
-            <DeleteAccountModal />
+            {/* <DeleteAccountModal /> */}
             <LogoutModal />
         </>
     );
