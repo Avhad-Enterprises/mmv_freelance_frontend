@@ -1,25 +1,51 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
+import HeaderDash from "@/layouts/headers/headerDash";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
 import { CategoryCardWrapper } from "./components/category/category-section-2";
 import { how_works_data } from "@/data/how-works-data";
 import FeatureTen from "./components/features/feature-ten";
-// import TopCompany from "./components/top-company/top-company";
-// import FeedbackOne from "./components/feedBacks/feedback-one";
 import { FaqItems } from "./components/faqs/faq-one";
 import BlogFive from "./components/blogs/blog-two";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
 
+interface DecodedToken {
+  exp: number;
+}
+
 const HomeSix = () => {
   const searchParams = useSearchParams();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check authentication status
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        if (decodedToken.exp * 1000 > Date.now()) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem('token');
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+      }
+    }
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     // Check if login parameter is present
@@ -34,13 +60,25 @@ const HomeSix = () => {
     }
   }, [searchParams]);
 
-  return (
+  if (isLoading) {
+    return (
+      <Wrapper>
+        <div className="main-page-wrapper">
+          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </Wrapper>
+    );
+  }
 
+  return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {/* header start */}
-        <Header />
-        {/* header end */}
+        {/* Conditional header rendering */}
+        {isAuthenticated ? <HeaderDash /> : <Header />}
 
         {/* hero banner start */}
         <HeroBannerSeven />
@@ -82,7 +120,7 @@ const HomeSix = () => {
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
             <div className="title-one text-center mb-70 lg-mb-30">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it’s Work?</h2>
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
             </div>
 
             <div className="border-bottom">
@@ -107,15 +145,6 @@ const HomeSix = () => {
         <FeatureTen />
         {/* text feature end */}
 
-        {/* top company start */}
-        {/* <TopCompany /> */}
-        {/* top company end */}
-
-
-        {/* feedback start */}
-        {/* <FeedbackOne style_2={true} style_3={true} /> */}
-        {/* feedback end */}
-
         {/* faq start */}
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
@@ -130,7 +159,7 @@ const HomeSix = () => {
               </div>
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
-              <div className="btn-eight fw-500">Don’t find the answer? We can help.
+              <div className="btn-eight fw-500">Don't find the answer? We can help.
               <Link href="/faq">Click here</Link>
               </div>
             </div>
@@ -145,7 +174,6 @@ const HomeSix = () => {
         {/* fancy banner start */}
         <FancyBannerSeven/>
         {/* fancy banner end */}
-
 
         {/* footer start */}
         <FooterOne />

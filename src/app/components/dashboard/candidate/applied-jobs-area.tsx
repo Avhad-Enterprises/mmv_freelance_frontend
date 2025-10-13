@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { Briefcase, CalendarCheck, CashCoin, Tag } from 'react-bootstrap-icons';
 import useDecodedToken from '@/hooks/useDecodedToken';
 
-// Status Mapping
+// Status Mapping - FIXED to match API values
 const statusMap: Record<number, { text: string; className: string }> = {
   0: { text: 'Pending', className: 'text-bg-warning' },
-  1: { text: 'Accepted', className: 'text-bg-success' },
-  2: { text: 'Rejected', className: 'text-bg-danger' },
+  1: { text: 'Ongoing', className: 'text-bg-info' },
+  2: { text: 'Completed', className: 'text-bg-success' },
+  3: { text: 'Rejected', className: 'text-bg-danger' },
 };
 
 // Job Interface
@@ -19,7 +20,7 @@ interface IJob {
   deadline: string;
   project_category: string;
   projects_type: string;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
 }
 
 type IProps = {
@@ -32,7 +33,7 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
   const [filteredJobs, setFilteredJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<'Pending' | 'Accepted' | 'Rejected' | 'All'>('All');
+  const [selectedStatus, setSelectedStatus] = useState<'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'>('All');
   
   useEffect(() => {
     const fetchJobs = async () => {
@@ -84,7 +85,7 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
     }
   }, [decoded]);
 
-  const handleStatusFilter = (status: 'Pending' | 'Accepted' | 'Rejected' | 'All') => {
+  const handleStatusFilter = (status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All') => {
     setSelectedStatus(status);
     if (status === 'All') {
       setFilteredJobs(jobs);
@@ -110,7 +111,7 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h2 className="main-title mb-0">Applied Jobs</h2>
           <div className="btn-group" role="group" aria-label="Status Filter">
-            {['All', 'Pending', 'Accepted', 'Rejected'].map((status) => (
+            {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
               <button
                 key={status}
                 type="button"

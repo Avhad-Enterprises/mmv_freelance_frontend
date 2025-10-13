@@ -33,10 +33,10 @@ const menu_data:IMenuData[] = [
   },
   {
     id: 3,
-    link: '/coming-soon',
+    link: '/candidates-v1',
     title: 'Candidates',
     sub_menus: [
-      {link: '/coming-soon', title: 'Candidates'}
+      {link: '/candidates-v1', title: 'Candidates'}
     ]
   },
   {

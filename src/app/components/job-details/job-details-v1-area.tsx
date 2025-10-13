@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link'; // <-- IMPORT ADDED
+import Link from 'next/link';
 import { IJobType } from '@/types/job-data-type';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest } from '@/utils/api';
@@ -20,6 +20,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null); // New state for user role
   const applyLoginModalRef = useRef<any>(null);
 
   // State for Apply Button
@@ -50,11 +51,12 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const fetchUserIdAndInitialState = async () => {
     try {
       const response = await makeGetRequest('users/me');
-      const userData = response.data?.data?.user;
-      if (userData?.user_id) {
-        setUserId(userData.user_id);
+      const userData = response.data?.data; // Adjusted to access 'data' then 'user' and 'userType'
+      if (userData?.user?.user_id) {
+        setUserId(userData.user.user_id);
+        setUserRole(userData.userType); // Set the user role
         // Check initial saved and applied status
-        checkInitialJobStatus(userData.user_id);
+        checkInitialJobStatus(userData.user.user_id);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -77,12 +79,20 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
 
   // This function now calls the API submit handler directly
   const handleApplyClick = () => {
-    if (isLoggedIn) {
-      handleApplySubmit();
-    } else {
-      // Open the APPLY-SPECIFIC login modal
+    if (!isLoggedIn) {
+      // Open the APPLY-SPECIFIC login modal if not logged in
       applyLoginModalRef.current?.show();
+      return;
     }
+
+    // Check if the user is a client
+    if (userRole === 'CLIENT') {
+      toast.error('Only freelancers can apply.');
+      return;
+    }
+
+    // If logged in and not a client, proceed with application
+    handleApplySubmit();
   };
   
   // New function to handle the "Apply" API call
@@ -158,7 +168,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const handleLoginSuccess = () => {
     applyLoginModalRef.current?.hide();
     setIsLoggedIn(true);
-    window.location.reload();
+    window.location.reload(); // Reload to refetch user data and status
   };
 
   return (

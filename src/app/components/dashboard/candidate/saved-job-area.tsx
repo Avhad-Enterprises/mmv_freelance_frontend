@@ -103,7 +103,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
 
         <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">Saved Jobs</h2>

@@ -1,373 +1,729 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import CandidateGridItem from "./candidate-grid-item";
-import CandidateListItem from "./candidate-list-item";
-import CandidateV1FilterArea from "./filter/candidate-v1-filter-area";
-import ShortSelect from "../common/short-select";
-import { makeGetRequest, makePostRequest } from "@/utils/api";
-import useDecodedToken from "@/hooks/useDecodedToken";
+// CandidateV1Area.tsx
+import React, { useEffect, useState, useRef } from "react";
+import toast, { Toaster } from 'react-hot-toast';
+import SaveCandidateLoginModal from "../../components/common/popup/save-candidate-login-modal";
+import CandidateCard from "../candidate/candidate-card";
 
-const CandidateV1Area = ({ style_2 = false }: { style_2?: boolean }) => {
-  const [jobType, setJobType] = useState<string>(style_2 ? "list" : "grid");
-  const [candidates, setCandidates] = useState<any[]>([]);
-  const [allCandidates, setAllCandidates] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+// Define the structure of a candidate object for type safety
+interface Candidate {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  username: string;
+  profile_picture: string;
+  bio: string | null;
+  city: string | null;
+  country: string | null;
+  skills: string[];
+  superpowers: string[];
+  languages: string[];
+  portfolio_links: string[];
+  rate_amount: string;
+  currency: string;
+  availability: string;
+}
 
-  // Saved Candidates
+// Define props for the component
+interface CandidateV1AreaProps {
+  isAuthenticated: boolean;
+  onLoginSuccess: () => void;
+}
+
+const CandidateV1Area = ({ isAuthenticated, onLoginSuccess }: CandidateV1AreaProps) => {
+  const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
   const [savedCandidates, setSavedCandidates] = useState<number[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<{ [candidateId: number]: number }>({});
+  const [loading, setLoading] = useState(true);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
+  const [savingStates, setSavingStates] = useState<{ [key: number]: boolean }>({});
 
-  // Current User Info
-  const decoded = useDecodedToken();
-
-  // Filter State
-  const [selectedSkill, setSelectedSkill] = useState<string>("");
-  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  // Filter states
+  const [selectedSkill, setSelectedSkill] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [sortValue, setSortValue] = useState("");
 
   // Pagination
   const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const indexOfLast = currentPage * ITEMS_PER_PAGE;
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
-  const currentCandidates = candidates.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(candidates.length / ITEMS_PER_PAGE);
+  const currentCandidates = Array.isArray(filteredCandidates)
+    ? filteredCandidates.slice(indexOfFirst, indexOfLast)
+    : [];
+  const totalPages = Math.ceil(
+    Array.isArray(filteredCandidates) ? filteredCandidates.length / ITEMS_PER_PAGE : 0
+  );
 
-  // Debug setJobType
-  const setJobTypeAndLog = (type: string) => {
-    console.log("Setting jobType to:", type);
-    setJobType(type);
-  };
+  const loginModalRef = useRef<any>(null);
 
-  // Toggle Save
-  const handleToggleSave = async (freelancerId: number) => {
-    if (!decoded) {
-      console.error("User not logged in");
-      return;
-    }
+  // Fetch current user information when authenticated
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      if (!isAuthenticated) {
+        setCurrentUserId(null);
+        setUserType(null);
+        setSavedCandidates([]);
+        return;
+      }
 
-    const userId = decoded.user_id;
-    const payload = {
-      user_id: userId,
-      freelancer_id: freelancerId,
-      created_by: 1,
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+
+        const response = await fetch('http://localhost:8000/api/v1/users/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user info');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data.user) {
+          setCurrentUserId(data.data.user.user_id);
+          setUserType(data.data.userType);
+          console.log('Current user ID:', data.data.user.user_id);
+          console.log('Current user type:', data.data.userType);
+        }
+      } catch (err) {
+        console.error('Error fetching current user:', err);
+      }
     };
 
-    try {
-      if (savedCandidates.includes(freelancerId)) {
-        await makePostRequest("favorites/remove", payload);
-        setSavedCandidates((prev) => prev.filter((id) => id !== freelancerId));
-      } else {
-        await makePostRequest("favorites/add", payload);
-        setSavedCandidates((prev) => [...prev, freelancerId]);
-      }
-    } catch (err) {
-      console.error("Error in save/remove API:", err);
-    }
-  };
+    fetchCurrentUser();
+  }, [isAuthenticated]);
 
-  // Fetch All Active Freelancers
-  const fetchCandidates = async () => {
-    setLoading(true);
-    try {
-      const res = await makeGetRequest("users/freelancers/active");
-      const data = res.data.data;
-      console.log("Fetched candidates:", data);
-      if (!Array.isArray(data)) {
-        console.error("API data is not an array:", data);
-        setAllCandidates([]);
-        setCandidates([]);
-      } else {
-        setAllCandidates(data);
-        setCandidates(data);
-      }
-    } catch (err) {
-      console.error("Error fetching candidates:", err);
-      setAllCandidates([]);
-      setCandidates([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch Saved Favorites
-  const fetchSavedCandidates = async () => {
-    if (!decoded) return;
-    try {
-      const res = await makePostRequest(`getfreelanceby${decoded.user_id}`);
-      const saved = res.data.data.map((fav: any) => fav.favorite_freelancer_id);
-      console.log("Fetched saved candidates:", saved);
-      setSavedCandidates(saved);
-    } catch (err) {
-      console.error("Error fetching saved favorites:", err);
-    }
-  };
-
+  // Fetch candidates from API
   useEffect(() => {
+    const fetchCandidates = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public', {
+          cache: 'no-cache' 
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch candidates: HTTP Status ${response.status}`);
+        }
+        
+        const responseData = await response.json();
+        const candidatesData = Array.isArray(responseData.data) ? responseData.data : [];
+        setCandidates(candidatesData);
+        setFilteredCandidates(candidatesData);
+      } catch (err: any) {
+        console.error("Error fetching candidates:", err);
+        setError(`Error fetching candidates. Please try again later. Details: ${err.message}`);
+        setCandidates([]);
+        setFilteredCandidates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchCandidates();
   }, []);
 
+  // Load saved candidates from localStorage when auth status changes
   useEffect(() => {
-    if (decoded) {
-      fetchSavedCandidates();
-    }
-  }, [decoded]);
+    const fetchFavorites = async () => {
+      if (isAuthenticated && currentUserId && userType === 'CLIENT') {
+        try {
+          setLoadingFavorites(true);
+          const token = localStorage.getItem('token');
+          if (!token) {
+            setLoadingFavorites(false);
+            return;
+          }
 
-  // Apply Filter
-  const applyFilter = () => {
-    let filtered = [...allCandidates];
+          // Fetch favorites from API
+          console.log('Fetching favorites from API...');
+          const response = await fetch('http://localhost:8000/api/v1/favorites/listfreelancers', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            console.log('Favorites API Response:', result);
+            console.log('Favorites data array:', result.data);
+            
+            if (result.data && Array.isArray(result.data)) {
+              const savedIds: number[] = [];
+              const favIds: { [key: number]: number } = {};
+              
+              result.data.forEach((fav: any) => {
+                console.log('Processing favorite item:', fav);
+                
+                // Try different possible field names
+                const freelancerId = fav.favorite_freelancer_id || fav.freelancer_id || fav.user_id;
+                const favoriteRecordId = fav.favorite_id || fav.id;
+                
+                if (freelancerId) {
+                  savedIds.push(freelancerId);
+                  // Store the favorite record ID for deletion
+                  if (favoriteRecordId) {
+                    favIds[freelancerId] = favoriteRecordId;
+                  }
+                  console.log(`Found favorite: Freelancer ID ${freelancerId}, Record ID ${favoriteRecordId}`);
+                }
+              });
+              
+              setSavedCandidates(savedIds);
+              setFavoriteIds(favIds);
+              
+              // Also save to localStorage
+              localStorage.setItem(`savedCandidates_${currentUserId}`, JSON.stringify(savedIds));
+              localStorage.setItem(`favoriteIds_${currentUserId}`, JSON.stringify(favIds));
+              
+              console.log('✅ Loaded favorites:', savedIds);
+              console.log('✅ Loaded favorite IDs:', favIds);
+            }
+          } else {
+            console.error('Failed to fetch favorites:', response.status);
+            // Fallback to localStorage
+            const saved = localStorage.getItem(`savedCandidates_${currentUserId}`);
+            const ids = localStorage.getItem(`favoriteIds_${currentUserId}`);
+            if (saved) {
+              setSavedCandidates(JSON.parse(saved));
+            }
+            if (ids) {
+              setFavoriteIds(JSON.parse(ids));
+            }
+          }
+        } catch (err) {
+          console.error('Error loading favorites:', err);
+          // Fallback to localStorage
+          const saved = localStorage.getItem(`savedCandidates_${currentUserId}`);
+          const ids = localStorage.getItem(`favoriteIds_${currentUserId}`);
+          if (saved) {
+            setSavedCandidates(JSON.parse(saved));
+          }
+          if (ids) {
+            setFavoriteIds(JSON.parse(ids));
+          }
+        } finally {
+          setLoadingFavorites(false);
+        }
+      } else {
+        setSavedCandidates([]);
+        setFavoriteIds({});
+        setLoadingFavorites(false);
+      }
+    };
+
+    fetchFavorites();
+  }, [isAuthenticated, currentUserId, userType]);
+
+  // Initialize the Bootstrap modal instance
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const initModal = async () => {
+        const bootstrap = await import('bootstrap');
+        const modalElement = document.getElementById('saveCandidateLoginModal');
+        if (modalElement && !loginModalRef.current) {
+          loginModalRef.current = new bootstrap.Modal(modalElement);
+        } else if (!modalElement) {
+          console.error('Modal element with ID saveCandidateLoginModal not found');
+        }
+      };
+      initModal();
+    }
+  }, []);
+
+  // Handle saving/unsaving a candidate
+  const handleToggleSave = async (candidateId: number) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      if (loginModalRef.current) {
+        loginModalRef.current.show();
+      } else {
+        console.error('Login modal not initialized');
+      }
+      return;
+    }
+
+    // Check if user is a CLIENT
+    if (userType !== 'CLIENT') {
+      toast.error('Only clients can save candidates. Please switch to a client account.');
+      return;
+    }
+
+    // Check if user ID is available
+    if (!currentUserId) {
+      console.error('User ID not available');
+      toast.error('Unable to save candidate. Please try logging in again.');
+      return;
+    }
+
+    // Prevent double-clicking
+    if (savingStates[candidateId]) {
+      return;
+    }
+
+    const isSaved = savedCandidates.includes(candidateId);
+
+    // Set saving state
+    setSavingStates(prev => ({ ...prev, [candidateId]: true }));
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No authentication token found');
+        toast.error('Authentication required. Please log in again.');
+        setSavingStates(prev => ({ ...prev, [candidateId]: false }));
+        return;
+      }
+
+      if (isSaved) {
+        // Remove from favorites using the API
+        const favoriteId = favoriteIds[candidateId];
+        
+        if (!favoriteId) {
+          console.error('No favorite ID found for candidate:', candidateId);
+          // Still remove from local state
+          setSavedCandidates(prev => {
+            const newSaved = prev.filter(id => id !== candidateId);
+            localStorage.setItem(`savedCandidates_${currentUserId}`, JSON.stringify(newSaved));
+            return newSaved;
+          });
+          setFavoriteIds(prev => {
+            const newIds = { ...prev };
+            delete newIds[candidateId];
+            localStorage.setItem(`favoriteIds_${currentUserId}`, JSON.stringify(newIds));
+            return newIds;
+          });
+          return;
+        }
+        
+        const removePayload = {
+          id: favoriteId
+        };
+        
+        console.log('Removing candidate from favorites:', removePayload);
+
+        const response = await fetch('http://localhost:8000/api/v1/favorites/remove', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(removePayload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Failed to remove candidate' }));
+          console.error('Remove API Error:', errorData);
+          console.error('Remove API Status:', response.status);
+          throw new Error(errorData.message || `Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('API Response (Remove):', result);
+
+        // Update local state - remove from saved
+        setSavedCandidates(prev => {
+          const newSaved = prev.filter(id => id !== candidateId);
+          localStorage.setItem(`savedCandidates_${currentUserId}`, JSON.stringify(newSaved));
+          return newSaved;
+        });
+        setFavoriteIds(prev => {
+          const newIds = { ...prev };
+          delete newIds[candidateId];
+          localStorage.setItem(`favoriteIds_${currentUserId}`, JSON.stringify(newIds));
+          return newIds;
+        });
+        toast.success('Candidate removed from favorites');
+        console.log(`Candidate ${candidateId} removed from favorites successfully`);
+      } else {
+        // Add to favorites using the API
+        const addPayload = {
+          user_id: currentUserId,
+          freelancer_id: candidateId,
+          created_by: currentUserId
+        };
+        
+        console.log('Adding candidate to favorites:', addPayload);
+
+        const response = await fetch('http://localhost:8000/api/v1/favorites/add', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(addPayload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Failed to save candidate' }));
+          console.error('Add API Error:', errorData);
+          
+          // If already in favorites, just update local state
+          if (errorData.message && errorData.message.includes('already in favorites')) {
+            console.log('Candidate already in favorites, updating local state');
+            setSavedCandidates(prev => {
+              const newSaved = [...prev, candidateId];
+              localStorage.setItem(`savedCandidates_${currentUserId}`, JSON.stringify(newSaved));
+              return newSaved;
+            });
+            return;
+          }
+          
+          throw new Error(errorData.message || `Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('API Response (Add):', result);
+
+        // Extract the favorite ID from the response
+        const favoriteId = result.data?.favorite_id || result.data?.id || result.id;
+        console.log('Favorite ID from API:', favoriteId);
+
+        // Update local state - add to saved
+        setSavedCandidates(prev => {
+          const newSaved = [...prev, candidateId];
+          localStorage.setItem(`savedCandidates_${currentUserId}`, JSON.stringify(newSaved));
+          return newSaved;
+        });
+        
+        // Store the favorite ID for later removal
+        if (favoriteId) {
+          setFavoriteIds(prev => {
+            const newIds = { ...prev, [candidateId]: favoriteId };
+            localStorage.setItem(`favoriteIds_${currentUserId}`, JSON.stringify(newIds));
+            return newIds;
+          });
+        }
+        
+        toast.success('Candidate added to favorites');
+        console.log(`Candidate ${candidateId} added to favorites successfully`);
+      }
+    } catch (err: any) {
+      console.error('Error toggling save:', err);
+      toast.error(`Failed to ${isSaved ? 'remove' : 'save'} candidate: ${err.message}`);
+    } finally {
+      // Clear saving state
+      setSavingStates(prev => ({ ...prev, [candidateId]: false }));
+    }
+  };
+
+  // Handle successful login from the modal
+  const handleLoginSuccess = () => {
+    console.log('handleLoginSuccess called');
+    if (loginModalRef.current) {
+      loginModalRef.current.hide();
+    } else {
+      console.error('Modal ref not initialized when calling handleLoginSuccess');
+    }
+    onLoginSuccess();
+  };
+
+  // Apply skill and location filters
+  const applyFilters = () => {
+    let filtered = [...candidates];
 
     if (selectedSkill) {
-      filtered = filtered.filter((c) =>
-        Array.isArray(c.skill?.languages)
-          ? c.skill.languages.includes(selectedSkill)
-          : false
-      );
+      filtered = filtered.filter(c => c.skills.includes(selectedSkill));
     }
 
     if (selectedLocation) {
       filtered = filtered.filter(
-        (c) => `${c.city}, ${c.country}` === selectedLocation
+        c => c.city && c.country && `${c.city}, ${c.country}` === selectedLocation
       );
     }
 
-    setCandidates(filtered);
+    setFilteredCandidates(filtered);
     setCurrentPage(1);
-    console.log("Filtered candidates:", filtered);
   };
 
-  //dropDown Sorting Function
-  const handleSort = (sortValue: string) => {
-    console.log("Sort by:", sortValue);
-    let sorted = [...candidates];
+  // Clear all filters
+  const clearFilters = () => {
+    setSelectedSkill("");
+    setSelectedLocation("");
+    setFilteredCandidates(candidates);
+    setCurrentPage(1);
+  };
 
-    switch (sortValue) {
-      case "New":
-        sorted = [...allCandidates]; // reset to API data
+  // Handle sorting of candidates
+  const handleSort = (value: string) => {
+    setSortValue(value);
+    let sorted = [...filteredCandidates];
+
+    switch (value) {
+      case "rate-low":
+        sorted.sort((a, b) => parseFloat(a.rate_amount) - parseFloat(b.rate_amount));
         break;
-      case "Category":
-        sorted.sort((a, b) =>
-          (a.category || "").localeCompare(b.category || "")
-        );
+      case "rate-high":
+        sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
         break;
-      case "Job Type":
-        sorted.sort((a, b) =>
-          (a.job_type || "").localeCompare(b.job_type || "")
-        );
-        break;
-      case "Budget":
-        sorted.sort(
-          (a, b) => (a.expected_salary || 0) - (b.expected_salary || 0)
-        );
+      case "name":
+        sorted.sort((a, b) => a.first_name.localeCompare(b.first_name));
         break;
       default:
         break;
     }
-
-    setCandidates(sorted);
-    setCurrentPage(1);
+    setFilteredCandidates(sorted);
   };
 
-  //Collect unique skills (flattened languages array)
+  // Extract unique skills and locations for filter dropdowns
   const allSkills = Array.from(
-    new Set(allCandidates.flatMap((c) => c.skill?.languages || []))
+    new Set(candidates.flatMap(c => c.skills))
   );
 
   const allLocations = Array.from(
-    new Set(allCandidates.map((c) => `${c.city}, ${c.country}`))
+    new Set(candidates
+      .filter(c => c.city && c.country)
+      .map(c => `${c.city}, ${c.country}`))
   );
 
   return (
-    <section className="candidates-profile pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
-      <div className="container">
-        <div className="row">
-          {/* Filter Sidebar */}
-          <div className="col-xl-3 col-lg-4">
-            <button
-              type="button"
-              className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#filteroffcanvas"
-            >
-              <i className="bi bi-funnel"></i> Filter
-            </button>
-            <CandidateV1FilterArea
-              onSkillChange={setSelectedSkill}
-              onLocationChange={setSelectedLocation}
-              onApplyFilter={applyFilter}
-              skills={allSkills}
-              locations={allLocations}
-            />
-          </div>
-
-          {/* Candidate List / Grid */}
-          <div className="col-xl-9 col-lg-8">
-            <div className="ms-xxl-5 ms-xl-3">
-              {/* Sort + Toggle */}
-              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                <div className="total-job-found">
-                  All{" "}
-                  <span className="text-dark fw-500">{candidates.length}</span>{" "}
-                  candidates found
-                </div>
-                <div className="d-flex align-items-center">
-                  <div className="short-filter d-flex align-items-center">
-                    <div className="text-dark fw-500 me-2">Sort:</div>
-                    <ShortSelect onChange={handleSort} />
-                  </div>
-                  {/* Toggle Button */}
-                  <div className="d-flex ms-2" style={{ display: "flex" }}>
-                    {jobType === "list" ? (
-                      <button
-                        data-testid="grid-view-button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setJobTypeAndLog("grid");
-                        }}
-                        className="style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn"
-                        title="Switch to Grid View"
-                        style={{ display: "inline-block" }}
-                      >
-                        <i className="bi bi-grid"></i>
-                      </button>
-                    ) : (
-                      <button
-                        data-testid="list-view-button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          console.log("List button clicked");
-                          setJobTypeAndLog("list");
-                        }}
-                        className="style-changer-btn text-center rounded-circle tran3s ms-2 list-btn"
-                        title="Switch to List View"
-                        style={{ display: "inline-block" }}
-                      >
-                        <i className="bi bi-list"></i>
-                      </button>
+    <>
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+      <section className="candidates-profile pt-5 pb-5">
+        <div className="container">
+          <div className="row mb-4">
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2>Find Candidates</h2>
+                {isAuthenticated && (
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-success">✓ Logged In</span>
+                    {userType && (
+                      <span className={`badge ${userType === 'CLIENT' ? 'bg-primary' : 'bg-secondary'}`}>
+                        {userType}
+                      </span>
+                    )}
+                    {loadingFavorites && (
+                      <span className="spinner-border spinner-border-sm text-primary" role="status">
+                        <span className="visually-hidden">Loading favorites...</span>
+                      </span>
+                    )}
+                    {currentUserId && (
+                      <span className="text-muted small">User ID: {currentUserId}</span>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {loading ? (
-                <p>Loading candidates...</p>
-              ) : (
-                <>
-                  {/* Grid View */}
-                  <div
-                    data-testid="grid-view"
-                    className={`accordion-box grid-style ${jobType === "grid" ? "show" : "d-none"
-                      }`}
-                  >
-                    <div className="row">
-                      {currentCandidates.length > 0 ? (
-                        currentCandidates.map((item) => (
-                          <div
-                            key={item.user_id}
-                            className="col-xxl-4 col-sm-6 d-flex"
-                          >
-                            <CandidateGridItem
-                              item={item}
-                              isSaved={savedCandidates.includes(item.user_id)}
-                              onToggleSave={handleToggleSave}
-                            />
-                          </div>
-                        ))
-                      ) : (
-                        <p>No candidates found.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* List View */}
-                  <div
-                    data-testid="list-view"
-                    className={`accordion-box list-style ${jobType === "list" ? "show" : "d-none"
-                      }`}
-                  >
-                    {currentCandidates.length > 0 ? (
-                      currentCandidates.map((item) => (
-                        <CandidateListItem
-                          key={item.user_id}
-                          item={item}
-                          isSaved={savedCandidates.includes(item.user_id)}
-                          onToggleSave={handleToggleSave}
-                        />
-                      ))
-                    ) : (
-                      <p>No candidates found.</p>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Pagination */}
-              <div className="pt-20 d-sm-flex align-items-center justify-content-between">
-                <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                  Showing{" "}
-                  <span className="text-dark fw-500">
-                    {indexOfFirst + 1} to{" "}
-                    {Math.min(indexOfLast, candidates.length)}
-                  </span>{" "}
-                  of{" "}
-                  <span className="text-dark fw-500">{candidates.length}</span>
-                </p>
-
-                <div className="d-flex justify-content-center">
-                  <ul className="pagination-two d-flex align-items-center style-none">
-                    {/* Previous */}
-                    <li className={currentPage === 1 ? "disabled" : ""}>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage((prev) => Math.max(prev - 1, 1));
-                        }}
-                      >
-                        <i className="bi bi-chevron-left"></i>
-                      </a>
-                    </li>
-
-                    {/* Page numbers */}
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <li
-                        key={i}
-                        className={currentPage === i + 1 ? "active" : ""}
-                      >
-                        <a
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCurrentPage(i + 1);
-                          }}
-                        >
-                          {i + 1}
-                        </a>
-                      </li>
-                    ))}
-
-                    {/* Next */}
-                    <li
-                      className={currentPage === totalPages ? "disabled" : ""}
-                    >
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                          );
-                        }}
-                      >
-                        <i className="bi bi-chevron-right"></i>
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                )}
               </div>
             </div>
           </div>
+
+          <div className="row">
+            {/* Filter Sidebar */}
+            <div className="col-lg-3 mb-4">
+              <div className="filter-area p-3 border rounded bg-light">
+                <h5 className="mb-3">Filters</h5>
+                
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Skill</label>
+                  <select
+                    className="form-select"
+                    value={selectedSkill}
+                    onChange={(e) => setSelectedSkill(e.target.value)}
+                  >
+                    <option value="">All Skills</option>
+                    {allSkills.map((skill, idx) => (
+                      <option key={idx} value={skill}>{skill}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Location</label>
+                  <select
+                    className="form-select"
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                  >
+                    <option value="">All Locations</option>
+                    {allLocations.map((loc, idx) => (
+                      <option key={idx} value={loc}>{loc}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  className="btn btn-primary w-100"
+                  onClick={applyFilters}
+                >
+                  Apply Filters
+                </button>
+
+                <button
+                  className="btn btn-outline-secondary w-100 mt-2"
+                  onClick={clearFilters}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Candidate List */}
+            <div className="col-lg-9">
+              {/* Top Controls */}
+              <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                <div className="mb-2 mb-sm-0">
+                  {loading ? (
+                    <span>Loading candidates...</span>
+                  ) : (
+                    <>
+                      <span className="fw-bold">{filteredCandidates.length}</span> candidates found
+                      {savedCandidates.length > 0 && userType === 'CLIENT' && (
+                        <span className="text-muted ms-2">
+                          ({savedCandidates.length} saved)
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+                
+                <div className="d-flex gap-2">
+                  <select
+                    className="form-select form-select-sm"
+                    style={{ width: 'auto' }}
+                    value={sortValue}
+                    onChange={(e) => handleSort(e.target.value)}
+                  >
+                    <option value="">Sort By</option>
+                    <option value="rate-low">Rate: Low to High</option>
+                    <option value="rate-high">Rate: High to Low</option>
+                    <option value="name">Name: A-Z</option>
+                  </select>
+
+                  <button
+                    className={`btn btn-sm ${viewType === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => setViewType('grid')}
+                    title="Grid View"
+                  >
+                    ⊞
+                  </button>
+                  <button
+                    className={`btn btn-sm ${viewType === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => setViewType('list')}
+                    title="List View"
+                  >
+                    ☰
+                  </button>
+                </div>
+              </div>
+
+              {/* Candidates Display */}
+              {loading ? (
+                <div className="text-center p-5">
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="text-center p-5">
+                  <h4>Error</h4>
+                  <p>{error}</p>
+                </div>
+              ) : currentCandidates.length === 0 ? (
+                <div className="text-center p-5">
+                  <h4>No candidates found</h4>
+                  <p>Try adjusting your filters</p>
+                </div>
+              ) : (
+                <div className={viewType === 'grid' ? 'row' : ''}>
+                  {currentCandidates.map(candidate => (
+                    <div 
+                      key={candidate.user_id} 
+                      className={viewType === 'grid' ? 'col-md-6 col-lg-6 mb-4' : 'col-12 mb-3'}
+                    >
+                      <CandidateCard
+                        candidate={candidate}
+                        isSaved={savedCandidates.includes(candidate.user_id)}
+                        onToggleSave={handleToggleSave}
+                        viewType={viewType}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <nav className="mt-4">
+                  <ul className="pagination justify-content-center">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        Previous
+                      </button>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
+                        <button
+                          className="page-link"
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </button>
+                      </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
+              )}
+
+              {!loading && (
+                <div className="text-center mt-3 text-muted">
+                  Showing {indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)} of {filteredCandidates.length} candidates
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <SaveCandidateLoginModal onLoginSuccess={handleLoginSuccess} />
+    </>
   );
 };
 

@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ErrorMsg from "../common/error-msg";
 import icon from "@/assets/images/icon/icon_60.svg";
-import { useRouter } from "next/navigation";
+// ❌ We no longer need the router for redirection
+// import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { makePostRequest } from "@/utils/api";
 
@@ -17,18 +18,15 @@ const schema = Yup.object().shape({
   password: Yup.string().required("Password is required").min(6, "Password must be at least 6 characters").label("Password"),
 });
 
-const LoginForm = ({ 
-  onLoginSuccess,
-  isModal = false 
-}: { 
-  onLoginSuccess?: () => void;
-  isModal?: boolean;
-}) => {
+// ✅ The component props can be simplified as they are no longer needed
+const LoginForm = () => {
   const [showPass, setShowPass] = useState<boolean>(false);
-  const router = useRouter();
+  // ❌ router is no longer needed
+  // const router = useRouter(); 
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<IFormData>({ resolver: yupResolver(schema) });
 
+  // ✅ This is the only part that needs to be changed
   const onSubmit = async (data: IFormData) => {
     try {
       const res = await makePostRequest("auth/login", data);
@@ -36,30 +34,19 @@ const LoginForm = ({
       const token = result?.data?.token;
 
       if (token) {
-        // CRITICAL: Check isModal BEFORE setting token
-        if (isModal && onLoginSuccess) {
-          // Set token AFTER calling callback to avoid middleware interference
-          localStorage.setItem("token", token);
-          reset();
-          toast.success("Login successful!");
-          // Call the callback which will close modal and refresh
-          onLoginSuccess();
-          return; // Exit early to prevent any redirect logic
-        }
-        
-        // Normal login flow (not from modal)
+        // 1. Store the token as before
         localStorage.setItem("token", token);
         reset();
-        toast.success("Login successful! Redirecting...");
         
-        const userRoles = result?.data?.user?.roles;
-        if (userRoles?.includes('CLIENT')) {
-          router.push("/dashboard/employ-dashboard");
-        } else if (userRoles?.includes('VIDEOGRAPHER') || userRoles?.includes('VIDEO_EDITOR')) {
-          router.push("/dashboard/candidate-dashboard");
-        } else {
-          router.push("/");
-        }
+        // 2. Show a success message
+        toast.success("Login successful! Refreshing...");
+
+        // 3. Reload the page after a short delay
+        // The delay gives the user a moment to see the success toast.
+        setTimeout(() => {
+          window.location.reload();
+        }, 500); // 500ms delay
+
       } else {
         toast.error(result?.message || "Login failed: No token received.");
       }
