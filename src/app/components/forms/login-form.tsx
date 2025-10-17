@@ -18,8 +18,14 @@ const schema = Yup.object().shape({
   password: Yup.string().required("Password is required").min(6, "Password must be at least 6 characters").label("Password"),
 });
 
+// Props interface for LoginForm
+interface LoginFormProps {
+  onLoginSuccess?: () => void;
+  isModal?: boolean;
+}
+
 // ✅ The component props can be simplified as they are no longer needed
-const LoginForm = () => {
+const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => {
   const [showPass, setShowPass] = useState<boolean>(false);
   // ❌ router is no longer needed
   // const router = useRouter(); 
@@ -41,7 +47,12 @@ const LoginForm = () => {
         // 2. Show a success message
         toast.success("Login successful! Refreshing...");
 
-        // 3. Reload the page after a short delay
+        // 3. Call the onLoginSuccess callback if provided
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
+
+        // 4. Reload the page after a short delay
         // The delay gives the user a moment to see the success toast.
         setTimeout(() => {
           window.location.reload();

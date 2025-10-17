@@ -15,6 +15,7 @@ export interface IJobType {
   projects_type?: string;
   project_format?: string;
   audio_voiceover?: string;
+  audio_description?: string;
   video_length?: number;
   preferred_video_style?: string;
   sample_project_file?: string | null;

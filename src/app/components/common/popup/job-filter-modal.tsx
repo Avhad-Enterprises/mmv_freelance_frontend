@@ -8,7 +8,7 @@ import SearchFilter from "../../jobs/filter/job-filter-2/search-filter";
 // import FilterEnglishFluency from "../../jobs/filter/job-filter-2/filter-english-fluency";
 import FilterJobType from "../../jobs/filter/job-filter-2/filter-job-type";
 import FilterExperience from "../../jobs/filter/job-filter-2/filter-experience";
-import { SalaryRangeSlider } from "../../jobs/filter/job-prices";
+import JobPrices from "../../jobs/filter/job-prices";
 
 // Correct prop types (tuple instead of number[])
 type IProps = {
@@ -76,7 +76,7 @@ const JobFilterModal = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
                         Salary Range :
                       </div>
                       <div className="main-body ps-xl-4 flex-fill">
-                        <SalaryRangeSlider
+                        <JobPrices
                           priceValue={priceValue}
                           setPriceValue={setPriceValue}
                           maxPrice={maxPrice}

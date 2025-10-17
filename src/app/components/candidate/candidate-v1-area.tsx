@@ -1,3 +1,4 @@
+"use client";
 // CandidateV1Area.tsx
 import React, { useEffect, useState, useRef } from "react";
 import toast, { Toaster } from 'react-hot-toast';
@@ -25,11 +26,12 @@ interface Candidate {
 
 // Define props for the component
 interface CandidateV1AreaProps {
-  isAuthenticated: boolean;
-  onLoginSuccess: () => void;
+  isAuthenticated?: boolean;
+  onLoginSuccess?: () => void;
+  style_2?: boolean;
 }
 
-const CandidateV1Area = ({ isAuthenticated, onLoginSuccess }: CandidateV1AreaProps) => {
+const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, style_2 = false }: CandidateV1AreaProps) => {
   const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);

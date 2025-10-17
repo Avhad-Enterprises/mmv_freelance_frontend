@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { ProjectTask } from "./job-area"; // Import the type from the parent
+import { IJobType } from "@/types/job-data-type"; // Import the type from types
 
 // Props type for this component
 type IProps = {
-  project: ProjectTask;
+  project: IJobType & { count?: number; };
 };
 
 const EmployJobItem = ({ project }: IProps) => {
@@ -13,23 +13,25 @@ const EmployJobItem = ({ project }: IProps) => {
   const toggleOpen = () => setIsOpen(!isOpen);
 
   // Format the creation date
-  const createdDate = new Date(project.created_at).toLocaleDateString("en-US", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  const createdDate = project.created_at 
+    ? new Date(project.created_at).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "N/A";
 
   return (
     <>
       {/* Main Table Row - Click to toggle details */}
       <tr onClick={toggleOpen} style={{ cursor: "pointer" }} title="Click to see details">
         <td>
-          <div className="job-name fw-500">{project.project_title}</div>
+          <div className="job-name fw-500">{project.project_title || "Untitled"}</div>
         </td>
-        <td>{project.project_category}</td>
-        <td>${project.budget.toLocaleString()}</td>
+        <td>{project.project_category || "N/A"}</td>
+        <td>${project.budget?.toLocaleString() || 0}</td>
         <td>{createdDate}</td>
-        <td>{project.count}</td>
+        <td>{project.count || 0}</td>
         <td>
           <div className="action-dots float-end">
             <button
@@ -56,14 +58,18 @@ const EmployJobItem = ({ project }: IProps) => {
           <td colSpan={6} style={{ padding: '0.5rem 1rem', backgroundColor: '#f8f9fa' }}>
             <div className="p-3">
               <h5>Project Details</h5>
-              <p>{project.project_description}</p>
+              <p>{project.project_description || "No description available"}</p>
               <h5>Skills Required</h5>
               <div>
-                {project.skills_required.map((skill, index) => (
-                  <span key={index} className="badge bg-secondary text-white me-2 mb-2 p-2">
-                    {skill}
-                  </span>
-                ))}
+                {project.skills_required && project.skills_required.length > 0 ? (
+                  project.skills_required.map((skill, index) => (
+                    <span key={index} className="badge bg-secondary text-white me-2 mb-2 p-2">
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <p>No skills listed</p>
+                )}
               </div>
             </div>
           </td>

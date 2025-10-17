@@ -11,12 +11,12 @@ import { resetFilter } from '@/redux/features/filterSlice';
 
 // Define types for the data we expect from parent
 interface ICategory {
-  id: number;
-  name: string;
+  category_id: number;
+  category_name: string;
 }
 interface ISkill {
-  id: number;
-  name: string;
+  skill_id: number;
+  skill_name: string;
 }
 
 // Update props to accept categories and skills lists

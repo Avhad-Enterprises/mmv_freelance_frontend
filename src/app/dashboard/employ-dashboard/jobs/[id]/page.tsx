@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Wrapper from '@/layouts/wrapper';
 import EmployAside from '@/app/components/dashboard/employ/aside';
 import JobDetailsDashboardArea from '@/app/components/dashboard/employ/job-details-dashboard-area';
-import DashboardHeader from '@/layouts/headers/dashboard-header';
+import DashboardHeader from '@/app/components/dashboard/candidate/dashboard-header';
 
 const JobDetailsPage = ({ params }: { params: { id: string } }) => {
   const [isOpenSidebar, setIsOpenSidebar] = useState(false);

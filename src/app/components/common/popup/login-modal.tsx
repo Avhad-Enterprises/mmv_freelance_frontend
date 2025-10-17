@@ -8,10 +8,10 @@ import google from '@/assets/images/icon/google.png';
 import facebook from '@/assets/images/icon/facebook.png';
 
 interface LoginModalProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess?: () => void;
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess }) => {
+const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) => {
   return (
     <div
       className="modal fade"
