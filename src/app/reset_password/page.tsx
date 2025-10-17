@@ -73,7 +73,7 @@ const ResetPasswordForm = () => {
         password: data.password,
       });
       toast.success("Password reset successful!");
-      router.push("/login");
+      router.push("/");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to reset password");
     } finally {

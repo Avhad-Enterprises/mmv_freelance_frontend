@@ -32,11 +32,18 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       console.error("Authentication failed - clearing token");
       localStorage.removeItem("token");
-      // Optionally redirect to login page
+      
+      // Don't redirect for login endpoint failures (wrong credentials)
+      if (error.config?.url?.includes('/auth/login')) {
+        // Let the login form handle the error display
+        return Promise.reject(error);
+      }
+      
+      // For other endpoints, redirect to home page instead of /login
       if (typeof window !== 'undefined') {
-        // Only redirect if not already on login page
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        // Only redirect if not already on home page
+        if (window.location.pathname !== '/') {
+          window.location.href = '/';
         }
       }
     }

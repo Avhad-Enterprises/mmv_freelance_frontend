@@ -229,7 +229,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
       setFormData((prev) => ({ ...prev, client_id: decoded.user_id, created_by: decoded.user_id }));
     } else {
       toast.error("Please log in to edit a Project.");
-      router.push("/login");
+      router.push("/");
     }
   }, [router]);
 

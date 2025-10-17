@@ -47,7 +47,14 @@ export default function MobileMenu() {
           </ul>
 
           <div className="border-t pt-4 mt-4 space-y-2">
-            <Link href="/login" className="block text-blue-600 font-semibold">Login</Link>
+            <a
+              href="#"
+              className="block text-blue-600 font-semibold"
+              data-bs-toggle="modal"
+              data-bs-target="#loginModal"
+            >
+              Login
+            </a>
             <Link href="/register" className="block text-blue-600 font-semibold">Register</Link>
           </div>
         </nav>

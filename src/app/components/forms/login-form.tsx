@@ -43,26 +43,47 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         // 1. Store the token as before
         localStorage.setItem("token", token);
         reset();
-        
-        // 2. Show a success message
-        toast.success("Login successful! Refreshing...");
 
-        // 3. Call the onLoginSuccess callback if provided
+        // 2. Decode token to get user role
+        const base64Payload = token.split(".")[1];
+        const decodedPayload = JSON.parse(atob(base64Payload));
+        const userRoles = decodedPayload.roles || decodedPayload.role || [];
+
+        // Handle case where roles might be a single string instead of array
+        const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+
+        // 3. Show a success message
+        toast.success("Login successful! Redirecting to dashboard...");
+
+        // 4. Call the onLoginSuccess callback if provided
         if (onLoginSuccess) {
           onLoginSuccess();
         }
 
-        // 4. Reload the page after a short delay
-        // The delay gives the user a moment to see the success toast.
+        // 5. Redirect to appropriate dashboard based on role
         setTimeout(() => {
-          window.location.reload();
+          if (rolesArray.includes('CLIENT') || rolesArray.includes('client')) {
+            window.location.href = '/dashboard/employ-dashboard';
+          } else if (rolesArray.includes('VIDEOGRAPHER') || rolesArray.includes('videographer') || 
+                     rolesArray.includes('VIDEO_EDITOR') || rolesArray.includes('video_editor') ||
+                     rolesArray.includes('videoEditor')) {
+            window.location.href = '/dashboard/candidate-dashboard';
+          } else {
+            // Fallback to home if no recognized role
+            window.location.href = '/';
+          }
         }, 500); // 500ms delay
 
       } else {
         toast.error(result?.message || "Login failed: No token received.");
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Login failed");
+      // Handle login-specific errors without triggering global redirect
+      if (error.response?.status === 401) {
+        toast.error(error.response?.data?.message || "Invalid email or password");
+      } else {
+        toast.error(error.response?.data?.message || "Login failed");
+      }
     }
   };
 

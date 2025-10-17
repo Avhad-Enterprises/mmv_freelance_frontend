@@ -40,16 +40,19 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
       }
 
       // Check if user has required role
-      const userRoles = decoded.roles || [];
-      const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+      const userRoles = decoded.roles || decoded.role || [];
+      const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+      const hasAllowedRole = allowedRoles.some(role => rolesArray.includes(role));
       
       if (allowedRoles.length > 0 && !hasAllowedRole) {
-        console.log(`User roles '${userRoles.join(', ')}' not allowed. Allowed roles:`, allowedRoles);
+        console.log(`User roles '${rolesArray.join(', ')}' not allowed. Allowed roles:`, allowedRoles);
         
         // Redirect based on role
-        if (userRoles.includes('CLIENT')) {
+        if (rolesArray.includes('CLIENT') || rolesArray.includes('client')) {
           router.push('/dashboard/employ-dashboard');
-        } else if (userRoles.includes('VIDEOGRAPHER') || userRoles.includes('VIDEO_EDITOR')) {
+        } else if (rolesArray.includes('VIDEOGRAPHER') || rolesArray.includes('videographer') || 
+                   rolesArray.includes('VIDEO_EDITOR') || rolesArray.includes('video_editor') ||
+                   rolesArray.includes('videoEditor')) {
           router.push('/dashboard/candidate-dashboard');
         } else {
           router.push(redirectTo);
