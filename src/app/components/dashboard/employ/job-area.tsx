@@ -56,7 +56,7 @@ const EmployJobArea: FC<IProps> = ({ setIsOpenSidebar }) => {
       const clientId = meResponse.data?.data?.profile?.client_id;
       if (!clientId) throw new Error("Could not find Client ID. Please log in.");
 
-      const projectsResponse = await makeGetRequest(`projectsTask/client/${clientId}`);
+      const projectsResponse = await makeGetRequest(`projects-tasks/client/${clientId}`);
       const createdProjects = projectsResponse.data?.data || [];
 
       const processedData: ProjectSummary[] = createdProjects.map((p: any) => ({
@@ -148,15 +148,14 @@ const EmployJobArea: FC<IProps> = ({ setIsOpenSidebar }) => {
   setProjects(updatedProjects);
 
   try {
-    // 1️⃣ Update applicant status using PATCH /projectsTask/updatestatus
-    await makePatchRequest(`projectsTask/updatestatus`, {
-      projects_task_id: Number(applicationId),
-      status: newStatus
+    // 1️⃣ Update applicant status using PATCH /projects-tasks/:id/status
+    await makePatchRequest(`projects-tasks/${applicationId}/status`, {
+      status: newStatus,
+      user_id: Number(applicationId)
     });
 
-    // 2️⃣ Update project status using PUT /projectsTask/updateprojects_taskbyid
-    await makePutRequest(`projectsTask/updateprojects_taskbyid`, {
-      projects_task_id: Number(projectId),
+    // 2️⃣ Update project status using PUT /projects-tasks/:id
+    await makePutRequest(`projects-tasks/${projectId}`, {
       status: newProjectStatus
     });
 
