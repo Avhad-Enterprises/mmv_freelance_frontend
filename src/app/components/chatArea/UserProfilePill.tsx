@@ -2,7 +2,7 @@
 import React from 'react';
 import { getAuth } from "firebase/auth";
 
-const UserProfilePill = ({ userId }) => {
+const UserProfilePill = ({ userId }: { userId: string }) => {
     // In a real app, you would fetch user details (name, avatar) from another collection
     // based on the userId. For this example, we'll just show the ID.
     const isCurrentUser = getAuth().currentUser?.uid === userId;
