@@ -1,3 +1,5 @@
+// components/common/video-popup.tsx
+"use client";
 import React from "react";
 import ModalVideo from "react-modal-video";
 
@@ -11,7 +13,7 @@ type IPropType = {
 const VideoPopup = ({
   isVideoOpen,
   setIsVideoOpen,
-  videoId = "-6ZbrfSRWKc",
+  videoId, // Now dynamically passed
 }: IPropType) => {
   return (
     <ModalVideo

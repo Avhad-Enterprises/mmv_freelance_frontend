@@ -206,7 +206,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('https://api.makemyvid.io/api/v1/skills');
+        const response = await fetch('http://localhost:8000/api/v1/skills');
         if (!response.ok) throw new Error('Network response was not ok');
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
@@ -225,7 +225,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
   // Fetch superpowers/categories from API
   useEffect(() => {
-    fetch('https://api.makemyvid.io/api/v1/categories')
+    fetch('http://localhost:8000/api/v1/category/getallcategorys')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -258,7 +258,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`https://api.makemyvid.io/api/v1/users/me`, {
+      const res = await fetch(`http://localhost:8000/api/v1/users/me`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
       });
@@ -468,7 +468,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
         // Make API calls
         if (Object.keys(userPayload).length > 0) {
-            const userRes = await fetch(`https://api.makemyvid.io/api/v1/users/me`, {
+            const userRes = await fetch(`http://localhost:8000/api/v1/users/me`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(userPayload)
@@ -481,7 +481,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
         const freelancerTypes = ["freelancer", "video_editor", "videographer"];
         if (userType && freelancerTypes.includes(userType) && Object.keys(profilePayload).length > 0) {
-            const profileRes = await fetch(`https://api.makemyvid.io/api/v1/freelancer-profiles/me`, {
+            const profileRes = await fetch(`http://localhost:8000/api/v1/freelancer-profiles/me`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(profilePayload)

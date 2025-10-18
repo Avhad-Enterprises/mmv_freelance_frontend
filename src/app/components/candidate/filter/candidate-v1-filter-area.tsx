@@ -139,67 +139,8 @@ const CandidateV1FilterArea = ({
           </div>
         </div> */}
 
-        <div className="filter-block bottom-line pb-25 mt-25">
-          <a
-            className="filter-title fw-500 text-dark collapsed"
-            data-bs-toggle="collapse"
-            href="#collapseCType"
-            role="button"
-            aria-expanded="false"
-          >
-            Candidate Type
-          </a>
-          <div className="collapse" id="collapseCType">
-            <div className="main-body">
-              <ul className="style-none filter-input">
-                <li>
-                  <input type="checkbox" name="Gender" />
-                  <label>Male</label>
-                </li>
-                <li>
-                  <input type="checkbox" name="Gender" />
-                  <label>Female</label>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
 
-        <div className="filter-block bottom-line pb-25 mt-25">
-          <a
-            className="filter-title fw-500 text-dark collapsed"
-            data-bs-toggle="collapse"
-            href="#collapseSalary"
-            role="button"
-            aria-expanded="false"
-          >
-            Salary Range
-          </a>
-          <div className="collapse" id="collapseSalary">
-            <JobPrices
-              priceValue={priceValue}
-              setPriceValue={setPriceValue}
-              maxPrice={50000}
-            />
-          </div>
-        </div>
-
-        <div className="filter-block bottom-line pb-25 mt-25">
-          <a
-            className="filter-title fw-500 text-dark collapsed"
-            data-bs-toggle="collapse"
-            href="#collapseFluency"
-            role="button"
-            aria-expanded="false"
-          >
-            English Fluency
-          </a>
-          <div className="collapse" id="collapseFluency">
-            <div className="main-body">
-              <FilterEnglishFluency />
-            </div>
-          </div>
-        </div>
+        
 
         <a
           href="#"

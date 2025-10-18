@@ -1,51 +1,47 @@
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+// app/components/candidate/candidate-list-item.tsx
+"use client";
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-type Candidate = {
+// Interface defining the props for this component
+interface MappedCandidate {
   user_id: number;
-  username: any;
+  username: string;
   first_name: string;
   last_name: string;
-  location: string;
   city: string;
   country: string;
   profile_picture?: string;
-  skill?: any[];
-  total_earnings: number;
-  favorite?: boolean;
-  post: any;
-  budget: any;
-};
+  skill?: string[];
+  post: string; // This prop is no longer rendered but kept for type consistency
+  budget: string;
+}
 
 interface CandidateListItemProps {
-  item: Candidate;
-  style_2?: boolean;
+  item: MappedCandidate;
   isSaved: boolean;
   onToggleSave: (id: number) => void;
 }
 
 const CandidateListItem: React.FC<CandidateListItemProps> = ({
   item,
-  style_2 = false,
   isSaved,
   onToggleSave,
 }) => {
   return (
-    <div
-      className={`candidate-profile-card ${isSaved ? "favourite" : ""} ${style_2 ? "border-0" : ""
-        } list-layout mb-25`}
-    >
+    <div className={`candidate-profile-card ${isSaved ? "favourite" : ""} list-layout mb-25`}>
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
-          <Link href="/candidate-profile-v2" className="rounded-circle">
+          {/* MODIFIED: Link now points to the correct dynamic route */}
+          <Link href={`/candidate-profile-v1/${item.user_id}`} className="rounded-circle">
             <Image
               src={item.profile_picture || "/images/default-avatar.png"}
               alt="Candidate"
               width={80}
               height={80}
               className="lazy-img rounded-circle"
-              unoptimized
+              style={{ objectFit: 'cover' }}
             />
           </Link>
         </div>
@@ -54,17 +50,18 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
             <div className="col-xl-3">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
-                  <Link href="/candidate-profile-v2" className="tran3s">
+                  {/* MODIFIED: Link now points to the correct dynamic route */}
+                  <Link href={`/candidate-profile-v1/${item.user_id}`} className="tran3s">
                     {item.first_name} {item.last_name}
                   </Link>
                 </h4>
-                <div className="candidate-post">{item.post}</div>
+                
                 <ul className="cadidate-skills style-none d-flex align-items-center">
-                  {Array.isArray(item.skill) &&
-                    item.skill.slice(0, 3).map((s, i) => <li key={i}>{s}</li>)}
-
-                  {Array.isArray(item.skill) && item.skill.length > 3 && (
-                    <li>+{item.skill.length - 3}</li>
+                  {item.skill && item.skill.slice(0, 3).map((s, i) => (
+                    <li key={i} className="text-nowrap">{s}</li>
+                  ))}
+                  {item.skill && item.skill.length > 3 && (
+                    <li className="more">+{item.skill.length - 3}</li>
                   )}
                 </ul>
               </div>
@@ -73,37 +70,30 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
             <div className="col-xl-3 col-md-4 col-sm-6">
               <div className="candidate-info">
                 <span>Budget</span>
-                <div>
-                  {item.budget ? `${item.budget} / month` : "Negotiable"}
-                </div>
+                <div>{item.budget}</div>
               </div>
             </div>
-
 
             <div className="col-xl-3 col-md-4 col-sm-6">
               <div className="candidate-info">
                 <span>Location</span>
-                <div>{`${item.city}, ${item.country}`}</div>
+                <div>{item.city && item.country ? `${item.city}, ${item.country}` : 'N/A'}</div>
               </div>
             </div>
 
             <div className="col-xl-3 col-md-4">
-              <div className="d-flex justify-content-lg-end">
-                {/*Heart Save Button */}
+              <div className="d-flex justify-content-lg-end align-items-center">
                 <button
                   type="button"
-                  className="save-btn text-center rounded-circle tran3s mt-10"
+                  className="save-btn text-center rounded-circle tran3s"
                   onClick={() => onToggleSave(item.user_id)}
+                  title={isSaved ? "Unsave" : "Save"}
                 >
-                  <i
-                    className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"
-                      }`}
-                  ></i>
+                  <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                 </button>
-
                 <Link
-                  href={`/candidate-profile/${item.username}`}
-                  className="profile-btn tran3s ms-md-2 mt-10 sm-mt-20"
+                  href={`/candidate-profile-v1/${item.user_id}`} 
+                  className="profile-btn tran3s ms-md-2"
                 >
                   View Profile
                 </Link>

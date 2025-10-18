@@ -1,50 +1,43 @@
+// app/components/candidate-details/candidate-profile-slider.tsx
 "use client";
 import React from "react";
 import Image from "next/image";
 import Slider from "react-slick";
-import port_1 from "@/assets/images/candidates/CP_01.jpg";
-import port_2 from "@/assets/images/candidates/CP_02.jpg";
-import port_3 from "@/assets/images/candidates/CP_03.jpg";
-import port_4 from "@/assets/images/candidates/CP_02.jpg";
+import default_port_1 from "@/assets/images/candidates/CP_01.jpg";
 
-const CandidateProfileSlider = () => {
-  // slider setting
+interface CandidateProfileSliderProps {
+  portfolioLinks?: string[];
+}
+
+const CandidateProfileSlider: React.FC<CandidateProfileSliderProps> = ({ portfolioLinks }) => {
   const slider_setting = {
-    dots: true,
-    arrows: false,
-    centerPadding: "0px",
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    responsive: [
-      {
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 450,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
+    // ... your slider settings
   };
 
-  // portfolio data
-  const portfolio_data = [port_1, port_2, port_3, port_4];
+  // --- MODIFIED: Filter the links to only include actual image files ---
+  const imageLinks = (portfolioLinks || []).filter(link =>
+    /\.(jpeg|jpg|gif|png|webp)$/.test(link.toLowerCase())
+  );
+
+  const imagesToDisplay = imageLinks.length > 0 ? imageLinks : [default_port_1.src];
+
+  if (imagesToDisplay.length === 0) {
+    return <p>No portfolio images available.</p>;
+  }
+
   return (
     <Slider {...slider_setting} className="candidate-portfolio-slider">
-      {portfolio_data.map((img, i) => (
+      {imagesToDisplay.map((imgSrc, i) => (
         <div className="item" key={i}>
-          <a href="#" className="w-100 d-blok">
+          <a href={imgSrc} target="_blank" rel="noopener noreferrer" className="w-100 d-blok">
             <Image
-              src={img}
-              alt=""
+              src={imgSrc}
+              alt={`Portfolio image ${i + 1}`}
+              width={300}
+              height={200}
               className="w-100"
-              style={{ width: "100%", height: "auto" }}
+              style={{ width: "100%", height: "auto", objectFit: 'cover' }}
+              onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/300x200'; }}
             />
           </a>
         </div>
