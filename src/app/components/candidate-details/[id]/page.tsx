@@ -1,4 +1,3 @@
-// app/candidate-profile-v1/[id]/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
@@ -8,64 +7,9 @@ import FooterOne from "@/layouts/footers/footer-one";
 import CandidateProfileBreadcrumb from "@/app/components/candidate-details/profile-bredcrumb";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area";
 import JobPortalIntro from "@/app/components/job-portal-intro/job-portal-intro";
+import { IFreelancer } from "@/interfaces/freelancer"; // <-- IMPORT the shared type
 
-// Define the structure of a freelancer object that matches your API response
-// This type is used after fetching and before passing to CandidateDetailsArea
-export interface IFreelancer {
-  user_id: number;
-  first_name: string;
-  last_name: string;
-  username: string; // Used for email fallback
-  profile_picture: string | null;
-  bio: string | null;
-  city: string | null;
-  country: string | null;
-  latitude: string | null;
-  longitude: string | null;
-  skills: string[];
-  superpowers: string[];
-  languages: string[];
-  portfolio_links: string[]; // Raw portfolio links
-  rate_amount: string;
-  currency: string;
-  availability: string;
-  profile_title: string | null;
-  short_description: string | null;
-  experience_level: string | null;
-  role_name: string | null;
-  // Fields that were removed from display or are not directly used in IFreelancer for display logic,
-  // but might be present in the raw API response or needed for type completeness.
-  timezone: string | null;
-  address_line_first: string | null;
-  address_line_second: string | null;
-  state: string | null;
-  pincode: string | null;
-  is_active: boolean;
-  is_banned: boolean;
-  is_deleted: boolean;
-  email_notifications: boolean;
-  created_at: string;
-  updated_at: string;
-  freelancer_id: number;
-  certification: any;
-  education: any;
-  previous_works: any;
-  services: any;
-  work_type: string | null;
-  hours_per_week: number | null;
-  id_type: string | null;
-  id_document_url: string | null;
-  kyc_verified: boolean;
-  aadhaar_verification: boolean;
-  hire_count: number;
-  review_id: number;
-  total_earnings: number;
-  time_spent: number;
-  projects_applied: any[];
-  projects_completed: any[];
-  payment_method: any;
-  bank_account_info: any;
-}
+// Remove the old, local IFreelancer interface from this file
 
 const DynamicCandidateProfilePage = () => {
   const params = useParams();
@@ -81,29 +25,42 @@ const DynamicCandidateProfilePage = () => {
           setLoading(true);
           setError(null);
 
-          const response = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public', {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
             cache: 'no-cache'
           });
           if (!response.ok) throw new Error(`Failed to fetch data`);
 
           const responseData = await response.json();
-          const foundRawFreelancer: IFreelancer | undefined = responseData.data.find((f: IFreelancer) => f.user_id === parseInt(candidateId));
+          // Find the raw data. Assume the raw data might not have all IFreelancer fields.
+          const foundRawFreelancer = responseData.data.find((f: any) => f.user_id === parseInt(candidateId));
 
           if (foundRawFreelancer) {
-            // Map raw API data to the IFreelancer type, ensuring arrays are not null
+            // Process YouTube links to create the 'youtube_videos' array
+            const youtubeVideos = (foundRawFreelancer.portfolio_links || [])
+              .filter((link: string) => link.includes("youtube.com/watch?v="))
+              .map((link: string) => {
+                const videoId = link.split('v=')[1]?.split('&')[0] || '';
+                return { id: videoId, url: link };
+              })
+              .filter((video: {id: string}) => video.id !== '');
+
+            // Map the raw data to the complete IFreelancer type
             const mappedFreelancer: IFreelancer = {
-              ...foundRawFreelancer, // Spread all existing properties
+              ...foundRawFreelancer, // Spread all properties from the raw object
               bio: foundRawFreelancer.bio || foundRawFreelancer.short_description || null,
+              email: `${foundRawFreelancer.username || 'unknown'}@example.com`,
+              // Ensure arrays and required fields have default values
               skills: foundRawFreelancer.skills || [],
               superpowers: foundRawFreelancer.superpowers || [],
               languages: foundRawFreelancer.languages || [],
               portfolio_links: foundRawFreelancer.portfolio_links || [],
-              email: `${foundRawFreelancer.username || 'unknown'}@example.com`, // Placeholder email
-              rate_amount: foundRawFreelancer.rate_amount || "0.00",
-              currency: foundRawFreelancer.currency || "USD",
-              availability: foundRawFreelancer.availability || "not specified",
-              experience_level: foundRawFreelancer.experience_level || null,
-              role_name: foundRawFreelancer.role_name || null,
+              experience: foundRawFreelancer.experience || [],
+              education: foundRawFreelancer.education || [],
+              previous_works: foundRawFreelancer.previous_works || [],
+              services: foundRawFreelancer.services || [],
+              certification: foundRawFreelancer.certification || [],
+              // Add the processed youtube_videos
+              youtube_videos: youtubeVideos,
             };
             setFreelancer(mappedFreelancer);
           } else {
@@ -129,22 +86,17 @@ const DynamicCandidateProfilePage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         <Header />
-
         <CandidateProfileBreadcrumb title={breadcrumbTitle} subtitle="Candidate Profile" />
-
         {error && (
             <div className="container text-center pt-80 pb-80">
                 <h2 className="text-danger">An Error Occurred</h2>
                 <p>{error}</p>
             </div>
         )}
-
         {!error && (
             <CandidateDetailsArea freelancer={freelancer} loading={loading} />
         )}
-
         <JobPortalIntro top_border={true} />
-
         <FooterOne />
       </div>
     </Wrapper>

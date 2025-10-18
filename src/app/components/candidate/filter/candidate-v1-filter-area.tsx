@@ -12,6 +12,9 @@ type Props = {
   onApplyFilter: () => void;
   skills: string[];
   locations: string[];
+  selectedSkill: string;      // <-- ADD THIS LINE
+  selectedLocation: string;
+  onClearFilters: () => void; // <-- ADD THIS LINE
 };
 
 const CandidateV1FilterArea = ({

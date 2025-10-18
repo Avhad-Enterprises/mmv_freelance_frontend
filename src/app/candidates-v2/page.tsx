@@ -25,7 +25,7 @@ const CandidateV2Page = () => {
         {/* search breadcrumb end */}
 
         {/* candidate area start */}
-        <CandidateV1Area style_2={true} />
+        <CandidateV1Area/>
         {/* candidate area end */}
 
         {/* job portal intro start */}

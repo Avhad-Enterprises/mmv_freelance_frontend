@@ -48,7 +48,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const res = await fetch('http://localhost:8000/api/v1/users/me', {
+const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -91,7 +91,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
                         <Link href="/dashboard/employ-dashboard">
-                            <Image src={logo} alt="logo" priority />
+                            <Image src={logo} alt="logo" width={140} priority />
                         </Link>
                         <button
                             onClick={() => setIsOpenSidebar(false)}
@@ -203,13 +203,7 @@ const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
                         </ul>
                     </nav>
 
-                    <div className="profile-complete-status">
-                        <div className="progress-value fw-500">87%</div>
-                        <div className="progress-line position-relative">
-                            <div className="inner-line" style={{ width: "80%" }}></div>
-                        </div>
-                        <p>Profile Complete</p>
-                    </div>
+                    
                 </div>
             </aside>
 
