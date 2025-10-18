@@ -146,7 +146,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ activeTab }) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`tags/getallskill`)
+      const response = await makeGetRequest(`skills`)
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : []
       const names: string[] = fetchedSkills
         .map((s: any) => s?.skill_name)

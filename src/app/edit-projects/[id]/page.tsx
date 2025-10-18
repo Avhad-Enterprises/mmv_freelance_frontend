@@ -110,9 +110,9 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
       const errorMessage = error.response?.data?.message || error.message;
       if (errorMessage.includes("already exists")) {
         try {
-          const skillData = await makeGetRequest(`tags/getallskill`);
+          const skillData = await makeGetRequest(`skills`);
           const skill = skillData.data?.data?.find((s: any) => s.skill_name.toLowerCase() === trimmedSkill.toLowerCase());
-          if (skill && !skill.is_deleted) {
+          if (skill) {
             setFormData((prev) => ({
               ...prev,
               skills_required: [...prev.skills_required, trimmedSkill],
@@ -120,7 +120,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
             setSkillInput("");
             setAvailableSkills([]);
           } else {
-            toast.error("Skill exists but is marked as deleted.");
+            toast.error("Skill does not exist.");
           }
         } catch (fetchError) {
           console.error("Failed to fetch skill:", fetchError);
@@ -134,10 +134,9 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`tags/getallskill`);
+      const response = await makeGetRequest(`skills`);
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : [];
       const skillNames = fetchedSkills
-        .filter((skill: any) => !skill.is_deleted)
         .map((skill: any) => skill.skill_name)
         .filter((name: string) => name.toLowerCase().includes(query.toLowerCase()));
       setAvailableSkills(skillNames);

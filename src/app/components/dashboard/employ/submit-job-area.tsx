@@ -113,7 +113,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`tags/getallskill`);
+      const response = await makeGetRequest(`skills`);
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : [];
       const skillNames = fetchedSkills
         .map((skill: any) => skill.skill_name)

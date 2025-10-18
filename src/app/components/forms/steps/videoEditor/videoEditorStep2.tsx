@@ -63,7 +63,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
   React.useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('https://api.makemyvid.io/api/v1/tags/getallskill');
+        const response = await fetch('https://api.makemyvid.io/api/v1/skills');
         if (!response.ok) throw new Error('Network response was not ok');
        
         const result = await response.json();
