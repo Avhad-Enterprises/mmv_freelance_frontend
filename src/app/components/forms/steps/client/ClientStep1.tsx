@@ -8,11 +8,21 @@ type Props = {
 };
 
 const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({ 
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isValid }, 
+    watch 
+  } = useForm({ 
     defaultValues: formData,
     mode: 'onChange' // Real-time validation
   });
+
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Watch password field for comparison
+  const password = watch("password");
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -30,10 +40,11 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               placeholder="Enter your full name" 
               className="form-control" 
               {...register("full_name", { required: "Full Name is required" })}
-              onChange={() => clearErrors("full_name")}
             />
             {errors.full_name && (
-              <div className="error">{String(errors.full_name.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.full_name.message)}
+              </div>
             )}
           </div>
         </div>
@@ -53,10 +64,11 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
                   message: "Invalid email address"
                 }
               })}
-              onChange={() => clearErrors("email")}
             />
             {errors.email && (
-              <div className="error">{String(errors.email.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.email.message)}
+              </div>
             )}
           </div>
         </div>
@@ -76,7 +88,6 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
                   message: "Password must be at least 6 characters"
                 }
               })}
-              onChange={() => clearErrors("password")}
             />
             <span 
               className="placeholder_icon"
@@ -84,7 +95,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '80%',
+                top: '85%', // Adjusted position
                 transform: 'translateY(-50%)',
                 cursor: 'pointer'
               }}
@@ -92,14 +103,54 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
             </span>
             {errors.password && (
-              <div className="error">{String(errors.password.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.password.message)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Confirm Password */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Confirm Password*</label>
+            <input 
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm Password" 
+              className="form-control"
+              {...register("confirm_password", { 
+                required: "Please confirm your password",
+                validate: value => value === password || "Passwords do not match"
+              })}
+            />
+            <span 
+              className="placeholder_icon"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '65%', // Adjusted position
+                transform: 'translateY(-50%)',
+                cursor: 'pointer'
+              }}
+            >
+              <i className={`fa ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </span>
+            {errors.confirm_password && (
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.confirm_password.message)}
+              </div>
             )}
           </div>
         </div>
 
         {/* Next Button */}
-        <div className="col-12">
-          <button type="submit" className="btn-one tran3s w-100 mt-30">
+        <div className="col-1To'0">
+          <button 
+            type="submit" 
+            className="btn-one tran3s w-100 mt-30"
+            disabled={!isValid}
+          >
             Next
           </button>
         </div>

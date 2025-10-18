@@ -45,7 +45,7 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
           setError('Authentication token not found. Please log in.');
           return;
         }
-        const response = await fetch('https://api.makemyvid.io/api/v1/applications/my-applications', {
+        const response = await fetch('http://localhost:8000/api/v1/applications/my-applications', {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useForm } from "react-hook-form";
+
 // Assuming you might still need these for other parts, but they aren't used in this snippet.
 // import { Country, State, City } from "country-state-city";
 
@@ -19,7 +20,7 @@ const isYouTubeUrl = (url: string) => {
 };
 
 const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors, watch } = useForm({
+  const { register, handleSubmit, formState: { errors }, setValue, clearErrors, watch } = useForm({
     defaultValues: formData,
     mode: 'onChange'
   });
@@ -48,19 +49,23 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     });
   }, [register]);
 
-  // State for skills and categories (keeping these as they are API-dependent)
+  // State for skills and categories
   const [allSkills, setAllSkills] = React.useState<string[]>([]);
   const [editorSuperpowers, setEditorSuperpowers] = React.useState<string[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = React.useState<boolean>(true);
   const [skillError, setSkillError] = React.useState<string | null>(null);
 
+  // New state for the custom skill modal
+  const [isOtherSkillModalOpen, setIsOtherSkillModalOpen] = React.useState(false);
+  const [customSkill, setCustomSkill] = React.useState("");
+
   // Fetch skills from API
   React.useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('https://api.makemyvid.io/api/v1/tags/getallskill');
+        const response = await fetch('http://localhost:8000/api/v1/tags/getallskill');
         if (!response.ok) throw new Error('Network response was not ok');
-        
+       
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
           const skillNames = result.data.map((skill: any) => skill.skill_name);
@@ -81,7 +86,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
 
   // Fetch categories when the component mounts
   React.useEffect(() => {
-    fetch('https://api.makemyvid.io/api/v1/category/getallcategorys')
+    fetch('http://localhost:8000/api/v1/category/getallcategorys')
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
@@ -89,7 +94,6 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
         return res.json();
       })
       .then(data => {
-        // Safely access nested data
         const categories = data?.data || [];
         const editorCategories = categories
           .filter((cat: any) => cat.category_type === 'editor' && cat.is_active)
@@ -97,22 +101,16 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
         setEditorSuperpowers(editorCategories);
       })
       .catch(err => console.error('Error fetching editor categories:', err));
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
-  const { 
+  const {
     full_name = "",
-    superpowers = [], 
-    portfolio_links = ["", "", ""], 
-    rate_amount = "", 
-    rate_currency = "INR", 
+    superpowers = [],
+    portfolio_links = ["", "", ""],
+    rate_amount = "",
+    rate_currency = "INR",
     skill_tags = []
   } = watch() || formData;
-
-  // Skills management functions
-  const removeSkill = (skill: string) => {
-    const currentSkills = watch("skill_tags") || [];
-    setValue("skill_tags", currentSkills.filter((x: string) => x !== skill));
-  };
 
   // Filter available superpowers based on what's already selected
   const spFiltered: string[] = (editorSuperpowers || []).filter(
@@ -141,6 +139,21 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
       setValue("skill_tags", newTags);
       clearErrors("skill_tags");
     }
+  };
+
+  // New handler for adding the custom skill from the modal
+  const handleAddCustomSkill = () => {
+      const trimmedSkill = customSkill.trim();
+      if (trimmedSkill) {
+        addSkillTag(trimmedSkill);
+        // Add to the main skill list to make it available in the dropdown if removed
+        if (!allSkills.includes(trimmedSkill)) {
+          setAllSkills(prevSkills => [...prevSkills, trimmedSkill]);
+        }
+        // Close modal and reset state
+        setCustomSkill("");
+        setIsOtherSkillModalOpen(false);
+      }
   };
 
   const removeSkillTag = (tagToRemove: string) => {
@@ -172,49 +185,149 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     nextStep(data);
   };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
+  // Inline styles for the modal for simplicity
+  const modalOverlayStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1050,
+  };
 
-      <div className="mt-3">
-        <h5>Skills*</h5>
-        <div className="position-relative">
-          <select
-            className="form-control"
-            value=""
-            onChange={(e) => {
-              if (e.target.value) {
-                addSkillTag(e.target.value);
-                e.target.value = ""; // Reset select after selection
-              }
-            }}
-            disabled={isLoadingSkills || !!skillError}
-          >
-            <option value="">
-              {isLoadingSkills ? "Loading skills..." : "Select a skill"}
-            </option>
-            {allSkills
-              .filter(s => !skill_tags.includes(s))
-              .map((skill: string) => (
-                <option key={skill} value={skill}>
-                  {skill}
-                </option>
-              ))}
-          </select>
-        </div>
-        {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
-        {errors.skill_tags && (
-          <div className="error">{String(errors.skill_tags.message)}</div>
-        )}
-        
-        <div className="d-flex flex-wrap gap-2 mt-2">
-          {skill_tags.map((t: string) => (
-            <span key={t} className="badge bg-success d-flex align-items-center">
-              {t}
+  const modalContentStyle: React.CSSProperties = {
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    width: '90%',
+    maxWidth: '500px',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)',
+  };
+
+  const modalHeaderStyle: React.CSSProperties = {
+    marginBottom: '15px'
+  }
+
+  const modalFooterStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+    marginTop: '20px'
+  }
+
+  return (
+    <>
+      {/* Custom Skill Modal */}
+      {isOtherSkillModalOpen && (
+        <div style={modalOverlayStyle}>
+          <div style={modalContentStyle}>
+            <h5 style={modalHeaderStyle}>Add a Custom Skill</h5>
+            <div className="input-group-meta position-relative">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter your skill here"
+                value={customSkill}
+                onChange={(e) => setCustomSkill(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div style={modalFooterStyle}>
               <button
                 type="button"
-                className="btn btn-sm btn-link text-white p-0 ms-1"
-                onClick={() => removeSkillTag(t)}
+                className="btn btn-secondary"
+                onClick={() => {
+                  setIsOtherSkillModalOpen(false);
+                  setCustomSkill("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleAddCustomSkill}
+              >
+                Add Skill
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
+
+        <div className="mt-3">
+          <h5>Skills*</h5>
+          <div className="position-relative">
+            <select
+              className="form-control"
+              value=""
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (selectedValue === "other") {
+                  setIsOtherSkillModalOpen(true);
+                } else if (selectedValue) {
+                  addSkillTag(selectedValue);
+                }
+                e.target.value = ""; // Reset select after selection
+              }}
+              disabled={isLoadingSkills || !!skillError}
+            >
+              <option value="">
+                {isLoadingSkills ? "Loading skills..." : "Select a skill"}
+              </option>
+              {allSkills
+                .filter(s => !skill_tags.includes(s))
+                .map((skill: string) => (
+                  <option key={skill} value={skill}>
+                    {skill}
+                  </option>
+                ))}
+              {/* Add the "Other" option here */}
+              <option value="other">Other...</option>
+            </select>
+          </div>
+          {skillError && <small className="text-danger d-block mt-1">{skillError}</small>}
+          {errors.skill_tags && (
+            <div className="text-danger">{String(errors.skill_tags.message)}</div>
+          )}
+         
+          <div className="d-flex flex-wrap gap-2 mt-2">
+            {skill_tags.map((t: string) => (
+              <span key={t} className="badge bg-success d-flex align-items-center">
+                {t}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-link text-white p-0 ms-1"
+                  onClick={() => removeSkillTag(t)}
+                  style={{textDecoration: 'none', lineHeight: 1}}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <h5 className="mt-4">My Superpowers are*</h5>
+        <small>(Select up to 3 categories that best describe your skills)</small>
+
+        {/* Selected superpowers as chips */}
+        <div className="d-flex flex-wrap gap-2 mt-3">
+          {(superpowers || []).map((s: string) => (
+            <span key={s} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
+              {s}
+              <button
+                type="button"
+                className="btn btn-sm btn-link text-white p-0 m-0"
+                onClick={() => removeSuperpower(s)}
+                aria-label={`Remove ${s}`}
                 style={{textDecoration: 'none', lineHeight: 1}}
               >
                 ×
@@ -222,144 +335,131 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
             </span>
           ))}
         </div>
-      </div>
 
-      <h5>My Superpowers are*</h5>
-      <small>(Select up to 3 categories that best describe your skills)</small>
-
-      {/* Selected superpowers as chips */}
-      <div className="d-flex flex-wrap gap-2 mt-3">
-        {(superpowers || []).map((s: string) => (
-          <span key={s} className="badge bg-success d-flex align-items-center" style={{ gap: 6 }}>
-            {s}
-            <button
-              type="button"
-              className="btn btn-sm btn-link text-white p-0 m-0"
-              onClick={() => removeSuperpower(s)}
-              aria-label={`Remove ${s}`}
-              style={{textDecoration: 'none', lineHeight: 1}}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-      </div>
-
-      {/* Dropdown for selecting superpowers */}
-      <div className="mt-2">
-        <select
-          className="form-control"
-          value=""
-          onChange={(e) => {
-            if (e.target.value) {
-              addSuperpower(e.target.value);
-              e.target.value = ""; // Reset select after selection
-            }
-          }}
-          disabled={(superpowers || []).length >= 3}
-        >
-          <option value="">
-            {(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Select a category"}
-          </option>
-          {spFiltered.map((category: string) => (
-            <option key={category} value={category}>
-              {category}
+        {/* Dropdown for selecting superpowers */}
+        <div className="mt-2">
+          <select
+            className="form-control"
+            value=""
+            onChange={(e) => {
+              if (e.target.value) {
+                addSuperpower(e.target.value);
+                e.target.value = ""; // Reset select
+              }
+            }}
+            disabled={(superpowers || []).length >= 3}
+          >
+            <option value="">
+              {(superpowers || []).length >= 3 ? "You have reached the 3 category limit" : "Select a category"}
             </option>
+            {spFiltered.map((category: string) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+          <small className="text-danger d-block mt-1">Selected {(superpowers || []).length}/3</small>
+          {errors.superpowers && (
+            <div className="text-danger">{String(errors.superpowers.message)}</div>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <h5>Portfolio (YouTube links only)*</h5>
+          {portfolio_links.map((link: string, idx: number) => (
+            <div key={idx} className="input-group-meta position-relative mb-2">
+              <input
+                type="url"
+                className={`form-control ${link && !isYouTubeUrl(link) ? 'is-invalid' : ''}`}
+                placeholder="https://www.youtube.com/..."
+                value={link}
+                onChange={(e) => handlePortfolioChange(idx, e.target.value)}
+                onBlur={(e) => handlePortfolioBlur(idx, e.target.value)}
+              />
+            </div>
           ))}
-        </select>
-        <small className="text-muted d-block mt-1">Selected {(superpowers || []).length}/3</small>
-        {errors.superpowers && (
-          <div className="error">{String(errors.superpowers.message)}</div>
-        )}
-      </div>
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm mt-2"
+            onClick={() => {
+              const currentLinks = watch("portfolio_links") || ["", "", ""];
+              if (currentLinks.length < 10) {
+                setValue("portfolio_links", [...currentLinks, ""]);
+                clearErrors("portfolio_links");
+              }
+            }}
+            disabled={(watch("portfolio_links") || ["", "", ""]).length >= 10}
+          >
+            + Add more
+          </button>
+          <small className="text-danger d-block mt-1">At least one valid YouTube link is required. Maximum 10 links allowed.</small>
+          {errors.portfolio_links && (
+            <div className="text-danger">{String(errors.portfolio_links.message)}</div>
+          )}
+        </div>
 
-
-
-      <div className="mt-3">
-        <h5>Portfolio (YouTube links only)*</h5>
-        {portfolio_links.map((link: string, idx: number) => (
-          <div key={idx} className="input-group-meta position-relative mb-2">
-            <input
-              type="url"
-              className={`form-control ${link && !isYouTubeUrl(link) ? 'is-invalid' : ''}`}
-              placeholder="https://www.youtube.com/..."
-              value={link}
-              onChange={(e) => handlePortfolioChange(idx, e.target.value)}
-              onBlur={(e) => handlePortfolioBlur(idx, e.target.value)}
-            />
+        <div className="row mt-4">
+          <div className="col-md-6">
+            <div className="input-group-meta position-relative mb-25">
+              <label>Rate Amount*</label>
+              <input
+                type="number"
+                className="form-control"
+                min={0}
+                max={10000}
+                step={1}
+                {...register("rate_amount", {
+                  required: "Rate amount is required",
+                  min: { value: 0, message: "Rate cannot be negative" },
+                  max: { value: 10000, message: "Rate cannot exceed 10,000" },
+                  onChange: () => clearErrors("rate_amount")
+                })}
+                placeholder="Enter amount (max 10,000)"
+              />
+              {errors.rate_amount && (
+                <div className="text-danger">{String(errors.rate_amount.message)}</div>
+              )}
+            </div>
           </div>
-        ))}
-        <button
-          type="button"
-          className="btn btn-outline-primary btn-sm mt-2"
-          onClick={() => {
-            const currentLinks = watch("portfolio_links") || ["", "", ""];
-            setValue("portfolio_links", [...currentLinks, ""]);
-            clearErrors("portfolio_links");
-          }}
-        >
-          + Add more
-        </button>
-        <small className="d-block mt-1">Minimum one valid YouTube link is mandatory.</small>
-        {errors.portfolio_links && (
-          <div className="error">{String(errors.portfolio_links.message)}</div>
-        )}
-      </div>
-
-      <div className="row mt-3">
-        <div className="col-md-6">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Rate Amount*</label>
-            <input
-              type="number"
-              className="form-control"
-              min={0}
-              max={10000}
-              step={1}
-              {...register("rate_amount", {
-                required: "Rate amount is required",
-                min: { value: 0, message: "Rate cannot be negative" },
-                max: { value: 10000, message: "Rate cannot exceed 10,000" },
-                onChange: () => clearErrors("rate_amount")
-              })}
-              placeholder="Enter amount (max 10,000)"
-            />
-            {errors.rate_amount && (
-              <div className="error">{String(errors.rate_amount.message)}</div>
-            )}
+          <div className="col-md-6">
+            <div className="input-group-meta position-relative mb-25">
+              <label>Currency*</label>
+              <select
+                className="form-control"
+                {...register("rate_currency", {
+                  required: "Currency is required",
+                  onChange: () => clearErrors("rate_currency")
+                })}
+              >
+                <option value="INR">INR (₹)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="AUD">AUD (A$)</option>
+                <option value="CAD">CAD (C$)</option>
+                <option value="CHF">CHF (Fr)</option>
+                <option value="CNY">CNY (¥)</option>
+                <option value="NZD">NZD (NZ$)</option>
+              </select>
+              {errors.rate_currency && (
+                <div className="text-danger">{String(errors.rate_currency.message)}</div>
+              )}
+            </div>
           </div>
         </div>
-        <div className="col-md-6">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Currency*</label>
-            <select
-              className="form-control"
-              {...register("rate_currency", {
-                required: "Currency is required",
-                onChange: () => clearErrors("rate_currency")
-              })}
-            >
-              <option value="INR">INR</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-            </select>
-            {errors.rate_currency && (
-              <div className="error">{String(errors.rate_currency.message)}</div>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <div className="d-flex justify-content-between mt-4">
-        <button type="button" className="btn-one" onClick={prevStep}>Previous</button>
-        <button
-          type="submit"
-          className="btn-one"
-        >
-          Next
-        </button>
-      </div>
-    </form>
+        <div className="d-flex justify-content-between mt-4">
+          <button type="button" className="btn-one" onClick={prevStep}>Previous</button>
+          <button
+            type="submit"
+            className="btn-one"
+          >
+            Next
+          </button>
+        </div>
+      </form>
+    </>
   );
 };
 

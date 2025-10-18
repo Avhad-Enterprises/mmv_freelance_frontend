@@ -38,8 +38,8 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="bank_transfer">Bank Transfer</option>
               <option value="upi">UPI</option>
             </select>
-            {errors.payment_method && (
-              <div className="error">{String(errors.payment_method.message)}</div>
+              {errors.payment_method && (
+              <div className="error" style={{ color: 'red' }}>{String(errors.payment_method.message)}</div>
             )}
           </div>
         </div>
@@ -64,7 +64,7 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   onChange={() => clearErrors("card_number")}
                 />
                 {errors.card_number && (
-                  <div className="error">{String(errors.card_number.message)}</div>
+                  <div className="error" style={{ color: 'red' }}>{String(errors.card_number.message)}</div>
                 )}
               </div>
             </div>
@@ -86,7 +86,7 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   onChange={() => clearErrors("card_expiry")}
                 />
                 {errors.card_expiry && (
-                  <div className="error">{String(errors.card_expiry.message)}</div>
+                  <div className="error" style={{ color: 'red' }}>{String(errors.card_expiry.message)}</div>
                 )}
               </div>
             </div>
@@ -132,8 +132,8 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   }
                 })}
               />
-              {errors.paypal_email && (
-                <div className="error">{String(errors.paypal_email.message)}</div>
+                {errors.paypal_email && (
+                <div className="error" style={{ color: 'red' }}>{String(errors.paypal_email.message)}</div>
               )}
             </div>
           </div>
@@ -157,7 +157,7 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                 })}
               />
               {errors.upi_id && (
-                <div className="error">{String(errors.upi_id.message)}</div>
+                <div className="error" style={{ color: 'red' }}>{String(errors.upi_id.message)}</div>
               )}
             </div>
           </div>

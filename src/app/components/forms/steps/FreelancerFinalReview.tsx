@@ -72,7 +72,7 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
 
       // Submit
-      const response = await fetch('https://api.makemyvid.io/api/v1/auth/register/videoeditor', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/register/videoeditor', {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',

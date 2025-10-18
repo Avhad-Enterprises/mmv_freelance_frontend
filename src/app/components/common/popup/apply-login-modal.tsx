@@ -6,6 +6,7 @@ import Image from 'next/image';
 import LoginForm from '@/app/components/forms/login-form';
 import google from '@/assets/images/icon/google.png';
 import facebook from '@/assets/images/icon/facebook.png';
+import apple from '@/assets/images/icon/apple.png';
 
 interface ApplyLoginModalProps {
   onLoginSuccess: () => void;
@@ -42,7 +43,7 @@ const ApplyLoginModal: React.FC<ApplyLoginModalProps> = ({ onLoginSuccess }) => 
             </div>
 
             <div className="form-wrapper m-auto">
-              {/* ✅ This LoginForm will ONLY refresh the page */}
+              {/* ✅ Login form inside modal */}
               <LoginForm onLoginSuccess={onLoginSuccess} isModal={true} />
 
               <div className="d-flex align-items-center mt-30 mb-10">
@@ -51,26 +52,37 @@ const ApplyLoginModal: React.FC<ApplyLoginModalProps> = ({ onLoginSuccess }) => 
                 <div className="line flex-grow-1"></div>
               </div>
 
-              <div className="row">
-                <div className="col-md-6">
+              {/* ✅ Social login buttons in a single row */}
+              <div className="row text-center justify-content-center">
+                <div className="col-md-4 col-12 mb-2 mb-md-0">
                   <a
                     href="#"
-                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
                   >
                     <Image src={google} alt="google-img" width={20} height={20} />
-                    <span className="ps-2">Login with Google</span>
+                    <span className="ps-2">Google</span>
                   </a>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4 col-12 mb-2 mb-md-0">
                   <a
                     href="#"
-                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
                   >
                     <Image src={facebook} alt="facebook-img" width={20} height={20} />
-                    <span className="ps-2">Login with Facebook</span>
+                    <span className="ps-2">Facebook</span>
+                  </a>
+                </div>
+                <div className="col-md-4 col-12">
+                  <a
+                    href="#"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
+                  >
+                    <Image src={apple} alt="apple-img" width={20} height={20} />
+                    <span className="ps-2">Apple</span>
                   </a>
                 </div>
               </div>
+              {/* ✅ End social login buttons */}
             </div>
           </div>
         </div>
