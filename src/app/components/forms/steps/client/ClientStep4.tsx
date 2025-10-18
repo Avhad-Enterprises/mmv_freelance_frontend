@@ -9,10 +9,16 @@ type Props = {
 };
 
 const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, clearErrors } = useForm({
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors } 
+  } = useForm({
     defaultValues: formData,
     mode: 'onChange'
-  });  const onSubmit = (data: any) => {
+  });
+
+  const onSubmit = (data: any) => {
     nextStep(data);
   };
 
@@ -26,7 +32,6 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <select
               className="form-control"
               {...register("work_arrangement", { required: "Work arrangement is required" })}
-              onChange={() => clearErrors("work_arrangement")}
             >
               <option value="">Select Work Arrangement</option>
               <option value="remote">Remote</option>
@@ -34,7 +39,9 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="hybrid">Hybrid</option>
             </select>
             {errors.work_arrangement && (
-              <div className="error">{String(errors.work_arrangement.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.work_arrangement.message)}
+              </div>
             )}
           </div>
         </div>
@@ -46,7 +53,6 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <select
               className="form-control"
               {...register("project_frequency", { required: "Project frequency is required" })}
-              onChange={() => clearErrors("project_frequency")}
             >
               <option value="">Select Project Frequency</option>
               <option value="one_time">One-time Project</option>
@@ -54,7 +60,9 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="ongoing">Ongoing Projects</option>
             </select>
             {errors.project_frequency && (
-              <div className="error">{String(errors.project_frequency.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.project_frequency.message)}
+              </div>
             )}
           </div>
         </div>
@@ -66,7 +74,6 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <select
               className="form-control"
               {...register("hiring_preferences", { required: "Hiring preference is required" })}
-              onChange={() => clearErrors("hiring_preferences")}
             >
               <option value="">Select Hiring Preference</option>
               <option value="individuals">Individual Freelancers</option>
@@ -74,13 +81,15 @@ const ClientStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="both">Both Individuals and Agencies</option>
             </select>
             {errors.hiring_preferences && (
-              <div className="error">{String(errors.hiring_preferences.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.hiring_preferences.message)}
+              </div>
             )}
           </div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="col-12 d-flex justify-content-between">
+        <div className="col-12 d-flex justify-content-between mt-40">
           <button
             type="button"
             className="btn-one"

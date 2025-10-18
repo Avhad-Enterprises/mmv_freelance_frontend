@@ -43,7 +43,7 @@ const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
           return;
         }
 
-        const response = await fetch('https://api.makemyvid.io/api/v1/users/me', {
+        const response = await fetch('http://localhost:8000/api/v1/users/me', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -82,7 +82,7 @@ const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
         }
 
         // Fetch favorites list
-        const favoritesResponse = await fetch('https://api.makemyvid.io/api/v1/favorites/listfreelancers', {
+        const favoritesResponse = await fetch('http://localhost:8000/api/v1/favorites/listfreelancers', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -121,7 +121,7 @@ const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
         setFavoriteIds(favIds);
 
         // Fetch full candidate details
-        const candidatesResponse = await fetch('https://api.makemyvid.io/api/v1/freelancers/getfreelancers-public', {
+        const candidatesResponse = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public', {
           cache: 'no-cache'
         });
 
@@ -167,7 +167,7 @@ const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
         return;
       }
 
-      const response = await fetch('https://api.makemyvid.io/api/v1/favorites/remove', {
+      const response = await fetch('http://localhost:8000/api/v1/favorites/remove', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

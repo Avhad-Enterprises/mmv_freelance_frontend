@@ -2,29 +2,30 @@
 import React, { useState } from "react";
 import Wrapper from "@/layouts/wrapper";
 import EmployAside from "@/app/components/dashboard/employ/aside";
-import SubmitJobArea from "@/app/components/dashboard/employ/submit-job-area";
 import Header from '@/layouts/headers/headerDash';
+import ChatArea from "@/app/components/chatArea/chatArea";
 
-
-const EmployDashboardSubmitJobPage = () => {
-  const [isOpenSidebar,setIsOpenSidebar] = useState<boolean>(false);
+const EmployDashboardChatPage = () => {
+  const [isOpenSidebar, setIsOpenSidebar] = useState(false);
   return (
     <Wrapper>
       <Header />
+      {/* This main wrapper should NOT use flexbox */}
       <div className="main-page-wrapper">
-        {/* aside start */}
+        {/* Render the sidebar first */}
         <EmployAside
           isOpenSidebar={isOpenSidebar}
           setIsOpenSidebar={setIsOpenSidebar}
         />
-        {/* aside end  */}
 
-        {/* submit job area start */}
-        <SubmitJobArea setIsOpenSidebar={setIsOpenSidebar} />
-        {/* submit job area end */}
+        {/* Wrap the ChatArea in the 'dashboard-body' div */}
+        {/* This div gets the margin-left from your CSS and we give it a calculated height */}
+        <div className="dashboard-body" style={{ height: 'calc(100vh - 85px)' }}>
+          <ChatArea setIsOpenSidebar={setIsOpenSidebar} />
+        </div>
       </div>
     </Wrapper>
   );
 };
 
-export default EmployDashboardSubmitJobPage;
+export default EmployDashboardChatPage;

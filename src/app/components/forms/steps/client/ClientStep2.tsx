@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import MultipleSelectionField from "../MultipleSelectionField";
+import MultipleSelectionField from "../MultipleSelectionField"; // Assuming this path is correct
 
 type Props = {
   formData: any;
@@ -10,12 +10,25 @@ type Props = {
 };
 
 const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { register, handleSubmit, formState: { errors, isValid }, setValue, clearErrors } = useForm({
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors }, 
+    setValue,
+    trigger
+  } = useForm({
     defaultValues: formData,
     mode: 'onChange'
   });
 
   const [selectedServices, setSelectedServices] = useState<string[]>(formData?.required_services || []);
+
+  // Register the custom 'required_services' field and its validation rule
+  useEffect(() => {
+    register("required_services", {
+      validate: (value) => value && value.length > 0 || "Please select at least one service"
+    });
+  }, [register]);
 
   const onSubmit = (data: any) => {
     nextStep(data);
@@ -33,10 +46,11 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               placeholder="Enter your company name"
               className="form-control"
               {...register("company_name", { required: "Company name is required" })}
-              onChange={() => clearErrors("company_name")}
             />
             {errors.company_name && (
-              <div className="error">{String(errors.company_name.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.company_name.message)}
+              </div>
             )}
           </div>
         </div>
@@ -48,7 +62,6 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <select
               className="form-control"
               {...register("industry", { required: "Industry is required" })}
-              onChange={() => clearErrors("industry")}
             >
               <option value="">Select Industry</option>
               <option value="film">Film</option>
@@ -59,7 +72,9 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="other">Other</option>
             </select>
             {errors.industry && (
-              <div className="error">{String(errors.industry.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.industry.message)}
+              </div>
             )}
           </div>
         </div>
@@ -90,7 +105,6 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <select
               className="form-control"
               {...register("company_size", { required: "Company size is required" })}
-              onChange={() => clearErrors("company_size")}
             >
               <option value="">Select Company Size</option>
               <option value="1-10">1-10 employees</option>
@@ -99,7 +113,9 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <option value="200+">200+ employees</option>
             </select>
             {errors.company_size && (
-              <div className="error">{String(errors.company_size.message)}</div>
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.company_size.message)}
+              </div>
             )}
           </div>
         </div>
@@ -107,33 +123,24 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         {/* Services Required */}
         <div className="col-12">
           <MultipleSelectionField
-            label="Services Required"
+            label="Services Required*"
             options={[
-              "Video Production",
-              "Photography",
-              "Animation",
-              "Motion Graphics",
-              "Video Editing",
-              "Sound Design",
-              "Color Grading",
-              "VFX",
-              "Live Streaming",
-              "360° Video",
-              "Drone Videography"
+              "Video Production", "Photography", "Animation", "Motion Graphics",
+              "Video Editing", "Sound Design", "Color Grading", "VFX",
+              "Live Streaming", "360° Video", "Drone Videography"
             ]}
             selectedItems={selectedServices}
             onChange={(services) => {
               setSelectedServices(services);
-              setValue('required_services', services);
-              clearErrors('required_services');
+              // Update the form value and trigger validation
+              setValue('required_services', services, { shouldValidate: true });
             }}
-            required={true}
             error={errors.required_services?.message as string}
           />
         </div>
 
         {/* Navigation Buttons */}
-        <div className="col-12 d-flex justify-content-between">
+        <div className="col-12 d-flex justify-content-between mt-40">
           <button
             type="button"
             className="btn-one"

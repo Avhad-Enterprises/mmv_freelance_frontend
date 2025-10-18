@@ -6,6 +6,7 @@ import Image from 'next/image';
 import LoginForm from '@/app/components/forms/login-form';
 import google from '@/assets/images/icon/google.png';
 import facebook from '@/assets/images/icon/facebook.png';
+import apple from '@/assets/images/icon/apple.png'; 
 
 interface LoginModalProps {
   onLoginSuccess?: () => void;
@@ -34,9 +35,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
               <h2 id="loginModalLabel">Hi, Welcome Back!</h2>
               <p>
                 Still do not have an account?{' '}
-                <Link href="/register" className="text-primary">
-                  Sign up
-                </Link>
+                <Link
+  href="/register"
+  className="text-primary"
+  onClick={() => {
+    if (window.location.pathname === '/register') {
+      window.location.reload(); // refresh if already there
+    }
+  }}
+>
+  Sign up
+</Link>
               </p>
             </div>
 
@@ -50,26 +59,37 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
                 <div className="line flex-grow-1"></div>
               </div>
 
-              <div className="row">
-                <div className="col-md-6">
+              {/* ✅ Social buttons in a single line */}
+              <div className="row text-center justify-content-center">
+                <div className="col-md-4 col-12 mb-2 mb-md-0">
                   <a
                     href="#"
-                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
                   >
                     <Image src={google} alt="google-img" width={20} height={20} />
-                    <span className="ps-2">Login with Google</span>
+                    <span className="ps-2">Google</span>
                   </a>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-4 col-12 mb-2 mb-md-0">
                   <a
                     href="#"
-                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
                   >
                     <Image src={facebook} alt="facebook-img" width={20} height={20} />
-                    <span className="ps-2">Login with Facebook</span>
+                    <span className="ps-2">Facebook</span>
+                  </a>
+                </div>
+                <div className="col-md-4 col-12">
+                  <a
+                    href="#"
+                    className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100"
+                  >
+                    <Image src={apple} alt="apple-img" width={20} height={20} />
+                    <span className="ps-2">Apple</span>
                   </a>
                 </div>
               </div>
+              {/* ✅ End of social buttons */}
             </div>
           </div>
         </div>

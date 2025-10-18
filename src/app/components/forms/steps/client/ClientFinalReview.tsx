@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { Country } from "country-state-city";
 
@@ -43,11 +43,21 @@ type Props = {
 };
 
 const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+
   const handleSubmitRegistration = async () => {
-    // ------------------- DEBUGGING STEP 1 -------------------
-    // Check your browser's console for this log.
-    // It will show you exactly what data this component received.
-    // The 'work_arrangement', 'project_frequency', and 'hiring_preferences' fields are likely missing here.
+    // Validate checkboxes
+    if (!termsAccepted) {
+      toast.error('Please accept the Terms and Conditions to continue');
+      return;
+    }
+
+    if (!privacyAccepted) {
+      toast.error('Please accept the Privacy Policy to continue');
+      return;
+    }
+
     console.log('Initial formData received by Review component:', formData);
 
     const loadingToast = toast.loading('Submitting registration...');
@@ -90,9 +100,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       }
 
       // Work Preferences
-      // These lines are correct, but they will only run if the values exist in `formData`.
-      // If the values are missing from the log above, these `if` statements will evaluate to false,
-      // and the data will not be appended to the request.
       if (formData.work_arrangement) formDataToSend.append('work_arrangement', formData.work_arrangement);
       if (formData.project_frequency) formDataToSend.append('project_frequency', formData.project_frequency);
       if (formData.hiring_preferences) formDataToSend.append('hiring_preferences', formData.hiring_preferences);
@@ -104,9 +111,9 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.project_budget) formDataToSend.append('project_budget', formData.project_budget);
       if (formData.project_timeline) formDataToSend.append('project_timeline', formData.project_timeline);
 
-      // Terms and Privacy
-      if (formData.terms_accepted !== undefined) formDataToSend.append('terms_accepted', formData.terms_accepted);
-      if (formData.privacy_policy_accepted !== undefined) formDataToSend.append('privacy_policy_accepted', formData.privacy_policy_accepted);
+      // Terms and Privacy - ALWAYS send as boolean
+      formDataToSend.append('terms_accepted', String(termsAccepted));
+      formDataToSend.append('privacy_policy_accepted', String(privacyAccepted));
 
       // Business Document
       if (formData.business_document && formData.business_document instanceof File && formData.business_document.size > 0) {
@@ -123,15 +130,12 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         formDataToSend.append('profile_picture', formData.profile_photo as File);
       }
       
-      // ------------------- DEBUGGING STEP 2 -------------------
-      // This log shows what is ACTUALLY being sent to the backend.
-      // If the fields are missing from the first log, they will also be missing here.
       console.log('Client form data being sent to API:');
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
       }
 
-      const response = await fetch('https://api.makemyvid.io/api/v1/auth/register/client', {
+      const response = await fetch('http://localhost:8000/api/v1/auth/register/client', {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',
@@ -196,6 +200,41 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
           <ReviewSection key={title} title={title} data={data} />
         ))}
 
+        {/* Terms and Privacy Policy Checkboxes */}
+        <div className="col-12 mt-4">
+          <div className="terms-section">
+            <div className="checkbox-wrapper mb-3">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="checkbox-input"
+                />
+                <span className="checkbox-text">
+                  I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+                  <span className="required-mark">*</span>
+                </span>
+              </label>
+            </div>
+
+            <div className="checkbox-wrapper">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={privacyAccepted}
+                  onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                  className="checkbox-input"
+                />
+                <span className="checkbox-text">
+                  I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                  <span className="required-mark">*</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         <div className="col-12 d-flex justify-content-between mt-4">
           <button
             type="button"
@@ -208,6 +247,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
             type="button"
             className="btn-one"
             onClick={handleSubmitRegistration}
+            disabled={!termsAccepted || !privacyAccepted}
           >
             Submit Registration
           </button>
@@ -227,6 +267,49 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         }
         .review-item:last-child {
           border-bottom: none;
+        }
+        .terms-section {
+          padding: 20px;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          background-color: #fff9e6;
+        }
+        .checkbox-wrapper {
+          display: flex;
+          align-items: flex-start;
+        }
+        .checkbox-label {
+          display: flex;
+          align-items: flex-start;
+          cursor: pointer;
+          user-select: none;
+        }
+        .checkbox-input {
+          width: 18px;
+          height: 18px;
+          margin-right: 10px;
+          margin-top: 2px;
+          cursor: pointer;
+          flex-shrink: 0;
+        }
+        .checkbox-text {
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .checkbox-text a {
+          color: #0066cc;
+          text-decoration: underline;
+        }
+        .checkbox-text a:hover {
+          color: #004499;
+        }
+        .required-mark {
+          color: #dc3545;
+          margin-left: 4px;
+        }
+        .btn-one:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
       `}</style>
     </div>

@@ -1,113 +1,3 @@
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import Image from "next/image";
-// import MultiStepRegisterForm from "../forms/MultiStepRegisterForm";
-// import LoadingSpinner from "../common/loading-spinner";
-// import google from "@/assets/images/icon/google.png";
-// import facebook from "@/assets/images/icon/facebook.png";
-
-// const RegisterArea = () => {
-//   const [activeTab, setActiveTab] = useState<"candidate" | "employer">("candidate");
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       setIsLoading(false);
-//     }, 1000);
-//     return () => clearTimeout(timer);
-//   }, []);
-
-//   if (isLoading) {
-//     return <LoadingSpinner />;
-//   }
-
-//   return (
-//     <section className="registration-section position-relative pt-100 lg-pt-80 pb-150 lg-pb-80">
-//       <div className="container">
-//         <div className="user-data-form">
-//           <div className="text-center">
-//             <h2>Create Account</h2>
-//           </div>
-//           <div className="form-wrapper m-auto">
-//             <ul className="nav nav-tabs border-0 w-100 mt-30" role="tablist">
-//               <li className="nav-item" role="presentation">
-//                 <button
-//                   className={`nav-link ${activeTab === "candidate" ? "active" : ""}`}
-//                   onClick={() => setActiveTab("candidate")}
-//                   data-bs-toggle="tab"
-//                   data-bs-target="#fc1"
-//                   role="tab"
-//                   aria-selected={activeTab === "candidate"}
-//                   tabIndex={-1}
-//                 >
-//                   Freelancer
-//                 </button>
-//               </li>
-//               <li className="nav-item" role="presentation">
-//                 <button
-//                   className={`nav-link ${activeTab === "employer" ? "active" : ""}`}
-//                   onClick={() => setActiveTab("employer")}
-//                   data-bs-toggle="tab"
-//                   data-bs-target="#fc2"
-//                   role="tab"
-//                   aria-selected={activeTab === "employer"}
-//                   tabIndex={-1}
-//                 >
-//                   Client
-//                 </button>
-//               </li>
-//             </ul>
-//             <div className="tab-content mt-40">
-//               <MultiStepRegisterForm accountType={activeTab === "candidate" ? "freelancer" : "client"} />
-//             </div>
-//           </div>
-
-//           <div className="d-flex align-items-center mt-30 mb-10">
-//             <div className="line"></div>
-//             <span className="pe-3 ps-3">OR</span>
-//             <div className="line"></div>
-//           </div>
-//           <div className="row">
-//             <div className="col-sm-6">
-//               <a
-//                 href="coming-soon"
-//                 className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-//               >
-//                 <Image src={google} alt="google-img" />
-//                 <span className="ps-2">Signup with Google</span>
-//               </a>
-//             </div>
-//             <div className="col-sm-6">
-//               <a
-//                 href="coming-soon"
-//                 className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-//               >
-//                 <Image src={facebook} alt="facebook-img" />
-//                 <span className="ps-2">Signup with Facebook</span>
-//               </a>
-//             </div>
-//           </div>
-//           <p className="text-center mt-10">
-//             Have an account?{" "}
-//             <a
-//               href="#"
-//               className="fw-500"
-//               data-bs-toggle="modal"
-//               data-bs-target="#loginModal"
-//             >
-//               Sign In
-//             </a>
-//           </p>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default RegisterArea;
-
-
-
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -115,6 +5,7 @@ import MultiStepRegisterForm from "../forms/MultiStepRegisterForm";
 import LoadingSpinner from "../common/loading-spinner";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
+import apple from "@/assets/images/icon/apple.png";
 
 type AccountType = "videoEditor" | "videographer" | "client";
 
@@ -235,23 +126,38 @@ const RegisterArea = () => {
             <span className="pe-3 ps-3">OR</span>
             <div className="line"></div>
           </div>
-          <div className="row">
-            <div className="col-sm-6">
+          <p className="text-center mb-15" style={{ fontSize: '15px', color: '#6B7280', fontWeight: '500' }}>
+            Continue with
+          </p>
+          <div className="row gx-2">
+            <div className="col-sm-4">
               <a
                 href="coming-soon"
                 className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                style={{ padding: '10px 8px', fontSize: '14px' }}
               >
-                <Image src={google} alt="google-img" />
-                <span className="ps-2">Signup with Google</span>
+                <Image src={google} alt="google-img" width={20} height={20} />
+                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Google</span>
               </a>
             </div>
-            <div className="col-sm-6">
+            <div className="col-sm-4">
               <a
                 href="coming-soon"
                 className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                style={{ padding: '10px 8px', fontSize: '14px' }}
               >
-                <Image src={facebook} alt="facebook-img" />
-                <span className="ps-2">Signup with Facebook</span>
+                <Image src={facebook} alt="facebook-img" width={20} height={20} />
+                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Facebook</span>
+              </a>
+            </div>
+            <div className="col-sm-4">
+              <a
+                href="coming-soon"
+                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
+                style={{ padding: '10px 8px', fontSize: '14px' }}
+              >
+                <Image src={apple} alt="apple-img" width={20} height={20} />
+                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Apple</span>
               </a>
             </div>
           </div>
