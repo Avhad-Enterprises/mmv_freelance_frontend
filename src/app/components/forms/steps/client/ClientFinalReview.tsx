@@ -135,7 +135,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         console.log(key, value);
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/auth/register/client', {
+      const response = await fetch('https://api.makemyvid.io/api/v1/auth/register/client', {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',

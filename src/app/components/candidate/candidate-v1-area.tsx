@@ -80,7 +80,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, s
           return;
         }
 
-        const response = await fetch('http://localhost:8000/api/v1/users/me', {
+        const response = await fetch('https://api.makemyvid.io/api/v1/users/me', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -111,7 +111,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, s
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public', {
+        const response = await fetch('https://api.makemyvid.io/api/v1/freelancers/getfreelancers-public', {
           cache: 'no-cache' 
         });
 
@@ -149,7 +149,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, s
 
           // Fetch favorites from API
           console.log('Fetching favorites from API...');
-          const response = await fetch('http://localhost:8000/api/v1/favorites/listfreelancers', {
+          const response = await fetch('https://api.makemyvid.io/api/v1/favorites/listfreelancers', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -315,7 +315,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, s
         
         console.log('Removing candidate from favorites:', removePayload);
 
-        const response = await fetch('http://localhost:8000/api/v1/favorites/remove', {
+        const response = await fetch('https://api.makemyvid.io/api/v1/favorites/remove', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -358,7 +358,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {}, s
         
         console.log('Adding candidate to favorites:', addPayload);
 
-        const response = await fetch('http://localhost:8000/api/v1/favorites/add', {
+        const response = await fetch('https://api.makemyvid.io/api/v1/favorites/add', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
