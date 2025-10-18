@@ -1,3 +1,4 @@
+// components/candidate/certification.tsx
 import React from "react";
 
 type CertificationProps = {

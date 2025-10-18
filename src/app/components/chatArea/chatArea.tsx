@@ -103,7 +103,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ setIsOpenSidebar }) => {
                     setIsLoading(false);
                     return;
                 }
-                const response = await fetch('https://api.makemyvid.io/api/v1/users/me', {
+                const response = await fetch('http://localhost:8000/api/v1/users/me', {
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
                 });
                 if (!response.ok) throw new Error('Failed to fetch user data');

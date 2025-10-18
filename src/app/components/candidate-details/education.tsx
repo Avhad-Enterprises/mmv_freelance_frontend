@@ -1,3 +1,4 @@
+// components/candidate/education.tsx
 "use client";
 
 import React from "react";

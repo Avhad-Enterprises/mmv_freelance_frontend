@@ -1,12 +1,17 @@
+// app/components/candidate/bio.tsx
 import React from "react";
 
 interface CandidateBioProps {
   bio: {
     location: string;
     email: string;
-    total_earnings: number;
+    rateAmount: string; // Changed from total_earnings
+    availability: string;
+    experience_level: string | null;
+    role_name: string | null;
   };
 }
+
 const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
   return (
     <ul className="style-none">
@@ -14,45 +19,35 @@ const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
         <span>Location: </span>
         <div>{bio.location}</div>
       </li>
-      {/* <li>
-        <span>Age: </span>
-        <div>28</div>
-      </li> */}
       <li>
         <span>Email: </span>
         <div>
-          <a href="mailto:${bio.email}">{bio.email}</a>
+          <a href={`mailto:${bio.email}`}>{bio.email}</a>
         </div>
       </li>
-      {/* <li>
-        <span>Qualification: </span>
-        <div>Master Degree</div>
-      </li>
       <li>
-        <span>Gender: </span>
-        <div>Male</div>
-      </li> */}
-      <li>
-        <span>Expected Salary: </span>
-        <div>{bio.total_earnings}/month</div>
+        <span>Expected Rate: </span>
+        <div>{bio.rateAmount} / hr</div>
       </li>
-      <li>
-        <span>Social:</span>
-        <div>
-          <a href="#" className="me-3">
-            <i className="bi bi-facebook"></i>
-          </a>
-          <a href="#" className="me-3">
-            <i className="bi bi-instagram"></i>
-          </a>
-          <a href="#" className="me-3">
-            <i className="bi bi-twitter"></i>
-          </a>
-          <a href="#">
-            <i className="bi bi-linkedin"></i>
-          </a>
-        </div>
-      </li>
+      {bio.availability && (
+        <li>
+          <span>Availability: </span>
+          <div className="text-capitalize">{bio.availability.replace(/_/g, ' ')}</div>
+        </li>
+      )}
+      {bio.experience_level && (
+        <li>
+          <span>Experience: </span>
+          <div className="text-capitalize">{bio.experience_level.replace(/_/g, ' ')}</div>
+        </li>
+      )}
+      {bio.role_name && (
+        <li>
+          <span>Role: </span>
+          <div className="text-capitalize">{bio.role_name.replace(/_/g, ' ')}</div>
+        </li>
+      )}
+      
     </ul>
   );
 };
