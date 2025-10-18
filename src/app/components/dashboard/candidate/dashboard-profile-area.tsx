@@ -105,13 +105,13 @@ const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSa
                 <h4 className="dash-title-three">{title}</h4>
                 <div>
                     {!editingSection ? (
-                        <button className="btn btn-primary" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
+                        <button className="dash-btn-two" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
                             Edit
                         </button>
                     ) : isEditingThisSection && (
                         <div className="d-flex gap-2">
                             <button className="btn btn-success" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onSave(sectionKey)} disabled={isSaving}>
-                                {isSaving ? 'Save Draft' : 'Save Draft'}
+                                {isSaving ? 'Saving Draft...' : 'Save Draft'}
                             </button>
                             <button className="btn btn-secondary" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={onCancel} disabled={isSaving}>
                                 Cancel
@@ -526,7 +526,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
             animation: 'slideUp 0.3s ease-out'
           }}>
             <button 
-              className="btn btn-primary btn-lg" 
+              className="dash-btn-two btn-lg" 
               onClick={saveAllChanges}
               disabled={saving}
               style={{ 
