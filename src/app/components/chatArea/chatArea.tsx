@@ -189,7 +189,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({ setIsOpenSidebar }) => {
             
             // Update conversation's last message read status
             if (selectedConversation.lastSenderId !== currentUser.user_id) {
-                setDoc(doc(firestoreDb, "conversations", selectedConversation.id), {
+                setDoc(doc(firestoreDb!, "conversations", selectedConversation.id), {
                     lastMessageRead: true
                 }, { merge: true });
             }
