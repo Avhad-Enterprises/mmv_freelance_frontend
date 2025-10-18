@@ -26,7 +26,7 @@ const EmployDashboardArea = ({setIsOpenSidebar}:IProps) => {
         {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
         {/* header end */}
 
-        <h2 className="main-title">Dashboard</h2>
+        <h2 className="main-title">Client Dashboard</h2>
         {/* <div className="row">
           <CardItem img={icon_1} title="Total Visitor" value="1.7k+" />
           <CardItem img={icon_2} title="Shortlisted" value="03" />

@@ -72,7 +72,10 @@ const CandidateDetailsV2Area = () => {
                   <CandidateBio bio={{
                     location: '',
                     email: '',
-                    total_earnings: 0
+                    rateAmount: '',
+                    availability: '',
+                    experience_level: null,
+                    role_name: null
                   }} />
                   {/* CandidateBio */}
                   <a href="#" className="btn-ten fw-500 text-white w-100 text-center tran3s mt-15">Download CV</a>
@@ -80,7 +83,7 @@ const CandidateDetailsV2Area = () => {
                 <h4 className="sidebar-title">Location</h4>
                 <div className="map-area mb-60 md-mb-40">
                   <div className="gmap_canvas h-100 w-100">
-                    <iframe className="gmap_iframe h-100 w-100" src="https://maps.google.com/maps?width=600&amp;height=400&amp;hl=en&amp;q=bass hill plaza medical centre&amp;t=&amp;z=12&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"></iframe>
+                    <iframe className="gmap_iframe h-100 w-100" src="https://maps.google.com/maps?width=600&height=400&hl=en&q=bass hill plaza medical centre&t=&z=12&ie=UTF8&iwloc=B&output=embed"></iframe>
                   </div>
                 </div>
                 <h4 className="sidebar-title">Email James Brower.</h4>

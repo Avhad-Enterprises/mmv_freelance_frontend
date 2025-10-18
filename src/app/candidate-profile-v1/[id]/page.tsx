@@ -65,6 +65,7 @@ interface RawApiFreelancer {
   payment_method: any;
   bank_account_info: any;
   role_name: string | null;
+  experience: any; // Added this line to fix the error
 }
 
 // Refined IFreelancer type for CandidateDetailsArea, with pre-processed data
@@ -87,8 +88,8 @@ export interface IFreelancer {
   longitude: string | null;
   profile_title: string | null;
   short_description: string | null;
-  // Pre-processed YouTube videos
-  youtube_videos: { id: string; url: string; title: string; }[];
+  // Pre-processed YouTube videos (without titles)
+  youtube_videos: { id: string; url: string; }[];
   // Other details you might want to display
   experience_level: string | null;
   work_type: string | null;
@@ -116,22 +117,6 @@ const DynamicCandidateProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Helper to fetch YouTube video titles
-  const fetchYouTubeVideoInfo = async (url: string) => {
-    try {
-      const videoId = url.split('v=')[1]?.split('&')[0];
-      if (videoId) {
-        // Using the YouTube API tool to get video information
-        const response = await youtube.get_video_information(url=url, fetch_audio_video_tokens=false);
-        return { id: videoId, url: url, title: response.title || 'YouTube Video' };
-      }
-    } catch (e) {
-      console.error(`Error fetching YouTube info for ${url}:`, e);
-    }
-    return { id: '', url: url, title: 'YouTube Video' }; // Fallback
-  };
-
-
   useEffect(() => {
     if (candidateId) {
       const fetchData = async () => {
@@ -139,17 +124,21 @@ const DynamicCandidateProfilePage = () => {
           setLoading(true);
           setError(null);
 
-          const response = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public');
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`);
           if (!response.ok) throw new Error(`Failed to fetch data`);
 
           const responseData = await response.json();
           const foundRawFreelancer: RawApiFreelancer | undefined = responseData.data.find((f: RawApiFreelancer) => f.user_id === parseInt(candidateId));
 
           if (foundRawFreelancer) {
-            // Process YouTube links
-            const youtubeLinks = (foundRawFreelancer.portfolio_links || []).filter(link => link.includes("youtube.com/watch?v="));
-            const youtubeVideoPromises = youtubeLinks.map(link => fetchYouTubeVideoInfo(link));
-            const youtubeVideos = await Promise.all(youtubeVideoPromises);
+            // Process YouTube links to extract ID and URL
+            const youtubeVideos = (foundRawFreelancer.portfolio_links || [])
+              .filter(link => link.includes("youtube.com/watch?v="))
+              .map(link => {
+                const videoId = link.split('v=')[1]?.split('&')[0] || '';
+                return { id: videoId, url: link };
+              })
+              .filter(video => video.id !== ''); // Ensure we have a valid ID
 
             // Map raw API data to the refined IFreelancer type
             const mappedFreelancer: IFreelancer = {
@@ -171,7 +160,7 @@ const DynamicCandidateProfilePage = () => {
               longitude: foundRawFreelancer.longitude || null,
               profile_title: foundRawFreelancer.profile_title || null,
               short_description: foundRawFreelancer.short_description || null,
-              youtube_videos: youtubeVideos.filter(video => video.id !== ''), // Only include valid video info
+              youtube_videos: youtubeVideos,
               experience_level: foundRawFreelancer.experience_level || null,
               work_type: foundRawFreelancer.work_type || null,
               hours_per_week: foundRawFreelancer.hours_per_week || null,

@@ -120,7 +120,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
     <div className="dashboard-body">
       <div className="position-relative">
         {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
-        <h2 className="main-title">Dashboard</h2>
+        <h2 className="main-title">Freelancer Dashboard</h2>
 
         {/* <div className="row">
           <CardItem img={icon_1} title="Total Submitted" value="1.7k+" />

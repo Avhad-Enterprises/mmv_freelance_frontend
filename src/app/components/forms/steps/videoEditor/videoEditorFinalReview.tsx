@@ -81,7 +81,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
 
       // Submit
-      const response = await fetch('http://localhost:8000/api/v1/auth/register/videoeditor', {
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`, {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',

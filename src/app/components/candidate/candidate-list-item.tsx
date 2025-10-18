@@ -14,8 +14,10 @@ interface MappedCandidate {
   country: string;
   profile_picture?: string;
   skill?: string[];
+  location: string; // <-- ADD THIS LINE
   post: string; // This prop is no longer rendered but kept for type consistency
   budget: string;
+  total_earnings: number; // <-- ADD THIS LINE
 }
 
 interface CandidateListItemProps {

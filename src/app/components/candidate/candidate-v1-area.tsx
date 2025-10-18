@@ -77,7 +77,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const response = await fetch('http://localhost:8000/api/v1/users/me', {
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch user');
@@ -99,7 +99,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/api/v1/freelancers/getfreelancers-public', {
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
           cache: 'no-cache'
         });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
@@ -126,7 +126,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
           const token = localStorage.getItem('token');
           if (!token) return;
 
-          const response = await fetch('http://localhost:8000/api/v1/favorites/listfreelancers', {
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/listfreelancers`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (!response.ok) throw new Error('Failed to fetch favorites');

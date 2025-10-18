@@ -57,7 +57,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
   React.useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/skills');
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`);
         if (!response.ok) throw new Error('Network response was not ok');
         
         const result = await response.json();
@@ -80,7 +80,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
 
   // Fetch categories when the component mounts
   React.useEffect(() => {
-    fetch('http://localhost:8000/api/v1/category/getallcategorys')
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category/getallcategorys`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');

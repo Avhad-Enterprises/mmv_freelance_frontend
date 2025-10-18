@@ -220,7 +220,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/users/me`, {
+const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
       });
@@ -438,7 +438,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
       // Make API calls only if there are changes for that payload
       if (Object.keys(userPayload).length > 0) {
-        const userRes = await fetch(`http://localhost:8000/api/v1/users/me`, {
+const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           method: 'PATCH',
           headers: apiHeaders,
           body: JSON.stringify(userPayload)
@@ -450,7 +450,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
       }
 
       if (Object.keys(profilePayload).length > 0) {
-        const profileRes = await fetch('http://localhost:8000/api/v1/users/me', {
+const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           method: 'PATCH',
           headers: apiHeaders,
           body: JSON.stringify(profilePayload)

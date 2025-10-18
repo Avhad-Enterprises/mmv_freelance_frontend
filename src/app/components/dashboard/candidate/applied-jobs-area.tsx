@@ -45,7 +45,7 @@ const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
           setError('Authentication token not found. Please log in.');
           return;
         }
-        const response = await fetch('http://localhost:8000/api/v1/applications/my-applications', {
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
