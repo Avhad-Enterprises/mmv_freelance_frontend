@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { makePostRequest } from "@/utils/api";
+import { makePostRequest, makeDeleteRequest } from "@/utils/api";
 import view from "@/assets/dashboard/images/icon/icon_18.svg";
 import edit from "@/assets/dashboard/images/icon/icon_20.svg";
 import delete_icon from "@/assets/dashboard/images/icon/icon_21.svg";
@@ -21,14 +21,7 @@ const ActionDropdown = ({ projectsTaskId }: Props) => {
 
   const handleDelete = async () => {
     try {
-      const response = await makePostRequest("projectsTask/delete",
-        {
-          projects_task_id: projectsTaskId,
-          is_active: 0,
-          is_deleted: true,
-          deleted_by: userId
-        }
-      );
+      const response = await makeDeleteRequest(`projects-tasks/${projectsTaskId}`);
 
       if (response.status === 200 || response.status === 201) {
         alert("Project Deleted successfully!");

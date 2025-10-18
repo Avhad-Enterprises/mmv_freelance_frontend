@@ -135,13 +135,13 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await makeGetRequest(`category/getallcategorys`);
+        const response = await makeGetRequest(`categories`);
         const categories = response.data?.data || []; // adjust based on your API response shape
 
         // Map to `NiceSelect` option format
         const formatted = categories.map((cat: any) => ({
-          value: cat.name, // adjust based on your DB field
-          label: cat.name,
+          value: cat.category_name, // adjust based on your DB field
+          label: cat.category_name,
         }));
 
         setAllCategories(formatted);
@@ -283,7 +283,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
     try {
       console.log("Submitting deadline:", formattedDeadline);
       console.log("Submitting Project data:", payload);
-      const response = await makePostRequest("projectsTask/insertprojects_task", payload);
+      const response = await makePostRequest("projects-tasks", payload);
       console.log("API response:", response);
 
       if (response.data.success || response.data.message === "inserted") {

@@ -80,7 +80,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
 
   // Fetch categories when the component mounts
   React.useEffect(() => {
-    fetch('https://api.makemyvid.io/api/v1/category/getallcategorys')
+    fetch('https://api.makemyvid.io/api/v1/categories')
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');

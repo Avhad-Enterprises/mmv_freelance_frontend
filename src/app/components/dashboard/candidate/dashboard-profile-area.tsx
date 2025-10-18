@@ -225,7 +225,7 @@ const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
 
   // Fetch superpowers/categories from API
   useEffect(() => {
-    fetch('https://api.makemyvid.io/api/v1/category/getallcategorys')
+    fetch('https://api.makemyvid.io/api/v1/categories')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

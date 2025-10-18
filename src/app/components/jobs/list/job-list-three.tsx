@@ -52,8 +52,8 @@ const JobListThree = ({
       setLoading(true);
       try {
         const [jobsRes, categoriesRes, skillsRes] = await Promise.all([
-          makeGetRequest("/projectsTask/getallprojectlisting-public"),
-          makeGetRequest("/category/getallcategorys"),
+          makeGetRequest("/projects-tasks/listings"),
+          makeGetRequest("/categories"),
           makeGetRequest("/skills"),
         ]);
 

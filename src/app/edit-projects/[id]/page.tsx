@@ -157,11 +157,11 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     console.log("projectId:", projectId);
     const fetchCategories = async () => {
       try {
-        const response = await makeGetRequest(`category/getallcategorys`);
+        const response = await makeGetRequest(`categories`);
         const categories = response.data?.data || [];
         const formatted = categories.map((cat: any) => ({
-          value: cat.name,
-          label: cat.name,
+          value: cat.category_name,
+          label: cat.category_name,
         }));
         setAllCategories(formatted);
       } catch (error) {
@@ -177,10 +177,10 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
       }
 
       try {
-        const response = await makePostRequest(`projectsTask/getprojects_taskbyid`, { projects_task_id: projectId });
+        const response = await makeGetRequest(`projects-tasks/${projectId}`);
         console.log("Api Response:", response);
 
-        const project = response.data.projects;
+        const project = response.data?.projects;
         if (project) {
           setFormData({
             projectsTaskId: project.projects_task_id,
@@ -338,7 +338,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     setLoading(true);
     try {
       console.log("Updating Project data:", payload);
-      const response = await makePutRequest("projectsTask/updateprojects_taskbyid", payload);
+      const response = await makePutRequest(`projects-tasks/${formData.projectsTaskId}`, payload);
       console.log("API response:", response);
 
       if (response.data.success) {

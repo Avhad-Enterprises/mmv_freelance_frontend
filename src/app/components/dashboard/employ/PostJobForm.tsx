@@ -100,7 +100,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     };
 
     try {
-      await makePostRequest("/projectsTask/insertprojects_task", payload);
+      await makePostRequest("/projects-tasks", payload);
       toast.success("Job posted successfully!");
       setTimeout(() => {
         onBackToList();

@@ -46,7 +46,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         return;
       }
 
-      const projectsRes = await makeGetRequest("projectsTask/getallprojectlisting-public");
+      const projectsRes = await makeGetRequest("projects-tasks/listings");
       const allProjects = projectsRes?.data?.data || [];
 
       const matched = allProjects.filter((proj: any) =>

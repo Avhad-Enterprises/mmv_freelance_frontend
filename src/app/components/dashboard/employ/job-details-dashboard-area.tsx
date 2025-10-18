@@ -11,7 +11,7 @@ const JobDetailsDashboardArea = ({ job_id }: { job_id: string }) => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const response = await makeGetRequest('projectsTask/getallprojectlisting-public');
+        const response = await makeGetRequest('projects-tasks/listings');
         const allJobs: IJobType[] = response?.data?.data || [];
 
         const matchedJob = allJobs.find(
