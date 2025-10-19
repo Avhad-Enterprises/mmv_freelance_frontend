@@ -24,7 +24,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
 
       if (isActive) {
         if (job.projects_task_id !== undefined) {
-          await makeDeleteRequest("saved/remove-saved", {
+          await makeDeleteRequest("api/v1/saved/remove-saved", {
             user_id: userId,
             projects_task_id: job.projects_task_id,
           });
@@ -40,7 +40,7 @@ const ListItemTwo = ({ item }: { item: IJobType }) => {
             created_by: userId,
           };
 
-          await makePostRequest("saved/create", payload);
+          await makePostRequest("api/v1/saved/create", payload);
           dispatch(add_to_wishlist(job));
         }
       }

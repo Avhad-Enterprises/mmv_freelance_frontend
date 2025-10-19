@@ -72,7 +72,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
         return;
       }
       try {
-        const res = await makePostRequest("users/get_user_by_id", {
+        const res = await makePostRequest("api/v1/users/get_user_by_id", {
           user_id: decoded.user_id,
         });
         setJobItems(res?.data?.data || []);
@@ -90,7 +90,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
     const fetchCount = async () => {
       if (!decoded?.user_id) return;
       try {
-        const res = await makePostRequest("users/get_user_by_id", {
+        const res = await makePostRequest("api/v1/users/get_user_by_id", {
           user_id: decoded.user_id,
         });
         setAppliedCount(res?.data?.data || 0);
@@ -104,7 +104,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
   // Handle delete job
   const handleDelete = async (applied_projects_id: number) => {
     try {
-      await makeDeleteRequest("applications/my-applications/withdraw", {
+      await makeDeleteRequest("api/v1/applications/my-applications/withdraw", {
         applied_projects_id,
       });
       // Remove the deleted job from UI

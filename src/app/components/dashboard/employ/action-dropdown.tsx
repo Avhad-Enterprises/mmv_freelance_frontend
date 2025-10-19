@@ -36,7 +36,7 @@ const ActionDropdown = ({ id,favoriteFreelancerId, onDeleted }: Props) => {
     };
 
     try {
-      const response = await makePostRequest("favorites/remove", payload);
+      const response = await makePostRequest("api/v1/favorites/remove", payload);
 
       if (response.status === 200 || response.status === 201) {
         alert("Freelancer removed from favorites!");

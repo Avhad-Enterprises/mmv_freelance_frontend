@@ -44,7 +44,7 @@ const FileUploadComponent = ({
         folderPath: folderPath,
       };
 
-      const response = await makePostRequest("files/uploadtoaws", payload);
+      const response = await makePostRequest("api/v1/files/uploadtoaws", payload);
       return response.data.fileUrl;
     } catch (error) {
       console.error("Error uploading file:", error);

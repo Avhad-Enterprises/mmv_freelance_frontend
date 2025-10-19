@@ -21,7 +21,7 @@ const ActionDropdown = ({ projectsTaskId }: Props) => {
 
   const handleDelete = async () => {
     try {
-      const response = await makeDeleteRequest(`projects-tasks/${projectsTaskId}`);
+      const response = await makeDeleteRequest(`api/v1/projects-tasks/${projectsTaskId}`);
 
       if (response.status === 200 || response.status === 201) {
         alert("Project Deleted successfully!");

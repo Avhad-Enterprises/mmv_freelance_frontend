@@ -62,8 +62,10 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`)
         
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
-          const skillNames = result.data.map((skill: any) => skill.skill_name);
-          setAllSkills(skillNames);
+          const skillNames: string[] = result.data.map((skill: any) => skill.skill_name);
+          // Remove duplicates from the skills array
+          const uniqueSkillNames = [...new Set(skillNames)];
+          setAllSkills(uniqueSkillNames);
         } else {
           throw new Error('Invalid data format from API');
         }
@@ -80,7 +82,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`)
 
   // Fetch categories when the component mounts
   React.useEffect(() => {
-fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category/getallcategorys`)
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       .then(res => {
         if (!res.ok) {
           throw new Error('Network response was not ok');
@@ -391,7 +393,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category/getallcategorys`)
         <div className="row mt-3">
           <div className="col-md-6">
             <div className="input-group-meta position-relative mb-25">
-              <label>Rate Amount*</label>
+              <label>Rate Amount per Hour*</label>
               <input
                 type="number"
                 className="form-control"
@@ -404,7 +406,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category/getallcategorys`)
                   max: { value: 10000, message: "Rate cannot exceed 10,000" },
                   onChange: () => clearErrors("rate_amount")
                 })}
-                placeholder="Enter amount (max 10,000)"
+                placeholder="Enter amount per hour (max 10,000)"
               />
               {errors.rate_amount && (
                 <div className="text-danger">{String(errors.rate_amount.message)}</div>

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import NiceSelect from "@/ui/nice-select";
-import { makeGetRequest } from "@/utils/api"; // adjust this path as needed
 import slugify from "slugify";
 
-interface ProjectTask {
-  project_category: string;
+interface Category {
+  category_name: string;
 }
 
 type Props = {
@@ -19,25 +18,18 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await makeGetRequest("projects-tasks/listings");
-        const projects: ProjectTask[] = res.data?.data || [];
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
+        const result = await response.json();
+        const categories: Category[] = result.data || [];
 
-        const uniqueCategories = [
-          ...new Set(
-            projects
-              .map((proj) => proj.project_category)
-              .filter(Boolean) // ignore null/undefined
-          ),
-        ];
-
-        const options = uniqueCategories.map((cat) => ({
-          value: slugify(cat.toLowerCase(), "-"),
-          label: cat,
+        const options = categories.map((cat) => ({
+          value: slugify(cat.category_name.toLowerCase(), "-"),
+          label: cat.category_name,
         }));
 
         setCategoryOptions(options);
       } catch (error) {
-        console.error("Error fetching project categories:", error);
+        console.error("Error fetching categories:", error);
       }
     };
 

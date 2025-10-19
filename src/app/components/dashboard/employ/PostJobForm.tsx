@@ -58,7 +58,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const meResponse = await makeGetRequest("/users/me");
+        const meResponse = await makeGetRequest("api/v1/users/me");
         const userId = meResponse.data?.data?.user?.user_id;
         const clientId = meResponse.data?.data?.profile?.client_id;
         if (userId && clientId) {
@@ -100,7 +100,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     };
 
     try {
-      await makePostRequest("/projects-tasks", payload);
+      await makePostRequest("api/v1/projects-tasks", payload);
       toast.success("Job posted successfully!");
       setTimeout(() => {
         onBackToList();

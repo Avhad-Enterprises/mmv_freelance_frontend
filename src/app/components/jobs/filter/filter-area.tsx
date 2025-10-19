@@ -44,7 +44,7 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice, all_categories, all_s
 
         {/* Job Type */}
         <div className="filter-block bottom-line pb-25">
-          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseJobType" role="button" aria-expanded="false">Job Type</a>
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseJobType" role="button" aria-expanded="true">Job Type</a>
           <div className="collapse show" id="collapseJobType">
             <JobType />
           </div>
@@ -52,7 +52,7 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice, all_categories, all_s
 
         {/* Budget */}
         <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseSalary" role="button" aria-expanded="false">Budget</a>
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseSalary" role="button" aria-expanded="true">Budget</a>
           <div className="collapse show" id="collapseSalary">
             <JobPrices priceValue={priceValue} setPriceValue={setPriceValue} maxPrice={maxPrice} />
           </div>

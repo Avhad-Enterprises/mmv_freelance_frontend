@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 // internal
 import Menus from './component/menus';
-import logo from '@/assets/images/logo/logo_04.png';
+import logo from '@/assets/images/logo/logo_new.png';
 import useSticky from '@/hooks/use-sticky';
 import LoginModal from '@/app/components/common/popup/login-modal';
 

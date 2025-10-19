@@ -84,7 +84,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     }
 
     try {
-      const response = await makePostRequest("tags/insertskill", {
+      const response = await makePostRequest("api/v1/tags/insertskill", {
         skill_name: trimmedSkill,
         created_by: userId,
       });
@@ -110,7 +110,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
       const errorMessage = error.response?.data?.message || error.message;
       if (errorMessage.includes("already exists")) {
         try {
-          const skillData = await makeGetRequest(`skills`);
+          const skillData = await makeGetRequest(`api/v1/skills`);
           const skill = skillData.data?.data?.find((s: any) => s.skill_name.toLowerCase() === trimmedSkill.toLowerCase());
           if (skill) {
             setFormData((prev) => ({
@@ -134,7 +134,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`skills`);
+      const response = await makeGetRequest(`api/v1/skills`);
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : [];
       const skillNames = fetchedSkills
         .map((skill: any) => skill.skill_name)
@@ -157,7 +157,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     console.log("projectId:", projectId);
     const fetchCategories = async () => {
       try {
-        const response = await makeGetRequest(`categories`);
+        const response = await makeGetRequest(`api/v1/categories`);
         const categories = response.data?.data || [];
         const formatted = categories.map((cat: any) => ({
           value: cat.category_name,
@@ -177,7 +177,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
       }
 
       try {
-        const response = await makeGetRequest(`projects-tasks/${projectId}`);
+        const response = await makeGetRequest(`api/v1/projects-tasks/${projectId}`);
         console.log("Api Response:", response);
 
         const project = response.data?.projects;
@@ -338,7 +338,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     setLoading(true);
     try {
       console.log("Updating Project data:", payload);
-      const response = await makePutRequest(`projects-tasks/${formData.projectsTaskId}`, payload);
+      const response = await makePutRequest(`api/v1/projects-tasks/${formData.projectsTaskId}`, payload);
       console.log("API response:", response);
 
       if (response.data.success) {

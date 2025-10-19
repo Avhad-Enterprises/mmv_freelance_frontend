@@ -35,7 +35,7 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
   // ✅ This is the only part that needs to be changed
   const onSubmit = async (data: IFormData) => {
     try {
-      const res = await makePostRequest("auth/login", data);
+      const res = await makePostRequest("api/v1/auth/login", data);
       const result = res.data;
       const token = result?.data?.token;
 

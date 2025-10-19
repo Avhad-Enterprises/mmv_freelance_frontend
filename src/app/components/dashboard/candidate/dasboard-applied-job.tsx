@@ -52,7 +52,7 @@ const AppliedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
     setLoading(true);
 
     try {
-      const appliedRes = await makeGetRequest("applied/lists");
+      const appliedRes = await makeGetRequest("api/v1/applied/lists");
       // , {
       //   user_id: user.user_id,
       // }
@@ -69,7 +69,7 @@ const AppliedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         return;
       }
 
-      const projectsRes = await makeGetRequest("projects-tasks/listings");
+      const projectsRes = await makeGetRequest("api/v1/projects-tasks/listings");
       const allProjects = projectsRes?.data?.data || [];
 
       const matched = allProjects

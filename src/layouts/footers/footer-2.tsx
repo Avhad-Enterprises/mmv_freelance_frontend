@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 // internal
-import logo from '@/assets/images/logo/logo_04.png';
+import logo from '@/assets/images/logo/logo_new.png';
 import shape from '@/assets/images/shape/shape_28.svg';
 import { WidgetOne, WidgetThree, WidgetTwo } from './component/footer-widgets';
 import SocialLinks from './component/social-links';
@@ -16,7 +16,7 @@ const FooterTwo = () => {
             <div className="col-xl-4 col-lg-3 footer-intro mb-15">
               <div className="logo mb-25">
                 <Link href="/" className="d-flex align-items-center">
-                  <Image src={logo} alt="logo" priority />
+                  <Image src={logo} alt="logo" width={120} height={60} priority />
                 </Link>
               </div>
               <a href="#" className="email fw-500">jobisupport@new.com</a>

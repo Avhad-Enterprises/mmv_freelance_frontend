@@ -24,7 +24,7 @@ const DashboardSettingArea = ({ setIsOpenSidebar }: IProps) => {
       if (!decodedToken?.user_id) return;
 
       try {
-        const res = await makePostRequest("users/get_user_by_id", {
+        const res = await makePostRequest("api/v1/users/get_user_by_id", {
           user_id: decodedToken.user_id,
         });
 
@@ -57,7 +57,7 @@ const DashboardSettingArea = ({ setIsOpenSidebar }: IProps) => {
     if (!decodedToken?.user_id) return;
 
     try {
-      await makePostRequest("users/update_user_by_id", {
+      await makePostRequest("api/v1/users/update_user_by_id", {
         user_id: decodedToken.user_id,
         first_name: formData.firstName,
         last_name: formData.lastName,

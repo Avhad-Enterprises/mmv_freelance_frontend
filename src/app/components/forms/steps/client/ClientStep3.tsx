@@ -137,12 +137,15 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                     accept="image/*"
                     className="form-control pt-4"
                     {...register("profile_photo", {
-                        validate: (value) => validateProfilePhoto(value?.[0] || selectedProfilePhoto)
+                        validate: () => validateProfilePhoto(selectedProfilePhoto)
                     })}
                     onChange={(e) => {
                         const file = e.target.files?.[0] || null;
                         setSelectedProfilePhoto(file);
                         setValue("profile_photo", e.target.files, { shouldValidate: true });
+                        if (file) {
+                            clearErrors("profile_photo");
+                        }
                         if (profilePhotoUrl) URL.revokeObjectURL(profilePhotoUrl);
                         setProfilePhotoUrl(file ? URL.createObjectURL(file) : null);
                     }}
@@ -209,11 +212,10 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         {/* State */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>State*</label>
+            <label>State</label>
             <select 
               className="form-control"
               {...register("state", { 
-                required: "State is required",
                 onChange: () => setValue("city", "")
               })}
             >
@@ -233,10 +235,10 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         {/* City */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>City*</label>
+            <label>City</label>
             <select 
               className="form-control"
-              {...register("city", { required: "City is required" })}
+              {...register("city")}
             >
               <option value="">Select City</option>
               {watch("country") && watch("state") && (() => {

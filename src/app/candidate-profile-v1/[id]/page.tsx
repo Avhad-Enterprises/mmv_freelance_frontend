@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
 import FooterOne from "@/layouts/footers/footer-one";
-import CandidateProfileBreadcrumb from "@/app/components/candidate-details/profile-bredcrumb";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area";
 import JobPortalIntro from "@/app/components/job-portal-intro/job-portal-intro";
 
@@ -119,16 +118,17 @@ const DynamicCandidateProfilePage = () => {
 
   useEffect(() => {
     if (candidateId) {
+      const parsedId = parseInt(candidateId);
       const fetchData = async () => {
         try {
           setLoading(true);
           setError(null);
 
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`);
+          const response = await fetch(`/api/v1/freelancers/getfreelancers-public`);
           if (!response.ok) throw new Error(`Failed to fetch data`);
 
           const responseData = await response.json();
-          const foundRawFreelancer: RawApiFreelancer | undefined = responseData.data.find((f: RawApiFreelancer) => f.user_id === parseInt(candidateId));
+          const foundRawFreelancer: RawApiFreelancer | undefined = responseData.data.find((f: RawApiFreelancer) => f.user_id === parsedId);
 
           if (foundRawFreelancer) {
             // Process YouTube links to extract ID and URL
@@ -193,18 +193,10 @@ const DynamicCandidateProfilePage = () => {
     }
   }, [candidateId]);
 
-  const breadcrumbTitle = loading
-    ? "Loading Profile..."
-    : freelancer
-    ? `${freelancer.first_name} ${freelancer.last_name}`
-    : "Candidate Profile";
-
   return (
     <Wrapper>
       <div className="main-page-wrapper">
         <Header />
-
-        <CandidateProfileBreadcrumb title={breadcrumbTitle} subtitle="Candidate Profile" />
 
         {error && (
             <div className="container text-center pt-80 pb-80">

@@ -11,8 +11,8 @@ const BlogTwo = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await makeGetRequest("blog/getallblogs");
-        const data: IBlogDataType[] = response.data;
+        const response = await makeGetRequest("api/v1/blog/getallblogs");
+        const data: IBlogDataType[] = response.data.data || [];
 
         const formattedBlogs = data
           .filter((item) => item.is_active === 1 && item.is_deleted === false)

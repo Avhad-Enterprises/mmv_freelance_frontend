@@ -41,11 +41,11 @@ const menu_data:IMenuData[] = [
   },
   {
     id:4,
-    link:'/blog-v1',
+    link:'/blog-v2',
     title:'Blog',
     sub_menus:[
-      // {link:'/blog-v1',title:'Blog Standard'},
-      {link:'/coming-soon',title:'Blog Grid'},
+      {link:'/blog-v2',title:'Blog'},
+      // {link:'/coming-soon',title:'Blog Grid'},
       // {link:'/blog-v3',title:'Full width'},
       // {link:'/blog-details',title:'Blog Details'},
     ]

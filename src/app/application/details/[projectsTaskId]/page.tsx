@@ -36,7 +36,7 @@ export default function ApplicationDetailsPage({
   // Update application status
   const updateApplicationStatus = async (applicationId: number, newStatus: number) => {
     try {
-      await makePatchRequest("applications/update-status", { applied_projects_id: applicationId, status: newStatus });
+      await makePatchRequest("api/v1/applications/update-status", { applied_projects_id: applicationId, status: newStatus });
       setApplications((prev) =>
         prev.map((app) =>
           app.applied_projects_id === applicationId ? { ...app, status: newStatus } : app
@@ -59,7 +59,7 @@ export default function ApplicationDetailsPage({
 
       try {
         setLoading(true);
-        const response = await makePostRequest("applications/projects/get-applications", { projects_task_id: Number(projectsTaskId) });
+        const response = await makePostRequest("api/v1/applications/projects/get-applications", { projects_task_id: Number(projectsTaskId) });
         const fetchedApplications = response.data?.data || [];
         setApplications(fetchedApplications);
       } catch (err) {

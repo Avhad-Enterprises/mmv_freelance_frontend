@@ -319,11 +319,10 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
           {/* State */}
           <div className="col-md-6">
             <div className="input-group-meta position-relative mb-25">
-              <label>State*</label>
+              <label>State</label>
               <select
                 className="form-control"
                 {...register("state", {
-                  required: "State is required",
                   onChange: (e) => {
                     setValue("city", "");
                     clearErrors("state");
@@ -346,10 +345,10 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
           {/* City */}
           <div className="col-md-6">
             <div className="input-group-meta position-relative mb-25">
-              <label>City*</label>
+              <label>City</label>
               <select
                 className="form-control"
-                {...register("city", { required: "City is required" })}
+                {...register("city")}
                 onChange={() => clearErrors("city")}
               >
                 <option value="">Select City</option>

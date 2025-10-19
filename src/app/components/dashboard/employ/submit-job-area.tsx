@@ -93,7 +93,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
     }
 
     try {
-      const response = await makePostRequest("tags/insertskill", {
+      const response = await makePostRequest("api/v1/tags/insertskill", {
         skill_name: trimmedSkill,
         created_by: userId,
       });
@@ -113,7 +113,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`skills`);
+      const response = await makeGetRequest(`api/v1/skills`);
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : [];
       const skillNames = fetchedSkills
         .map((skill: any) => skill.skill_name)
@@ -135,7 +135,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await makeGetRequest(`categories`);
+        const response = await makeGetRequest(`api/v1/categories`);
         const categories = response.data?.data || []; // adjust based on your API response shape
 
         // Map to `NiceSelect` option format
@@ -283,7 +283,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
     try {
       console.log("Submitting deadline:", formattedDeadline);
       console.log("Submitting Project data:", payload);
-      const response = await makePostRequest("projects-tasks", payload);
+      const response = await makePostRequest("api/v1/projects-tasks", payload);
       console.log("API response:", response);
 
       if (response.data.success || response.data.message === "inserted") {

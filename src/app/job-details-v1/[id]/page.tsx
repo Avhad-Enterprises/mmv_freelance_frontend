@@ -7,7 +7,6 @@ import Header from '@/layouts/headers/header';
 import HeaderDash from '@/layouts/headers/headerDash'; // <-- Import the dashboard header
 import JobDetailsV1Area from '@/app/components/job-details/job-details-v1-area';
 import JobPortalIntro from '@/app/components/job-portal-intro/job-portal-intro';
-import JobDetailsBreadcrumb from '@/app/components/jobs/breadcrumb/job-details-breadcrumb';
 import RelatedJobs from '@/app/components/jobs/related-jobs';
 import FooterOne from '@/layouts/footers/footer-one';
 import { IJobType } from '@/types/job-data-type';
@@ -44,7 +43,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const response = await makeGetRequest('projects-tasks/listings');
+        const response = await makeGetRequest('api/v1/projects-tasks/listings');
         const allJobs: IJobType[] = response?.data?.data || [];
         const matchedJob = allJobs.find(
           (j) => j.projects_task_id === Number(params.id)
@@ -75,7 +74,6 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
         {/* Conditionally render the header */}
         {isAuthenticated ? <HeaderDash /> : <Header />}
 
-        <JobDetailsBreadcrumb />
         <JobDetailsV1Area job={job} />
         <RelatedJobs category={[job.project_category || '']} />
         <JobPortalIntro />

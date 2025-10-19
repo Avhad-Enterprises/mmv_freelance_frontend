@@ -26,7 +26,7 @@ const StateSelect: React.FC<Props> = ({ value, countryId, onChange }) => {
     const fetchStates = async () => {
       setLoading(true);
       try {
-        const res = await makeGetRequest(`location/states/${countryId}`);
+        const res = await makeGetRequest(`api/v1/location/states/${countryId}`);
         // console.log("States Data : ", res);
         if (res.data?.data) {
           setStates(res.data.data);

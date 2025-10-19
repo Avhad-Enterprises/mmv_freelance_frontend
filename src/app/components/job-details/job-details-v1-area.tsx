@@ -50,7 +50,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
 
   const fetchUserIdAndInitialState = async () => {
     try {
-      const response = await makeGetRequest('users/me');
+      const response = await makeGetRequest('api/v1/users/me');
       const userData = response.data?.data; // Adjusted to access 'data' then 'user' and 'userType'
       if (userData?.user?.user_id) {
         setUserId(userData.user.user_id);
@@ -105,7 +105,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     setIsApplying(true);
     try {
         // Replace 'applications/create' with your actual endpoint for applying to a job
-        const response = await makePostRequest('applications/projects/apply', {
+        const response = await makePostRequest('api/v1/applications/projects/apply', {
             projects_task_id: job.projects_task_id,
             user_id: userId,
         });
@@ -142,7 +142,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         toast.success('Job unsaved successfully');
         setIsSaved(false);
       } else {
-        const response = await makePostRequest('saved/create', {
+        const response = await makePostRequest('api/v1/saved/create', {
           projects_task_id: job.projects_task_id,
           user_id: userId,
           is_active: true,

@@ -13,7 +13,7 @@ const DeleteAccountModal = () => {
     if (!decoded?.user_id) return;
     setLoading(true);
     try {
-      await makePostRequest("users/soft_delete_user", { user_id: Number(decoded.user_id) });
+      await makePostRequest("api/v1/users/soft_delete_user", { user_id: Number(decoded.user_id) });
 
       localStorage.clear(); //clear token & data
       router.push("/"); // redirect to home

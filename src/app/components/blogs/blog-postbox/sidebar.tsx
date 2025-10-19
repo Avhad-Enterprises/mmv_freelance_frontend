@@ -30,7 +30,7 @@ const BlogSidebar = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const res = await makeGetRequest("blog/getallblogs");
+        const res = await makeGetRequest("api/v1/blog/getallblogs");
         setBlogs(res.data.data || []);
       } catch (error) {
         console.error("Error fetching blogs:", error);

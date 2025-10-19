@@ -36,7 +36,7 @@ const SendResetLinkForm = () => {
   const onSubmit = async (data: IForgotFormData) => {
     setLoading(true);
     try {
-      await makePostRequest("users/forgot-password", data);
+      await makePostRequest("api/v1/users/forgot-password", data);
       toast.success("Check your registered email for the reset link.");
       alert("Reset link sent successfully!"); // 👈 ab direct yahi pe alert
     } catch (error: any) {

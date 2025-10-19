@@ -28,11 +28,6 @@ const Header = () => {
               </div>
               <div className="right-widget ms-auto order-lg-3">
                 <ul className="d-flex align-items-center style-none">
-                  <li className="d-none d-md-block">
-                    <Link href="/coming-soon" className="job-post-btn tran3s">
-                      Post Job
-                    </Link>
-                  </li>
                   <li>
                     <a
                       href="#"
@@ -44,7 +39,7 @@ const Header = () => {
                     </a>
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/coming-soon" className="btn-one">
+                    <Link href="/candidates-v1" className="btn-one">
                       Hire Top Talents
                     </Link>
                   </li>
@@ -89,12 +84,7 @@ const Header = () => {
                     <Menus />
                     {/* menus end */}
                     <li className="d-md-none">
-                      <Link href='/register' className="job-post-btn tran3s">
-                        Post Job
-                      </Link>
-                    </li>
-                    <li className="d-md-none">
-                      <Link href="/coming-soon" className="btn-one w-100">
+                      <Link href="/candidates-v1" className="btn-one w-100">
                         Hire Top Talents
                       </Link>
                     </li>

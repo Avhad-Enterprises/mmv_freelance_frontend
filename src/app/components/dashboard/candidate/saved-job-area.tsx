@@ -30,7 +30,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
     try {
       // Fixed: only 1 argument passed
       const savedRes = await makeGetRequest(
-        `saved/listsave?user_id=${user.user_id}`
+        `api/v1/saved/listsave?user_id=${user.user_id}`
       );
       const savedData = savedRes?.data?.data || [];
 
@@ -46,7 +46,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
         return;
       }
 
-      const projectsRes = await makeGetRequest("projects-tasks/listings");
+      const projectsRes = await makeGetRequest("api/v1/projects-tasks/listings");
       const allProjects = projectsRes?.data?.data || [];
 
       const matched = allProjects.filter((proj: any) =>
@@ -68,7 +68,7 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
 
   const handleRemove = async (jobId: number) => {
     try {
-      await makeDeleteRequest("saved/remove-saved", {
+      await makeDeleteRequest("api/v1/saved/remove-saved", {
         user_id: user?.user_id,
         projects_task_id: jobId,
       });

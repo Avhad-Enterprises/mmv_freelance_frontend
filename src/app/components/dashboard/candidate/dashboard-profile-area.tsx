@@ -210,8 +210,10 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`)
         if (!response.ok) throw new Error('Network response was not ok');
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
-          const skillNames = result.data.map((skill: any) => skill.skill_name);
-          setAllSkills(skillNames);
+          const skillNames: string[] = result.data.map((skill: any) => skill.skill_name);
+          // Remove duplicates from the skills array
+          const uniqueSkillNames = [...new Set(skillNames)];
+          setAllSkills(uniqueSkillNames);
         }
       } catch (error) {
         console.error("Failed to fetch skills:", error);
@@ -225,7 +227,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`)
 
   // Fetch superpowers/categories from API
   useEffect(() => {
-fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/category/getallcategorys`)
+fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();

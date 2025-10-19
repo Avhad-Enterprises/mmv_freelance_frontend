@@ -15,9 +15,22 @@ const getCountryName = (isoCode: string) => {
 };
 
 const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
+  const [termsAccepted, setTermsAccepted] = React.useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = React.useState(false);
   const data = formData as any;
     
   const handleSubmit = async () => {
+    // Validate checkboxes
+    if (!termsAccepted) {
+      toast.error('Please accept the Terms and Conditions to continue');
+      return;
+    }
+
+    if (!privacyAccepted) {
+      toast.error('Please accept the Privacy Policy to continue');
+      return;
+    }
+
     const loadingToast = toast.loading('Submitting registration...');
     
     try {
@@ -79,6 +92,10 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (data.role) fd.append('role', data.role);
       if (Array.isArray(data.superpowers)) fd.append('superpowers', JSON.stringify(data.superpowers));
       if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
+
+      // Terms and Privacy - ALWAYS send as boolean
+      fd.append('terms_accepted', String(termsAccepted));
+      fd.append('privacy_policy_accepted', String(privacyAccepted));
 
       // Submit
 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`, {
@@ -156,6 +173,37 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
         </div>
       ))}
 
+      {/* Terms and Privacy Policy Checkboxes */}
+      <div className="mt-4">
+        <div className="agreement-checkbox">
+          <div className="mb-3">
+            <input
+              type="checkbox"
+              id="terms-checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+            />
+            <label htmlFor="terms-checkbox">
+              I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+            </label>
+          </div>
+
+          <div>
+            <input
+              type="checkbox"
+              id="privacy-checkbox"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            />
+            <label htmlFor="privacy-checkbox">
+              I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div className="d-flex justify-content-between mt-4">
         <button type="button" className="btn-one" onClick={prevStep}>
           Previous
@@ -164,6 +212,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
           type="button"
           className="btn-one"
           onClick={handleSubmit}
+          disabled={!termsAccepted || !privacyAccepted}
         >
           Confirm & Submit
         </button>
@@ -173,3 +222,19 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 };
 
 export default VideoEditorFinalReview;
+
+// Add disabled button styling
+if (typeof document !== 'undefined') {
+  const styleId = 'video-editor-final-review-styles';
+  if (!document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .btn-one:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}

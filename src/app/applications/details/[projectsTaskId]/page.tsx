@@ -48,7 +48,7 @@ export default function ApplicationDetailsPage({
       };
 
       const response = await makePatchRequest(
-        "applications/update-status",
+        "api/v1/applications/update-status",
         payload
       );
 
@@ -79,7 +79,7 @@ export default function ApplicationDetailsPage({
       try {
         setLoading(true);
         const response = await makePostRequest(
-          "applications/projects/get-applications",
+          "api/v1/applications/projects/get-applications",
           { projects_task_id: Number(projectsTaskId) }
         );
         const fetchedApplications = response.data?.data || [];

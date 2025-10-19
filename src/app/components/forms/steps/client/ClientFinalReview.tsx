@@ -202,34 +202,30 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 
         {/* Terms and Privacy Policy Checkboxes */}
         <div className="col-12 mt-4">
-          <div className="terms-section">
-            <div className="checkbox-wrapper mb-3">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-text">
-                  I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
-                  <span className="required-mark">*</span>
-                </span>
+          <div className="agreement-checkbox">
+            <div className="mb-3">
+              <input
+                type="checkbox"
+                id="terms-checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              <label htmlFor="terms-checkbox">
+                I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+                <span className="required-mark">*</span>
               </label>
             </div>
 
-            <div className="checkbox-wrapper">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={privacyAccepted}
-                  onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                  className="checkbox-input"
-                />
-                <span className="checkbox-text">
-                  I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-                  <span className="required-mark">*</span>
-                </span>
+            <div>
+              <input
+                type="checkbox"
+                id="privacy-checkbox"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              />
+              <label htmlFor="privacy-checkbox">
+                I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+                <span className="required-mark">*</span>
               </label>
             </div>
           </div>
@@ -267,41 +263,6 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
         }
         .review-item:last-child {
           border-bottom: none;
-        }
-        .terms-section {
-          padding: 20px;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          background-color: #fff9e6;
-        }
-        .checkbox-wrapper {
-          display: flex;
-          align-items: flex-start;
-        }
-        .checkbox-label {
-          display: flex;
-          align-items: flex-start;
-          cursor: pointer;
-          user-select: none;
-        }
-        .checkbox-input {
-          width: 18px;
-          height: 18px;
-          margin-right: 10px;
-          margin-top: 2px;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
-        .checkbox-text {
-          font-size: 14px;
-          line-height: 1.5;
-        }
-        .checkbox-text a {
-          color: #0066cc;
-          text-decoration: underline;
-        }
-        .checkbox-text a:hover {
-          color: #004499;
         }
         .required-mark {
           color: #dc3545;

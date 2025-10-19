@@ -35,7 +35,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const res = await makeGetRequest(`blog/getblog/${blogId}`);
+        const res = await makeGetRequest(`api/v1/blog/getblog/${blogId}`);
         if (res?.data?.data) {
           setItem(res.data.data);
         }

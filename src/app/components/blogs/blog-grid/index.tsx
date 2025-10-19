@@ -5,7 +5,7 @@ import BlogSidebar from "../blog-postbox/sidebar";
 import BlogPagination from "../blog-postbox/blog-pagination";
 import BlogItem from "../blog-postbox/blog-item";
 import { IBlogDataType } from "@/types/blog-type";
-import { makeGetRequest } from "@/utils/api";
+import blog_data from "@/data/blog-data";
 
 const BlogGridArea = () => {
   const [allBlogs, setAllBlogs] = useState<IBlogDataType[]>([]);
@@ -13,39 +13,10 @@ const BlogGridArea = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Safe JSON parser
-  const safeJson = (str: any): string[] => {
-    try {
-      return typeof str === "string" ? JSON.parse(str) : [];
-    } catch (error) {
-      console.error("JSON parse error:", error);
-      return [];
-    }
-  };
-
   useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const res = await makeGetRequest("blog/getallblogs");
-        const data = res.data?.data;
-
-        const parsedBlogs: IBlogDataType[] = data.map((b: any): IBlogDataType => ({
-          ...b,
-          sub_section: safeJson(b.sub_section),
-          tags: safeJson(b.tags),
-          notes: safeJson(b.notes),
-        }));
-
-        console.log("Parsed Blogs:", parsedBlogs); // Debugging log
-        setAllBlogs(parsedBlogs);
-      } catch (error) {
-        console.error("Error fetching blogs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBlogs();
+    // Use static blog data instead of API call
+    setAllBlogs(blog_data);
+    setLoading(false);
   }, []);
 
   const startIndex = (currentPage - 1) * itemsPerPage;

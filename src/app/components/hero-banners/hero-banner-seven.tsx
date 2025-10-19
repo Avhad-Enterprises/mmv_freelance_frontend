@@ -8,6 +8,7 @@ import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 
 const HeroBannerSeven = () => {
   const { handleSubmit, setCategoryVal,setSearchText } = useSearchFormSubmit();
+
   // handleSearchInput
   const handleSearchInput = (e:React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value)

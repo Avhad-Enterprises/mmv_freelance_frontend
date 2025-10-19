@@ -26,7 +26,7 @@ const ChangePasswordArea = () => {
         confirmPassword,
       };
 
-      await makePostRequest("users/change-password", payload);
+      await makePostRequest("api/v1/users/change-password", payload);
       toast.success("Password changed successfully");
 
       // Optional: Reset fields

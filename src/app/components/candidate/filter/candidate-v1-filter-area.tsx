@@ -67,7 +67,7 @@ const CandidateV1FilterArea = ({
             data-bs-toggle="collapse"
             href="#collapseCategory"
             role="button"
-            aria-expanded="false"
+            aria-expanded="true"
           >
             Skill
           </a>
@@ -84,7 +84,7 @@ const CandidateV1FilterArea = ({
             data-bs-toggle="collapse"
             href="#collapseLocation"
             role="button"
-            aria-expanded="false"
+            aria-expanded="true"
           >
             Location
           </a>

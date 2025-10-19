@@ -16,16 +16,16 @@ const BlogFullWidthArea = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await makeGetRequest("blog/getallblogs");
+        const response = await makeGetRequest("api/v1/blog/getallblogs");
 
-        if (Array.isArray(response.data)) {
-          setBlogs(response.data);
+        if (Array.isArray(response.data.data)) {
+          setBlogs(response.data.data);
         } else {
-          console.warn("API did not return an array:", response.data);
+          console.warn("API did not return an array:", response.data.data);
           setBlogs([]);
         }
 
-        console.log("Fetched Blogs:", response.data);
+        console.log("Fetched Blogs:", response.data.data);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
         setBlogs([]);

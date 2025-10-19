@@ -127,7 +127,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ activeTab }) => {
       }
 
       try {
-        await makePostRequest("/tags/insertskill", {
+        await makePostRequest("api/v1/tags/insertskill", {
           skill_name: trimmedSkill,
           created_by: 1,
         });
@@ -146,7 +146,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ activeTab }) => {
 
   const fetchSkill = async (query: string) => {
     try {
-      const response = await makeGetRequest(`skills`)
+      const response = await makeGetRequest(`api/v1/skills`)
       const fetchedSkills = Array.isArray(response.data?.data) ? response.data.data : []
       const names: string[] = fetchedSkills
         .map((s: any) => s?.skill_name)
@@ -190,7 +190,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ activeTab }) => {
         skill: data.account_type === "freelancer" ? JSON.stringify(skills) : "[]",
       }
 
-      await makePostRequest("users/insert_user", payload)
+      await makePostRequest("api/v1/users/insert_user", payload)
       alert("Registered successfully!")
       reset()
       setSkills([])

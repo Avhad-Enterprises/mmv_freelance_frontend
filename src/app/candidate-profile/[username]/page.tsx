@@ -63,7 +63,7 @@ const CandidateProfilePage = ({ params }: PageProps) => {
         const fetchFreelancer = async () => {
             try {
                 // Potential Typo Alert: "getfreelaner" might need to be "getfreelancer"
-                const response = await makePostRequest("users/getfreelaner", {username});
+                const response = await makePostRequest("api/v1/users/getfreelaner", {username});
                 
                 // Check your console logs to confirm the structure.
                 // You might need response.data instead of response.data.data
