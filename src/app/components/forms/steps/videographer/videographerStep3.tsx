@@ -5,6 +5,7 @@ import { Country, State, City } from "country-state-city";
 import { geocodeAddress } from "@/lib/actions/latlongaction";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import toast, { Toaster } from 'react-hot-toast'; // --- NEW: Import react-hot-toast
 
 type Props = {
   formData: any;
@@ -13,12 +14,12 @@ type Props = {
 };
 
 const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { 
-    register, 
-    handleSubmit, 
+  const {
+    register,
+    handleSubmit,
     formState: { errors },
-    setValue, 
-    clearErrors, 
+    setValue,
+    clearErrors,
     watch,
     setError
   } = useForm({
@@ -26,17 +27,29 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
     mode: 'onChange'
   });
 
-  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(null);
-  const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(null);
+  const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(formData?.profile_photo || null);
+  const [selectedIdDocument, setSelectedIdDocument] = useState<File | null>(formData?.id_document || null);
   const [selectedCountry, setSelectedCountry] = useState("in");
   const [countryCode, setCountryCode] = useState("+91");
   const [isGeocoding, setIsGeocoding] = useState(false);
-  
+  const [showProfilePreview, setShowProfilePreview] = useState(false);
+  const [showIdPreview, setShowIdPreview] = useState(false);
+
   // Preview URLs
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [idDocumentUrl, setIdDocumentUrl] = useState<string | null>(null);
 
   const note = "Upload your original profile photo only. If fake images are detected, your profile will be de-activated immediately.";
+
+  // Initialize preview URLs for existing files
+  useEffect(() => {
+    if (selectedProfilePhoto) {
+      setProfilePhotoUrl(URL.createObjectURL(selectedProfilePhoto));
+    }
+    if (selectedIdDocument) {
+      setIdDocumentUrl(URL.createObjectURL(selectedIdDocument));
+    }
+  }, []);
 
   // Cleanup object URLs on unmount
   useEffect(() => {
@@ -50,11 +63,13 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
     };
   }, [profilePhotoUrl, idDocumentUrl]);
 
-  // File validation functions
+  // --- MODIFIED: File validation functions with type checking ---
   const validateProfilePhoto = (file: File | null): boolean | string => {
     if (!file) return "Profile photo is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid image.";
     if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, or PNG.";
     return true;
   };
 
@@ -62,6 +77,8 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
     if (!file) return "ID document is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid document.";
     if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, or PDF.";
     return true;
   };
 
@@ -72,7 +89,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
     const countryName = Country.getCountryByCode(data.country)?.name || '';
     const stateName = State.getStateByCodeAndCountry(data.state, data.country)?.name || '';
     const fullAddressToGeocode = `${data.full_address}, ${data.city}, ${stateName}, ${countryName}`;
-    
+
     const geocodeResult = await geocodeAddress(fullAddressToGeocode);
 
     if (geocodeResult.error) {
@@ -100,142 +117,281 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Phone Number with Country Code */}
-      <h4 className="mb-3">Phone Number & OTP Verification*</h4>
-      <div className="row">
-        <div className="col-12">
-          <div className="input-group-meta position-relative mb-25">
-            <label>Phone Number*</label>
-            <div className="phone-input-wrapper">
-              <div className="country-code-selector">
-                <PhoneInput
-                  country={selectedCountry}
-                  value={countryCode}
-                  onChange={(value, country: any) => {
-                    setSelectedCountry(country.countryCode);
-                    setCountryCode("+" + country.dialCode);
-                    clearErrors("phone_number");
-                  }}
-                  containerClass="country-code-container"
-                  inputClass="country-code-input"
-                  buttonClass="country-code-button"
-                  specialLabel=""
-                  inputProps={{
-                    readOnly: true,
-                  }}
-                  enableSearch={true}
-                  searchPlaceholder="Search country..."
-                  searchNotFound="No country found"
-                  disableSearchIcon={false}
-                  preferredCountries={['in', 'us', 'gb', 'ca', 'au']}
-                />
-              </div>
-              <input 
-                type="tel" 
-                placeholder="Enter your phone number"
-                className="form-control phone-number-input"
-                {...register("phone_number", { 
-                  required: "Phone number is required",
-                  pattern: {
-                    value: /^[0-9]{10}$/,
-                    message: "Please enter a valid 10-digit phone number"
-                  }
-                })}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  e.target.value = value;
-                  clearErrors("phone_number");
+    <>
+      {/* --- NEW: Add Toaster for notifications --- */}
+      <Toaster position="top-center" />
+
+      {/* Profile Photo Preview Modal */}
+      {showProfilePreview && profilePhotoUrl && (
+        <div style={modalOverlayStyle} onClick={() => setShowProfilePreview(false)}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <h5 style={{ margin: 0 }}>Profile Photo Preview</h5>
+              <button
+                type="button"
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '0 5px'
+                }}
+                onClick={() => setShowProfilePreview(false)}
+              >
+                ×
+              </button>
+            </div>
+            <img
+              src={profilePhotoUrl}
+              alt="Profile Preview"
+              style={{
+                width: '100%',
+                maxHeight: '500px',
+                objectFit: 'contain',
+                borderRadius: '8px'
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ID Document Preview Modal */}
+      {showIdPreview && idDocumentUrl && (
+        <div style={modalOverlayStyle} onClick={() => setShowIdPreview(false)}>
+          <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <h5 style={{ margin: 0 }}>ID Document Preview</h5>
+              <button
+                type="button"
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  padding: '0 5px'
+                }}
+                onClick={() => setShowIdPreview(false)}
+              >
+                ×
+              </button>
+            </div>
+            {selectedIdDocument?.type === 'application/pdf' ? (
+              <embed
+                src={idDocumentUrl}
+                type="application/pdf"
+                style={{
+                  width: '100%',
+                  height: '500px',
+                  borderRadius: '8px'
                 }}
               />
-            </div>
-            {errors.phone_number && (
-              <div className="error">{String(errors.phone_number.message)}</div>
+            ) : (
+              <img
+                src={idDocumentUrl}
+                alt="ID Document Preview"
+                style={{
+                  width: '100%',
+                  maxHeight: '500px',
+                  objectFit: 'contain',
+                  borderRadius: '8px'
+                }}
+              />
             )}
           </div>
         </div>
-      </div>
-
-      {/* Upload Profile Photo */}
-      <h4 className="mb-2">Upload Profile Photo*</h4>
-      <small className="d-block mb-2" style={{ color: "blue" }}>{note}</small>
-      <div className="custom-file-upload">
-        <input
-          type="file"
-          accept="image/*"
-          id="profile-photo-input"
-          className="hidden-file-input"
-          {...register("profile_photo", {
-            validate: (value) => validateProfilePhoto(value?.[0] || selectedProfilePhoto)
-          })}
-          onChange={(e) => {
-            const file = e.target.files?.[0] || null;
-            setSelectedProfilePhoto(file);
-            setValue("profile_photo", e.target.files);
-            clearErrors("profile_photo");
-            
-            if (profilePhotoUrl) {
-              URL.revokeObjectURL(profilePhotoUrl);
-            }
-            if (file) {
-              setProfilePhotoUrl(URL.createObjectURL(file));
-            } else {
-              setProfilePhotoUrl(null);
-            }
-          }}
-        />
-        <label htmlFor="profile-photo-input" className="file-upload-label">
-          {selectedProfilePhoto ? selectedProfilePhoto.name : "Choose Profile Photo"}
-        </label>
-      </div>
-      {selectedProfilePhoto && (
-        <small className="text-success d-block mt-1">
-          Selected: {selectedProfilePhoto.name} ({(selectedProfilePhoto.size / 1024).toFixed(1)} KB)
-        </small>
-      )}
-      {profilePhotoUrl && (
-        <a 
-          href={profilePhotoUrl} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="preview-link"
-        >
-          Preview Photo
-        </a>
-      )}
-      {errors.profile_photo && (
-        <div className="error">{String(errors.profile_photo.message)}</div>
       )}
 
-      {/* ID Verification */}
-      <div className="mt-3">
-        <h5>ID Verification*</h5>
-        <div className="row">
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Phone Number with Country Code */}
+        <div className="mt-4">
+          <label>Phone Number*</label>
+          <div className="phone-input-wrapper">
+            <div className="country-code-selector">
+              <PhoneInput
+                country={selectedCountry}
+                value={countryCode}
+                onChange={(value, country: any) => {
+                  setSelectedCountry(country.countryCode);
+                  setCountryCode("+" + country.dialCode);
+                  clearErrors("phone_number");
+                }}
+                containerClass="country-code-container"
+                inputClass="country-code-input"
+                buttonClass="country-code-button"
+                specialLabel=""
+                inputProps={{
+                  readOnly: true,
+                }}
+                enableSearch={true}
+                searchPlaceholder="Search country..."
+                searchNotFound="No country found"
+                disableSearchIcon={false}
+                preferredCountries={['in', 'us', 'gb', 'ca', 'au']}
+              />
+            </div>
+            <input
+              type="tel"
+              placeholder="Enter your phone number"
+              className="form-control phone-number-input"
+              style={{ height: '60px', minHeight: '60px' }}
+              {...register("phone_number", {
+                required: "Phone number is required",
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: "Please enter a valid 10-digit phone number"
+                }
+              })}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                e.target.value = value;
+                clearErrors("phone_number");
+              }}
+            />
+          </div>
+          {errors.phone_number && (
+            <div className="text-danger mt-1">{String(errors.phone_number.message)}</div>
+          )}
+        </div>
+
+        {/* Upload Profile Photo */}
+        <div className="mt-4">
+          <label>Upload Profile Photo*</label>
+          <small className="d-block mb-2 text-primary">{note}</small>
+          <div className="input-group-meta position-relative uniform-height">
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/jpg" // --- MODIFIED: Specify accepted formats
+              id="profile-photo-input"
+              className="hidden-file-input"
+              {...register("profile_photo", {
+                validate: (value) => validateProfilePhoto(value?.[0] || selectedProfilePhoto)
+              })}
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+
+                // --- NEW: File type validation with toast ---
+                if (file) {
+                  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                  if (!allowedTypes.includes(file.type)) {
+                    toast.error('Invalid file type. Please upload a JPG, JPEG, or PNG file.');
+                    e.target.value = ''; // Reset the input
+                    return;
+                  }
+                }
+
+                setSelectedProfilePhoto(file);
+                setValue("profile_photo", e.target.files);
+                clearErrors("profile_photo");
+
+                if (profilePhotoUrl) {
+                  URL.revokeObjectURL(profilePhotoUrl);
+                }
+                if (file) {
+                  setProfilePhotoUrl(URL.createObjectURL(file));
+                } else {
+                  setProfilePhotoUrl(null);
+                }
+              }}
+            />
+            <label
+              htmlFor="profile-photo-input"
+              className={`file-upload-label ${selectedProfilePhoto ? 'file-selected' : ''}`}
+              style={{
+                height: '60px',
+                minHeight: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 15px'
+              }}
+            >
+              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {selectedProfilePhoto
+                  ? `${selectedProfilePhoto.name} (${(selectedProfilePhoto.size / 1024).toFixed(1)} KB)`
+                  : "Choose Profile Photo"}
+              </span>
+              {selectedProfilePhoto && (
+                <div style={{ display: 'flex', gap: '10px', marginLeft: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowProfilePreview(true);
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                      padding: '4px 8px',
+                      fontSize: '16px',
+                      color: '#666'
+                    }}
+                    title="Preview photo"
+                  >
+                    <i className="fa fa-eye"></i>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setSelectedProfilePhoto(null);
+                      setProfilePhotoUrl(null);
+                      setValue("profile_photo", null);
+                      const input = document.getElementById('profile-photo-input') as HTMLInputElement;
+                      if (input) input.value = '';
+                    }}
+                    style={{
+                      border: 'none',
+                      background: 'none',
+                      cursor: 'pointer',
+                      padding: '4px 8px',
+                      fontSize: '16px',
+                      color: '#dc3545'
+                    }}
+                    title="Remove file"
+                  >
+                    <i className="fa fa-trash"></i>
+                  </button>
+                </div>
+              )}
+            </label>
+          </div>
+          {errors.profile_photo && (
+            <div className="text-danger mt-1">{String(errors.profile_photo.message)}</div>
+          )}
+        </div>
+
+        {/* ID Verification */}
+        <div className="mt-4">
+          <label>ID Verification*</label>
+          <div className="row mt-2">
+            <div className="col-md-6">
               <label>ID Type*</label>
-              <select
-                className="form-control"
-                {...register("id_type", { required: "ID type is required" })}
-                onChange={() => clearErrors("id_type")}
-              >
-                <option value="">Select ID Type*</option>
-                <option value="passport">Passport</option>
-                <option value="driving_license">Driving License</option>
-                <option value="national_id">National ID</option>
-              </select>
+              <div className="input-group-meta position-relative uniform-height">
+                <select
+                  className="form-control"
+                  style={{ height: '60px', minHeight: '60px' }}
+                  {...register("id_type", { required: "ID type is required" })}
+                  onChange={() => clearErrors("id_type")}
+                >
+                  <option value="">Select ID Type</option>
+                  <option value="passport">Passport</option>
+                  <option value="driving_license">Driving License</option>
+                  <option value="national_id">National ID</option>
+                </select>
+              </div>
               {errors.id_type && (
-                <div className="error">{String(errors.id_type.message)}</div>
+                <div className="text-danger mt-1">{String(errors.id_type.message)}</div>
               )}
             </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
+            <div className="col-md-6">
               <label>Upload ID Document*</label>
-              <div className="custom-file-upload">
+              <div className="input-group-meta position-relative uniform-height">
                 <input
                   type="file"
-                  accept="image/*,.pdf"
+                  accept="image/png, image/jpeg, image/jpg, .pdf" // --- MODIFIED: Specify accepted formats
                   id="id-document-input"
                   className="hidden-file-input"
                   {...register("id_document", {
@@ -243,10 +399,21 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                   })}
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
+
+                    // --- NEW: File type validation with toast ---
+                    if (file) {
+                      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                      if (!allowedTypes.includes(file.type)) {
+                        toast.error('Invalid file type. Please upload a JPG, JPEG, PNG, or PDF file.');
+                        e.target.value = ''; // Reset the input
+                        return;
+                      }
+                    }
+
                     setSelectedIdDocument(file);
                     setValue("id_document", e.target.files);
                     clearErrors("id_document");
-                    
+
                     if (idDocumentUrl) {
                       URL.revokeObjectURL(idDocumentUrl);
                     }
@@ -257,164 +424,279 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                     }
                   }}
                 />
-                <label htmlFor="id-document-input" className="file-upload-label">
-                  {selectedIdDocument ? selectedIdDocument.name : "Choose ID Document"}
+                <label
+                  htmlFor="id-document-input"
+                  className={`file-upload-label ${selectedIdDocument ? 'file-selected' : ''}`}
+                  style={{
+                    height: '60px',
+                    minHeight: '60px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 15px'
+                  }}
+                >
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {selectedIdDocument
+                      ? `${selectedIdDocument.name} (${(selectedIdDocument.size / 1024).toFixed(1)} KB)`
+                      : "Choose ID Document"}
+                  </span>
+                  {selectedIdDocument && (
+                    <div style={{ display: 'flex', gap: '10px', marginLeft: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowIdPreview(true);
+                        }}
+                        style={{
+                          border: 'none',
+                          background: 'none',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          fontSize: '16px',
+                          color: '#666'
+                        }}
+                        title="Preview document"
+                      >
+                        <i className="fa fa-eye"></i>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedIdDocument(null);
+                          setIdDocumentUrl(null);
+                          setValue("id_document", null);
+                          const input = document.getElementById('id-document-input') as HTMLInputElement;
+                          if (input) input.value = '';
+                        }}
+                        style={{
+                          border: 'none',
+                          background: 'none',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          fontSize: '16px',
+                          color: '#dc3545'
+                        }}
+                        title="Remove file"
+                      >
+                        <i className="fa fa-trash"></i>
+                      </button>
+                    </div>
+                  )}
                 </label>
               </div>
-              {selectedIdDocument && (
-                <small className="text-success d-block mt-1">
-                  Selected: {selectedIdDocument.name} ({(selectedIdDocument.size / 1024).toFixed(1)} KB)
-                </small>
-              )}
-              {idDocumentUrl && (
-                <a 
-                  href={idDocumentUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="preview-link"
-                >
-                  Preview Document
-                </a>
-              )}
               {errors.id_document && (
-                <div className="error">{String(errors.id_document.message)}</div>
+                <div className="text-danger mt-1">{String(errors.id_document.message)}</div>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Location Details */}
-      <div className="mt-4">
-        <h5>Location Details*</h5>
-        <div className="row">
-          {/* Country */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
+        {/* Location Details */}
+        <div className="mt-4">
+          <label>Location Details*</label>
+          <div className="row mt-2">
+            {/* Country */}
+            <div className="col-md-6">
               <label>Country*</label>
-              <select
-                className="form-control"
-                {...register("country", {
-                  required: "Country is required",
-                  onChange: (e) => {
-                    setValue("state", "");
-                    setValue("city", "");
-                    clearErrors("country");
-                  }
-                })}
-              >
-                <option value="">Select Country</option>
-                {Country.getAllCountries().map((c) => (
-                  <option key={c.isoCode} value={c.isoCode}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              {errors.country && (
-                <div className="error">{String(errors.country.message)}</div>
-              )}
-            </div>
-          </div>
-
-          {/* State */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>State</label>
-              <select
-                className="form-control"
-                {...register("state", {
-                  onChange: (e) => {
-                    setValue("city", "");
-                    clearErrors("state");
-                  }
-                })}
-              >
-                <option value="">Select State</option>
-                {watch("country") && State.getStatesOfCountry(watch("country")).map((state) => (
-                  <option key={state.isoCode} value={state.isoCode}>
-                    {state.name}
-                  </option>
-                ))}
-              </select>
-              {errors.state && (
-                <div className="error">{String(errors.state.message)}</div>
-              )}
-            </div>
-          </div>
-
-          {/* City */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>City</label>
-              <select
-                className="form-control"
-                {...register("city")}
-                onChange={() => clearErrors("city")}
-              >
-                <option value="">Select City</option>
-                {watch("state") && (() => {
-                  const cities = City.getCitiesOfState(watch("country"), watch("state"));
-                  const stateName = State.getStateByCodeAndCountry(watch("state"), watch("country"))?.name;
-                  
-                  // If no cities available, show the state name as an option
-                  if (cities.length === 0 && stateName) {
-                    return (
-                      <option key={stateName} value={stateName}>
-                        {stateName}
-                      </option>
-                    );
-                  }
-                  
-                  // Otherwise show all cities
-                  return cities.map((city) => (
-                    <option key={city.name} value={city.name}>
-                      {city.name}
+              <div className="input-group-meta position-relative uniform-height">
+                <select
+                  className="form-control"
+                  style={{ height: '60px', minHeight: '60px' }}
+                  {...register("country", {
+                    required: "Country is required",
+                    onChange: (e) => {
+                      setValue("state", "");
+                      setValue("city", "");
+                      clearErrors("country");
+                    }
+                  })}
+                >
+                  <option value="">Select Country</option>
+                  {Country.getAllCountries().map((c) => (
+                    <option key={c.isoCode} value={c.isoCode}>
+                      {c.name}
                     </option>
-                  ));
-                })()}
-              </select>
-              {errors.city && (
-                <div className="error">{String(errors.city.message)}</div>
+                  ))}
+                </select>
+              </div>
+              {errors.country && (
+                <div className="text-danger mt-1">{String(errors.country.message)}</div>
               )}
             </div>
-          </div>
 
-          {/* Full Address */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
+            {/* State */}
+            <div className="col-md-6">
+              <label>State*</label>
+              <div className="input-group-meta position-relative uniform-height">
+                <select
+                  className="form-control"
+                  style={{ height: '60px', minHeight: '60px' }}
+                  {...register("state", {
+                    required: "State is required",
+                    onChange: (e) => {
+                      setValue("city", "");
+                      clearErrors("state");
+                    }
+                  })}
+                >
+                  <option value="">Select State</option>
+                  {watch("country") && (() => {
+                    const states = State.getStatesOfCountry(watch("country"));
+                    const countryName = Country.getCountryByCode(watch("country"))?.name;
+
+                    if (states.length === 0 && countryName) {
+                      return (
+                        <option key={countryName} value={countryName}>
+                          {countryName}
+                        </option>
+                      );
+                    }
+
+                    return states.map((state) => (
+                      <option key={state.isoCode} value={state.isoCode}>
+                        {state.name}
+                      </option>
+                    ));
+                  })()}
+                </select>
+              </div>
+              {errors.state && (
+                <div className="text-danger mt-1">{String(errors.state.message)}</div>
+              )}
+            </div>
+
+            {/* City */}
+            <div className="col-md-6">
+              <label>City*</label>
+              <div className="input-group-meta position-relative uniform-height">
+                <select
+                  className="form-control"
+                  style={{ height: '60px', minHeight: '60px' }}
+                  {...register("city", {
+                    required: "City is required"
+                  })}
+                  onChange={() => clearErrors("city")}
+                >
+                  <option value="">Select City</option>
+                  {watch("state") && (() => {
+                    const cities = City.getCitiesOfState(watch("country"), watch("state"));
+                    const stateName = State.getStateByCodeAndCountry(watch("state"), watch("country"))?.name;
+                    const countryName = Country.getCountryByCode(watch("country"))?.name;
+
+                    if (cities.length === 0) {
+                      const fallbackName = stateName || countryName;
+                      if (fallbackName) {
+                        return (
+                          <option key={fallbackName} value={fallbackName}>
+                            {fallbackName}
+                          </option>
+                        );
+                      }
+                    }
+
+                    return cities.map((city) => (
+                      <option key={city.name} value={city.name}>
+                        {city.name}
+                      </option>
+                    ));
+                  })()}
+                </select>
+              </div>
+              {errors.city && (
+                <div className="text-danger mt-1">{String(errors.city.message)}</div>
+              )}
+            </div>
+
+            {/* Pincode */}
+            <div className="col-md-6">
+              <label>Pincode</label>
+              <div className="input-group-meta position-relative uniform-height">
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ height: '60px', minHeight: '60px' }}
+                  placeholder="Enter pincode"
+                  maxLength={10}
+                />
+              </div>
+            </div>
+
+            {/* Full Address */}
+            <div className="col-12 mt-2">
               <label>Full Address*</label>
-              <textarea
-                className="form-control"
-                placeholder="e.g., 123 Main St, Anytown, State, 12345"
-                {...register("full_address", {
-                  required: "Full address is required",
-                })}
-                rows={3}
-                onChange={() => clearErrors("full_address")}
-              />
+              {/* --- NEW: Green hint text for address --- */}
+              <small className="d-block mb-2 text-success">
+                Please provide your full street address for accurate location verification.
+              </small>
+              <div className="input-group-meta position-relative uniform-height">
+                <textarea
+                  className="form-control"
+                  // --- CHANGE 1: Added background color style to match other inputs ---
+                  style={{ 
+                    minHeight: '100px',
+                    backgroundColor: 'var(--bg-white, #fff)'
+                  }}
+                  placeholder="e.g., 123 Main St, Anytown, State, 12345"
+                  {...register("full_address", {
+                    required: "Full address is required",
+                  })}
+                  rows={3}
+                  onChange={() => clearErrors("full_address")}
+                />
+              </div>
               {errors.full_address && (
-                <div className="error">{String(errors.full_address.message)}</div>
+                <div className="text-danger mt-1">{String(errors.full_address.message)}</div>
               )}
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation Buttons */}
-      <div className="d-flex justify-content-between mt-4">
-        <button type="button" className="btn-one" onClick={prevStep} disabled={isGeocoding}>
-          Previous
-        </button>
-        <button
-          type="submit"
-          className="btn-one"
-          disabled={isGeocoding}
-        >
-          {isGeocoding ? "Verifying Address..." : "Next"}
-        </button>
-      </div>
-    </form>
+        {/* Navigation Buttons */}
+        <div className="d-flex justify-content-between mt-4">
+          <button type="button" className="btn-one" onClick={prevStep} disabled={isGeocoding}>
+            Previous
+          </button>
+          <button
+            type="submit"
+            className="btn-one"
+            disabled={isGeocoding}
+          >
+            {isGeocoding ? "Verifying Address..." : "Next"}
+          </button>
+        </div>
+      </form>
+    </>
   );
+};
+
+// Modal styles
+const modalOverlayStyle: React.CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1050,
+};
+
+const modalContentStyle: React.CSSProperties = {
+  backgroundColor: '#fff',
+  padding: '20px',
+  borderRadius: '8px',
+  width: '90%',
+  maxWidth: '700px',
+  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.5)',
+  maxHeight: '90vh',
+  overflowY: 'auto'
 };
 
 export default VideographerStep3;
@@ -439,12 +721,14 @@ if (typeof document !== 'undefined') {
     }
     .country-code-input {
       width: 100% !important;
-      height: 58px !important;
+      height: 60px !important;
       background-color: var(--bg-white) !important;
       border: 2px solid #E3E3E3 !important;
       border-radius: 8px !important;
       padding: 0 8px 0 60px !important;
       font-size: 16px !important;
+      /* --- CHANGE 2: Added font-family to match other form controls --- */
+      font-family: inherit !important;
       cursor: default !important;
       text-align: left !important;
     }
@@ -452,7 +736,7 @@ if (typeof document !== 'undefined') {
       position: absolute !important;
       left: 0 !important;
       top: 0 !important;
-      height: 58px !important;
+      height: 60px !important;
       width: 52px !important;
       background-color: transparent !important;
       border-right: 2px solid #E3E3E3 !important;
@@ -473,7 +757,7 @@ if (typeof document !== 'undefined') {
     }
     .phone-number-input {
       flex: 1;
-      height: 58px !important;
+      height: 60px !important;
       background-color: var(--bg-white);
       border: 2px solid #E3E3E3;
       border-radius: 8px;
@@ -538,40 +822,14 @@ if (typeof document !== 'undefined') {
       background-color: transparent !important;
     }
 
-    .preview-link {
-      display: inline-block;
-      font-size: 14px;
-      font-weight: 600;
-      color: #007bff;
-      background-color: transparent;
-      border: 2px solid #007bff;
-      padding: 8px 14px;
-      border-radius: 8px;
-      margin-top: 10px;
-      text-decoration: none !important;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .preview-link:hover {
-      background-color: #007bff;
-      color: #fff !important;
-      text-decoration: none !important;
-    }
-
-    input[type="file"].pt-4 {
-      padding-top: 1rem !important;
-    }
-
     .hidden-file-input {
       display: none;
     }
 
-    .custom-file-upload {
-      margin-bottom: 10px;
-    }
-
     .file-upload-label {
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 12px 20px;
       background-color: var(--bg-white);
       border: 2px solid #E3E3E3;
@@ -582,13 +840,32 @@ if (typeof document !== 'undefined') {
       transition: all 0.2s ease;
       width: 100%;
       text-align: center;
-      font-weight: 500;
+      font-weight: 400;
     }
 
     .file-upload-label:hover {
       border-color: #007bff;
       background-color: #f8f9fa;
     }
-  `;
-  document.head.appendChild(style);
+
+    .file-upload-label.file-selected {
+      border-color: #28a745;
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .react-tel-input .country-list .country {
+      padding: 10px !important;
+      display: flex !important;
+      align-items: center !important;
+      font-family: inherit !important;
+      font-size: 14px !important;
+    }`;
+  
+  // To prevent creating duplicate style tags on hot reloads
+  const styleId = 'videographer-step3-styles-unique';
+  if (!document.getElementById(styleId)) {
+    style.id = styleId;
+    document.head.appendChild(style);
+  }
 }

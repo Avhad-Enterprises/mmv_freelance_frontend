@@ -113,7 +113,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '50%',
+                top: '80%',
                 transform: 'translateY(-50%)',
                 cursor: 'pointer'
               }}
@@ -147,7 +147,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '50%',
+                top: '80%',
                 transform: 'translateY(-50%)',
                 cursor: 'pointer'
               }}
