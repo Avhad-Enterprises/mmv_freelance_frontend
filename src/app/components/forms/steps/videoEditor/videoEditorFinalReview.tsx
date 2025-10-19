@@ -37,13 +37,12 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       const fd = new FormData();
   
       // Basic Information (required)
-      fd.append('full_name', data.full_name || '');
-      fd.append('profile_title', data.full_name || '');
+      fd.append('first_name', data.first_name || '');
+      fd.append('last_name', data.last_name || '');
+      fd.append('profile_title', `${data.first_name || ''} ${data.last_name || ''}`.trim());
       fd.append('email', data.email || '');
       fd.append('password', data.password || '');
-      fd.append('account_type', 'videoEditor');
-
-      // Skills
+      fd.append('account_type', 'videoEditor');      // Skills
       const skills: string[] = Array.isArray(data.base_skills) ? data.base_skills : [];
       fd.append('skills', JSON.stringify(skills));
 
@@ -119,10 +118,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
     }
   };
 
-  const sections: Record<string, Record<string, any>> = {
+    const sections: Record<string, Record<string, any>> = {
     Basic: {
       role: data.role,
-      full_name: data.full_name,
+      first_name: data.first_name,
+      last_name: data.last_name,
       base_skills: data.base_skills,
     },
     "Superpowers & Location": {

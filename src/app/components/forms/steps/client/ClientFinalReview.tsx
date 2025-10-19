@@ -65,7 +65,8 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       const formDataToSend = new FormData();
 
       // Basic Information
-      formDataToSend.append('full_name', formData.full_name);
+      formDataToSend.append('first_name', formData.first_name);
+      formDataToSend.append('last_name', formData.last_name);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('password', formData.password);
       formDataToSend.append('account_type', 'client');
@@ -161,7 +162,8 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 
   const sections = {
     "Basic Information": {
-      full_name: formData.full_name,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
       email: formData.email,
     },
     "Company Information": {

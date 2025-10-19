@@ -32,21 +32,37 @@ const VideoEditorStep1: React.FC<Props> = ({ formData, nextStep }) => {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="row">
-        {/* Full Name */}
+        {/* First Name */}
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
-            <label>Full Name*</label>
+            <label>First Name*</label>
             <input 
               type="text" 
-              placeholder="Enter your full name" 
+              placeholder="Enter your first name" 
               className="form-control"
-              {...register("full_name", { required: "Full Name is required" })}
-              // Removed onChange
+              {...register("first_name", { required: "First Name is required" })}
             />
-            {errors.full_name && (
-              // Added red style
+            {errors.first_name && (
               <div className="error" style={{ color: 'red' }}>
-                {String(errors.full_name.message)}
+                {String(errors.first_name.message)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Last Name */}
+        <div className="col-12">
+          <div className="input-group-meta position-relative mb-25">
+            <label>Last Name*</label>
+            <input 
+              type="text" 
+              placeholder="Enter your last name" 
+              className="form-control"
+              {...register("last_name", { required: "Last Name is required" })}
+            />
+            {errors.last_name && (
+              <div className="error" style={{ color: 'red' }}>
+                {String(errors.last_name.message)}
               </div>
             )}
           </div>
@@ -101,7 +117,7 @@ const VideoEditorStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '85%', // Matched style from ClientStep1
+                top: '50%',
                 transform: 'translateY(-50%)',
                 cursor: 'pointer'
               }}
@@ -109,7 +125,6 @@ const VideoEditorStep1: React.FC<Props> = ({ formData, nextStep }) => {
               <i className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
             </span>
             {errors.password && (
-              // Added red style
               <div className="error" style={{ color: 'red' }}>
                 {String(errors.password.message)}
               </div>
@@ -136,7 +151,7 @@ const VideoEditorStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '65%', // Matched style from ClientStep1
+                top: '50%',
                 transform: 'translateY(-50%)',
                 cursor: 'pointer'
               }}

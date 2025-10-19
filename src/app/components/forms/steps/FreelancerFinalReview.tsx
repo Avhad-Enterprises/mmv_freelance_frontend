@@ -17,9 +17,9 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       const fd = new FormData();
 
       // Basic Information (required)
-      fd.append('username', data.username || data.full_name?.split(' ')?.[0] || '');
-      fd.append('first_name', data.first_name || data.full_name?.split(' ')?.[0] || '');
-      fd.append('last_name', data.last_name || data.full_name?.split(' ')?.slice(1).join(' ') || '');
+      fd.append('username', data.first_name || '');
+      fd.append('first_name', data.first_name || '');
+      fd.append('last_name', data.last_name || '');
       fd.append('email', data.email || '');
       fd.append('password', data.password || '');
       fd.append('account_type', 'freelancer');
@@ -96,7 +96,8 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
   const sections: Record<string, Record<string, any>> = {
     Basic: {
       role: data.role,
-      full_name: data.full_name,
+      first_name: data.first_name,
+      last_name: data.last_name,
       base_skills: data.base_skills,
     },
     "Superpowers & Location": {

@@ -33,7 +33,8 @@ export interface MultiStepRegisterFormProps {
 
 // Common interface for fields that appear across different account types
 interface FormDataCommon {
-  full_name: string; // Changed from username
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
   phone_number: string;
@@ -175,7 +176,8 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
 
   const getInitialFormState = (currentAccountType: MultiStepRegisterFormProps['accountType']): AllFormData => {
     const baseCommon: Omit<FormDataCommon, 'account_type'> = {
-      full_name: "", // Changed from username
+      first_name: "",
+      last_name: "",
       email: "",
       password: "",
       phone_number: "",

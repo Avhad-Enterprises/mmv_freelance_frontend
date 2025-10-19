@@ -106,7 +106,8 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   }, []);
 
   const {
-    full_name = "",
+    first_name = "",
+    last_name = "",
     superpowers = [],
     portfolio_links = ["", "", ""],
     rate_amount = "",
@@ -262,7 +263,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <h4 className="mb-2">Hi, I am {full_name || "[Your Name]"}</h4>
+        <h4 className="mb-2">Hi, I am {first_name && last_name ? `${first_name} ${last_name}` : "[Your Name]"}</h4>
 
         <div className="mt-3">
           <h5>Skills*</h5>
