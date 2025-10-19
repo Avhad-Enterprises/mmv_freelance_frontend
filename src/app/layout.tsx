@@ -68,6 +68,7 @@ export default function RootLayout({
           </SidebarProvider>
         </Providers>
         <BackToTopCom />
+        <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" />
       </body>
     </html>
   );

@@ -2,114 +2,92 @@
 import React from "react";
 import Link from "next/link";
 import { IJobType } from "@/types/job-data-type";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { add_to_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
-import { makePostRequest, makeDeleteRequest } from "@/utils/api";
-import useDecodedToken from "@/hooks/useDecodedToken";
+import { useAppSelector } from "@/redux/hook";
+import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 
-const ListItemTwo = ({ item }: { item: IJobType }) => {
+const ListItemTwo = ({ item, onToggleSave }: { item: IJobType; onToggleSave?: (job: IJobType) => void }) => {
   const { wishlist } = useAppSelector((state) => state.wishlist);
   const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
-  const dispatch = useAppDispatch();
-  const decoded = useDecodedToken();
-
-  const handleToggleWishlist = async (job: IJobType) => {
-    try {
-      if (!decoded || !decoded.user_id) {
-        console.warn("User not logged in or token invalid.");
-        return;
-      }
-
-      const userId = decoded.user_id;
-
-      if (isActive) {
-        if (job.projects_task_id !== undefined) {
-          await makeDeleteRequest("api/v1/saved/remove-saved", {
-            user_id: userId,
-            projects_task_id: job.projects_task_id,
-          });
-          dispatch(remove_from_wishlist(job.projects_task_id));
-        }
-      } else {
-        if (job.projects_task_id !== undefined) {
-          const payload = {
-            user_id: userId,
-            projects_task_id: job.projects_task_id,
-            is_active: true,
-            is_deleted: false,
-            created_by: userId,
-          };
-
-          await makePostRequest("api/v1/saved/create", payload);
-          dispatch(add_to_wishlist(job));
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling wishlist:", error);
-    }
-  };
 
   return (
-    <div className="job-list-one style-two position-relative border-style mb-20">
-      <div className="row justify-content-between align-items-center">
-        <div className="col-md-5">
-          <div className="job-title d-flex align-items-center">
-            <div className="split-box1">
-              <Link
-                href={`/job-details-v1/${item.projects_task_id}`}
-                className="job-duration fw-500"
-              >
-                {item.deadline?.slice(0, 10) || ""}
-              </Link>
-              <Link
-                href={`/job-details-v1/${item.projects_task_id}`}
-                className="title fw-500 tran3s"
-              >
-                {item.project_title
-                  ? `${item.project_title.slice(0, 22)}${
-                      item.project_title.length > 20 ? ".." : ""
-                    }`
-                  : ""}
-              </Link>
+    <div className={`candidate-profile-card ${isActive ? "favourite" : ""} list-layout mb-25`}>
+      <div className="d-flex">
+        <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+          <Link href={`/job-details-v1/${item.projects_task_id}`} className="rounded-circle">
+            <div
+              className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
+              style={{
+                width: 80,
+                height: 80,
+                fontSize: '28px',
+                fontWeight: 'bold',
+                backgroundColor: getCategoryColor(item.project_category),
+                color: getCategoryTextColor(item.project_category)
+              }}
+            >
+              {getCategoryIcon(item.project_category)}
             </div>
-          </div>
+          </Link>
         </div>
+        <div className="right-side">
+          <div className="row gx-1 align-items-center">
+            <div className="col-xl-3">
+              <div className="position-relative">
+                <h4 className="candidate-name mb-0">
+                  <Link href={`/job-details-v1/${item.projects_task_id}`} className="tran3s">
+                    {item.project_title
+                      ? `${item.project_title.slice(0, 22)}${
+                          item.project_title.length > 22 ? ".." : ""
+                        }`
+                      : ""}
+                  </Link>
+                </h4>
 
-        <div className="col-md-4 col-sm-6">
-          <div className="job-location">
-            <Link href={`/job-details-v1/${item.projects_task_id}`}>
-              Remote / Not specified
-            </Link>
-          </div>
-          <div className="job-salary">
-            <span className="fw-500 text-dark">${item.budget ?? 0}</span> / Fixed Budget
-          </div>
-        </div>
+                <ul className="cadidate-skills style-none d-flex align-items-center">
+                  {item.skills_required && item.skills_required.slice(0, 3).map((s, i) => (
+                    <li key={i} className="text-nowrap">{s}</li>
+                  ))}
+                  {item.skills_required && item.skills_required.length > 3 && (
+                    <li className="more">+{item.skills_required.length - 3}</li>
+                  )}
+                </ul>
+              </div>
+            </div>
 
-        <div className="col-md-3 col-sm-6">
-          <div className="btn-group d-flex align-items-center justify-content-sm-end xs-mt-20">
-            {/* Toggle Save/Unsave Button */}
-            <button
-              onClick={() => handleToggleWishlist(item)}
-              className={`save-btn text-center rounded-circle tran3s me-3 ${
-                isActive ? "active" : ""
-              }`}
-              title={isActive ? "Remove Job" : "Save Job"}
-            >
-              <i
-                className={`bi ${
-                  isActive ? "bi-bookmark-check-fill" : "bi-bookmark"
-                }`}
-              ></i>
-            </button>
+            <div className="col-xl-3 col-md-4 col-sm-6">
+              <div className="candidate-info">
+                <span>Budget</span>
+                <div>${item.budget ?? 0}</div>
+              </div>
+            </div>
 
-            {/* Apply button */}
-            <Link
-              href={`/job-details-v1/${item.projects_task_id}`}
-              className="apply-btn text-center tran3s"
-            >
-              APPLY
-            </Link>
+            <div className="col-xl-3 col-md-4 col-sm-6">
+              <div className="candidate-info">
+                <span>Type</span>
+                <div>{item.projects_type || 'Not specified'}</div>
+              </div>
+            </div>
+
+            <div className="col-xl-3 col-md-4">
+              <div className="d-flex justify-content-lg-end align-items-center">
+                {onToggleSave && (
+                  <button
+                    type="button"
+                    className="save-btn text-center rounded-circle tran3s"
+                    onClick={() => onToggleSave(item)}
+                    title={isActive ? "Unsave" : "Save"}
+                  >
+                    <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
+                  </button>
+                )}
+                <Link
+                  href={`/job-details-v1/${item.projects_task_id}`}
+                  className="profile-btn tran3s ms-md-2"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>

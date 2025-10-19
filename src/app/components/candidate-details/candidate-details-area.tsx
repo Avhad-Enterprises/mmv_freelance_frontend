@@ -2,6 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import avatar from "@/assets/images/candidates/img_01.jpg";
 import VideoPopup from "../common/video-popup";
 import Skills from "./skills";
@@ -70,6 +71,12 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
           <div className="row">
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
+                
+                {/* --- BACK BUTTON ADDED HERE --- */}
+                <Link href="/candidates-v1" className="btn-two mb-30">
+                  &larr; Back to Candidates
+                </Link>
+
                 <div className="inner-card border-style mb-65 lg-mb-40">
                   <h3 className="title">Bio</h3>
                   <p>{bio}</p>

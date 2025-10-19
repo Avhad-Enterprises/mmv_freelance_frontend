@@ -5,9 +5,12 @@ import ListItemTwo from "./list-item-2";
 import JobGridItem from "../grid/job-grid-item";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
-import { useAppSelector } from "@/redux/hook";
+import { useAppSelector, useAppDispatch } from "@/redux/hook";
 import { IJobType } from "@/types/job-data-type";
-import { makeGetRequest } from "@/utils/api";
+import { makeGetRequest, makePostRequest, makeDeleteRequest } from "@/utils/api";
+import { add_to_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
+import useDecodedToken from "@/hooks/useDecodedToken";
+import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 
 // Define simple types for categories and skills for clarity
 interface ICategory {
@@ -39,7 +42,17 @@ const JobListThree = ({
   const [itemOffset, setItemOffset] = useState(0);
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
+  // Add dropdown filter states
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSkill, setSelectedSkill] = useState("");
   // The 'jobType' state has been removed as it's no longer needed.
+
+  // Redux
+  const dispatch = useAppDispatch();
+  const decoded = useDecodedToken();
+
+  // Modal ref - removed, using direct Bootstrap modal access
+  // const loginModalRef = useRef<any>(null);
 
   // Redux filter state from the store
   const { project_category, projects_type, tags, search_key } = useAppSelector(
@@ -74,29 +87,43 @@ const JobListThree = ({
     fetchInitialData();
   }, []);
 
+  // Initialize the login modal - removed, using direct Bootstrap modal access
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     const initModal = async () => {
+  //       const bootstrap = await import('bootstrap');
+  //       const modalElement = document.getElementById('saveJobLoginModal');
+  //       if (modalElement && !loginModalRef.current) {
+  //         loginModalRef.current = new bootstrap.Modal(modalElement);
+  //       }
+  //     };
+  //     initModal();
+  //   }
+  // }, []);
+
   // --- Filtering and Sorting Effect ---
   useEffect(() => {
     let filteredData = all_jobs;
 
-    if (project_category.length > 0) {
+    // Use local state for category and skill filtering
+    if (selectedCategory) {
       filteredData = filteredData.filter((item) =>
-        project_category.some((c) => item.project_category?.toLowerCase() === c.toLowerCase())
+        item.project_category?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
+    if (selectedSkill) {
+      filteredData = filteredData.filter((item) =>
+        item.skills_required?.some(
+          (jobSkill) => jobSkill && jobSkill.toLowerCase() === selectedSkill.toLowerCase()
+        )
+      );
+    }
+
+    // Keep Redux state for other filters
     if (projects_type) {
       filteredData = filteredData.filter(
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
-      );
-    }
-
-    if (tags.length > 0) {
-      filteredData = filteredData.filter((item) =>
-        tags.some((selectedSkill) =>
-          selectedSkill && item.skills_required?.some(
-            (jobSkill) => jobSkill && jobSkill.toLowerCase() === selectedSkill.toLowerCase()
-          )
-        )
       );
     }
 
@@ -122,8 +149,8 @@ const JobListThree = ({
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset, itemsPerPage, project_category, projects_type,
-    tags, all_jobs, priceValue, shortValue, search_key,
+    itemOffset, itemsPerPage, selectedCategory, selectedSkill, projects_type,
+    all_jobs, priceValue, shortValue, search_key,
   ]);
 
   // --- Event Handlers ---
@@ -135,6 +162,59 @@ const JobListThree = ({
 
   const handleShort = (item: { value: string; label: string }) => {
     setShortValue(item.value);
+  };
+
+  const handleToggleSave = async (job: IJobType) => {
+    if (!decoded || !decoded.user_id) {
+      // Show login modal for unauthenticated users
+      const modalElement = document.getElementById('saveJobLoginModal');
+      if (modalElement) {
+        // Bootstrap JS is now loaded globally, so we can use it directly
+        const bootstrap = (window as any).bootstrap;
+        if (bootstrap && bootstrap.Modal) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        }
+      }
+      return;
+    }
+
+    const { wishlist } = useAppSelector((state) => state.wishlist);
+    const isActive = wishlist.some((p) => p.projects_task_id === job.projects_task_id);
+
+    try {
+      const userId = decoded.user_id;
+
+      if (isActive) {
+        if (job.projects_task_id !== undefined) {
+          await makeDeleteRequest("api/v1/saved/remove-saved", {
+            user_id: userId,
+            projects_task_id: job.projects_task_id,
+          });
+          dispatch(remove_from_wishlist(job.projects_task_id));
+        }
+      } else {
+        if (job.projects_task_id !== undefined) {
+          const payload = {
+            user_id: userId,
+            projects_task_id: job.projects_task_id,
+            is_active: true,
+            is_deleted: false,
+            created_by: userId,
+          };
+
+          await makePostRequest("api/v1/saved/create", payload);
+          dispatch(add_to_wishlist(job));
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+    }
+  };
+
+  const handleLoginSuccess = () => {
+    // Modal will be hidden automatically by Bootstrap when login succeeds
+    // The LoginForm component handles the redirect
   };
 
   // --- Render Logic ---
@@ -149,7 +229,8 @@ const JobListThree = ({
   }
 
   return (
-    <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
+    <>
+      <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
       <div className="container">
         <div className="row">
           <div className="col-xl-3 col-lg-4">
@@ -168,6 +249,10 @@ const JobListThree = ({
               maxPrice={priceValue[1]}
               all_categories={categories}
               all_skills={skills}
+              onCategoryChange={setSelectedCategory}
+              onSkillChange={setSelectedSkill}
+              selectedCategory={selectedCategory}
+              selectedSkill={selectedSkill}
             />
           </div>
 
@@ -197,7 +282,7 @@ const JobListThree = ({
 
               {/* View now depends directly on the 'grid_style' prop */}
               <div className={`accordion-box list-style ${!grid_style ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} />)}
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} />)}
               </div>
 
               <div className={`accordion-box grid-style ${grid_style ? "show" : ""}`}>
@@ -205,7 +290,7 @@ const JobListThree = ({
                   {currentItems &&
                     currentItems.map((job) => (
                       <div key={job.projects_task_id} className="col-sm-6 mb-30">
-                        <JobGridItem item={job} />
+                        <JobGridItem item={job} onToggleSave={handleToggleSave} />
                       </div>
                     ))}
                 </div>
@@ -236,6 +321,8 @@ const JobListThree = ({
         </div>
       </div>
     </section>
+    <SaveJobLoginModal onLoginSuccess={handleLoginSuccess} />
+    </>
   );
 };
 

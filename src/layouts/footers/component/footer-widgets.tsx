@@ -34,7 +34,7 @@ export function WidgetThree({ cls,style_2 }: { cls: string;style_2?:boolean }) {
     <div className={`${cls} mb-20`}>
       <h5 className={`footer-title ${style_2?'text-white':''}`}>Support</h5>
       <ul className="footer-nav-link style-none">
-        <li><Link href='/terms-of-use'>Terms of use</Link></li>
+        <li><Link href='/terms-condition'>Terms of use</Link></li>
         <li><Link href='/terms-condition'>Terms & conditions</Link></li>
         <li><Link href='/privacy-policy'>Privacy</Link></li>
         <li><Link href='/cookies'>Cookie policy</Link></li>

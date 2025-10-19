@@ -5,6 +5,8 @@ import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidat
 import CandidateListItem from "@/app/components/candidate/candidate-list-item"; // Using your desired item component
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area";
 import ShortSelect from "@/app/components/common/short-select";
+import Pagination from "@/ui/pagination";
+import NiceSelect from "@/ui/nice-select";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -186,6 +188,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
     onLoginSuccess();
   };
 
+  // --- Pagination Handler ---
+  const handlePageClick = (event: { selected: number }) => {
+    setCurrentPage(event.selected + 1); // ReactPaginate is 0-indexed, our state is 1-indexed
+  };
+
   const applyFilters = () => {
     let filtered = [...candidates];
     if (selectedSkill) {
@@ -209,17 +216,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
     setSortValue(value);
     let sorted = [...filteredCandidates];
     switch (value) {
-      case "rate-low":
+      case "price-low-to-high":
         sorted.sort((a, b) => parseFloat(a.rate_amount) - parseFloat(b.rate_amount));
         break;
-      case "rate-high":
+      case "price-high-to-low":
         sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
-        break;
-      case "name":
-        sorted.sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
-        break;
-      case "created_at":
-        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       default:
         break;
@@ -261,7 +262,21 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                   <div className="total-job-found">
                     All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
                   </div>
-                  <ShortSelect onChange={handleSort} />
+                  <div className="d-flex align-items-center">
+                    <div className="short-filter d-flex align-items-center">
+                      <div className="text-dark fw-500 me-2">Sort:</div>
+                      <NiceSelect
+                        options={[
+                          { value: "", label: "Budget Sort" },
+                          { value: "price-low-to-high", label: "Low to High" },
+                          { value: "price-high-to-low", label: "High to Low" },
+                        ]}
+                        defaultCurrent={0}
+                        onChange={(item) => handleSort(item.value)}
+                        name="Budget Sort"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="accordion-box list-style show">
@@ -297,25 +312,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="pt-20 d-sm-flex align-items-center justify-content-between">
+                  <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
                     <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
                       Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
                     </p>
-                    <div className="d-flex justify-content-center">
-                      <ul className="pagination-two d-flex align-items-center style-none">
-                        <li className={currentPage === 1 ? "disabled" : ""}>
-                          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.max(p - 1, 1)); }}><i className="bi bi-chevron-left"></i></a>
-                        </li>
-                        {Array.from({ length: totalPages }, (_, i) => (
-                          <li key={i} className={currentPage === i + 1 ? "active" : ""}>
-                            <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(i + 1); }}>{i + 1}</a>
-                          </li>
-                        ))}
-                        <li className={currentPage === totalPages ? "disabled" : ""}>
-                          <a href="#" onClick={(e) => { e.preventDefault(); setCurrentPage(p => Math.min(p + 1, totalPages)); }}><i className="bi bi-chevron-right"></i></a>
-                        </li>
-                      </ul>
-                    </div>
+                    <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
                   </div>
                 )}
               </div>

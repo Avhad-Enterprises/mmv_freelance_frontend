@@ -3,8 +3,8 @@
 "use client"
 import React from 'react';
 import JobType from './job-type';
-import JobCategory from './job-category';
-import JobSkills from './job-skills'; // <-- IMPORT the new component
+import FilterJobCategory from './filter-job-category'; // <-- IMPORT the new dropdown component
+import FilterJobSkills from './filter-job-skills'; // <-- IMPORT the new dropdown component
 import JobPrices from './job-prices';
 import { useAppDispatch } from '@/redux/hook';
 import { resetFilter } from '@/redux/features/filterSlice';
@@ -19,21 +19,37 @@ interface ISkill {
   skill_name: string;
 }
 
-// Update props to accept categories and skills lists
+// Update props to accept categories and skills lists and change handlers
 type IProps = {
   priceValue: [number, number];
   setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>;
   maxPrice: number;
   all_categories: ICategory[]; // <-- ADDED
   all_skills: ISkill[];       // <-- ADDED
+  onCategoryChange: (value: string) => void; // <-- ADDED
+  onSkillChange: (value: string) => void;    // <-- ADDED
+  selectedCategory: string; // <-- ADDED
+  selectedSkill: string;    // <-- ADDED
 };
 
-const FilterArea = ({ priceValue, setPriceValue, maxPrice, all_categories, all_skills }: IProps) => {
+const FilterArea = ({
+  priceValue,
+  setPriceValue,
+  maxPrice,
+  all_categories,
+  all_skills,
+  onCategoryChange,
+  onSkillChange,
+  selectedCategory,
+  selectedSkill
+}: IProps) => {
   const dispatch = useAppDispatch();
-  
+
   const handleReset = () => {
     dispatch(resetFilter());
     setPriceValue([0, maxPrice]);
+    onCategoryChange(""); // Reset category
+    onSkillChange("");    // Reset skill
   };
 
   return (
@@ -62,17 +78,17 @@ const FilterArea = ({ priceValue, setPriceValue, maxPrice, all_categories, all_s
         <div className="filter-block bottom-line pb-25 mt-25">
           <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="false">Category</a>
           <div className="collapse" id="collapseCategory">
-            {/* Pass categories down as a prop */}
-            <JobCategory all_categories={all_categories} />
+            {/* Use dropdown filter */}
+            <FilterJobCategory categories={all_categories} onChange={onCategoryChange} />
           </div>
         </div>
 
-        {/* Skills Section (Replaces old Tags) */}
+        {/* Skills Section */}
         <div className="filter-block bottom-line pb-25 mt-25">
           <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseSkills" role="button" aria-expanded="false">Skills</a>
           <div className="collapse" id="collapseSkills">
-             {/* Pass skills down as a prop */}
-            <JobSkills all_skills={all_skills} />
+             {/* Use dropdown filter */}
+            <FilterJobSkills skills={all_skills} onChange={onSkillChange} />
           </div>
         </div>
 

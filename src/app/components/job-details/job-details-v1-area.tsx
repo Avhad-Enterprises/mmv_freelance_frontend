@@ -181,7 +181,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
               <div className="details-post-data me-xxl-5 pe-xxl-4">
                 
                 {/* --- BACK BUTTON ADDED HERE --- */}
-                <Link href="/job-list-v1" className="btn btn-secondary btn-sm mb-20">
+                <Link href="/job-list-v1" className="btn-two mb-20">
                   &larr; Back to Jobs
                 </Link>
 
