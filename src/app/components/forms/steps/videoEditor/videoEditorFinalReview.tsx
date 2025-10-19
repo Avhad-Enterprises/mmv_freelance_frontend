@@ -3,24 +3,50 @@ import React from "react";
 import toast from "react-hot-toast";
 import { Country } from "country-state-city";
 
+// Define the FormData interface for type safety
+interface FormData {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
+  base_skills?: string[];
+  experience_level?: string;
+  portfolio_links?: string[];
+  rate_amount?: number;
+  rate_currency?: string;
+  phone_number?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  pincode?: string;
+  coordinates?: { lat: number; lng: number };
+  id_type?: string;
+  id_document?: File | File[];
+  profile_photo?: File;
+  availability?: string;
+  languages?: string[];
+  short_description?: string;
+  role?: string;
+  superpowers?: string[];
+  skill_tags?: string[];
+}
+
 type Props = {
-  formData: any;
+  formData: FormData;
   prevStep: () => void;
-  handleRegister: (data: any) => Promise<void> | void;
+  handleRegister: (data: unknown) => Promise<void>;
 };
 
-const getCountryName = (isoCode: string) => {
+const getCountryName = (isoCode: string): string => {
   const country = Country.getAllCountries().find(c => c.isoCode === isoCode);
   return country ? country.name : isoCode;
 };
 
 const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
-  const [termsAccepted, setTermsAccepted] = React.useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = React.useState(false);
-  const data = formData as any;
-    
+  const [termsAccepted, setTermsAccepted] = React.useState<boolean>(false);
+  const [privacyAccepted, setPrivacyAccepted] = React.useState<boolean>(false);
+  
   const handleSubmit = async () => {
-    // Validate checkboxes
     if (!termsAccepted) {
       toast.error('Please accept the Terms and Conditions to continue');
       return;
@@ -36,68 +62,57 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
     try {
       const fd = new FormData();
   
-      // Basic Information (required)
-      fd.append('first_name', data.first_name || '');
-      fd.append('last_name', data.last_name || '');
-      fd.append('profile_title', `${data.first_name || ''} ${data.last_name || ''}`.trim());
-      fd.append('email', data.email || '');
-      fd.append('password', data.password || '');
-      fd.append('account_type', 'videoEditor');      // Skills
-      const skills: string[] = Array.isArray(data.base_skills) ? data.base_skills : [];
+      fd.append('first_name', formData.first_name || '');
+      fd.append('last_name', formData.last_name || '');
+      fd.append('profile_title', `${formData.first_name || ''} ${formData.last_name || ''}`.trim());
+      fd.append('email', formData.email || '');
+      fd.append('password', formData.password || '');
+      fd.append('account_type', 'videoEditor');      
+      const skills: string[] = Array.isArray(formData.base_skills) ? formData.base_skills : [];
       fd.append('skills', JSON.stringify(skills));
 
-      // Experience
-      if (data.experience_level) fd.append('experience_level', data.experience_level);
+      if (formData.experience_level) fd.append('experience_level', formData.experience_level);
 
-      // Portfolio
-      const portfolioLinks: string[] = (data.portfolio_links || []).filter((l: string) => !!l);
+      const portfolioLinks: string[] = (formData.portfolio_links || []).filter((l: string) => !!l);
       if (portfolioLinks.length > 0) fd.append('portfolio_links', JSON.stringify(portfolioLinks));
       
-      // Rate
-      if (data.rate_amount) fd.append('rate_amount', String(data.rate_amount));
+      if (formData.rate_amount) fd.append('rate_amount', String(formData.rate_amount));
 
-      // Contact & Location
-      if (data.phone_number) fd.append('phone_number', data.phone_number);
-      if (data.address) fd.append('street_address', data.address);
-      if (data.city) fd.append('city', data.city);
-      if (data.country) fd.append('country', data.country);
-      if (data.pincode) fd.append('pincode', data.pincode);
+      if (formData.phone_number) fd.append('phone_number', formData.phone_number);
+      if (formData.address) fd.append('street_address', formData.address);
+      if (formData.city) fd.append('city', formData.city);
+      if (formData.country) fd.append('country', formData.country);
+      if (formData.pincode) fd.append('pincode', formData.pincode);
 
-      if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
-        fd.append('latitude', String(data.coordinates.lat));
-        fd.append('longitude', String(data.coordinates.lng));
+      if (formData.coordinates && formData.coordinates.lat && formData.coordinates.lng) {
+        fd.append('latitude', String(formData.coordinates.lat));
+        fd.append('longitude', String(formData.coordinates.lng));
       }
 
-      // ID Verification
-      if (data.id_type) fd.append('id_type', data.id_type);
-      if (data.id_document) {
-        const file = Array.isArray(data.id_document) ? data.id_document[0] : data.id_document;
-        if (file) fd.append('id_document', file as File);
+      if (formData.id_type) fd.append('id_type', formData.id_type);
+      if (formData.id_document) {
+        const file = Array.isArray(formData.id_document) ? formData.id_document[0] : formData.id_document;
+        if (file) fd.append('id_document', file);
       }
 
-      // Profile photo upload
-      if (data.profile_photo) {
-        fd.append('profile_photo', data.profile_photo as File);
+      if (formData.profile_photo) {
+        fd.append('profile_photo', formData.profile_photo);
       }
 
-      // Work Preferences
-      if (data.availability) fd.append('availability', data.availability);
-      if (Array.isArray(data.languages) && data.languages.length > 0) {
-        fd.append('languages', JSON.stringify(data.languages));
+      if (formData.availability) fd.append('availability', formData.availability);
+      if (Array.isArray(formData.languages) && formData.languages.length > 0) {
+        fd.append('languages', JSON.stringify(formData.languages));
       }
-      if (data.short_description) fd.append('short_description', data.short_description);
+      if (formData.short_description) fd.append('short_description', formData.short_description);
 
-      // Extra fields
-      if (data.role) fd.append('role', data.role);
-      if (Array.isArray(data.superpowers)) fd.append('superpowers', JSON.stringify(data.superpowers));
-      if (Array.isArray(data.skill_tags)) fd.append('skill_tags', JSON.stringify(data.skill_tags));
+      if (formData.role) fd.append('role', formData.role);
+      if (Array.isArray(formData.superpowers)) fd.append('superpowers', JSON.stringify(formData.superpowers));
+      if (Array.isArray(formData.skill_tags)) fd.append('skill_tags', JSON.stringify(formData.skill_tags));
 
-      // Terms and Privacy - ALWAYS send as boolean
       fd.append('terms_accepted', String(termsAccepted));
       fd.append('privacy_policy_accepted', String(privacyAccepted));
 
-      // Submit
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`, {
         method: 'POST',
         headers: {
           'x-test-mode': 'true',
@@ -118,42 +133,42 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
     }
   };
 
-    const sections: Record<string, Record<string, any>> = {
+  const sections: Record<string, Record<string, string | string[] | undefined>> = {
     Basic: {
-      role: data.role,
-      first_name: data.first_name,
-      last_name: data.last_name,
-      base_skills: data.base_skills,
+      role: formData.role,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      base_skills: formData.base_skills,
     },
     "Superpowers & Location": {
-      superpowers: data.superpowers,
-      address: data.address,
-      city: data.city,
-      country: data.country ? `${getCountryName(data.country)} (${data.country})` : undefined,
-      pincode: data.pincode,
-      skill_tags: data.skill_tags,
-      rate: data.rate_amount ? `${data.rate_currency} ${data.rate_amount}` : undefined,
+      superpowers: formData.superpowers,
+      address: formData.address,
+      city: formData.city,
+      country: formData.country ? `${getCountryName(formData.country)} (${formData.country})` : undefined,
+      pincode: formData.pincode,
+      skill_tags: formData.skill_tags,
+      rate: formData.rate_amount ? `${formData.rate_currency} ${formData.rate_amount}` : undefined,
     },
     Portfolio: {
-      links: (data.portfolio_links || []).filter((l: string) => !!l),
+      links: (formData.portfolio_links || []).filter((l: string) => !!l),
     },
     Verification: {
-      phone_number: data.phone_number,
-      id_type: data.id_type,
+      phone_number: formData.phone_number,
+      id_type: formData.id_type,
     },
     About: {
-      short_description: data.short_description,
-      availability: data.availability,
-      languages: data.languages,
+      short_description: formData.short_description,
+      availability: formData.availability,
+      languages: formData.languages,
     },
   };
 
   return (
-    <div>
-      <h4 className="mb-3">Final Review</h4>
-      <p className="mb-4">Please review your information carefully before submitting.</p>
+    <div className="row">
+      <h4 className="mb-25">Final Review</h4>
+      <p className="mb-25">Please review your information carefully before submitting.</p>
       {Object.entries(sections).map(([title, values]) => (
-        <div key={title} className="mb-3">
+        <div key={title} className="col-12 mb-25">
           <h5 className="mb-2">{title}</h5>
           <div className="p-3 border rounded">
             {Object.entries(values)
@@ -173,44 +188,48 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
         </div>
       ))}
 
-      {/* Terms and Privacy Policy Checkboxes */}
-      <div className="mt-4">
-        <div className="agreement-checkbox">
-          <div className="mb-3">
-            <input
-              type="checkbox"
-              id="terms-checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-            />
-            <label htmlFor="terms-checkbox">
-              I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
-              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
-            </label>
-          </div>
+      {/* --- REVISED CHECKBOX SECTION --- */}
+      <div className="col-12 mt-4">
+        {/* Terms and Conditions */}
+        <div className="d-flex align-items-center mb-3">
+          <input
+            type="checkbox"
+            id="terms-checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="me-2"
+            style={{ width: '20px', height: '20px', cursor: 'pointer' }} // Changed size here
+          />
+          <label htmlFor="terms-checkbox" style={{ cursor: 'pointer' }}>
+            I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+            <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+          </label>
+        </div>
 
-          <div>
-            <input
-              type="checkbox"
-              id="privacy-checkbox"
-              checked={privacyAccepted}
-              onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            />
-            <label htmlFor="privacy-checkbox">
-              I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
-            </label>
-          </div>
+        {/* Privacy Policy */}
+        <div className="d-flex align-items-center mb-3">
+          <input
+            type="checkbox"
+            id="privacy-checkbox"
+            checked={privacyAccepted}
+            onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            className="me-2"
+            style={{ width: '20px', height: '20px', cursor: 'pointer' }} // Changed size here
+          />
+          <label htmlFor="privacy-checkbox" style={{ cursor: 'pointer' }}>
+            I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+          </label>
         </div>
       </div>
 
-      <div className="d-flex justify-content-between mt-4">
-        <button type="button" className="btn-one" onClick={prevStep}>
+      <div className="col-12 d-flex justify-content-between mt-30">
+        <button type="button" className="btn-one tran3s" onClick={prevStep}>
           Previous
         </button>
         <button
           type="button"
-          className="btn-one"
+          className="btn-one tran3s"
           onClick={handleSubmit}
           disabled={!termsAccepted || !privacyAccepted}
         >
@@ -222,19 +241,3 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 };
 
 export default VideoEditorFinalReview;
-
-// Add disabled button styling
-if (typeof document !== 'undefined') {
-  const styleId = 'video-editor-final-review-styles';
-  if (!document.getElementById(styleId)) {
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.textContent = `
-      .btn-one:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    `;
-    document.head.appendChild(style);
-  }
-}
