@@ -1,33 +1,41 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Briefcase, CalendarCheck, CashCoin, Tag } from 'react-bootstrap-icons';
 import useDecodedToken from '@/hooks/useDecodedToken';
 import { useSidebar } from '@/context/SidebarContext';
-import DashboardHeader from './dashboard-header';
+import DashboardHeader from './dashboard-header-minus';
+import DashboardJobDetailsArea from './dashboard-job-details-area';
+import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 
-// Status Mapping - FIXED to match API values
+// Status Mapping
 const statusMap: Record<number, { text: string; className: string }> = {
-  0: { text: 'Pending', className: 'text-bg-warning' },
-  1: { text: 'Ongoing', className: 'text-bg-info' },
-  2: { text: 'Completed', className: 'text-bg-success' },
-  3: { text: 'Rejected', className: 'text-bg-danger' },
+  0: { text: 'Pending', className: 'bg-warning' },
+  1: { text: 'Ongoing', className: 'bg-info' },
+  2: { text: 'Completed', className: 'bg-success' },
+  3: { text: 'Rejected', className: 'bg-danger' },
 };
 
-// Job Interface
+// Job Interface - Aligned with IJobType
 interface IJob {
   projects_task_id: number;
   project_title: string;
   budget: number;
   deadline: string;
-  project_category: string;
+  category: string; // Changed from project_category to match IJobType
   projects_type: string;
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
+  skills_required?: string[];
+  project_description?: string;
+  project_format?: string;
+  audio_voiceover?: string;
+  video_length?: number;
+  preferred_video_style?: string;
+  audio_description?: string;
+  reference_links?: string[];
+  created_at?: string;
+  additional_notes?: string;
 }
 
-type IProps = {
-  // No props needed, using context
-};
+type IProps = {};
 
 const AppliedJobsArea = ({}: IProps) => {
   const decoded = useDecodedToken();
@@ -36,8 +44,11 @@ const AppliedJobsArea = ({}: IProps) => {
   const [filteredJobs, setFilteredJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'>('All');
-  
+  const [selectedStatus, setSelectedStatus] = useState<
+    'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'
+  >('All');
+  const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
+
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
@@ -48,13 +59,16 @@ const AppliedJobsArea = ({}: IProps) => {
           setError('Authentication token not found. Please log in.');
           return;
         }
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(`Failed to fetch applications: ${response.statusText}`);
         }
@@ -67,9 +81,19 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applicat
           project_title: job.project_title || 'Untitled Project',
           budget: job.budget || 0,
           deadline: job.deadline || '',
-          project_category: job.project_category || 'N/A',
+          category: job.project_category || 'N/A', // Map project_category to category
           projects_type: job.projects_type || 'N/A',
+          skills_required: job.skills_required || [],
           status: statusMap[job.status]?.text || 'Pending',
+          project_description: job.project_description || '',
+          project_format: job.project_format || '',
+          audio_voiceover: job.audio_voiceover || '',
+          video_length: job.video_length,
+          preferred_video_style: job.preferred_video_style || '',
+          audio_description: job.audio_description || '',
+          reference_links: job.reference_links || [],
+          created_at: job.created_at || '',
+          additional_notes: job.additional_notes || '',
         }));
         setJobs(jobData);
         setFilteredJobs(jobData);
@@ -88,7 +112,9 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applicat
     }
   }, [decoded]);
 
-  const handleStatusFilter = (status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All') => {
+  const handleStatusFilter = (
+    status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'
+  ) => {
     setSelectedStatus(status);
     if (status === 'All') {
       setFilteredJobs(jobs);
@@ -97,170 +123,151 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applicat
     }
   };
 
+  if (selectedJob) {
+    return (
+      <DashboardJobDetailsArea
+        job={selectedJob}
+        onBack={() => setSelectedJob(null)}
+      />
+    );
+  }
 
   return (
-    <>
-      <div className="dashboard-body">
-        <div className="position-relative">
-          {/* header start */}
-          <DashboardHeader />
-          {/* header end */}
-
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h2 className="main-title mb-0">Applied Jobs</h2>
-          </div>
-          <div className="btn-group" role="group" aria-label="Status Filter">
-            {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
-              <button
-                key={status}
-                type="button"
-                className={`btn-one w-100 mt-25 ${selectedStatus === status ? 'active' : ''}`}
-                onClick={() => handleStatusFilter(status as any)}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
+    <div className="dashboard-body">
+      <div className="position-relative">
+        <DashboardHeader />
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h2 className="main-title mb-0">Applied Jobs</h2>
         </div>
+        <div className="btn-group w-100" role="group" aria-label="Status Filter">
+          {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
+            <button
+              key={status}
+              type="button"
+              className={`btn-one flex-fill ${selectedStatus === status ? 'active' : ''}`}
+              onClick={() => handleStatusFilter(status as any)}
+            >
+              {status}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      <div className="job-post-item-wrapper mt-4">
         {loading ? (
-          <p>Loading...</p>
+          <div className="text-center py-5">Loading...</div>
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : filteredJobs.length === 0 ? (
-          <div className="text-center p-5 bg-light rounded">
+          <div className="text-center p-5 bg-light rounded mt-4">
             <h4>No Applied Jobs Found</h4>
-            <p className="text-muted">Your applications will appear here once you apply for a job.</p>
+            <p className="text-muted">
+              You have no applications with the status: '{selectedStatus}'
+            </p>
           </div>
         ) : (
-          <div className="row">
-            {filteredJobs.map((job) => {
-              const statusInfo = Object.values(statusMap).find(s => s.text === job.status) || statusMap[0];
-              return (
-                <div key={job.projects_task_id} className="col-12 mb-4">
-                  <div className="card job-card-custom h-100">
-                    <div className="card-body p-4">
-                      {/* -- Card Header -- */}
-                      <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h5 className="card-title fw-bold mb-0">{job.project_title}</h5>
-                        
-                        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
-                          <span className={`badge rounded-pill status-badge ${statusInfo.className}`}>
-                            {job.status}
-                          </span>
-                          <Link
-                            href={`/job-details-v1/${job.projects_task_id}`}
-                            className="btn btn-sm btn-one-green"
-                          >
-                            View Details
-                          </Link>
+          filteredJobs.map((job) => {
+            const statusInfo =
+              Object.values(statusMap).find((s) => s.text === job.status) || {
+                className: 'bg-secondary',
+              };
+            return (
+              <div
+                key={job.projects_task_id}
+                className="candidate-profile-card list-layout mb-25"
+              >
+                <div className="d-flex">
+                  <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+                    <a
+                      onClick={() => setSelectedJob(job)}
+                      className="rounded-circle cursor-pointer"
+                    >
+                      <div
+                        className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
+                        style={{
+                          width: 80,
+                          height: 80,
+                          fontSize: '28px',
+                          fontWeight: 'bold',
+                          backgroundColor: getCategoryColor(job.category),
+                          color: getCategoryTextColor(job.category),
+                        }}
+                      >
+                        {getCategoryIcon(job.category)}
+                      </div>
+                    </a>
+                  </div>
+                  <div className="right-side">
+                    <div className="row gx-2 align-items-center">
+                      <div className="col-lg-3">
+                        <div className="position-relative">
+                          <h4 className="candidate-name mb-0">
+                            <a
+                              onClick={() => setSelectedJob(job)}
+                              className="tran3s cursor-pointer"
+                            >
+                              {job.project_title}
+                            </a>
+                          </h4>
+                          <ul className="cadidate-skills style-none d-flex align-items-center">
+                            {job.skills_required &&
+                              job.skills_required.slice(0, 2).map((s, i) => (
+                                <li key={i} className="text-nowrap">
+                                  {s}
+                                </li>
+                              ))}
+                            {job.skills_required &&
+                              job.skills_required.length > 2 && (
+                                <li className="more">
+                                  +{job.skills_required.length - 2}
+                                </li>
+                              )}
+                          </ul>
                         </div>
                       </div>
-
-                      {/* -- Card Details Grid -- */}
-                      <div className="row g-3 text-muted card-details-grid">
-                        <div className="col-md-6 col-lg-3">
-                          <div className="detail-item">
-                            <CashCoin size={18} />
-                            <div>
-                              <small>Budget</small>
-                              <p className="mb-0 fw-500 text-dark">₹{job.budget.toLocaleString()}</p>
-                            </div>
+                      <div className="col-lg-2 col-md-4 col-sm-6">
+                        <div className="candidate-info">
+                          <span>Budget</span>
+                          <div>₹{job.budget?.toLocaleString() ?? 0}</div>
+                        </div>
+                      </div>
+                      <div className="col-lg-2 col-md-4 col-sm-6">
+                        <div className="candidate-info">
+                          <span>Type</span>
+                          <div>{job.projects_type || 'N/A'}</div>
+                        </div>
+                      </div>
+                      <div className="col-lg-3 col-md-4 col-sm-6">
+                        <div className="candidate-info">
+                          <span>Status</span>
+                          <div>
+                            <span
+                              className={`badge rounded-pill ${statusInfo.className}`}
+                            >
+                              {job.status}
+                            </span>
                           </div>
                         </div>
-                        <div className="col-md-6 col-lg-3">
-                          <div className="detail-item">
-                            <Tag size={18} />
-                            <div>
-                              <small>Category</small>
-                              <p className="mb-0 fw-500 text-dark">{job.project_category}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-md-6 col-lg-3">
-                          <div className="detail-item">
-                            <Briefcase size={18} />
-                            <div>
-                              <small>Type</small>
-                              <p className="mb-0 fw-500 text-dark">{job.projects_type}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-md-6 col-lg-3">
-                          <div className="detail-item">
-                            <CalendarCheck size={18} />
-                            <div>
-                              <small>Deadline</small>
-                              <p className="mb-0 fw-500 text-dark">
-                                {new Date(job.deadline).toLocaleDateString('en-GB')}
-                              </p>
-                            </div>
-                          </div>
+                      </div>
+                      <div className="col-lg-2 col-md-4">
+                        <div className="d-flex justify-content-lg-end align-items-center">
+                          <a
+                            onClick={() => setSelectedJob(job)}
+                            className="profile-btn tran3s ms-md-2 cursor-pointer"
+                          >
+                            View Details
+                          </a>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })
         )}
       </div>
-
-      <style jsx global>{`
-        .job-card-custom {
-          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
-          border: 1px solid #e9ecef;
-          background-color: #fff;
-        }
-
-        .job-card-custom:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-          border-color: #244034;
-        }
-
-        .card-details-grid .detail-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        
-        .card-details-grid .detail-item svg {
-          flex-shrink: 0;
-          color: #31795A;
-        }
-
-        .status-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-weight: 500;
-          padding: 0.35em 0.65em;
-        }
-
-        .status-badge::before {
-          content: '';
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background-color: currentColor;
-        }
-        
-        .btn-one-green {
-          background-color: #244034;
-          border-color: #244034;
-          color: #fff;
-          transition: background-color 0.2s ease, border-color 0.2s ease;
-        }
-
-        .btn-one-green:hover {
-          background-color: #31795A;
-          border-color: #31795A;
-          color: #fff;
-        }
-      `}</style>
-    </>
+    </div>
   );
 };
 

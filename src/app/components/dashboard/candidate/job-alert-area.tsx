@@ -1,5 +1,5 @@
 import React from 'react';
-import DashboardHeader from './dashboard-header';
+import DashboardHeader from './dashboard-header-minus';
 import JobAlertItem from './job-alert-item';
 import ShortSelect from '../../common/short-select';
 

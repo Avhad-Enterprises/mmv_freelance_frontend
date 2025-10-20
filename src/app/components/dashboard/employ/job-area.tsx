@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
 import PostJobForm from "./PostJobForm";
-import { makeGetRequest, makePutRequest, makePatchRequest } from "@/utils/api";
+import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from "react-hot-toast";
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
+// Bootstrap will be imported dynamically on the client side
 
 export interface ProjectSummary {
   project_id: string;
@@ -48,7 +49,19 @@ const EmployJobArea: FC<IProps> = ({}) => {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
   const [applicantsByProject, setApplicantsByProject] = useState<ApplicantsState>({});
 
-  // Fetch projects
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const initDropdowns = async () => {
+        const bootstrap = await import('bootstrap');
+        const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+        dropdownElements.forEach((element) => {
+          new bootstrap.Dropdown(element);
+        });
+      };
+      initDropdowns();
+    }
+  }, [expandedProjectId]);
+
   const fetchClientData = useCallback(async () => {
     if (isPostingJob) return;
 
@@ -88,7 +101,6 @@ const EmployJobArea: FC<IProps> = ({}) => {
     fetchClientData();
   };
 
-  // Fetch applicants for a project
   const handleViewApplicantsClick = async (projectId: string) => {
     if (expandedProjectId === projectId) {
       setExpandedProjectId(null);
@@ -119,61 +131,86 @@ const EmployJobArea: FC<IProps> = ({}) => {
     }
   };
 
-  // Update a specific applicant AND project status
   const handleUpdateApplicantStatus = async (
-  projectId: string,
-  applicationId: number,
-  newStatus: Applicant['status']
-) => {
-  const currentApplicants = applicantsByProject[projectId]?.data || [];
-  const applicantIndex = currentApplicants.findIndex(a => a.applied_projects_id === applicationId);
-  if (applicantIndex === -1) return;
+    projectId: string,
+    applicationId: number,
+    newStatus: Applicant['status']
+  ) => {
+    const currentApplicants = applicantsByProject[projectId]?.data || [];
+    const applicantIndex = currentApplicants.findIndex(a => a.applied_projects_id === applicationId);
+    if (applicantIndex === -1) return;
 
-  const originalApplicants = JSON.parse(JSON.stringify(currentApplicants));
-  const updatedApplicants = [...originalApplicants];
-  updatedApplicants[applicantIndex].status = newStatus;
+    // Check if another applicant is already assigned or completed
+    if (newStatus === 1) {
+      const hasAssigned = currentApplicants.some(a => a.status === 1 && a.applied_projects_id !== applicationId);
+      if (hasAssigned) {
+        toast.error("❌ Only one applicant can be assigned to this project.");
+        return;
+      }
+    }
+    if (newStatus === 2) {
+      const hasCompleted = currentApplicants.some(a => a.status === 2 && a.applied_projects_id !== applicationId);
+      if (hasCompleted) {
+        toast.error("❌ This project is already marked as completed by another applicant.");
+        return;
+      }
+    }
 
-  setApplicantsByProject(prev => ({
-    ...prev,
-    [projectId]: { ...prev[projectId], data: updatedApplicants },
-  }));
+    const originalApplicants = JSON.parse(JSON.stringify(currentApplicants));
+    const updatedApplicants = [...currentApplicants];
+    updatedApplicants[applicantIndex].status = newStatus;
 
-  // Determine new project status based on applicant
-  let newProjectStatus = 0;
-  if (newStatus === 2) newProjectStatus = 2; // Completed
-  else if (newStatus === 1) newProjectStatus = 1; // Approved / Assigned
-  else if (newStatus === 3) newProjectStatus = 0; // Rejected doesn't affect project directly
-
-  const originalProjects = JSON.parse(JSON.stringify(projects));
-  const updatedProjects = projects.map(p =>
-    p.project_id === projectId ? { ...p, status: newProjectStatus } : p
-  );
-  setProjects(updatedProjects);
-
-  try {
-    // 1️⃣ Update applicant status using PATCH /projects-tasks/:id/status
-    await makePatchRequest(`api/v1/projects-tasks/${applicationId}/status`, {
-      status: newStatus,
-      user_id: Number(applicationId)
-    });
-
-    // 2️⃣ Update project status using PUT /projects-tasks/:id
-    await makePutRequest(`api/v1/projects-tasks/${projectId}`, {
-      status: newProjectStatus
-    });
-
-    toast.success("✅ Applicant and project updated successfully!");
-  } catch (err) {
-    console.error("Failed to update applicant/project:", err);
     setApplicantsByProject(prev => ({
       ...prev,
-      [projectId]: { ...prev[projectId], data: originalApplicants },
+      [projectId]: { ...prev[projectId], data: updatedApplicants },
     }));
-    setProjects(originalProjects);
-    toast.error("❌ Failed to update applicant/project. Please try again.");
-  }
-};
 
+    // Determine new project status
+    let newProjectStatus: number | null = null;
+    if (newStatus === 2) newProjectStatus = 2; // Completed
+    else if (newStatus === 1) newProjectStatus = 1; // Assigned
+    // For Rejected (3), don't update project status
+
+    const originalProjects = JSON.parse(JSON.stringify(projects));
+    if (newProjectStatus !== null) {
+    // FIX: Create a new const here. TypeScript will infer its type as 'number'.
+    const finalProjectStatus = newProjectStatus;
+
+    const updatedProjects = projects.map(p =>
+      p.project_id === projectId ? { ...p, status: finalProjectStatus } : p // Use the new const
+    );
+    setProjects(updatedProjects);
+  }
+
+    try {
+      // 1️⃣ Update applicant status
+      // Use PATCH /api/v1/projects-tasks/:id/status with applied_projects_id, but only send status
+      await makePatchRequest(`api/v1/projects-tasks/${applicationId}/status`, {
+        status: newStatus === 3 ? 0 : newStatus, // Map Rejected (3) to Pending (0) for the endpoint
+      });
+
+      // 2️⃣ Update project status (only for Assigned or Completed)
+      if (newStatus === 1 || newStatus === 2) {
+        await makePatchRequest(`api/v1/projects-tasks/${projectId}/status`, {
+          status: newProjectStatus,
+          user_id: currentApplicants[applicantIndex].user_id, // Assuming user_id is correct for freelancer_id
+        });
+      }
+
+      toast.success("✅ Applicant and project updated successfully!");
+    } catch (err: any) {
+      console.error("Failed to update applicant/project:", err);
+      setApplicantsByProject(prev => ({
+        ...prev,
+        [projectId]: { ...prev[projectId], data: originalApplicants },
+      }));
+      if (newProjectStatus !== null) {
+        setProjects(originalProjects);
+      }
+      const message = err.response?.data?.message || err.message || "Failed to update applicant/project.";
+      toast.error(`❌ ${message}`);
+    }
+  };
 
   const getStatusInfo = (status: Applicant['status'] | number) => {
     switch (status) {
@@ -188,10 +225,7 @@ const EmployJobArea: FC<IProps> = ({}) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* header start */}
         <DashboardHeader />
-        {/* header end */}
-        
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">{isPostingJob ? "Post a New Job" : "My Jobs"}</h2>
           {!isPostingJob && (
@@ -273,7 +307,7 @@ const EmployJobArea: FC<IProps> = ({}) => {
                                           <div className="d-flex align-items-center gap-3">
                                             <span className={`fw-bold ${status.className}`}>{status.text}</span>
                                             <div className="dropdown">
-                                              <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                              <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                 Actions
                                               </button>
                                               <ul className="dropdown-menu">

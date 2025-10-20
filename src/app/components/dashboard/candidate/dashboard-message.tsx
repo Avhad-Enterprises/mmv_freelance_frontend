@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
-import DashboardHeader from './dashboard-header';
+import DashboardHeader from './dashboard-header-minus';
 import EmailReadPanel from './email-read-panel';
 import EmailFooter from './email-footer';
 import icon_1 from '@/assets/dashboard/images/icon/icon_32.svg';
