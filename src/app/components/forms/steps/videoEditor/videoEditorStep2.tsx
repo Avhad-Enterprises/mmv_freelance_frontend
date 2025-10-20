@@ -109,7 +109,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     first_name = "",
     last_name = "",
     superpowers = [],
-    portfolio_links = ["", "", ""],
+    portfolio_links = ["", ""],
     rate_amount = "",
     rate_currency = "INR",
     skill_tags = []
@@ -135,7 +135,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
   };
 
   const addSkillTag = (tag: string) => {
-    if (tag && !(skill_tags || []).includes(tag)) {
+    if (tag && !(skill_tags || []).includes(tag) && (skill_tags || []).length < 15) {
       const currentTags = watch("skill_tags") || [];
       const newTags = [...currentTags, tag];
       setValue("skill_tags", newTags);
@@ -266,9 +266,15 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
               className="form-control text-start d-flex align-items-center justify-content-between"
               style={{ height: '60px', minHeight: '60px' }}
               onClick={() => setIsSkillsDropdownOpen(!isSkillsDropdownOpen)}
-              disabled={isLoadingSkills || !!skillError}
+              disabled={isLoadingSkills || !!skillError || (skill_tags || []).length >= 15}
             >
-              <span>{isLoadingSkills ? "Loading skills..." : "Select skills"}</span>
+              <span>
+                {isLoadingSkills 
+                  ? "Loading skills..." 
+                  : (skill_tags || []).length >= 15 
+                  ? "Maximum skills reached" 
+                  : "Select skills"}
+              </span>
               {isSkillsDropdownOpen && (
                 <span 
                   style={{ fontSize: '20px', fontWeight: 'bold', cursor: 'pointer' }}
