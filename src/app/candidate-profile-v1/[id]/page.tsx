@@ -124,11 +124,16 @@ const DynamicCandidateProfilePage = () => {
           setLoading(true);
           setError(null);
 
-          const response = await fetch(`/api/v1/freelancers/getfreelancers-public`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
+            cache: 'no-cache',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
           if (!response.ok) throw new Error(`Failed to fetch data`);
 
           const responseData = await response.json();
-          const foundRawFreelancer: RawApiFreelancer | undefined = responseData.data.find((f: RawApiFreelancer) => f.user_id === parsedId);
+          const foundRawFreelancer: RawApiFreelancer | undefined = responseData.data?.find((f: RawApiFreelancer) => String(f.user_id) === candidateId);
 
           if (foundRawFreelancer) {
             // Process YouTube links to extract ID and URL

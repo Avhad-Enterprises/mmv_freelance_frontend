@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
 import JobBreadcrumb from '../components/jobs/breadcrumb/job-breadcrumb';
-import JobListThree from '../components/jobs/list/job-list-three';
+import JobListThree from '../components/jobs/list/job-list-three-new';
 import JobPortalIntro from '../components/job-portal-intro/job-portal-intro';
 import FooterOne from '@/layouts/footers/footer-one';
 

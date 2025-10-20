@@ -47,17 +47,16 @@ const HomeSix = () => {
   }, []);
 
   useEffect(() => {
-    // Check if login parameter is present
-    if (searchParams.get('login') === 'true') {
-      // Trigger login modal after a short delay to ensure page is loaded
-      setTimeout(() => {
+  if (searchParams.get('login') === 'true') {
+    setTimeout(() => {
+      if (typeof document !== 'undefined') {
         const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
-        if (loginButton) {
-          loginButton.click();
-        }
-      }, 100);
-    }
-  }, [searchParams]);
+        if (loginButton) loginButton.click();
+      }
+    }, 100);
+  }
+}, [searchParams]);
+
 
   if (isLoading) {
     return (

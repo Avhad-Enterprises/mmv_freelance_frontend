@@ -1,16 +1,21 @@
 import React from "react";
 import Select from 'react-select';
 
+interface Category {
+  category_id: number;
+  category_name: string;
+}
+
 interface Props {
-  skills: string[];
+  categories: Category[];
   onChange: (values: string[]) => void;
   value: string[];
 }
 
-const FilterSkills = ({ skills, onChange, value }: Props) => {
-  const options = skills.map(skill => ({
-    value: skill,
-    label: skill,
+const FilterJobCategory = ({ categories, onChange, value }: Props) => {
+  const options = categories.map(category => ({
+    value: category.category_name,
+    label: category.category_name,
   }));
 
   return (
@@ -23,9 +28,9 @@ const FilterSkills = ({ skills, onChange, value }: Props) => {
       }}
       className="basic-multi-select"
       classNamePrefix="select"
-      placeholder="Select Skills"
+      placeholder="Select Categories"
     />
   );
 };
 
-export default FilterSkills;
+export default FilterJobCategory;

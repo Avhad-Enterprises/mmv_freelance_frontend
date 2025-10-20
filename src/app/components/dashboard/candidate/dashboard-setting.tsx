@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DashboardHeader from "./dashboard-header";
+import DashboardHeader from "./dashboard-header-minus";
 import ChangePasswordArea from "./change-password";
 import { makePostRequest } from "../../../../utils/api";
 import useDecodedToken from "../../../../hooks/useDecodedToken";

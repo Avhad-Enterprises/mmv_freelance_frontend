@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
-import JobListThree from '../components/jobs/list/job-list-three';
+import JobListThree from '../components/jobs/list/job-list-three-new';
 import JobPortalIntro from '../components/job-portal-intro/job-portal-intro';
 import FooterOne from '@/layouts/footers/footer-one';
 

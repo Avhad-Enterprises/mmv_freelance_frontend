@@ -161,7 +161,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         </div>
 
         {/* Next Button */}
-        <div className="col-1To'0">
+        <div className="col-12">
           <button 
             type="submit" 
             className="btn-one tran3s w-100 mt-30"

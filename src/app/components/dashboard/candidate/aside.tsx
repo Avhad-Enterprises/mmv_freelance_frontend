@@ -15,6 +15,8 @@ import nav_1 from "@/assets/dashboard/images/icon/icon_1.svg";
 import nav_1_active from "@/assets/dashboard/images/icon/icon_1_active.svg";
 import nav_2 from "@/assets/dashboard/images/icon/icon_2.svg";
 import nav_2_active from "@/assets/dashboard/images/icon/icon_2_active.svg";
+import nav_3 from "@/assets/dashboard/images/icon/icon_2.svg";
+import nav_3_active from "@/assets/dashboard/images/icon/icon_2_active.svg";
 import nav_6 from "@/assets/dashboard/images/icon/icon_6.svg";
 import nav_6_active from "@/assets/dashboard/images/icon/icon_6_active.svg";
 import nav_7 from "@/assets/dashboard/images/icon/icon_7.svg";
@@ -28,6 +30,8 @@ const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/candidate-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/candidate-dashboard/profile", title: "My Profile" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/candidate-dashboard/saved-job", title: "Saved Job" },
+    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/candidate-dashboard/browse-jobs", title: "Browse Projects" }, // ADD THIS
+
     // { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/candidate-dashboard/setting", title: "Account Settings" },
     { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/candidate-dashboard/applied-jobs", title: "Applied Projects" },
 ];
@@ -125,12 +129,6 @@ const CandidateAside = ({}: IProps) => {
                                     </li>
                                 );
                             })}
-                            <li>
-                                <a href="#" className="d-flex w-100 align-items-center" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                    <Image src={nav_8} alt="Delete Account" className="lazy-img" />
-                                    <span>Delete Account</span>
-                                </a>
-                            </li>
                             <li>
                                 <a href="#" className="d-flex w-100 align-items-center" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                     <Image src={logout} alt="icon" className="lazy-img" />

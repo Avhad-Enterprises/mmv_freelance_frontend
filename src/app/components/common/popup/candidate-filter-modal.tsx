@@ -53,9 +53,9 @@ const CandidateFilterModal = () => {
                       <div className="filter-title fw-500 text-dark">
                         Skills
                       </div>
-                      <FilterSkills skills={[]} onChange={function (value: string): void {
+                      <FilterSkills skills={[]} onChange={function (values: string[]): void {
                         throw new Error("Function not implemented.");
-                      }} />
+                      }} value={[]} />
                     </div>
                   </div>
                   <div className="col-lg-3">
@@ -63,9 +63,9 @@ const CandidateFilterModal = () => {
                       <div className="filter-title fw-500 text-dark">
                         Location
                       </div>
-                      <FilterCandidateLocation locations={[]} onChange={function (value: string): void {
+                      <FilterCandidateLocation locations={[]} onChange={function (values: string[]): void {
                         throw new Error("Function not implemented.");
-                      }} />
+                      }} value={[]} />
                     </div>
                   </div>
                   <div className="col-lg-3">

@@ -144,22 +144,24 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="col-6">
-          <button
-            type="button"
-            className="btn-one w-100 mt-30"
-            onClick={prevStep}
-          >
-            Previous
-          </button>
-        </div>
-        <div className="col-6">
-          <button
-            type="submit"
-            className="btn-one w-100 mt-30"
-          >
-            Next
-          </button>
+        <div className="row">
+          <div className="col-6">
+            <button
+              type="button"
+              className="btn-one w-100 mt-30"
+              onClick={prevStep}
+            >
+              Previous
+            </button>
+          </div>
+          <div className="col-6">
+            <button
+              type="submit"
+              className="btn-one w-100 mt-30"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </form>

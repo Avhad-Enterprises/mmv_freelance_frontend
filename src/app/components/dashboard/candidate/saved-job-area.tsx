@@ -1,212 +1,293 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import DashboardHeader from "./dashboard-header";
-import ShortSelect from "../../common/short-select";
-import { makeDeleteRequest, makeGetRequest } from "@/utils/api";
+import React, { useState, useEffect } from "react";
+import DashboardHeader from "./dashboard-header-minus";
+import DashboardJobDetailsArea from "./dashboard-job-details-area";
+import { useAppSelector, useAppDispatch } from "@/redux/hook";
+import { IJobType } from "@/types/job-data-type";
+import { makeGetRequest, makeDeleteRequest, makePostRequest } from "@/utils/api";
+import { set_wishlist, remove_from_wishlist, add_to_wishlist } from "@/redux/features/wishlist";
 import useDecodedToken from "@/hooks/useDecodedToken";
-import { notifyError, notifySuccess } from "@/utils/toast";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { set_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
-import { useSidebar } from "@/context/SidebarContext";
+import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
+import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
+import { notifyError } from "@/utils/toast";
 
-// Types
-interface IProps {
-  // No props needed, using context
-}
-
-const SavedJobArea: React.FC<IProps> = ({}) => {
-  const { setIsOpenSidebar } = useSidebar();
-  const { wishlist } = useAppSelector((state) => state.wishlist);
+const SavedJobArea = () => {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
-  const [sortType, setSortType] = useState("New");
-  const user = useDecodedToken();
+  const decoded = useDecodedToken();
 
-  // Fetch only login user's saved jobs
-  const fetchSavedJobs = async () => {
-    if (!user?.user_id) return;
-    setLoading(true);
+  // State for this component
+  const [loading, setLoading] = useState<boolean>(true);
+  const [gridStyle, setGridStyle] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
 
-    try {
-      // Fixed: only 1 argument passed
-      const savedRes = await makeGetRequest(
-        `api/v1/saved/listsave?user_id=${user.user_id}`
-      );
-      const savedData = savedRes?.data?.data || [];
+  // Get saved jobs directly from the Redux store
+  const { wishlist: savedJobs } = useAppSelector((state) => state.wishlist);
 
-      const savedIds = savedData
-        .filter(
-          (item: any) =>
-            !item.is_deleted && Number(item.user_id) === Number(user.user_id)
-        )
-        .map((item: any) => Number(item.projects_task_id));
-
-      if (savedIds.length === 0) {
-        dispatch(set_wishlist([]));
+  // Fetch saved jobs on component mount
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      if (!decoded?.user_id) {
+        setLoading(false);
         return;
       }
+      setLoading(true);
+      try {
+        // First, get the list of all jobs
+        const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+        const allJobs = jobsRes.data.data || [];
+        
+        // Then, get the user's saved project IDs
+        const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
+        const savedProjectIds = new Set(savedProjectsRes.data.data.map((p: any) => p.projects_task_id));
+        
+        // Filter the main job list to get the full objects for saved jobs
+        const userSavedJobs = allJobs.filter((job: IJobType) => 
+          job.projects_task_id !== undefined && savedProjectIds.has(job.projects_task_id)
+        );
+        
+        // Populate the Redux store with the saved jobs
+        dispatch(set_wishlist(userSavedJobs));
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+        notifyError("Failed to load saved jobs.");
+        dispatch(set_wishlist([])); // Clear list on error
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const projectsRes = await makeGetRequest("api/v1/projects-tasks/listings");
-      const allProjects = projectsRes?.data?.data || [];
-
-      const matched = allProjects.filter((proj: any) =>
-        savedIds.includes(Number(proj.projects_task_id))
-      );
-
-      dispatch(set_wishlist(matched));
-    } catch (err) {
-      console.error("Error fetching saved jobs:", err);
-      notifyError("Failed to load saved jobs.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     fetchSavedJobs();
-  }, [user]);
+  }, [decoded, dispatch]);
 
-  const handleRemove = async (jobId: number) => {
+  // Handler to unsave a job (it will disappear from this page)
+  const handleToggleSave = async (job: IJobType) => {
+    if (!decoded || !decoded.user_id || job.projects_task_id === undefined) return;
+
+    // In the context of this page, clicking a saved job always means unsaving it.
     try {
-      await makeDeleteRequest("api/v1/saved/remove-saved", {
-        user_id: user?.user_id,
-        projects_task_id: jobId,
+      await makeDeleteRequest("api/v1/saved/unsave-project", {
+        projects_task_id: job.projects_task_id,
       });
-      dispatch(remove_from_wishlist(jobId));
-      notifySuccess("Removed from saved jobs.");
-    } catch (err) {
-      console.error("Remove error:", err);
-      notifyError("Failed to remove job.");
+      dispatch(remove_from_wishlist(job.projects_task_id));
+    } catch (error) {
+      console.error("Error toggling save status:", error);
+      notifyError("Could not remove the job.");
     }
   };
 
-  const sortJobs = (jobs: any[], type: string) => {
-    switch (type) {
-      case "Budget":
-        return [...jobs].sort((a, b) => b.budget - a.budget);
-      case "Category":
-        return [...jobs].sort((a, b) =>
-          a.project_category.localeCompare(b.project_category)
-        );
-      case "Job Type":
-        return [...jobs].sort((a, b) =>
-          a.projects_type.localeCompare(b.projects_type)
-        );
-      case "New":
-      default:
-        return [...jobs];
-    }
-  };
+  // --- Reusable UI Components for List and Grid View ---
 
-  const sortedJobs = sortJobs(wishlist, sortType);
-
-  return (
-    <div className="dashboard-body">
-      <div className="position-relative">
-        {/* header start */}
-        <DashboardHeader />
-        {/* header end */}
-
-        <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">
-          <h2 className="main-title m0">Saved Jobs</h2>
-          <div className="short-filter d-flex align-items-center">
-            <div className="text-dark fw-500 me-2">Sort by:</div>
-            <ShortSelect onChange={setSortType} />
-          </div>
-        </div>
-
-        <div className="wrapper">
-          {loading ? (
-            <div className="text-center py-5">Loading...</div>
-          ) : sortedJobs.length === 0 ? (
-            <div className="text-center text-muted">No saved jobs found.</div>
-          ) : (
-            sortedJobs.map((j) => (
+  const ListItemTwo = ({ item }: { item: IJobType }) => {
+    return (
+      <div className={`candidate-profile-card list-layout mb-25`}>
+        <div className="d-flex">
+          <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+            <a onClick={() => setSelectedJob(item)} className="rounded-circle cursor-pointer">
               <div
-                key={j.projects_task_id}
-                className="job-list-one style-two position-relative mb-20"
+                className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
+                style={{
+                  width: 80,
+                  height: 80,
+                  fontSize: '28px',
+                  fontWeight: 'bold',
+                  backgroundColor: getCategoryColor(item.project_category),
+                  color: getCategoryTextColor(item.project_category)
+                }}
               >
-                <div className="row justify-content-between align-items-center">
-                  <div className="col-xxl-3 col-lg-4">
-                    <div className="job-title d-flex align-items-center">
-                      <a href="#" className="logo">
-                        <Image
-                          src={"/images/default-logo.png"}
-                          alt="logo"
-                          className="lazy-img m-auto"
-                          width={50}
-                          height={50}
-                        />
-                      </a>
-                      <a href="#" className="title fw-500 tran3s">
-                        {j.project_title}
-                      </a>
-                    </div>
-                  </div>
-
-                  <div className="col-lg-3 col-md-4 col-sm-6 ms-auto">
-                    <div className="job-category text-dark fw-500">
-                      {j.project_category || "Uncategorized"}
-                    </div>
-                    <div className="job-salary">₹{j.budget} / Fixed Budget</div>
-                    <div className="job-deadline text-muted">
-                      Deadline:{" "}
-                      {j.Deadline
-                        ? new Date(j.deadline).toLocaleDateString()
-                        : "N/A"}
-                    </div>
-                  </div>
-
-                  <div className="col-xxl-2 col-lg-3 col-md-4 col-sm-6 ms-auto xs-mt-10">
-                    <div className="job-type">
-                      <span className="badge bg-secondary">
-                        {j.projects_type}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="col-lg-2 col-md-4">
-                    <div className="action-dots float-end">
-                      <button
-                        className="action-btn dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        <span></span>
-                      </button>
-                      <ul className="dropdown-menu dropdown-menu-end">
-                        <li>
-                          <button
-                            onClick={() =>
-                              j.projects_task_id &&
-                              handleRemove(j.projects_task_id)
-                            }
-                            className="dropdown-item"
-                          >
-                            Remove
-                          </button>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            href={`/job-details-v1/${j.projects_task_id}`}
-                          >
-                            View
-                          </Link>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
+                {getCategoryIcon(item.project_category)}
+              </div>
+            </a>
+          </div>
+          <div className="right-side">
+            <div className="row gx-1 align-items-center">
+              <div className="col-xl-3">
+                <div className="position-relative">
+                  <h4 className="candidate-name mb-0">
+                    <a onClick={() => setSelectedJob(item)} className="tran3s cursor-pointer">
+                      {item.project_title
+                        ? `${item.project_title.slice(0, 22)}${item.project_title.length > 22 ? ".." : ""}`
+                        : ""}
+                    </a>
+                  </h4>
+                  <ul className="cadidate-skills style-none d-flex align-items-center">
+                    {item.skills_required?.slice(0, 3).map((s, i) => (
+                      <li key={i} className="text-nowrap">{s}</li>
+                    ))}
+                    {item.skills_required && item.skills_required.length > 3 && (
+                      <li className="more">+{item.skills_required.length - 3}</li>
+                    )}
+                  </ul>
                 </div>
               </div>
-            ))
-          )}
+              <div className="col-xl-3 col-md-4 col-sm-6">
+                <div className="candidate-info">
+                  <span>Budget</span>
+                  <div>${item.budget ?? 0}</div>
+                </div>
+              </div>
+              <div className="col-xl-3 col-md-4 col-sm-6">
+                <div className="candidate-info">
+                  <span>Type</span>
+                  <div>{item.projects_type || 'Not specified'}</div>
+                </div>
+              </div>
+              <div className="col-xl-3 col-md-4">
+                <div className="d-flex justify-content-lg-end align-items-center">
+                  <button
+                    type="button"
+                    className="save-btn text-center rounded-circle tran3s"
+                    onClick={() => handleToggleSave(item)}
+                    title="Unsave"
+                  >
+                    <i className="bi bi-heart-fill text-danger"></i>
+                  </button>
+                  <a
+                    onClick={() => setSelectedJob(item)}
+                    className="profile-btn tran3s ms-md-2 cursor-pointer"
+                  >
+                    View Details
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    );
+  };
+
+  const JobGridItem = ({ item }: { item: IJobType }) => {
+    return (
+      <div className={`candidate-profile-card grid-layout`}>
+        <a
+          onClick={() => handleToggleSave(item)}
+          className={`save-btn text-center rounded-circle tran3s cursor-pointer active`}
+          title='Unsave Job'
+        >
+          <i className="bi bi-heart-fill text-danger"></i>
+        </a>
+        <div className="cadidate-avatar online position-relative d-block me-auto ms-auto mb-3">
+          <a onClick={() => setSelectedJob(item)} className="rounded-circle cursor-pointer">
+            <div
+              className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
+              style={{
+                width: 80, height: 80, fontSize: '28px', fontWeight: 'bold',
+                backgroundColor: getCategoryColor(item.project_category),
+                color: getCategoryTextColor(item.project_category)
+              }}
+            >
+              {getCategoryIcon(item.project_category)}
+            </div>
+          </a>
+        </div>
+        <div className="text-center mb-2">
+          <h4 className="candidate-name mb-2">
+            <a onClick={() => setSelectedJob(item)} className="tran3s cursor-pointer">
+              {item.project_title}
+            </a>
+          </h4>
+          <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
+            {item.skills_required?.slice(0, 2).map((s, i) => (
+              <li key={i} className="text-nowrap">{s}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="candidate-info text-center mb-3">
+          <span>Budget</span>
+          <div>${item.budget ?? 0}</div>
+        </div>
+        <div className="candidate-info text-center mb-3">
+          <span>Type</span>
+          <div>{item.projects_type || 'Not specified'}</div>
+        </div>
+        <div className="d-flex justify-content-center">
+          <a onClick={() => setSelectedJob(item)} className="profile-btn tran3s cursor-pointer">
+            View Details
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  // If a job is selected, show the details view
+  if (selectedJob) {
+    return <DashboardJobDetailsArea job={selectedJob} onBack={() => setSelectedJob(null)} />;
+  }
+
+  // Main component render
+  return (
+    <>
+      <div className="dashboard-body">
+        <div className="position-relative">
+          <DashboardHeader />
+          <h2 className="main-title mb-30">Saved Jobs</h2>
+
+          <div className="job-post-item-wrapper">
+            <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+              <div className="total-job-found">
+                <span className="text-dark fw-500">{savedJobs.length}</span> saved jobs found
+              </div>
+              <div className="d-flex align-items-center gap-3">
+                <div className="layout-switcher">
+                  <button
+                    className={`style-changer-btn text-center ${!gridStyle ? 'active' : ''}`}
+                    onClick={() => setGridStyle(false)}
+                    title="List Layout"
+                  >
+                    <i className="bi bi-list"></i>
+                  </button>
+                  <button
+                    className={`style-changer-btn text-center ${gridStyle ? 'active' : ''}`}
+                    onClick={() => setGridStyle(true)}
+                    title="Grid Layout"
+                  >
+                    <i className="bi bi-grid-3x2"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {savedJobs.length === 0 ? (
+                    <div className="text-center mt-5">
+                        <h3>No saved jobs found</h3>
+                        <p>You can save jobs from the 'Browse Projects' page.</p>
+                    </div>
+                ) : (
+                    <>
+                        {/* List View */}
+                        <div className={`accordion-box list-style ${!gridStyle ? "show" : ""}`}>
+                            {savedJobs.map((job) => (
+                                <ListItemTwo key={job.projects_task_id} item={job} />
+                            ))}
+                        </div>
+
+                        {/* Grid View */}
+                        <div className={`accordion-box grid-style ${gridStyle ? "show" : ""}`}>
+                            <div className="row">
+                                {savedJobs.map((job) => (
+                                <div key={job.projects_task_id} className="col-sm-6 mb-30">
+                                    <JobGridItem item={job} />
+                                </div>
+                                ))}
+                            </div>
+                        </div>
+                    </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+      <SaveJobLoginModal onLoginSuccess={() => {}} />
+    </>
   );
 };
 

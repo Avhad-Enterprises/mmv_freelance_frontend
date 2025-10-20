@@ -197,33 +197,37 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
       ))}
 
       {/* Terms and Privacy Policy Checkboxes */}
-      <div className="mt-4">
-        <div className="agreement-checkbox">
-          <div className="mb-3">
-            <input
-              type="checkbox"
-              id="terms-checkbox"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-            />
-            <label htmlFor="terms-checkbox">
-              I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
-              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
-            </label>
-          </div>
+      <div className="col-12 mt-4">
+        {/* Terms and Conditions */}
+        <div className="d-flex align-items-center mb-3">
+          <input
+            type="checkbox"
+            id="terms-checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="me-2"
+            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+          />
+          <label htmlFor="terms-checkbox" style={{ cursor: 'pointer' }}>
+            I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+            <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+          </label>
+        </div>
 
-          <div>
-            <input
-              type="checkbox"
-              id="privacy-checkbox"
-              checked={privacyAccepted}
-              onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            />
-            <label htmlFor="privacy-checkbox">
-              I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
-              <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
-            </label>
-          </div>
+        {/* Privacy Policy */}
+        <div className="d-flex align-items-center mb-3">
+          <input
+            type="checkbox"
+            id="privacy-checkbox"
+            checked={privacyAccepted}
+            onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            className="me-2"
+            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+          />
+          <label htmlFor="privacy-checkbox" style={{ cursor: 'pointer' }}>
+            I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
+          </label>
         </div>
       </div>
 

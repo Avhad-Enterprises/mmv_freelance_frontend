@@ -7,12 +7,24 @@ import BlogItem from "./blog-item";
 import { IBlogDataType } from "@/types/blog-type";
 import { makeGetRequest } from "@/utils/api";
 
+// Helper function to parse tags
+function parseTagsArray(tagStr?: string | null): string[] {
+  if (!tagStr || typeof tagStr !== 'string' || tagStr.length <= 2) {
+    return [];
+  }
+  // Removes {}, splits by ',', and cleans up each tag by removing quotes
+  return tagStr.slice(1, -1).split(',').map(tag => tag.trim().replace(/"/g, ''));
+}
+
 const BlogPostboxArea = () => {
   const [blogs, setBlogs] = useState<IBlogDataType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -39,9 +51,23 @@ const BlogPostboxArea = () => {
 
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentBlogs = Array.isArray(blogs)
-    ? blogs.slice(indexOfFirst, indexOfLast)
-    : [];
+
+  // Filter blogs based on selected category and tags
+  const filteredBlogs = blogs.filter(blog => {
+    const matchesCategory = !selectedCategory || blog.category === selectedCategory;
+    const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => {
+      if (typeof blog.tags === 'string') {
+        return parseTagsArray(blog.tags).includes(tag);
+      }
+      if (Array.isArray(blog.tags)) {
+        return blog.tags.includes(tag);
+      }
+      return false;
+    });
+    return matchesCategory && matchesTags;
+  });
+
+  const currentBlogs = filteredBlogs.slice(indexOfFirst, indexOfLast);
 
   return (
     <section className="blog-section pt-100 lg-pt-80 pb-120 lg-pb-80">
@@ -58,7 +84,7 @@ const BlogPostboxArea = () => {
                       <BlogItem key={b.blog_id} blog={b} />
                     ))}
                     <BlogPagination
-                      total={Array.isArray(blogs) ? blogs.length : 0}
+                      total={filteredBlogs.length}
                       currentPage={currentPage}
                       itemsPerPage={itemsPerPage}
                       onPageChange={setCurrentPage}
@@ -70,7 +96,15 @@ const BlogPostboxArea = () => {
               </div>
 
               <div className="col-lg-4">
-                <BlogSidebar />
+                <BlogSidebar
+                  blogs={blogs}
+                  selectedCategory={selectedCategory}
+                  selectedTags={selectedTags}
+                  onSelectCategory={setSelectedCategory}
+                  onSelectTag={(tag) => {
+                    setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+                  }}
+                />
               </div>
             </div>
           </div>

@@ -117,7 +117,7 @@ const VideographerStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '48px',
+                top: '44px',
                 cursor: 'pointer'
               }}
             >

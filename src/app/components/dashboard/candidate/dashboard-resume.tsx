@@ -1,7 +1,7 @@
 "use client"
 import React,{useState} from 'react';
 import video_bg from '@/assets/dashboard/images/video_post.jpg';
-import DashboardHeader from './dashboard-header';
+import DashboardHeader from './dashboard-header-minus';
 import DashboardPortfolio from './dashboard-portfolio';
 import SelectYear from './select-year';
 import VideoPopup from '../../common/video-popup';

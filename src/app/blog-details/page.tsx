@@ -20,7 +20,7 @@ const BlogDetailsPage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* header start */}
-        <Header />
+        <Header isAuthenticated={true} />
         {/* header end */}
 
         {/* breadcrumb start */}

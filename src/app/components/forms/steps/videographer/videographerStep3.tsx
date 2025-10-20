@@ -203,7 +203,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         {/* Phone Number with Country Code */}
-        <div className="mt-4">
+        <div className="input-group-meta position-relative mb-25">
           <label>Phone Number*</label>
           <div className="phone-input-wrapper">
             <div className="country-code-selector">
@@ -254,7 +254,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         </div>
 
         {/* Upload Profile Photo */}
-        <div className="mt-4">
+        <div className="input-group-meta position-relative mb-25">
           <label>Upload Profile Photo*</label>
           <small className="d-block mb-2 text-primary">{note}</small>
           <div className="input-group-meta position-relative uniform-height">
@@ -364,9 +364,9 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         </div>
 
         {/* ID Verification */}
-        <div className="mt-4">
-          <label>ID Verification*</label>
-          <div className="row mt-2">
+        <div className="input-group-meta position-relative mb-25">
+          <label>ID Verification</label>
+          <div className="row">
             <div className="col-md-6">
               <label>ID Type*</label>
               <div className="input-group-meta position-relative uniform-height">
@@ -497,9 +497,9 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         </div>
 
         {/* Location Details */}
-        <div className="mt-4">
+        <div className="input-group-meta position-relative mb-25">
           <label>Location Details*</label>
-          <div className="row mt-4">
+          <div className="row">
             {/* Country */}
             <div className="col-md-6">
               <label>Country*</label>
@@ -626,7 +626,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                     required: "Pincode is required",
                     pattern: {
                       value: /^[a-zA-Z0-9\s-]{3,10}$/,
-                      message: "Please enter a valid pincode"
+                      message: "Please enter a valid pincode/ZIP code"
                     }
                   })}
                   onChange={() => clearErrors("pincode")}
@@ -668,7 +668,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="row mt-4">
+        <div className="row">
           <div className="col-6">
             <button type="button" className="btn-one w-100 mt-30" onClick={prevStep} disabled={isGeocoding}>
               Previous
