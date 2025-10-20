@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import Header from "@/layouts/headers/header";
-import HeaderDash from "@/layouts/headers/headerDash";
 import Wrapper from "@/layouts/wrapper";
 import FooterOne from "@/layouts/footers/footer-one";
 import MapArea from "../components/contact/map-area";
@@ -54,7 +53,7 @@ const ContactPage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* Conditional header rendering */}
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
 
         {/*MapArea start */}
         <MapArea />

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import EmployAside from './aside';
 import EmployDashboardArea from './dashboard-area';
-import Header from "@/layouts/headers/headerDash"; // <-- IMPORT the header here
 
 
 const EmployDashboardMain = () => {

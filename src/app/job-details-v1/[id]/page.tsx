@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // <-- Import the decoder
 import Wrapper from '@/layouts/wrapper';
 import Header from '@/layouts/headers/header';
-import HeaderDash from '@/layouts/headers/headerDash'; // <-- Import the dashboard header
 import JobDetailsV1Area from '@/app/components/job-details/job-details-v1-area';
 import JobPortalIntro from '@/app/components/job-portal-intro/job-portal-intro';
 import RelatedJobs from '@/app/components/jobs/related-jobs';
@@ -72,7 +71,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* Conditionally render the header */}
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
 
         <JobDetailsV1Area job={job} />
         <RelatedJobs category={[job.project_category || '']} />
