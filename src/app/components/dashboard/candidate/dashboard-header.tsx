@@ -108,7 +108,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           {/* Post Job Button */}
           <div>
             <Link
-              href="/dashboard/employ-dashboard/submit-job"
+              href="/dashboard/employ-dashboard/jobs"
               className="job-post-btn tran3s"
             >
               Post a Job

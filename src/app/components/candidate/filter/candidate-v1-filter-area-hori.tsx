@@ -1,0 +1,124 @@
+"use client";
+
+import React from "react";
+import FilterSkills from "./filter-skills-hori";
+import FilterCandidateLocation from "./filter-location-hori";
+
+type Props = {
+  onSkillChange: (values: string[]) => void;
+  onLocationChange: (values: string[]) => void;
+  onApplyFilter: () => void;
+  onClearFilters: () => void;
+  skills: string[];
+  locations: string[];
+  selectedSkills: string[];
+  selectedLocations: string[];
+};
+
+const CandidateV1FilterArea = ({
+  onSkillChange,
+  onLocationChange,
+  onApplyFilter,
+  onClearFilters,
+  skills,
+  locations,
+  selectedSkills,
+  selectedLocations,
+}: Props) => {
+  // Handler to remove a single skill
+  const handleRemoveSkill = (skillToRemove: string) => {
+    const newSkills = selectedSkills.filter(skill => skill !== skillToRemove);
+    onSkillChange(newSkills);
+  };
+
+  // Handler to remove a single location
+  const handleRemoveLocation = (locationToRemove: string) => {
+    const newLocations = selectedLocations.filter(loc => loc !== locationToRemove);
+    onLocationChange(newLocations);
+  };
+
+  const hasSelections = selectedSkills.length > 0 || selectedLocations.length > 0;
+
+  return (
+    <div className="p-4 rounded-3" style={{ backgroundColor: '#f0f5f3' }}>
+      {/* This row contains the dropdowns and buttons */}
+      <div className="row g-3 align-items-end">
+        {/* --- Skill Filter --- */}
+        <div className="col-lg-4 col-md-6">
+          <div className="filter-title fw-500 text-dark mb-2">Skill</div>
+          <FilterSkills
+            skills={skills}
+            onChange={onSkillChange}
+            selectedValues={selectedSkills}
+            placeholder="Select Skills"
+          />
+        </div>
+
+        {/* --- Location Filter --- */}
+        <div className="col-lg-4 col-md-6">
+          <div className="filter-title fw-500 text-dark mb-2">Location</div>
+          <FilterCandidateLocation
+            locations={locations}
+            onChange={onLocationChange}
+            selectedValues={selectedLocations}
+            placeholder="Select Location"
+          />
+        </div>
+        
+        {/* --- Action Buttons --- */}
+        <div className="col-lg-4 col-md-12">
+          <div className="d-flex gap-2 mt-md-0 mt-3">
+            <button
+              onClick={onApplyFilter}
+              className="btn-ten fw-500 text-white text-center tran3s flex-grow-1"
+            >
+              Apply Filter
+            </button>
+            <button
+              onClick={onClearFilters}
+              className="btn-eight fw-500 text-center tran3s flex-grow-1"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* --- Section to display selected tags --- */}
+      {hasSelections && (
+        <div className="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
+          {selectedSkills.map(skill => (
+            <div 
+              key={skill} 
+              className="btn-eight fw-500 d-flex align-items-center" 
+              style={{ backgroundColor: '#00BF58', color: 'white' }}
+            >
+              <span style={{ color: 'white' }}>{skill}</span>
+              <button 
+                onClick={() => handleRemoveSkill(skill)} 
+                className="btn-close ms-2" 
+                style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+              ></button>
+            </div>
+          ))}
+          {selectedLocations.map(location => (
+            <div 
+              key={location} 
+              className="btn-eight fw-500 d-flex align-items-center" 
+              style={{ backgroundColor: '#00BF58', color: 'white' }}
+            >
+              <span style={{ color: 'white' }}>{location}</span>
+              <button 
+                onClick={() => handleRemoveLocation(location)} 
+                className="btn-close ms-2" 
+                style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+              ></button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CandidateV1FilterArea;

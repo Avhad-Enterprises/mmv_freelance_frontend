@@ -1,4 +1,3 @@
-// app/components/candidate/candidate-list-item.tsx
 "use client";
 import React from 'react';
 import Image from 'next/image';
@@ -20,22 +19,25 @@ interface MappedCandidate {
   total_earnings: number;
 }
 
+// The props interface is updated to include the onViewProfile function
 interface CandidateListItemProps {
   item: MappedCandidate;
   isSaved: boolean;
   onToggleSave: (id: number) => void | Promise<void>;
+  onViewProfile: (id: number) => void; // <-- ADDED: Prop to handle profile view
 }
 
 const CandidateListItem: React.FC<CandidateListItemProps> = ({
   item,
   isSaved,
   onToggleSave,
+  onViewProfile, // <-- ADDED: Destructure the new prop
 }) => {
   return (
-    // ✅ MODIFIED: Removed the "favourite" class logic to hide the corner badge
     <div className="candidate-profile-card position-relative list-layout mb-25">
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+          {/* This link can remain for SEO purposes or right-click behavior, but the main action is the button */}
           <Link href={`/candidate-profile-v1/${item.user_id}`} className="rounded-circle">
             <Image
               src={item.profile_picture || "/images/default-avatar.png"}
@@ -92,12 +94,15 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                 >
                   <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                 </button>
-                <Link
-                  href={`/candidate-profile-v1/${item.user_id}`} 
+                
+                {/* MODIFIED: Changed from a Link to a button to trigger the in-page view */}
+                <button
+                  type="button"
+                  onClick={() => onViewProfile(item.user_id)} 
                   className="profile-btn tran3s ms-md-2"
                 >
                   View Profile
-                </Link>
+                </button>
               </div>
             </div>
           </div>
