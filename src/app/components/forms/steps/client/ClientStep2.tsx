@@ -45,6 +45,7 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               type="text"
               placeholder="Enter your company name"
               className="form-control"
+              style={{ height: '60px', minHeight: '60px' }}
               {...register("company_name", { required: "Company name is required" })}
             />
             {errors.company_name && (
@@ -61,6 +62,7 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <label>Industry*</label>
             <select
               className="form-control"
+              style={{ height: '60px', minHeight: '60px' }}
               {...register("industry", { required: "Industry is required" })}
             >
               <option value="">Select Industry</option>
@@ -104,6 +106,7 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <label>Company Size*</label>
             <select
               className="form-control"
+              style={{ height: '60px', minHeight: '60px' }}
               {...register("company_size", { required: "Company size is required" })}
             >
               <option value="">Select Company Size</option>
@@ -135,22 +138,25 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               // Update the form value and trigger validation
               setValue('required_services', services, { shouldValidate: true });
             }}
+            placeholder="Select service"
             error={errors.required_services?.message as string}
           />
         </div>
 
         {/* Navigation Buttons */}
-        <div className="col-12 d-flex justify-content-between mt-40">
+        <div className="col-6">
           <button
             type="button"
-            className="btn-one"
+            className="btn-one w-100 mt-30"
             onClick={prevStep}
           >
             Previous
           </button>
+        </div>
+        <div className="col-6">
           <button
             type="submit"
-            className="btn-one"
+            className="btn-one w-100 mt-30"
           >
             Next
           </button>

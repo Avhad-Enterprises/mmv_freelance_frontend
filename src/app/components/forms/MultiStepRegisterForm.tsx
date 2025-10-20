@@ -39,7 +39,7 @@ interface FormDataCommon {
   password: string;
   phone_number: string;
   id_type: string;
-  id_document: File | null;
+  id_document: File | File[] | null;
   profile_photo: File | null;
   otp: string;
   short_description: string;
@@ -51,7 +51,7 @@ interface FreelancerCommonFields {
   superpowers: string[];
   skill_tags: string[];
   portfolio_links: string[];
-  rate_amount: string;
+  rate_amount: number;
   rate_currency: string;
   availability: "Part-time" | "Full-time" | "Flexible" | "On-Demand" | "";
   languages: string[];
@@ -63,15 +63,17 @@ export interface VideoEditorFormData extends FormDataCommon, FreelancerCommonFie
   city: string; // Added
   country: string; // Added
   pincode: string; // Added
-  coordinates: { lat: string; lng: string }; // Added
+  coordinates: { lat: number; lng: number }; // Added
+  experience_level: string;
+  role: string;
 }
 
 export interface VideographerFormData extends FormDataCommon, FreelancerCommonFields {
   account_type: "videographer";
-  address: string; // Added
+  address: string;
   city: string;
   country: string;
-  coordinates: { lat: string; lng: string };
+  coordinates: { lat: number; lng: number };
 }
 
 export interface ClientFormData extends FormDataCommon {
@@ -111,7 +113,7 @@ export interface ClientFormData extends FormDataCommon {
   tax_id: string;
   city: string;
   country: string;
-  coordinates: { lat: string; lng: string };
+  coordinates: { lat: number; lng: number };
 }
 
 export type AllFormData = VideoEditorFormData | VideographerFormData | ClientFormData;
@@ -193,7 +195,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
       superpowers: [],
       skill_tags: [],
       portfolio_links: ["", "", ""],
-      rate_amount: "",
+      rate_amount: 0,
       rate_currency: "INR",
       availability: "",
       languages: [],
@@ -208,7 +210,9 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         city: "", // Added
         country: "", // Added
         pincode: "", // Added
-        coordinates: { lat: "", lng: "" }, // Added
+        coordinates: { lat: 0, lng: 0 }, // Added
+        experience_level: "",
+        role: "",
       } as VideoEditorFormData;
     } else if (currentAccountType === "videographer") {
       return {
@@ -218,7 +222,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         address: "", // Added
         city: "",
         country: "",
-        coordinates: { lat: "", lng: "" },
+        coordinates: { lat: 0, lng: 0 },
       } as VideographerFormData;
     } else { // client
       return {
@@ -259,7 +263,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
         tax_id: "",
         city: "",
         country: "",
-        coordinates: { lat: "", lng: "" },
+        coordinates: { lat: 0, lng: 0 },
       } as ClientFormData;
     }
   };

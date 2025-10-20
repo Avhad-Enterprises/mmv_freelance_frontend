@@ -457,7 +457,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           {/* Location Details */}
           <div className="col-12">
             <label>Location Details*</label>
-            <div className="row mt-2">
+            <div className="row mt-4">
               {/* Country */}
               <div className="col-md-6">
                 <div className="input-group-meta position-relative mb-25">
@@ -634,18 +634,20 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="col-12 d-flex justify-content-between mt-40">
+          <div className="col-6">
             <button
               type="button"
-              className="btn-one"
+              className="btn-one w-100 mt-30"
               onClick={prevStep}
               disabled={isGeocoding}
             >
               Previous
             </button>
+          </div>
+          <div className="col-6">
             <button
               type="submit"
-              className="btn-one"
+              className="btn-one w-100 mt-30"
               disabled={isGeocoding}
             >
               {isGeocoding ? "Verifying Address..." : "Next"}

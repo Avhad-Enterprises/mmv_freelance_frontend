@@ -498,9 +498,13 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
         </div>
 
         {/* Buttons */}
-        <div className="d-flex justify-content-between mt-4">
-          <button type="button" className="btn-one" onClick={prevStep}>Previous</button>
-          <button type="submit" className="btn-one">Next</button>
+        <div className="row">
+          <div className="col-6">
+            <button type="button" className="btn-one w-100 mt-30" onClick={prevStep}>Previous</button>
+          </div>
+          <div className="col-6">
+            <button type="submit" className="btn-one w-100 mt-30">Next</button>
+          </div>
         </div>
       </form>
     </>

@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 type Props = {
   formData: any;
@@ -129,6 +129,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 
   return (
     <div>
+      <Toaster position="top-right" />
       <h4 className="mb-3">Final Review</h4>
       <p className="mb-4">Please review your information carefully before submitting.</p>
       {Object.entries(sections).map(([title, values]) => (

@@ -54,6 +54,7 @@ const MultipleSelectionField: React.FC<MultipleSelectionFieldProps> = ({
       <div className="position-relative" ref={dropdownRef}>
         <select
           className="form-control"
+          style={{ height: '60px', minHeight: '60px' }}
           value=""
           onChange={(e) => {
             if (e.target.value) {

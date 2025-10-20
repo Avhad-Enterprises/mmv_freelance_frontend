@@ -37,7 +37,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
             <label>First Name*</label>
             <input 
               type="text" 
-              placeholder="Enter your first name" 
+              placeholder="Enter First Name" 
               className="form-control" 
               {...register("first_name", { required: "First Name is required" })}
             />
@@ -55,7 +55,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
             <label>Last Name*</label>
             <input 
               type="text" 
-              placeholder="Enter your last name" 
+              placeholder="Enter Last Name" 
               className="form-control" 
               {...register("last_name", { required: "Last Name is required" })}
             />
@@ -73,7 +73,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
             <label>Email*</label>
             <input 
               type="email" 
-              placeholder="james@example.com" 
+              placeholder="Enter Email" 
               className="form-control"
               {...register("email", { 
                 required: "Email is required",
@@ -113,8 +113,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '80%',
-                transform: 'translateY(-50%)',
+                top: '44px',
                 cursor: 'pointer'
               }}
             >
@@ -147,8 +146,7 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               style={{
                 position: 'absolute',
                 right: '15px',
-                top: '80%',
-                transform: 'translateY(-50%)',
+                top: '44px',
                 cursor: 'pointer'
               }}
             >

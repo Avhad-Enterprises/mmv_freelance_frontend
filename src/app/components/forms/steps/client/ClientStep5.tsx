@@ -237,17 +237,19 @@ const ClientStep5: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
         )}
 
         {/* Navigation Buttons */}
-        <div className="col-12 d-flex justify-content-between">
+        <div className="col-6">
           <button 
             type="button" 
-            className="btn-one"
+            className="btn-one w-100 mt-30"
             onClick={prevStep}
           >
             Previous
           </button>
+        </div>
+        <div className="col-6">
           <button
             type="submit"
-            className="btn-one"
+            className="btn-one w-100 mt-30"
           >
             Next
           </button>

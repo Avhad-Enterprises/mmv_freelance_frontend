@@ -499,7 +499,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         {/* Location Details */}
         <div className="mt-4">
           <label>Location Details*</label>
-          <div className="row mt-2">
+          <div className="row mt-4">
             {/* Country */}
             <div className="col-md-6">
               <label>Country*</label>
@@ -614,7 +614,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
 
             {/* Pincode */}
             <div className="col-md-6">
-              <label>Pincode</label>
+              <label>Pincode*</label>
               <div className="input-group-meta position-relative uniform-height">
                 <input
                   type="text"
@@ -622,8 +622,19 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                   style={{ height: '60px', minHeight: '60px' }}
                   placeholder="Enter pincode"
                   maxLength={10}
+                  {...register("pincode", {
+                    required: "Pincode is required",
+                    pattern: {
+                      value: /^[a-zA-Z0-9\s-]{3,10}$/,
+                      message: "Please enter a valid pincode"
+                    }
+                  })}
+                  onChange={() => clearErrors("pincode")}
                 />
               </div>
+              {errors.pincode && (
+                <div className="text-danger mt-1">{String(errors.pincode.message)}</div>
+              )}
             </div>
 
             {/* Full Address */}
@@ -657,17 +668,21 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="d-flex justify-content-between mt-4">
-          <button type="button" className="btn-one" onClick={prevStep} disabled={isGeocoding}>
-            Previous
-          </button>
-          <button
-            type="submit"
-            className="btn-one"
-            disabled={isGeocoding}
-          >
-            {isGeocoding ? "Verifying Address..." : "Next"}
-          </button>
+        <div className="row mt-4">
+          <div className="col-6">
+            <button type="button" className="btn-one w-100 mt-30" onClick={prevStep} disabled={isGeocoding}>
+              Previous
+            </button>
+          </div>
+          <div className="col-6">
+            <button
+              type="submit"
+              className="btn-one w-100 mt-30"
+              disabled={isGeocoding}
+            >
+              {isGeocoding ? "Verifying Address..." : "Next"}
+            </button>
+          </div>
         </div>
       </form>
     </>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Country } from "country-state-city";
 
 type Props = {
@@ -102,10 +102,16 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         formDataToSend.append("profile_picture", formData.profile_photo as File);
       }
 
-      console.log("Client form data being sent to API:");
+      // Debug: Log all form data being sent
+      console.log("=== CLIENT REGISTRATION PAYLOAD ===");
       for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
+        if (value instanceof File) {
+          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
       }
+      console.log("====================================");
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/client`, {
         method: "POST",
@@ -116,14 +122,21 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       });
 
       const data = await response.json();
+      console.log('API Response:', data);
+      
       if (!response.ok) {
+        console.error('Registration failed:', data);
         throw new Error(data.message || "Registration failed");
       }
 
-      await handleRegister(data);
+      // Registration successful - show success message and redirect
       toast.success("Registration completed successfully!", { id: loadingToast });
+      console.log('✅ Registration successful!');
+      setTimeout(() => {
+        window.location.href = '/?login=true';
+      }, 2000);
     } catch (error: any) {
-      console.error("Registration error:", error);
+      console.error("❌ Registration error:", error);
       toast.error(error.message || "Registration failed. Please try again.", { id: loadingToast });
     }
   };
@@ -169,6 +182,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
 
   return (
     <div className="row">
+      <Toaster position="top-right" />
       <h4 className="mb-25">Final Review</h4>
       <p className="mb-25">Please review your information carefully before submitting.</p>
       {Object.entries(sections).map(([title, values]) => (
@@ -231,13 +245,15 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       </div>
 
       {/* Buttons */}
-      <div className="col-12 d-flex justify-content-between mt-30">
-        <button type="button" className="btn-one tran3s" onClick={prevStep}>
+      <div className="col-6">
+        <button type="button" className="btn-one w-100 mt-30" onClick={prevStep}>
           Previous
         </button>
+      </div>
+      <div className="col-6">
         <button
           type="button"
-          className="btn-one tran3s"
+          className="btn-one w-100 mt-30"
           onClick={handleSubmitRegistration}
           disabled={!termsAccepted || !privacyAccepted}
         >

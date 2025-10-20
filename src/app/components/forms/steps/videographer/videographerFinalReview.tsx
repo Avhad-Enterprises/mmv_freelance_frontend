@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Country } from "country-state-city";
 
 type Props = {
@@ -100,6 +100,17 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       fd.append('terms_accepted', String(termsAccepted));
       fd.append('privacy_policy_accepted', String(privacyAccepted));
 
+      // Debug: Log all form data being sent
+      console.log('=== VIDEOGRAPHER REGISTRATION PAYLOAD ===');
+      for (let [key, value] of fd.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+      console.log('==========================================');
+
       // Submit
 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videographer`, {
         method: 'POST',
@@ -110,14 +121,22 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
       });
 
       const respData = await response.json();
+      console.log('API Response:', respData);
+      
       if (!response.ok) {
+        console.error('Registration failed with status:', response.status);
+        console.error('Error details:', respData);
         throw new Error(respData.message || 'Registration failed');
       }
 
-      await handleRegister(respData);
+      // Registration successful - show success message and redirect
+      console.log('✅ Registration successful!');
       toast.success('Registration completed successfully!', { id: loadingToast });
+      setTimeout(() => {
+        window.location.href = '/?login=true';
+      }, 2000);
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error('❌ Registration error:', error);
       toast.error(error.message || 'Registration failed. Please try again.', { id: loadingToast });
     }
   };
@@ -153,6 +172,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 
   return (
     <div>
+      <Toaster position="top-right" />
       <h4 className="mb-3">Final Review</h4>
       <p className="mb-4">Please review your information carefully before submitting.</p>
       {Object.entries(sections).map(([title, values]) => (
@@ -207,18 +227,22 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
         </div>
       </div>
 
-      <div className="d-flex justify-content-between mt-4">
-        <button type="button" className="btn-one" onClick={prevStep}>
-          Previous
-        </button>
-        <button
-          type="button"
-          className="btn-one"
-          onClick={handleSubmit}
-          disabled={!termsAccepted || !privacyAccepted}
-        >
-          Confirm & Submit
-        </button>
+      <div className="row">
+        <div className="col-6">
+          <button type="button" className="btn-one w-100 mt-30" onClick={prevStep}>
+            Previous
+          </button>
+        </div>
+        <div className="col-6">
+          <button
+            type="button"
+            className="btn-one w-100 mt-30"
+            onClick={handleSubmit}
+            disabled={!termsAccepted || !privacyAccepted}
+          >
+            Confirm & Submit
+          </button>
+        </div>
       </div>
     </div>
   );
