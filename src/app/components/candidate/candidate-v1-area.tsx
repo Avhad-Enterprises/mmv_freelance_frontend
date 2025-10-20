@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidate-login-modal";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item"; // Using your desired item component
-import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area";
+import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-new";
 import ShortSelect from "@/app/components/common/short-select";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
@@ -18,12 +18,12 @@ interface ApiCandidate {
   city: string | null;
   country: string | null;
   skills: string[];
+  superpowers: string[];
   rate_amount: string;
   currency: string;
   profile_title: string | null;
   created_at: string;
   total_earnings: number;
-  // Add any other fields from your API that might be needed
   availability: string;
 }
 
@@ -40,8 +40,9 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
   const [userType, setUserType] = useState<string | null>(null);
 
   // Filter and sort states
-  const [selectedSkill, setSelectedSkill] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedSuperpowers, setSelectedSuperpowers] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState("");
 
   // Pagination state
@@ -193,21 +194,40 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
     setCurrentPage(event.selected + 1); // ReactPaginate is 0-indexed, our state is 1-indexed
   };
 
-  const applyFilters = () => {
+  // Effect to auto-apply filters when any filter changes
+  useEffect(() => {
     let filtered = [...candidates];
-    if (selectedSkill) {
-      filtered = filtered.filter(c => c.skills?.includes(selectedSkill));
+    
+    // Filter by skills (any of the selected skills)
+    if (selectedSkills.length > 0) {
+      filtered = filtered.filter(c => 
+        c.skills?.some(skill => selectedSkills.includes(skill))
+      );
     }
-    if (selectedLocation) {
-      filtered = filtered.filter(c => c.city && c.country && `${c.city}, ${c.country}` === selectedLocation);
+    
+    // Filter by locations (any of the selected locations)
+    if (selectedLocations.length > 0) {
+      filtered = filtered.filter(c => 
+        c.city && c.country && 
+        selectedLocations.includes(`${c.city}, ${c.country}`)
+      );
     }
+    
+    // Filter by superpowers (any of the selected superpowers)
+    if (selectedSuperpowers.length > 0) {
+      filtered = filtered.filter(c => 
+        c.superpowers?.some(sp => selectedSuperpowers.includes(sp))
+      );
+    }
+
     setFilteredCandidates(filtered);
     setCurrentPage(1);
-  };
+  }, [selectedSkills, selectedLocations, selectedSuperpowers, candidates]);
 
   const clearFilters = () => {
-    setSelectedSkill("");
-    setSelectedLocation("");
+    setSelectedSkills([]);
+    setSelectedLocations([]);
+    setSelectedSuperpowers([]);
     setFilteredCandidates(candidates);
     setCurrentPage(1);
   };
@@ -246,13 +266,14 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
           <div className="row">
             <div className="col-xl-3 col-lg-4">
               <CandidateV1FilterArea
-                onSkillChange={setSelectedSkill}
-                onLocationChange={setSelectedLocation}
-                onApplyFilter={applyFilters}
+                onSkillChange={setSelectedSkills}
+                onLocationChange={setSelectedLocations}
+                onSuperpowersChange={setSelectedSuperpowers}
                 skills={allSkills}
                 locations={allLocations}
-                selectedSkill={selectedSkill}
-                selectedLocation={selectedLocation}
+                selectedSkills={selectedSkills}
+                selectedLocations={selectedLocations}
+                selectedSuperpowers={selectedSuperpowers}
                 onClearFilters={clearFilters}
               />
             </div>

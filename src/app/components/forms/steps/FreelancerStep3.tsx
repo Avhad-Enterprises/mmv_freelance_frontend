@@ -54,7 +54,7 @@ const FreelancerStep3: React.FC<Props> = ({ formData, setFormData, nextStep, pre
       />
 
       <div className="mt-3">
-        <h5>ID Verification*</h5>
+        <h5>ID Verification</h5>
         <div className="row">
           <div className="col-md-6">
             <select

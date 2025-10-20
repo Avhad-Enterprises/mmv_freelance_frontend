@@ -78,7 +78,7 @@ const BlogV2Page = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        <Header />
+        <Header isAuthenticated={true} />
 
         <BlogGridArea
           allBlogs={allBlogs}

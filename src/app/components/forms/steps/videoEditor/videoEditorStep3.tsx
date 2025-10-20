@@ -360,7 +360,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
 
         {/* ID Verification */}
         <div className="mt-4">
-          <label>ID Verification*</label>
+          <label>ID Verification</label>
           <div className="row mt-4">
             <div className="col-md-6">
               <label>ID Type*</label>

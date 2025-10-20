@@ -1,16 +1,21 @@
 import React from "react";
 import Select from 'react-select';
 
+interface Skill {
+  skill_id: number;
+  skill_name: string;
+}
+
 interface Props {
-  skills: string[];
+  skills: Skill[];
   onChange: (values: string[]) => void;
   value: string[];
 }
 
-const FilterSkills = ({ skills, onChange, value }: Props) => {
+const FilterJobSkills = ({ skills, onChange, value }: Props) => {
   const options = skills.map(skill => ({
-    value: skill,
-    label: skill,
+    value: skill.skill_name,
+    label: skill.skill_name,
   }));
 
   return (
@@ -28,4 +33,4 @@ const FilterSkills = ({ skills, onChange, value }: Props) => {
   );
 };
 
-export default FilterSkills;
+export default FilterJobSkills;
