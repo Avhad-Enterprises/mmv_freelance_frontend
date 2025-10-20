@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Header from '@/layouts/headers/header';
-import HeaderDash from '@/layouts/headers/headerDash';
 import Wrapper from '@/layouts/wrapper';
 import CandidateV1Area from '../components/candidate/candidate-v1-area';
 import FooterOne from '@/layouts/footers/footer-one';
@@ -58,7 +57,7 @@ const CandidateClientView = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
 
         {/* ✅ 2. Pass down the state and the handler function as props */}
         <CandidateV1Area 

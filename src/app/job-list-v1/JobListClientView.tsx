@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import Header from '@/layouts/headers/header';
-import HeaderDash from '@/layouts/headers/headerDash';
 import Wrapper from '@/layouts/wrapper';
 import JobListThree from '../components/jobs/list/job-list-three';
 import JobPortalIntro from '../components/job-portal-intro/job-portal-intro';
@@ -34,7 +33,7 @@ const JobListClientView = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
 
         <JobListThree itemsPerPage={8} />
 

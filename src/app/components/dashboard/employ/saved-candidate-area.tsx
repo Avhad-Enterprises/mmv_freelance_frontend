@@ -1,280 +1,377 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import CandidateCard from "../../candidate/candidate-card";
-import { useSidebar } from "@/context/SidebarContext";
+import React, { useState, useEffect, useCallback } from "react";
+import toast, { Toaster } from 'react-hot-toast';
 import DashboardHeader from "../candidate/dashboard-header";
+import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
+// import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori"; // Removed as filters are not needed for "saved only"
+import Pagination from "@/ui/pagination";
+// import NiceSelect from "@/ui/nice-select"; // Removed as sorting is not needed for "saved only"
+import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar"; // Import CandidateDetailsArea
+import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page"; // Import IFreelancer interface
 
-type IProps = {
-  // No props needed, using context
-};
-
-interface SavedCandidate {
+// This interface matches the raw data from your API
+interface ApiCandidate {
   user_id: number;
   first_name: string;
   last_name: string;
   username: string;
-  profile_picture: string;
-  bio: string | null;
+  profile_picture: string | null;
+  bio: string | null; // Added bio for mapping
+  timezone: string | null;
+  address_line_first: string | null;
+  address_line_second: string | null;
   city: string | null;
+  state: string | null;
   country: string | null;
+  pincode: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  is_active: boolean;
+  is_banned: boolean;
+  is_deleted: boolean;
+  email_notifications: boolean;
+  created_at: string;
+  updated_at: string;
+  freelancer_id: number;
+  profile_title: string | null;
+  role: string | null;
+  short_description: string | null;
+  experience_level: string | null;
   skills: string[];
   superpowers: string[];
+  skill_tags: string[];
+  base_skills: string[];
   languages: string[];
-  portfolio_links: string[];
+  portfolio_links: string[]; // Can contain YouTube links and others
+  certification: any; // Can be null
+  education: any; // Can be null
+  previous_works: any; // Can be null
+  services: any; // Can be null
   rate_amount: string;
   currency: string;
   availability: string;
+  work_type: string | null;
+  hours_per_week: number | null;
+  id_type: string | null;
+  id_document_url: string | null;
+  kyc_verified: boolean;
+  aadhaar_verification: boolean;
+  hire_count: number;
+  review_id: number;
+  total_earnings: number;
+  time_spent: number;
+  projects_applied: any[];
+  projects_completed: any[];
+  payment_method: any;
+  bank_account_info: any;
+  role_name: string | null;
+  experience: any; 
 }
 
-const SavedCandidateArea = ({}: IProps) => {
-  const { setIsOpenSidebar } = useSidebar();
-  const [savedCandidates, setSavedCandidates] = useState<SavedCandidate[]>([]);
-  const [favoriteIds, setFavoriteIds] = useState<{ [key: number]: number }>({});
+
+const SavedCandidateArea = () => {
+  // State variables for data and UI control
+  const [allCandidates, setAllCandidates] = useState<ApiCandidate[]>([]); // Renamed to allCandidates
+  const [displayedCandidates, setDisplayedCandidates] = useState<ApiCandidate[]>([]); // Holds only saved candidates
+  const [savedCandidates, setSavedCandidates] = useState<number[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<{ [candidateId: number]: number }>({});
   const [loading, setLoading] = useState(true);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [viewType, setViewType] = useState<'grid' | 'list'>('grid');
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  // Fetch current user ID
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('Please log in to view saved candidates');
-          setLoading(false);
-          return;
-        }
+  // New state for viewing a single candidate profile
+  const [selectedFreelancer, setSelectedFreelancer] = useState<IFreelancer | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(false);
 
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch user info');
-        }
+  // Helper function to format currency
+  const formatCurrency = (amountStr: string, currencyCode: string) => {
+    const amount = parseFloat(amountStr);
+    if (isNaN(amount)) return `${amountStr} ${currencyCode}`;
+    try {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: 2 }).format(amount);
+    } catch (e) {
+      return `${amount.toFixed(2)} ${currencyCode}`;
+    }
+  };
 
-        const data = await response.json();
-        if (data.success && data.data.user) {
-          setCurrentUserId(data.data.user.user_id);
-        }
-      } catch (err: any) {
-        console.error('Error fetching current user:', err);
-        setError('Failed to load user information');
-        setLoading(false);
-      }
+  // Helper function to map ApiCandidate to IFreelancer
+  const mapApiCandidateToIFreelancer = useCallback((apiCandidate: ApiCandidate): IFreelancer => {
+    const youtubeVideos = (apiCandidate.portfolio_links || [])
+      .filter(link => link.includes("youtube.com/watch?v="))
+      .map(link => {
+        const videoId = link.split('v=')[1]?.split('&')[0] || '';
+        return { id: videoId, url: link };
+      })
+      .filter(video => video.id !== '');
+
+    return {
+      user_id: apiCandidate.user_id,
+      first_name: apiCandidate.first_name,
+      last_name: apiCandidate.last_name,
+      bio: apiCandidate.bio || apiCandidate.short_description || null,
+      profile_picture: apiCandidate.profile_picture || null,
+      skills: apiCandidate.skills || [],
+      superpowers: apiCandidate.superpowers || [],
+      languages: apiCandidate.languages || [],
+      city: apiCandidate.city || null,
+      country: apiCandidate.country || null,
+      email: `${apiCandidate.username || 'unknown'}@example.com`, // Assuming email derived from username
+      rate_amount: apiCandidate.rate_amount || "0.00",
+      currency: apiCandidate.currency || "USD",
+      availability: apiCandidate.availability || "not specified",
+      latitude: apiCandidate.latitude || null,
+      longitude: apiCandidate.longitude || null,
+      profile_title: apiCandidate.profile_title || null,
+      short_description: apiCandidate.short_description || null,
+      youtube_videos: youtubeVideos,
+      experience_level: apiCandidate.experience_level || null,
+      work_type: apiCandidate.work_type || null,
+      hours_per_week: apiCandidate.hours_per_week || null,
+      kyc_verified: apiCandidate.kyc_verified,
+      aadhaar_verification: apiCandidate.aadhaar_verification,
+      hire_count: apiCandidate.hire_count,
+      review_id: apiCandidate.review_id,
+      total_earnings: apiCandidate.total_earnings,
+      time_spent: apiCandidate.time_spent,
+      role_name: apiCandidate.role_name || null,
+      experience: apiCandidate.experience || [],
+      education: apiCandidate.education || [],
+      previous_works: apiCandidate.previous_works || [],
+      certification: apiCandidate.certification || [],
+      services: apiCandidate.services || [],
+      portfolio_links: apiCandidate.portfolio_links || [],
     };
-
-    fetchCurrentUser();
   }, []);
 
-  // Fetch saved candidates
+  // Effect to fetch all candidates
   useEffect(() => {
-    const fetchSavedCandidates = async () => {
-      if (!currentUserId) return;
-
+    const fetchCandidates = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('Authentication required');
-          return;
-        }
-
-        // Fetch favorites list
-const favoritesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/listfreelancers`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!favoritesResponse.ok) {
-          throw new Error('Failed to fetch favorites');
-        }
-
-        const favoritesData = await favoritesResponse.json();
-        console.log('Favorites Response:', favoritesData);
-
-        if (!favoritesData.data || favoritesData.data.length === 0) {
-          setSavedCandidates([]);
-          setLoading(false);
-          return;
-        }
-
-        // Extract freelancer IDs and favorite record IDs
-        const freelancerIds: number[] = [];
-        const favIds: { [key: number]: number } = {};
-
-        favoritesData.data.forEach((fav: any) => {
-          const freelancerId = fav.freelancer_id || fav.favorite_freelancer_id;
-          const favoriteRecordId = fav.favorite_id || fav.id;
-          
-          if (freelancerId) {
-            freelancerIds.push(freelancerId);
-            if (favoriteRecordId) {
-              favIds[freelancerId] = favoriteRecordId;
-            }
-          }
-        });
-
-        setFavoriteIds(favIds);
-
-        // Fetch full candidate details
-const candidatesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
-          cache: 'no-cache'
-        });
-
-        if (!candidatesResponse.ok) {
-          throw new Error('Failed to fetch candidates');
-        }
-
-        const candidatesData = await candidatesResponse.json();
-        const allCandidates = Array.isArray(candidatesData.data) ? candidatesData.data : [];
-
-        // Filter to only saved candidates
-        const saved = allCandidates.filter((candidate: SavedCandidate) => 
-          freelancerIds.includes(candidate.user_id)
-        );
-
-        setSavedCandidates(saved);
-        console.log('Loaded saved candidates:', saved);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+        if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
+        
+        const responseData = await response.json();
+        const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
+        setAllCandidates(candidatesData); // Store all candidates
       } catch (err: any) {
-        console.error('Error fetching saved candidates:', err);
-        setError(`Failed to load saved candidates: ${err.message}`);
+        setError(`Error fetching candidates: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
+    fetchCandidates();
+  }, []);
 
-    fetchSavedCandidates();
-  }, [currentUserId]);
+  // Effect to fetch user's favorite candidates
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setLoadingFavorites(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setSavedCandidates([]);
+          setFavoriteIds({});
+          return;
+        }
 
-  // Handle removing a candidate from favorites
-  const handleRemoveFavorite = async (candidateId: number) => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/my-favorites`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch favorites');
+
+        const result = await response.json();
+        if (result.data && Array.isArray(result.data)) {
+          const savedIds = result.data.map((fav: any) => fav.freelancer_id);
+          const favIds = result.data.reduce((acc: any, fav: any) => {
+            acc[fav.freelancer_id] = fav.id;
+            return acc;
+          }, {});
+          setSavedCandidates(savedIds);
+          setFavoriteIds(favIds);
+        }
+      } catch (err) {
+        console.error("Error loading favorites:", err);
+        setSavedCandidates([]);
+        setFavoriteIds({});
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+    fetchFavorites();
+  }, []);
+  
+  // Effect to filter candidates based on saved status
+  useEffect(() => {
+    if (allCandidates.length > 0 || savedCandidates.length > 0) {
+      const savedOnlyCandidates = allCandidates.filter(candidate => 
+        savedCandidates.includes(candidate.user_id)
+      );
+      setDisplayedCandidates(savedOnlyCandidates);
+      setCurrentPage(1); // Reset pagination when candidates are filtered
+    }
+  }, [allCandidates, savedCandidates]); // Rerun when allCandidates or savedCandidates change
+
+  // --- Event Handler to Add/Remove Favorites ---
+  const handleToggleSave = async (candidateId: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        toast.error("Please log in to save candidates.");
+        return;
+    }
+
+    const isCurrentlySaved = savedCandidates.includes(candidateId);
+    
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        alert('Authentication required');
-        return;
-      }
+        if (isCurrentlySaved) {
+            // --- REMOVE from favorites ---
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ freelancer_id: candidateId })
+            });
 
-      const favoriteId = favoriteIds[candidateId];
-      if (!favoriteId) {
-        console.error('No favorite ID found for candidate:', candidateId);
-        // Still remove from UI
-        setSavedCandidates(prev => prev.filter(c => c.user_id !== candidateId));
-        return;
-      }
+            if (!response.ok) throw new Error("Failed to remove from favorites");
 
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: favoriteId })
-      });
+            // Update state immutably
+            setSavedCandidates(prev => prev.filter(id => id !== candidateId));
+            setFavoriteIds(prev => {
+                const newFavs = { ...prev };
+                delete newFavs[candidateId];
+                return newFavs;
+            });
+            toast.success('Removed from favorites!');
+        } else {
+            // --- ADD to favorites ---
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ freelancer_id: candidateId })
+            });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to remove candidate' }));
-        throw new Error(errorData.message || 'Failed to remove from favorites');
-      }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to add to favorites");
+            }
+            
+            const result = await response.json();
 
-      // Remove from UI
-      setSavedCandidates(prev => prev.filter(c => c.user_id !== candidateId));
-      setFavoriteIds(prev => {
-        const newIds = { ...prev };
-        delete newIds[candidateId];
-        return newIds;
-      });
-
-      console.log('Candidate removed from favorites');
+            // Update state immutably
+            setSavedCandidates(prev => [...prev, candidateId]);
+            setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
+            toast.success('Added to favorites!');
+        }
     } catch (err: any) {
-      console.error('Error removing favorite:', err);
-      alert(`Failed to remove candidate: ${err.message}`);
+        console.error("Error toggling favorite:", err);
+        toast.error(err.message || "An unexpected error occurred.");
     }
   };
+
+  const handlePageClick = (event: { selected: number }) => {
+    setCurrentPage(event.selected + 1);
+  };
+
+  // --- New Handlers for Profile View ---
+  const handleViewProfile = (candidateId: number) => {
+    setLoadingProfile(true);
+    // Find in allCandidates to ensure we have the full data
+    const candidate = allCandidates.find(c => c.user_id === candidateId); 
+    if (candidate) {
+      setSelectedFreelancer(mapApiCandidateToIFreelancer(candidate));
+    } else {
+      toast.error("Candidate profile not found locally. Please try again.");
+      console.error("Candidate not found in local state:", candidateId);
+    }
+    setLoadingProfile(false);
+  };
+
+  const handleBackToList = () => {
+    setSelectedFreelancer(null);
+  };
+
+  // --- Derived State for Rendering ---
+  const indexOfLast = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
+  const currentDisplayCandidates = displayedCandidates.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(displayedCandidates.length / ITEMS_PER_PAGE);
 
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* header start */}
+        <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
-        {/* header end */}
+        <h2 className="main-title">My Saved Candidates</h2> {/* Updated title */}
         
-        <div className="d-flex align-items-center justify-content-between mb-4">
-          <h2 className="main-title m-0">Saved Candidates</h2>
-          <div className="d-flex gap-2">
-            <button
-              className={`btn btn-sm ${viewType === 'grid' ? 'btn-primary' : 'btn-outline-secondary'}`}
-              onClick={() => setViewType('grid')}
-              title="Grid View"
-            >
-              ⊞
-            </button>
-            <button
-              className={`btn btn-sm ${viewType === 'list' ? 'btn-primary' : 'btn-outline-secondary'}`}
-              onClick={() => setViewType('list')}
-              title="List View"
-            >
-              ☰
-            </button>
-          </div>
-        </div>
+        {selectedFreelancer ? (
+          // Render CandidateDetailsArea if a freelancer is selected
+          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} onBackToList={handleBackToList} />
+        ) : (
+          // Otherwise, render the list of saved candidates
+          <>
+            {/* Removed CandidateV1FilterArea */}
+            {/* Removed Filter and Sort UI as only saved candidates are shown */}
 
-        <div className="wrapper">
-          {loading && (
-            <div className="text-center p-5">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="mt-3">Loading saved candidates...</p>
+            <div className="candidate-profile-area">
+                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                    <div className="total-job-found">
+                        Showing <span className="text-dark fw-500">{displayedCandidates.length}</span> saved candidates
+                    </div>
+                    {/* Removed sorting NiceSelect */}
+                </div>
+
+                <div className="accordion-box list-style show">
+                    {(loading || loadingFavorites) && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+                    {error && <p className="text-danger text-center p-5">{error}</p>}
+                    
+                    {!loading && !loadingFavorites && currentDisplayCandidates.length === 0 && (
+                        <div className="text-center p-5"><h4>No saved candidates found</h4><p>You haven't added any candidates to your favorites yet.</p></div>
+                    )}
+
+                    {!loading && !loadingFavorites && currentDisplayCandidates.map((apiCandidate) => (
+                        <CandidateListItem
+                            key={apiCandidate.user_id}
+                            isSaved={savedCandidates.includes(apiCandidate.user_id)} // Will always be true here
+                            onToggleSave={handleToggleSave}
+                            onViewProfile={handleViewProfile}
+                            item={{
+                                user_id: apiCandidate.user_id,
+                                username: apiCandidate.username,
+                                first_name: apiCandidate.first_name,
+                                last_name: apiCandidate.last_name,
+                                profile_picture: apiCandidate.profile_picture || undefined,
+                                city: apiCandidate.city || '',
+                                country: apiCandidate.country || '',
+                                skill: apiCandidate.skills,
+                                post: apiCandidate.profile_title || 'Freelancer',
+                                budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
+                                location: '', 
+                                total_earnings: apiCandidate.total_earnings,
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {totalPages > 1 && (
+                    <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                        <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                            Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, displayedCandidates.length)}</span> of <span className="text-dark fw-500">{displayedCandidates.length}</span>
+                        </p>
+                        <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
+                    </div>
+                )}
             </div>
-          )}
-
-          {error && (
-            <div className="alert alert-danger" role="alert">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && savedCandidates.length === 0 && (
-            <div className="text-center p-5">
-              <h4>No saved candidates yet</h4>
-              <p className="text-muted">
-                Start exploring candidates and save your favorites!
-              </p>
-            </div>
-          )}
-
-          {!loading && !error && savedCandidates.length > 0 && (
-            <>
-              <div className="mb-3">
-                <span className="fw-bold">{savedCandidates.length}</span> saved candidate{savedCandidates.length !== 1 ? 's' : ''}
-              </div>
-              
-              <div className={viewType === 'grid' ? 'row' : ''}>
-                {savedCandidates.map((candidate) => (
-                  <div 
-                    key={candidate.user_id} 
-                    className={viewType === 'grid' ? 'col-md-6 col-lg-6 mb-4' : 'col-12 mb-3'}
-                  >
-                    <CandidateCard
-                      candidate={candidate}
-                      isSaved={true}
-                      onToggleSave={handleRemoveFavorite}
-                      viewType={viewType}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

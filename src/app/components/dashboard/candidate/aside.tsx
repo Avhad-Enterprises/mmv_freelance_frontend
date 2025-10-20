@@ -53,7 +53,7 @@ const CandidateAside = ({}: IProps) => {
                 <div className="position-relative" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
-                        <Link href="/dashboard/candidate-dashboard">
+                        <Link href="/">
                             <Image src={logo} alt="logo" width={140} priority />
                         </Link>
                         <button

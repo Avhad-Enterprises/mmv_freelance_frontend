@@ -1,26 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import BlogSidebar from "../blog-postbox/sidebar";
 import BlogPagination from "../blog-postbox/blog-pagination";
 import BlogItem from "../blog-postbox/blog-item";
 import { IBlogDataType } from "@/types/blog-type";
-import blog_data from "@/data/blog-data";
 
-const BlogGridArea = () => {
-  const [allBlogs, setAllBlogs] = useState<IBlogDataType[]>([]);
-  const [loading, setLoading] = useState(true);
+// Define the types for the props this component will receive
+interface BlogGridAreaProps {
+  allBlogs: IBlogDataType[];
+  blogsToDisplay: IBlogDataType[];
+  loading: boolean;
+  selectedCategory: string | null;
+  selectedTags: string[];
+  onSelectCategory: (category: string) => void;
+  onSelectTag: (tag: string) => void;
+}
+
+const BlogGridArea = ({
+  allBlogs,
+  blogsToDisplay,
+  loading,
+  selectedCategory,
+  selectedTags,
+  onSelectCategory,
+  onSelectTag,
+}: BlogGridAreaProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
+  // When the filter changes, reset the pagination to the first page
   useEffect(() => {
-    // Use static blog data instead of API call
-    setAllBlogs(blog_data);
-    setLoading(false);
-  }, []);
+    setCurrentPage(1);
+  }, [blogsToDisplay]);
 
+  // Paginate the filtered list of blogs
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedBlogs = allBlogs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedBlogs = blogsToDisplay.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <section className="blog-section pt-100 lg-pt-80 pb-120 lg-pb-80">
@@ -38,12 +54,12 @@ const BlogGridArea = () => {
                 ))}
               </div>
             ) : (
-              <p>No blogs found.</p>
+              <p>No blogs found for the selected filter.</p>
             )}
 
-            {!loading && allBlogs.length > itemsPerPage && (
+            {!loading && blogsToDisplay.length > itemsPerPage && (
               <BlogPagination
-                total={allBlogs.length}
+                total={blogsToDisplay.length}
                 currentPage={currentPage}
                 itemsPerPage={itemsPerPage}
                 onPageChange={setCurrentPage}
@@ -52,7 +68,13 @@ const BlogGridArea = () => {
           </div>
 
           <div className="col-lg-4">
-            <BlogSidebar/>
+            <BlogSidebar
+              blogs={allBlogs}
+              selectedCategory={selectedCategory}
+              selectedTags={selectedTags}
+              onSelectCategory={onSelectCategory}
+              onSelectTag={onSelectTag}
+            />
           </div>
         </div>
       </div>

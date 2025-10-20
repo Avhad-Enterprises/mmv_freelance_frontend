@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
-import HeaderDash from "@/layouts/headers/headerDash";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
@@ -78,7 +77,7 @@ const HomeSix = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* Conditional header rendering */}
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
 
         {/* hero banner start */}
         <HeroBannerSeven />
