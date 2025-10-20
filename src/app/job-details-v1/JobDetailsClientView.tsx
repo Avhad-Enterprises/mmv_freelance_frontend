@@ -5,7 +5,6 @@ import { jwtDecode } from 'jwt-decode';
 
 import Wrapper from '@/layouts/wrapper';
 import Header from '@/layouts/headers/header';
-import HeaderDash from '@/layouts/headers/headerDash';
 import FooterOne from '@/layouts/footers/footer-one';
 import JobPortalIntro from '../components/job-portal-intro/job-portal-intro';
 import JobDetailsBreadcrumb from '../components/jobs/breadcrumb/job-details-breadcrumb';
@@ -43,7 +42,7 @@ const JobDetailsClientView = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* header start */}
-        {isAuthenticated ? <HeaderDash /> : <Header />}
+        <Header isAuthenticated={isAuthenticated} />
         {/* header end */}
 
         {/* job details breadcrumb start */}

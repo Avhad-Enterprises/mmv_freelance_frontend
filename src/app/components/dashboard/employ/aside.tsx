@@ -58,7 +58,7 @@ const EmployAside = ({}: IProps) => {
                 <div className="position-relative">
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
-                        <Link href="/dashboard/employ-dashboard">
+                        <Link href="/">
                             <Image src={logo} alt="logo" width={140} priority />
                         </Link>
                         <button

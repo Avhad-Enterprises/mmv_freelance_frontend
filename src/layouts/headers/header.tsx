@@ -7,7 +7,11 @@ import logo from "@/assets/images/logo/logo_new.png";
 import CategoryDropdown from "./component/category-dropdown";
 import LoginModal from "@/app/components/common/popup/login-modal";
 
-const Header = () => {
+type HeaderProps = {
+  isAuthenticated?: boolean;
+};
+
+const Header = ({ isAuthenticated = false }: HeaderProps) => {
   return (
     <>
       <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
@@ -29,14 +33,20 @@ const Header = () => {
               <div className="right-widget ms-auto order-lg-3">
                 <ul className="d-flex align-items-center style-none">
                   <li>
-                    <a
-                      href="#"
-                      className="login-btn-one"
-                      data-bs-toggle="modal"
-                      data-bs-target="#loginModal"
-                    >
-                      Login
-                    </a>
+                    {isAuthenticated ? (
+                      <Link href="/dashboard/candidate-dashboard" className="login-btn-one">
+                        Dashboard
+                      </Link>
+                    ) : (
+                      <a
+                        href="#"
+                        className="login-btn-one"
+                        data-bs-toggle="modal"
+                        data-bs-target="#loginModal"
+                      >
+                        Login
+                      </a>
+                    )}
                   </li>
                   <li className="d-none d-md-block ms-4">
                     <Link href="/candidates-v1" className="btn-one">
