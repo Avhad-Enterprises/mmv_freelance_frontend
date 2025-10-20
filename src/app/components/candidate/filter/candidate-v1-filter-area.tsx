@@ -7,14 +7,14 @@ import JobPrices from "../../jobs/filter/job-prices";
 import FilterEnglishFluency from "./filter-english-fluency";
 
 type Props = {
-  onSkillChange: (value: string) => void;
-  onLocationChange: (value: string) => void;
+  onSkillChange: (values: string[]) => void;
+  onLocationChange: (values: string[]) => void;
   onApplyFilter: () => void;
   skills: string[];
   locations: string[];
-  selectedSkill: string;      // <-- ADD THIS LINE
-  selectedLocation: string;
-  onClearFilters: () => void; // <-- ADD THIS LINE
+  selectedSkill: string[];
+  selectedLocation: string[];
+  onClearFilters: () => void;
 };
 
 const CandidateV1FilterArea = ({
@@ -23,6 +23,8 @@ const CandidateV1FilterArea = ({
   onApplyFilter,
   skills,
   locations,
+  selectedSkill,
+  selectedLocation,
 }: Props) => {
 
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 50000]);
@@ -73,7 +75,7 @@ const CandidateV1FilterArea = ({
           </a>
           <div className="collapse show" id="collapseCategory">
             <div className="main-body">
-              <FilterSkills skills={skills} onChange={onSkillChange} />
+              <FilterSkills skills={skills} onChange={onSkillChange} value={selectedSkill} />
             </div>
           </div>
         </div>
@@ -90,7 +92,7 @@ const CandidateV1FilterArea = ({
           </a>
           <div className="collapse show" id="collapseLocation">
             <div className="main-body">
-              <FilterCandidateLocation locations={locations} onChange={onLocationChange} />
+              <FilterCandidateLocation locations={locations} onChange={onLocationChange} value={selectedLocation} />
             </div>
           </div>
         </div>
