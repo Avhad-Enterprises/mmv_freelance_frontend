@@ -20,6 +20,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'via.placeholder.com',
       },
+      // Added hostname for blog images
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com',
+      },
     ],
   },
   experimental: {

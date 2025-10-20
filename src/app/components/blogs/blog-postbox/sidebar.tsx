@@ -1,54 +1,46 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { makeGetRequest } from "@/utils/api";
-import { IBlogDataType } from "@/types/blog-type"; // import type
+import { IBlogDataType } from "@/types/blog-type";
 
-// helper function
-function safeParseTags(tags: any): string[] {
-  if (!tags) return [];
-  if (Array.isArray(tags)) return tags; // already array
-  if (typeof tags === "string") {
-    try {
-      const parsed = JSON.parse(tags);
-      if (Array.isArray(parsed)) return parsed;
-      return [parsed];
-    } catch {
-      // fallback: comma separated string case
-      return tags.split(",").map((s) => s.trim()).filter(Boolean);
-    }
+// --- START: HELPER FUNCTION ---
+// This is required to correctly parse your API's tag string
+function parseTagsArray(tagStr?: string | null): string[] {
+  if (!tagStr || typeof tagStr !== 'string' || tagStr.length <= 2) {
+    return [];
   }
-  return [];
+  // Removes {}, splits by ',', and cleans up each tag by removing quotes
+  return tagStr.slice(1, -1).split(',').map(tag => tag.trim().replace(/"/g, ''));
+}
+// --- END: HELPER FUNCTION ---
+
+interface BlogSidebarProps {
+  blogs: IBlogDataType[];
+  selectedCategory: string | null;
+  selectedTags: string[];
+  onSelectCategory: (category: string) => void;
+  onSelectTag: (tag: string) => void;
 }
 
-const BlogSidebar = () => {
-  const [blogs, setBlogs] = useState<IBlogDataType[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const res = await makeGetRequest("api/v1/blog/getallblogs");
-        setBlogs(res.data.data || []);
-      } catch (error) {
-        console.error("Error fetching blogs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBlogs();
-  }, []);
-
-  if (loading) {
-    return <div className="blog-sidebar">Loading...</div>;
+const BlogSidebar = ({
+  blogs,
+  selectedCategory,
+  selectedTags,
+  onSelectCategory,
+  onSelectTag,
+}: BlogSidebarProps) => {
+  if (!blogs || !blogs.length) {
+    return <div className="blog-sidebar">Loading sidebar...</div>;
   }
 
-  // Recent 3 blogs
-  const recent_blogs = [...blogs].slice(-3);
+  // Sort blogs by date
+  const recent_blogs = [...blogs]
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .slice(0, 3);
 
-  // Categories with count
+  // Calculate categories with counts
   const categories = blogs.reduce((acc: Record<string, number>, blog) => {
     if (blog.category) {
       acc[blog.category] = (acc[blog.category] || 0) + 1;
@@ -56,28 +48,33 @@ const BlogSidebar = () => {
     return acc;
   }, {});
 
-  // Safe Tags Parsing
-  const keywords = Array.from(
-    new Set(blogs.flatMap((b) => safeParseTags(b.tags)))
-  );
+  // **FIXED**: Correctly parse tags from API string or array
+  const keywords = [
+    ...new Set(
+      blogs.flatMap(blog => {
+        if (typeof blog.tags === 'string') {
+          return parseTagsArray(blog.tags);
+        }
+        if (Array.isArray(blog.tags)) {
+          return blog.tags;
+        }
+        return [];
+      })
+    )
+  ];
 
   return (
     <div className="blog-sidebar ps-xl-4 md-mt-60">
-      {/* Search Box */}
-      <form action="#" className="search-form position-relative mb-50 lg-mb-40">
-        <input type="text" placeholder="Search..." />
-        <button type="button">
-          <i className="bi bi-search"></i>
-        </button>
-      </form>
-
-      {/* Categories */}
       <div className="category-list mb-60 lg-mb-40">
         <h3 className="sidebar-title">Categories</h3>
         <ul className="style-none">
           {Object.entries(categories).map(([cat, count]) => (
             <li key={cat}>
-              <Link href={`/category/${cat.toLowerCase()}`}>
+              {/* **FIXED**: Changed to Link component for navigation */}
+              <Link
+                href={`/blog-v2?category=${encodeURIComponent(cat)}`}
+                className={selectedCategory === cat ? 'active' : ''}
+              >
                 {cat} ({count})
               </Link>
             </li>
@@ -85,7 +82,6 @@ const BlogSidebar = () => {
         </ul>
       </div>
 
-      {/* Recent Blogs */}
       <div className="sidebar-recent-news mb-60 lg-mb-40">
         <h4 className="sidebar-title">Recent News</h4>
         {recent_blogs.map((b, i) => (
@@ -98,7 +94,7 @@ const BlogSidebar = () => {
             <div>
               <Image
                 src={b.featured_image || "/images/placeholder.jpg"}
-                alt={b.title}
+                alt={b.title || "Recent Post"}
                 width={80}
                 height={80}
                 className="rounded object-cover"
@@ -106,29 +102,37 @@ const BlogSidebar = () => {
             </div>
             <div className="post ps-4">
               <h4 className="mb-5">
-                <Link href={`/blog-details/${b.slug}`} className="title tran3s">
+                {/* **FIXED**: Changed to b.blog_id */}
+                <Link href={`/blog-details/${b.blog_id}`} className="title tran3s">
                   {b.title}
                 </Link>
               </h4>
               <div className="date">
-                {new Date(b.created_at || '').toLocaleDateString("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {b.created_at
+                  ? new Date(b.created_at).toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "Date not available"}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Keywords */}
       <div className="sidebar-keyword">
         <h4 className="sidebar-title">Keywords</h4>
         <ul className="style-none d-flex flex-wrap">
           {keywords.map((kw) => (
             <li key={kw}>
-              <Link href={`/tag/${kw.toLowerCase()}`}>{kw}</Link>
+              {/* **FIXED**: Changed to Link component for navigation */}
+              <Link
+                href={`/blog-v2?tag=${encodeURIComponent(kw)}`}
+                className={selectedTags?.includes(kw) ? 'active' : ''}
+              >
+                {kw}
+              </Link>
             </li>
           ))}
         </ul>
