@@ -77,12 +77,9 @@ export default function ApplicationDetailsPage({
     <div className="dashboard-body">
       <div className="position-relative">
         {/* Sidebar */}
-        <EmployAside
-        isOpenSidebar={isOpenSidebar}
-        setIsOpenSidebar={setIsOpenSidebar}
-      />
+        <EmployAside />
         {/* Header */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
 
         {/* Page Title & Back Button */}
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">

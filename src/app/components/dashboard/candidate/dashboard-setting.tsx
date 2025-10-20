@@ -3,12 +3,14 @@ import DashboardHeader from "./dashboard-header";
 import ChangePasswordArea from "./change-password";
 import { makePostRequest } from "../../../../utils/api";
 import useDecodedToken from "../../../../hooks/useDecodedToken";
+import { useSidebar } from "@/context/SidebarContext";
 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // No props needed, using context
 };
 
-const DashboardSettingArea = ({ setIsOpenSidebar }: IProps) => {
+const DashboardSettingArea = ({}: IProps) => {
+  const { setIsOpenSidebar } = useSidebar();
   const decodedToken = useDecodedToken();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -78,7 +80,7 @@ const DashboardSettingArea = ({ setIsOpenSidebar }: IProps) => {
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
         {/* header end */}
 
         <h2 className="main-title">Account Settings</h2>

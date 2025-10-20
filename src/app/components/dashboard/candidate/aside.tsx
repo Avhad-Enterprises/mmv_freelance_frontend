@@ -4,6 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import DeleteAccountModal from "../../forms/DeleteAccountModal";
 import { usePathname } from "next/navigation";
+import { useSidebar } from "@/context/SidebarContext";
+import { useUser } from "@/context/UserContext";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -31,67 +33,42 @@ const nav_data = [
 ];
 
 type IProps = {
-    isOpenSidebar: boolean;
-    setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    // No props needed, using context
 };
 
-const CandidateAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
+const CandidateAside = ({}: IProps) => {
     const pathname = usePathname();
-    const [fullName, setFullName] = useState("Loading...");
-    // 1. Add state to store the profile picture URL
-    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch profile');
-                }
-
-                const response = await res.json();
-                
-                if (response.success && response.data) {
-                    const { user } = response.data;
-                    
-                    // Set full name
-                    if (user?.first_name || user?.last_name) {
-                        setFullName(`${user.first_name || ''} ${user.last_name || ''}`.trim());
-                    } else {
-                        setFullName("User");
-                    }
-
-                    // 2. Set the profile picture URL from the API response
-                    if (user?.profile_picture) {
-                        setProfilePictureUrl(user.profile_picture);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch user profile:", err);
-                setFullName("User");
-            }
-        };
-
-        fetchUserProfile();
-    }, []);
+    const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
+    const { userData } = useUser();
+    
+    const fullName = userData 
+        ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
+        : "Loading...";
+    
+    const profilePictureUrl = userData?.profile_picture || null;
 
     return (
         <>
-            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`} style={{ top: 'var(--header-height, 80px)', height: 'calc(100vh - var(--header-height, 80px))', overflowY: 'auto' }}>
+            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
                 <div className="position-relative" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
+                    {/* Logo + Close Button */}
+                    <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
+                        <Link href="/dashboard/candidate-dashboard">
+                            <Image src={logo} alt="logo" width={140} priority />
+                        </Link>
+                        <button
+                            onClick={() => setIsOpenSidebar(false)}
+                            className="close-btn d-block d-md-none"
+                        >
+                            <i className="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
                     {/* User Info */}
                     <div className="user-data">
                         <div className="user-avatar online position-relative rounded-circle" style={{
                             width: '50px',
                             height: '50px',
-                            // Apply background only if there is no picture
                             background: profilePictureUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             display: 'flex',
                             alignItems: 'center',
@@ -99,9 +76,8 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
                             fontSize: '20px',
                             fontWeight: 'bold',
                             color: 'white',
-                            overflow: 'hidden' // Ensures the image corners are clipped
+                            overflow: 'hidden'
                         }}>
-                            {/* 3. Conditionally render the Image or the initial */}
                             {profilePictureUrl ? (
                                 <Image
                                     src={profilePictureUrl}

@@ -10,20 +10,22 @@ import main_graph from "@/assets/dashboard/images/main-graph.png";
 import DashboardHeader from "../candidate/dashboard-header";
 import { CardItem } from "../candidate/dashboard-area";
 import NiceSelect from "@/ui/nice-select";
+import { useSidebar } from "@/context/SidebarContext";
 
 // props type 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
+    // No props needed, using context
 }
 
-const EmployDashboardArea = ({setIsOpenSidebar}:IProps) => {
+const EmployDashboardArea = ({}: IProps) => {
+  const { setIsOpenSidebar } = useSidebar();
   const job_items = [...job_data.reverse().slice(0, 6)];
   const handleJobs = (item: { value: string; label: string }) => {};
   return (
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
+        <DashboardHeader />
         {/* header end */}
 
         <h2 className="main-title">Client Dashboard</h2>

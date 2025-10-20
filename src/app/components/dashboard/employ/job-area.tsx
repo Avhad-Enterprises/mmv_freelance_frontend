@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback, Fragment, type FC } from "reac
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePutRequest, makePatchRequest } from "@/utils/api";
 import toast from "react-hot-toast";
+import { useSidebar } from "@/context/SidebarContext";
+import DashboardHeader from "../candidate/dashboard-header";
 
 export interface ProjectSummary {
   project_id: string;
@@ -34,10 +36,11 @@ interface ApplicantsState {
 }
 
 interface IProps {
-  setIsOpenSidebar: (isOpen: boolean) => void;
+  // No props needed, using context
 }
 
-const EmployJobArea: FC<IProps> = ({ setIsOpenSidebar }) => {
+const EmployJobArea: FC<IProps> = ({}) => {
+  const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,6 +188,10 @@ const EmployJobArea: FC<IProps> = ({ setIsOpenSidebar }) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
+        {/* header start */}
+        <DashboardHeader />
+        {/* header end */}
+        
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">{isPostingJob ? "Post a New Job" : "My Jobs"}</h2>
           {!isPostingJob && (

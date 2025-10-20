@@ -4,6 +4,7 @@ import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, serverTimestamp, orderBy, limit, Timestamp, addDoc, Firestore } from "firebase/firestore";
 import { getAuth, signInAnonymously, Auth } from "firebase/auth";
 import { Search, Send, Plus, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { useSidebar } from "@/context/SidebarContext";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -330,7 +331,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me
     }
 
     return (
-        <div style={{ display: 'flex', background: '#EFF6F3', height: '600px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
+        <div style={{ display: 'flex', background: '#EFF6F3', minHeight: '600px', height: 'calc(100vh - 200px)', maxHeight: '800px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' }}>
             {/* Left Sidebar */}
             <div style={{ width: '100%', maxWidth: '24rem', background: 'white', borderRight: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column' }}>
                 {/* Sidebar Header */}

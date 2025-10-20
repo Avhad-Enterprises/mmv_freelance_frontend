@@ -11,11 +11,11 @@ const JobDetailsPage = ({ params }: { params: { id: string } }) => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
         <main className="dashboard-body">
           <div className="d-flex">
             <div className="main-content">
-              <EmployAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+              <EmployAside />
               <JobDetailsDashboardArea job_id={params.id} />
             </div>
           </div>

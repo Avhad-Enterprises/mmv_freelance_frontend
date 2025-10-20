@@ -11,11 +11,11 @@ const CandidateDashboardMessagesPage = () => {
 
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar}/>
+      <CandidateAside />
       {/* aside end  */}
 
       {/* messages area start */}
-      <DashboardMessage setIsOpenSidebar={setIsOpenSidebar}/>
+      <DashboardMessage />
       {/* messages area end */}
     </div>
     </Wrapper>

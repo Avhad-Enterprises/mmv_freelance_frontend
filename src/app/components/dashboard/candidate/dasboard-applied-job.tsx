@@ -123,7 +123,7 @@ const AppliedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
       </div>
 
       <div className="d-flex align-items-center justify-content-between mb-4">

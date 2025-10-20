@@ -8,17 +8,17 @@ import VideoPopup from '../../common/video-popup';
 
 // props type 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
+  // No props needed, using context
 }
 
-const DashboardResume = ({setIsOpenSidebar}:IProps) => {
+const DashboardResume = ({}:IProps) => {
   const [isVideoOpen, setIsVideoOpen] = useState<boolean>(false);
   return (
     <>
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar}/>
+        <DashboardHeader />
         {/* header end */}
 
         <h2 className="main-title">My Resume</h2>

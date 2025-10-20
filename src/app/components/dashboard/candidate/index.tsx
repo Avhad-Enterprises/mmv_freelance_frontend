@@ -10,11 +10,11 @@ const CandidateDashboardMain = () => {
       {/* dashboard layout with header on top */}
       <div className='dashboard-layout'>
         {/* aside start */}
-        <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        <CandidateAside />
         {/* aside end  */}
 
         {/* dashboard area start */}
-        <DashboardArea setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardArea />
         {/* dashboard area end */}
       </div>
     </div>

@@ -1,27 +1,9 @@
 'use client'
-import React,{useState} from 'react';
-import Wrapper from "@/layouts/wrapper";
-import CandidateAside from "@/app/components/dashboard/candidate/aside";
+import React from 'react';
 import SavedJobArea from "@/app/components/dashboard/candidate/saved-job-area";
-import Header from '@/layouts/headers/headerDash';
-
 
 const CandidateDashboardSavedJobPage = () => {
-  const [isOpenSidebar,setIsOpenSidebar] = useState<boolean>(false);
-  return (
-    <Wrapper>
-      <Header />
-      <div className="main-page-wrapper">
-        {/* aside start */}
-        <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
-        {/* aside end  */}
-
-        {/* saved job area start */}
-        <SavedJobArea setIsOpenSidebar={setIsOpenSidebar} />
-        {/* saved job area end */}
-      </div>
-    </Wrapper>
-  );
+  return <SavedJobArea />;
 };
 
 export default CandidateDashboardSavedJobPage;

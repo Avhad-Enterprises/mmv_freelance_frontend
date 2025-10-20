@@ -10,7 +10,7 @@ const CandidateDashboardPasswordChangePage = () => {
     <Wrapper>
       <div className="main-page-wrapper">
         {/* aside start */}
-        <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar} />
+        <CandidateAside />
         {/* aside end  */}
 
         {/* password change area start */}

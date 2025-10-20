@@ -1,16 +1,17 @@
+"use client";
 import React from "react";
 import DashboardHeader from "../candidate/dashboard-header";
 
 // props type 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
+  // No props needed, using context
 }
-const EmployMembershipArea = ({setIsOpenSidebar}:IProps) => {
+const EmployMembershipArea = ({}:IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
         {/* header end */}
 
         <h2 className="main-title">Membership</h2>

@@ -9,13 +9,15 @@ import useDecodedToken from "@/hooks/useDecodedToken";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { set_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
+import { useSidebar } from "@/context/SidebarContext";
 
 // Types
 interface IProps {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // No props needed, using context
 }
 
-const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
+const SavedJobArea: React.FC<IProps> = ({}) => {
+  const { setIsOpenSidebar } = useSidebar();
   const { wishlist } = useAppSelector((state) => state.wishlist);
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
@@ -103,7 +105,9 @@ const SavedJobArea: React.FC<IProps> = ({ setIsOpenSidebar }) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
+        {/* header start */}
+        <DashboardHeader />
+        {/* header end */}
 
         <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">Saved Jobs</h2>

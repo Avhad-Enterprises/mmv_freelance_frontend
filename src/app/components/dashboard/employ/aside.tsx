@@ -5,6 +5,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import LogoutModal from "../../common/popup/logout-modal";
 import DeleteAccountModal from "../../forms/DeleteAccountModal";
+import { useSidebar } from "@/context/SidebarContext";
+import { useUser } from "@/context/UserContext";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -36,57 +38,23 @@ const nav_data = [
 ];
 
 type IProps = {
-    isOpenSidebar: boolean;
-    setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    // No props needed, using context
 };
 
-const EmployAside = ({ isOpenSidebar, setIsOpenSidebar }: IProps) => {
+const EmployAside = ({}: IProps) => {
     const pathname = usePathname();
-    const [fullName, setFullName] = useState("Loading...");
-    const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error('Failed to fetch profile');
-                }
-
-                const response = await res.json();
-                
-                if (response.success && response.data) {
-                    const { user } = response.data;
-                    
-                    if (user?.first_name || user?.last_name) {
-                        setFullName(`${user.first_name || ''} ${user.last_name || ''}`.trim());
-                    } else {
-                        setFullName("User");
-                    }
-
-                    if (user?.profile_picture) {
-                        setProfilePictureUrl(user.profile_picture);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch user profile:", err);
-                setFullName("User");
-            }
-        };
-
-        fetchUserProfile();
-    }, []);
+    const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
+    const { userData } = useUser();
+    
+    const fullName = userData 
+        ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
+        : "Loading...";
+    
+    const profilePictureUrl = userData?.profile_picture || null;
 
     return (
         <>
-            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`} style={{ top: 'var(--header-height, 80px)' }}>
+            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
                 <div className="position-relative">
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">

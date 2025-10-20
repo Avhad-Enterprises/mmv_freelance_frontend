@@ -5,14 +5,14 @@ import ShortSelect from '../../common/short-select';
 
 // props type 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>
+  // No props needed, using context
 }
-const JobAlertArea = ({setIsOpenSidebar}:IProps) => {
+const JobAlertArea = ({}:IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
         {/* header start */}
-        <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} />
+        <DashboardHeader />
         {/* header end */}
 
         <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">

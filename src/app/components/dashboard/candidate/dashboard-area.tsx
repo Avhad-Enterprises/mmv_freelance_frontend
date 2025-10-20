@@ -6,7 +6,7 @@ import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
 import icon_3 from "@/assets/dashboard/images/icon/icon_14.svg";
 import icon_4 from "@/assets/dashboard/images/icon/icon_15.svg";
 import main_graph from "@/assets/dashboard/images/main-graph.png";
-// import DashboardHeader from "./dashboard-header";
+import DashboardHeader from "./dashboard-header";
 import {
   makePostRequest,
   makeGetRequest,
@@ -14,6 +14,7 @@ import {
 
 } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
+import { useSidebar } from "@/context/SidebarContext";
 
 type JobItem = {
   applied_projects_id: number;
@@ -55,11 +56,12 @@ export function CardItem({
 
 // props type
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+    // No props needed, using context
 };
 
-const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
+const DashboardArea = ({}: IProps) => {
   const decoded = useDecodedToken();
+  const { setIsOpenSidebar } = useSidebar();
   const [jobItems, setJobItems] = useState<JobItem[]>([]);
   const [appliedCount, setAppliedCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,7 @@ const DashboardArea = ({ setIsOpenSidebar }: IProps) => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        {/* <DashboardHeader setIsOpenSidebar={setIsOpenSidebar} /> */}
+        <DashboardHeader />
         <h2 className="main-title">Freelancer Dashboard</h2>
 
         {/* <div className="row">

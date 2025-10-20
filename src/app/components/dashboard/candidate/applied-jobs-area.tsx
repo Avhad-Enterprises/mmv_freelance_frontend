@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, CalendarCheck, CashCoin, Tag } from 'react-bootstrap-icons';
 import useDecodedToken from '@/hooks/useDecodedToken';
+import { useSidebar } from '@/context/SidebarContext';
+import DashboardHeader from './dashboard-header';
 
 // Status Mapping - FIXED to match API values
 const statusMap: Record<number, { text: string; className: string }> = {
@@ -24,11 +26,12 @@ interface IJob {
 }
 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // No props needed, using context
 };
 
-const AppliedJobsArea = ({ setIsOpenSidebar }: IProps) => {
+const AppliedJobsArea = ({}: IProps) => {
   const decoded = useDecodedToken();
+  const { setIsOpenSidebar } = useSidebar();
   const [jobs, setJobs] = useState<IJob[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<IJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,17 +102,13 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/applicat
     <>
       <div className="dashboard-body">
         <div className="position-relative">
-          <button
-            type="button"
-            className="dash-mobile-nav-toggler d-block d-md-none me-auto"
-            onClick={() => setIsOpenSidebar(true)}
-          >
-            <span></span>
-          </button>
-        </div>
+          {/* header start */}
+          <DashboardHeader />
+          {/* header end */}
 
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h2 className="main-title mb-0">Applied Jobs</h2>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h2 className="main-title mb-0">Applied Jobs</h2>
+          </div>
           <div className="btn-group" role="group" aria-label="Status Filter">
             {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
               <button

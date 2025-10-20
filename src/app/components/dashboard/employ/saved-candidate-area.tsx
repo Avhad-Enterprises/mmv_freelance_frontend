@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import CandidateCard from "../../candidate/candidate-card";
+import { useSidebar } from "@/context/SidebarContext";
+import DashboardHeader from "../candidate/dashboard-header";
 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // No props needed, using context
 };
 
 interface SavedCandidate {
@@ -24,7 +26,8 @@ interface SavedCandidate {
   availability: string;
 }
 
-const SavedCandidateArea = ({ setIsOpenSidebar }: IProps) => {
+const SavedCandidateArea = ({}: IProps) => {
+  const { setIsOpenSidebar } = useSidebar();
   const [savedCandidates, setSavedCandidates] = useState<SavedCandidate[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<{ [key: number]: number }>({});
   const [loading, setLoading] = useState(true);
@@ -199,6 +202,10 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
   return (
     <div className="dashboard-body">
       <div className="position-relative">
+        {/* header start */}
+        <DashboardHeader />
+        {/* header end */}
+        
         <div className="d-flex align-items-center justify-content-between mb-4">
           <h2 className="main-title m-0">Saved Candidates</h2>
           <div className="d-flex gap-2">

@@ -11,11 +11,11 @@ const CandidateDashboardResumePage = () => {
 
     <div className='main-page-wrapper'>
       {/* aside start */}
-      <CandidateAside isOpenSidebar={isOpenSidebar} setIsOpenSidebar={setIsOpenSidebar}/>
+      <CandidateAside />
       {/* aside end  */}
 
       {/* Resume area start */}
-      <DashboardResume setIsOpenSidebar={setIsOpenSidebar}/>
+      <DashboardResume />
       {/* Resume area end */}
     </div>
     </Wrapper>

@@ -3,9 +3,11 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import { Country, State, City } from 'country-state-city';
 import _ from 'lodash'; // Using lodash for deep object comparison
+import { useSidebar } from "@/context/SidebarContext";
+import DashboardHeader from "../candidate/dashboard-header";
 
 type IProps = {
-  setIsOpenSidebar: React.Dispatch<React.SetStateAction<boolean>>;
+  // No props needed, using context
 };
 
 // Simplified ProfileData type for Client view
@@ -134,7 +136,8 @@ const floatingButtonStyle = `
   }
 `;
 
-const DashboardProfileArea = ({ setIsOpenSidebar }: IProps) => {
+const DashboardProfileArea = ({}: IProps) => {
+  const { setIsOpenSidebar } = useSidebar();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [tempChanges, setTempChanges] = useState<{ [section: string]: Partial<ProfileData> }>({});
 
@@ -478,8 +481,12 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: floatingButtonStyle }} />
-      <div className="dashboard-body" style={{ marginTop: "85px" }}>
+      <div className="dashboard-body">
         <div className="position-relative">
+          {/* header start */}
+          <DashboardHeader />
+          {/* header end */}
+          
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="main-title">My Profile</h2>
           </div>
