@@ -1,110 +1,93 @@
+// "use client";
+// import React, { useEffect } from "react";
+// import dynamic from "next/dynamic";
+// import Header from "@/layouts/headers/header";
+// import Wrapper from "@/layouts/wrapper";
+// import CompanyBreadcrumb from "../components/common/common-breadcrumb";
+// import FooterOne from "@/layouts/footers/footer-one";
+// import RegisterArea from "../components/register/register-area";
+
+// const PageTitle = "Register";
+
+// const RegisterPage = () => {
+//   useEffect(() => {
+//     // Cleanup any lingering modal-backdrop elements and modal-open class
+//     const removeBackdropsAndModalOpen = () => {
+//       const backdrops = document.querySelectorAll(".modal-backdrop");
+//       backdrops.forEach((backdrop) => backdrop.remove());
+
+//       document.body.classList.remove("modal-open"); // Remove modal-open class
+//       document.body.style.overflow = ""; // Reset overflow style
+//     };
+
+//     removeBackdropsAndModalOpen();
+
+//     // Optional: Clean up on unmount
+//     return () => removeBackdropsAndModalOpen();
+//   }, []);
+
+//   return (
+//     <Wrapper>
+//       <div className="main-page-wrapper">
+//         {/* header start */}
+//         <Header />
+//         {/* header end */}
+
+//         {/*breadcrumb start */}
+//         <CompanyBreadcrumb
+//           title="Register"
+//           subtitle="Create an account & Start posting or hiring talents"
+//         />
+//         {/*breadcrumb end */}
+
+//         {/* register area start */}
+//         <RegisterArea/>
+//         {/* register area end */}
+
+//         {/* footer start */}
+//         <FooterOne />
+//         {/* footer end */}
+//       </div>
+//     </Wrapper>
+//   );
+// };
+
+// export default RegisterPage;
+
+
+
 "use client";
-import React, { useState } from "react";
-import { Resolver, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import ErrorMsg from "../components/common/error-msg";
-import { makePostRequest } from "@/utils/api";
+import React, { useEffect } from "react";
+import dynamic from "next/dynamic";
+import Header from "@/layouts/headers/header";
+import Wrapper from "@/layouts/wrapper";
+import FooterOne from "@/layouts/footers/footer-one";
+import ForgotPasswordArea from "../components/register/forgot-password-area";
 
-type IForgotFormData = {
-  email: string;
-};
+const PageTitle = "Register";
 
-const emailResolver: Resolver<IForgotFormData> = async (values) => {
-  const errors: any = {};
-  if (!values.email) {
-    errors.email = {
-      type: "required",
-      message: "Email is required.",
+const RegisterPage = () => {
+  useEffect(() => {
+    const removeBackdropsAndModalOpen = () => {
+      const backdrops = document.querySelectorAll(".modal-backdrop");
+      backdrops.forEach((backdrop) => backdrop.remove());
+      document.body.classList.remove("modal-open");
+      document.body.style.overflow = "";
     };
-  }
-  return {
-    values: Object.keys(errors).length === 0 ? values : {},
-    errors,
-  };
-};
 
-const SendResetLinkForm = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<IForgotFormData>({ resolver: emailResolver });
-
-  const [loading, setLoading] = useState(false);
-
-  const onSubmit = async (data: IForgotFormData) => {
-    setLoading(true);
-    try {
-      await makePostRequest("api/v1/users/forgot-password", data);
-      toast.success("Check your registered email for the reset link.");
-      alert("Reset link sent successfully!"); // 👈 ab direct yahi pe alert
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to send reset link");
-    } finally {
-      setLoading(false);
-      reset();
-    }
-  };
+    removeBackdropsAndModalOpen();
+    return () => removeBackdropsAndModalOpen();
+  }, []);
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <div
-        className="auth-card bg-white shadow rounded p-4"
-        style={{ maxWidth: "420px", width: "100%" }}
-      >
-        <h3 className="text-center mb-4">Reset Password</h3>
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
-          <div className="row">
-            <div className="col-12">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Email Address*</label>
-                <input
-                  type="email"
-                  placeholder="Enter your registered email"
-                  {...register("email")}
-                  className="form-control styled-input"
-                />
-                <div className="help-block with-errors">
-                  <ErrorMsg msg={errors.email?.message || ""} />
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12">
-              <button
-                type="submit"
-                className="btn-eleven fw-500 tran3s d-block mt-20 w-100"
-                disabled={loading}
-              >
-                {loading ? "Sending..." : "Send Reset Link"}
-              </button>
-            </div>
-          </div>
-        </form>
+    <Wrapper>
+      <div className="main-page-wrapper">
+        <Header />
+        <ForgotPasswordArea />
+        <FooterOne />
       </div>
-
-      <style jsx>{`
-        .styled-input {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 12px 14px;
-          font-size: 15px;
-          transition: all 0.3s ease;
-        }
-        .styled-input:focus {
-          border-color: #0d6efd;
-          box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-          outline: none;
-        }
-        label {
-          font-weight: 500;
-          margin-bottom: 6px;
-          display: block;
-        }
-      `}</style>
-    </div>
+    </Wrapper>
   );
 };
 
-export default SendResetLinkForm;
+export default RegisterPage;

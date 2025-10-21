@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getLocalStorage, setLocalStorage } from "@/utils/localstorage";
-import { notifyError, notifySuccess } from "@/utils/toast";
 import { IJobType } from "@/types/job-data-type";
 
 const wishlistData = getLocalStorage("wishlist_items");
@@ -25,7 +24,6 @@ export const wishlistSlice = createSlice({
 
       if (!isExist) {
         state.wishlist.push(payload);
-        notifySuccess(`${payload.project_title} added to wishlist`);
       }
       setLocalStorage("wishlist_items", state.wishlist);
     },

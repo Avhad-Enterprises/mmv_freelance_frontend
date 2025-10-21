@@ -31,6 +31,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   // State for Apply Button
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
+  const [applicationId, setApplicationId] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -60,7 +61,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       if (userData?.user?.user_id) {
         setUserId(userData.user.user_id);
         setUserRole(userData.userType);
-        checkInitialJobStatus(userData.user.user_id); // Pass user_id for clarity
+        checkInitialJobStatus(userData.user.user_id);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -77,18 +78,26 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
         setIsSaved(true);
       }
 
-      // MODIFIED: Check applied status
-      const appliedRes = await makeGetRequest('api/v1/applications/my-applications');
-      const myApplications = appliedRes.data.data || [];
-      const hasApplied = myApplications.some(
-        (app: any) => app.projects_task_id === job.projects_task_id
-      );
-      if (hasApplied) {
+      // Check if already applied to this specific project
+      const appliedRes = await makeGetRequest(`api/v1/applications/my-applications/project/${job.projects_task_id}`);
+      
+      if (appliedRes.data?.success && appliedRes.data?.data) {
+        const application = appliedRes.data.data;
         setIsApplied(true);
+        setApplicationId(application.applied_projects_id);
+      } else {
+        setIsApplied(false);
+        setApplicationId(null);
       }
 
-    } catch (error) {
-      console.error("Error checking initial job status:", error);
+    } catch (error: any) {
+      // If 404 or no application found, user hasn't applied
+      if (error.response?.status === 404) {
+        setIsApplied(false);
+        setApplicationId(null);
+      } else {
+        console.error("Error checking initial job status:", error);
+      }
     }
   };
 
@@ -103,10 +112,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       return;
     }
 
-    handleApplySubmit();
+    if (isApplied && applicationId) {
+      handleWithdrawApplication();
+    } else {
+      handleApplySubmit();
+    }
   };
   
-  // MODIFIED: Updated application submission logic
   const handleApplySubmit = async () => {
     if (!userId) {
       toast.error('Could not verify user. Please refresh and try again.');
@@ -115,10 +127,9 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     
     setIsApplying(true);
     try {
-      // New payload as per API documentation
       const payload = {
         projects_task_id: job.projects_task_id,
-        description: "I am interested in this project and would like to apply.", // Generic description
+        description: "" // Sending blank description
       };
 
       const response = await makePostRequest('api/v1/applications/projects/apply', payload);
@@ -126,12 +137,39 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       if (response.data?.success) {
         toast.success('Application submitted successfully!');
         setIsApplied(true);
+        setApplicationId(response.data.data?.applied_projects_id || null);
       } else {
         toast.error(response.data?.message || 'Failed to submit application.');
       }
     } catch (error: any) {
       console.error('Error submitting application:', error);
-      toast.error(error.response?.data?.message || 'An error occurred while applying.');
+      const errorMessage = error.response?.data?.message || 'An error occurred while applying.';
+      toast.error(errorMessage);
+    } finally {
+      setIsApplying(false);
+    }
+  };
+
+  const handleWithdrawApplication = async () => {
+    if (!applicationId) {
+      toast.error('Application ID not found.');
+      return;
+    }
+
+    setIsApplying(true);
+    try {
+      const response = await makeDeleteRequest(`api/v1/applications/withdraw/${applicationId}`, {});
+      
+      if (response.data?.message || response.status === 200) {
+        toast.success('Application withdrawn successfully!');
+        setIsApplied(false);
+        setApplicationId(null);
+      } else {
+        toast.error('Failed to withdraw application.');
+      }
+    } catch (error: any) {
+      console.error('Error withdrawing application:', error);
+      toast.error(error.response?.data?.message || 'An error occurred while withdrawing.');
     } finally {
       setIsApplying(false);
     }
@@ -287,9 +325,9 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       <button 
                         className="btn-one w-100 mt-25" 
                         onClick={handleApplyClick}
-                        disabled={isApplying || isApplied}
+                        disabled={isApplying || userRole === 'CLIENT'}
                       >
-                        {isApplying ? 'Applying...' : isApplied ? '✅ Applied' : 'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
                       </button>
 
                       <button

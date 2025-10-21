@@ -2,14 +2,25 @@
 import React from "react";
 import Link from "next/link";
 import { IJobType } from "@/types/job-data-type";
-import { useAppSelector } from "@/redux/hook";
+// import { useAppSelector } from "@/redux/hook"; // No longer needed
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 
-const ListItemTwo = ({ item, onToggleSave }: { item: IJobType; onToggleSave?: (job: IJobType) => void }) => {
-  const { wishlist } = useAppSelector((state) => state.wishlist);
-  const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
+// UPDATED: Added 'isActive' to the component's props
+const ListItemTwo = ({ 
+  item, 
+  onToggleSave, 
+  isActive 
+}: { 
+  item: IJobType; 
+  onToggleSave?: (job: IJobType) => void;
+  isActive: boolean; // Receive active state as a prop
+}) => {
+  // REMOVED: Redux state is no longer read from here
+  // const { wishlist } = useAppSelector((state) => state.wishlist);
+  // const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
   return (
+    // The 'isActive' prop now controls the 'favourite' class
     <div className={`candidate-profile-card ${isActive ? "favourite" : ""} list-layout mb-25`}>
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
@@ -77,6 +88,7 @@ const ListItemTwo = ({ item, onToggleSave }: { item: IJobType; onToggleSave?: (j
                     onClick={() => onToggleSave(item)}
                     title={isActive ? "Unsave" : "Save"}
                   >
+                    {/* The icon is driven by the 'isActive' prop */}
                     <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                   </button>
                 )}
