@@ -47,6 +47,7 @@ const JobListThree = ({
   // Redux
   const dispatch = useAppDispatch();
   const decoded = useDecodedToken();
+  const { wishlist } = useAppSelector((state) => state.wishlist);
 
   // Redux filter state
   const { projects_type, search_key } = useAppSelector((state) => state.filter);
@@ -157,7 +158,6 @@ const JobListThree = ({
       return;
     }
 
-    const { wishlist } = useAppSelector((state) => state.wishlist);
     const isActive = wishlist.some((p) => p.projects_task_id === job.projects_task_id);
 
     try {

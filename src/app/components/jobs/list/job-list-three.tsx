@@ -50,6 +50,7 @@ const JobListThree = ({
   // Redux
   const dispatch = useAppDispatch();
   const decoded = useDecodedToken();
+  const { wishlist } = useAppSelector((state) => state.wishlist);
 
   // Modal ref - removed, using direct Bootstrap modal access
   // const loginModalRef = useRef<any>(null);
@@ -179,7 +180,6 @@ const JobListThree = ({
       return;
     }
 
-    const { wishlist } = useAppSelector((state) => state.wishlist);
     const isActive = wishlist.some((p) => p.projects_task_id === job.projects_task_id);
 
     try {
