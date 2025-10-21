@@ -2,22 +2,40 @@
 import React from "react";
 import Link from "next/link";
 import { IJobType } from "@/types/job-data-type";
-import { useAppSelector } from "@/redux/hook";
+// import { useAppSelector } from "@/redux/hook"; // <-- Removed Redux
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 
-const JobGridItem = ({ item, style_2 = true, onToggleSave }: { item: IJobType; style_2?: boolean; onToggleSave?: (job: IJobType) => void }) => {
+// --- UPDATED PROPS ---
+// Added 'isActive' and made it required
+const JobGridItem = ({ 
+  item, 
+  style_2 = true, 
+  onToggleSave,
+  isActive // <-- Added prop
+}: { 
+  item: IJobType; 
+  style_2?: boolean; 
+  onToggleSave?: (job: IJobType) => void;
+  isActive: boolean; // <-- Added prop type
+}) => {
   const { projects_task_id, projects_type, budget, project_title } = item || {};
-  const { wishlist } = useAppSelector(state => state.wishlist);
-  const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
+  
+  // --- REMOVED REDUX LOGIC ---
+  // const { wishlist } = useAppSelector(state => state.wishlist);
+  // const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
+  // The 'isActive' const now comes directly from props.
 
   return (
+    // 'isActive' prop now controls the 'favourite' class
     <div className={`candidate-profile-card grid-layout ${isActive ? "favourite" : ""}`}>
       {onToggleSave && (
         <a
           onClick={() => onToggleSave(item)}
+          // 'isActive' prop controls the 'active' class
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
           title={isActive ? 'Unsave Job' : 'Save Job'}
         >
+          {/* 'isActive' prop controls the icon */}
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
         </a>
       )}

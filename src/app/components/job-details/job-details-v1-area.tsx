@@ -3,10 +3,30 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { IJobType } from '@/types/job-data-type';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
-import { makeGetRequest, makePostRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
-// Helper function to format seconds into a more readable string
+const API_BASE_URL = 'http://localhost:8000/'; 
+
+const api = axios.create({
+  baseURL: API_BASE_URL
+});
+
+api.interceptors.request.use(
+  (config) => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 const formatDuration = (seconds: number | undefined): string => {
   if (seconds === undefined) return 'N/A';
   if (seconds < 60) return `${seconds} sec`;
@@ -20,12 +40,13 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [userId, setUserId] = useState<number | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null); // New state for user role
+  const [userRole, setUserRole] = useState<string | null>(null);
   const applyLoginModalRef = useRef<any>(null);
 
   // State for Apply Button
   const [isApplying, setIsApplying] = useState(false);
-  const [isApplied, setIsApplied] = useState(false); // To track if user has already applied
+  const [isApplied, setIsApplied] = useState(false);
+  const [applicationId, setApplicationId] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -38,7 +59,6 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     };
     initialize();
 
-    // Initialize Bootstrap Modal for programmatic control
     if (typeof window !== 'undefined') {
       const bootstrap = require('bootstrap');
       const modalElement = document.getElementById('applyLoginModal');
@@ -46,16 +66,15 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         applyLoginModalRef.current = new bootstrap.Modal(modalElement);
       }
     }
-  }, []);
+  }, [job]);
 
   const fetchUserIdAndInitialState = async () => {
     try {
-      const response = await makeGetRequest('api/v1/users/me');
-      const userData = response.data?.data; // Adjusted to access 'data' then 'user' and 'userType'
+      const response = await api.get('api/v1/users/me'); 
+      const userData = response.data?.data;
       if (userData?.user?.user_id) {
         setUserId(userData.user.user_id);
-        setUserRole(userData.userType); // Set the user role
-        // Check initial saved and applied status
+        setUserRole(userData.userType);
         checkInitialJobStatus(userData.user.user_id);
       }
     } catch (error) {
@@ -63,39 +82,59 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     }
   };
   
-  // Function to check if job is already saved or applied
   const checkInitialJobStatus = async (currentUserId: number) => {
+    if (!job || job.projects_task_id === undefined) return;
+    
     try {
-      // NOTE: You will need to create these backend endpoints
-      // const savedStatus = await makeGetRequest(`saved/status/${job.projects_task_id}/${currentUserId}`);
-      // if (savedStatus.data?.isSaved) setIsSaved(true);
+      // Check if job is saved
+      const savedRes = await api.get(`api/v1/saved/my-saved-projects`);
+      const savedProjects = savedRes.data?.data || [];
+      const isJobSaved = savedProjects.some(
+        (savedJob: any) => savedJob.projects_task_id === job.projects_task_id
+      );
+      setIsSaved(isJobSaved);
 
-      // const appliedStatus = await makeGetRequest(`applications/status/${job.projects_task_id}/${currentUserId}`);
-      // if (appliedStatus.data?.isApplied) setIsApplied(true);
-    } catch (error) {
+      // Check if already applied to this specific project
+      const appliedRes = await api.get(`api/v1/applications/my-applications/project/${job.projects_task_id}`);
+      
+      if (appliedRes.data?.success && appliedRes.data?.data) {
+        const application = appliedRes.data.data;
+        setIsApplied(true);
+        setApplicationId(application.applied_projects_id);
+      } else {
+        setIsApplied(false);
+        setApplicationId(null);
+      }
+
+    } catch (error: any) {
+      // If 404 or no application found, user hasn't applied
+      if (error.response?.status === 404) {
+        setIsApplied(false);
+        setApplicationId(null);
+      } else {
         console.error("Error checking initial job status:", error);
+      }
     }
   };
 
-  // This function now calls the API submit handler directly
   const handleApplyClick = () => {
     if (!isLoggedIn) {
-      // Open the APPLY-SPECIFIC login modal if not logged in
       applyLoginModalRef.current?.show();
       return;
     }
 
-    // Check if the user is a client
     if (userRole === 'CLIENT') {
       toast.error('Only freelancers can apply.');
       return;
     }
 
-    // If logged in and not a client, proceed with application
-    handleApplySubmit();
+    if (isApplied && applicationId) {
+      handleWithdrawApplication();
+    } else {
+      handleApplySubmit();
+    }
   };
   
-  // New function to handle the "Apply" API call
   const handleApplySubmit = async () => {
     if (!userId) {
         toast.error('Could not verify user. Please refresh and try again.');
@@ -104,23 +143,49 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     
     setIsApplying(true);
     try {
-        // Replace 'applications/create' with your actual endpoint for applying to a job
-        const response = await makePostRequest('api/v1/applications/projects/apply', {
+        const response = await api.post('api/v1/applications/projects/apply', {
             projects_task_id: job.projects_task_id,
-            user_id: userId,
+            description: "" // Sending blank description as per requirement
         });
 
         if (response.data?.success) {
             toast.success('Application submitted successfully!');
             setIsApplied(true);
+            setApplicationId(response.data.data?.applied_projects_id || null);
         } else {
             toast.error(response.data?.message || 'Failed to submit application.');
         }
     } catch (error: any) {
         console.error('Error submitting application:', error);
-        toast.error(error.response?.data?.message || 'An error occurred while applying.');
+        const errorMessage = error.response?.data?.message || 'An error occurred while applying.';
+        toast.error(errorMessage);
     } finally {
         setIsApplying(false);
+    }
+  };
+
+  const handleWithdrawApplication = async () => {
+    if (!applicationId) {
+      toast.error('Application ID not found.');
+      return;
+    }
+
+    setIsApplying(true);
+    try {
+      const response = await api.delete(`api/v1/applications/withdraw/${applicationId}`);
+      
+      if (response.data?.message || response.status === 200) {
+        toast.success('Application withdrawn successfully!');
+        setIsApplied(false);
+        setApplicationId(null);
+      } else {
+        toast.error('Failed to withdraw application.');
+      }
+    } catch (error: any) {
+      console.error('Error withdrawing application:', error);
+      toast.error(error.response?.data?.message || 'An error occurred while withdrawing.');
+    } finally {
+      setIsApplying(false);
     }
   };
 
@@ -136,30 +201,34 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     }
 
     setIsSaving(true);
+    
+    const payload = {
+      projects_task_id: job.projects_task_id,
+    };
+
     try {
       if (isSaved) {
-        // TODO: Add unsave API call when available
-        toast.success('Job unsaved successfully');
-        setIsSaved(false);
+        const response = await api.delete('api/v1/saved/unsave-project', { data: payload });
+        
+        if (response.data?.success) {
+          toast.success('Job unsaved successfully');
+          setIsSaved(false);
+        } else {
+          toast.error(response.data?.message || 'Failed to unsave job');
+        }
       } else {
-        const response = await makePostRequest('api/v1/saved/create', {
-          projects_task_id: job.projects_task_id,
-          user_id: userId,
-          is_active: true,
-          created_by: userId
-        });
+        const response = await api.post('api/v1/saved/save-project', payload);
 
         if (response.data?.data?.saved_projects_id) {
           toast.success('Job saved successfully!');
           setIsSaved(true);
         } else {
-          // Use the backend message for more specific errors
           toast.error(response.data?.message || 'Failed to save job');
         }
       }
     } catch (error: any) {
-      console.error('Error saving job:', error);
-      toast.error(error.response?.data?.message || 'Failed to save job');
+      console.error('Error saving/unsaving job:', error);
+      toast.error(error.response?.data?.message || 'An error occurred');
     } finally {
       setIsSaving(false);
     }
@@ -168,7 +237,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const handleLoginSuccess = () => {
     applyLoginModalRef.current?.hide();
     setIsLoggedIn(true);
-    window.location.reload(); // Reload to refetch user data and status
+    window.location.reload(); 
   };
 
   return (
@@ -180,7 +249,6 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
             <div className="col-xxl-9 col-xl-8">
               <div className="details-post-data me-xxl-5 pe-xxl-4">
                 
-                {/* --- BACK BUTTON ADDED HERE --- */}
                 <Link href="/job-list-v1" className="btn-two mb-20">
                   &larr; Back to Jobs
                 </Link>
@@ -272,9 +340,9 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   <button 
                     className="btn-one w-100 mt-25" 
                     onClick={handleApplyClick}
-                    disabled={isApplying || isApplied}
+                    disabled={isApplying || userRole === 'CLIENT'}
                   >
-                    {isApplying ? 'Applying...' : isApplied ? '✅ Applied' : 'Apply Now'}
+                    {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
                   </button>
 
                   <button

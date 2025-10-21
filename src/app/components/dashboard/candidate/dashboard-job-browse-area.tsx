@@ -12,16 +12,46 @@ import useDecodedToken from "@/hooks/useDecodedToken";
 import { useSidebar } from "@/context/SidebarContext";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
+import toast from "react-hot-toast";
 
-interface ICategory {
-  category_id: number;
-  category_name: string;
-}
+// Currency conversion rates (hardcoded, base currency: USD)
+const EXCHANGE_RATES: { [key: string]: number } = {
+  'USD': 1,
+  'INR': 83.12,
+  'EUR': 0.92,
+  'GBP': 0.79,
+  'JPY': 149.50,
+  'AUD': 1.52,
+  'CAD': 1.36,
+  'CHF': 0.88,
+  'CNY': 7.24,
+  'NZD': 1.67,
+  'SGD': 1.34,
+  'HKD': 7.83,
+  'KRW': 1338.50,
+  'SEK': 10.87,
+  'NOK': 10.93,
+  'DKK': 6.88,
+  'MXN': 17.12,
+  'BRL': 4.98,
+  'ZAR': 18.65,
+  'RUB': 92.50,
+  'TRY': 34.15,
+  'AED': 3.67,
+  'SAR': 3.75,
+  'MYR': 4.48,
+  'THB': 34.82,
+  'IDR': 15680.00,
+  'PHP': 56.45,
+  'PLN': 3.98,
+  'CZK': 23.15,
+  'ILS': 3.68,
+};
 
-interface ISkill {
-  skill_id: number;
-  skill_name: string;
-}
+const convertToUserCurrency = (amountInUSD: number, userCurrency: string): number => {
+  const rate = EXCHANGE_RATES[userCurrency] || 1;
+  return amountInUSD * rate;
+};
 
 const DashboardJobBrowseArea = () => {
   const { setIsOpenSidebar } = useSidebar();
@@ -30,8 +60,6 @@ const DashboardJobBrowseArea = () => {
 
   // Component State
   const [all_jobs, setAllJobs] = useState<IJobType[]>([]);
-  const [categories, setCategories] = useState<ICategory[]>([]);
-  const [skills, setSkills] = useState<ISkill[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentItems, setCurrentItems] = useState<IJobType[] | null>(null);
   const [filterItems, setFilterItems] = useState<IJobType[]>([]);
@@ -39,11 +67,16 @@ const DashboardJobBrowseArea = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
+  const [userCurrency, setUserCurrency] = useState<string>('USD');
+
+  // Available options from jobs
+  const [availableSkills, setAvailableSkills] = useState<string[]>([]);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
 
   const itemsPerPage = 10;
 
@@ -56,40 +89,64 @@ const DashboardJobBrowseArea = () => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
-        const [jobsRes, categoriesRes, skillsRes] = await Promise.all([
+        const [jobsRes, userRes] = await Promise.all([
           makeGetRequest("api/v1/projects-tasks/listings"),
-          makeGetRequest("api/v1/categories"),
-          makeGetRequest("api/v1/skills"),
+          makeGetRequest("api/v1/users/me"),
         ]);
 
         const jobsData = jobsRes.data.data || [];
         setAllJobs(jobsData);
-        const maxBudget = Math.max(...jobsData.map((j: any) => j.budget || 0), 0);
-        setPriceValue([0, maxBudget || 10000]);
 
-        setCategories(categoriesRes.data.data || []);
-        setSkills(skillsRes.data.data || []);
+        // Get user currency
+        const userData = userRes.data?.data;
+        const currency = userData?.profile?.currency || 'USD';
+        setUserCurrency(currency);
+
+        // Extract unique skills from all jobs
+        const skillsSet = new Set<string>();
+        jobsData.forEach((job: IJobType) => {
+          if (job.skills_required && Array.isArray(job.skills_required)) {
+            job.skills_required.forEach(skill => {
+              if (skill) skillsSet.add(skill);
+            });
+          }
+        });
+        setAvailableSkills(Array.from(skillsSet).sort());
+
+        // Extract unique project types from all jobs
+        const typesSet = new Set<string>();
+        jobsData.forEach((job: IJobType) => {
+          if (job.projects_type) {
+            typesSet.add(job.projects_type);
+          }
+        });
+        setAvailableTypes(Array.from(typesSet).sort());
+
+        // Calculate max budget in user's currency
+        const maxBudgetUSD = Math.max(...jobsData.map((j: any) => j.budget || 0), 0);
+        const maxBudgetUserCurrency = convertToUserCurrency(maxBudgetUSD, currency);
+        setPriceValue([0, Math.ceil(maxBudgetUserCurrency)]);
 
         // Fetch saved projects if user is logged in
         if (decoded?.user_id) {
-            try {
-                const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
-                const savedProjectIds = savedProjectsRes.data.data.map((p: any) => p.projects_task_id);
-                
-                const savedJobs = jobsData.filter((job: IJobType) => 
-                    job.projects_task_id !== undefined && savedProjectIds.includes(job.projects_task_id)
-                );
-                
-                dispatch(set_wishlist(savedJobs));
-
-            } catch (error) {
-                console.error("Error fetching saved projects:", error);
-                dispatch(set_wishlist([]));
-            }
+          try {
+            const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
+            const savedProjectIds = savedProjectsRes.data.data.map((p: any) => p.projects_task_id);
+            
+            const savedJobs = jobsData.filter((job: IJobType) => 
+              job.projects_task_id !== undefined && savedProjectIds.includes(job.projects_task_id)
+            );
+            
+            dispatch(set_wishlist(savedJobs));
+          } catch (error) {
+            console.error("Error fetching saved projects:", error);
+            dispatch(set_wishlist([]));
+          }
         }
 
       } catch (error) {
         console.error("Error fetching initial data:", error);
+        toast.error("Failed to load jobs. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -102,17 +159,17 @@ const DashboardJobBrowseArea = () => {
   useEffect(() => {
     let filteredData = all_jobs;
 
-    if (selectedCategories.length > 0) {
-      filteredData = filteredData.filter((item) =>
-        item.project_category && selectedCategories.includes(item.project_category)
-      );
-    }
-
     if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
         item.skills_required?.some(jobSkill => 
           jobSkill && selectedSkills.includes(jobSkill)
         )
+      );
+    }
+
+    if (selectedTypes.length > 0) {
+      filteredData = filteredData.filter((item) =>
+        item.projects_type && selectedTypes.includes(item.projects_type)
       );
     }
 
@@ -122,9 +179,11 @@ const DashboardJobBrowseArea = () => {
       );
     }
 
-    filteredData = filteredData.filter(
-      (item) => (item.budget ?? 0) >= priceValue[0] && (item.budget ?? 0) <= priceValue[1]
-    );
+    // Filter by budget range (convert job budget to user currency for comparison)
+    filteredData = filteredData.filter((item) => {
+      const budgetInUserCurrency = convertToUserCurrency(item.budget ?? 0, userCurrency);
+      return budgetInUserCurrency >= priceValue[0] && budgetInUserCurrency <= priceValue[1];
+    });
 
     if (search_key) {
       filteredData = filteredData.filter((item) =>
@@ -144,8 +203,8 @@ const DashboardJobBrowseArea = () => {
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
-    all_jobs, priceValue, shortValue, search_key,
+    itemOffset, itemsPerPage, selectedSkills, selectedTypes, projects_type,
+    all_jobs, priceValue, shortValue, search_key, userCurrency,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -153,20 +212,21 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(newOffset);
   };
 
-const handleToggleSave = async (job: IJobType) => {
-  if (!decoded || !decoded.user_id) {
-    if (typeof window !== "undefined") {
-      const modalElement = document.getElementById('saveJobLoginModal');
-      if (modalElement) {
-        const bootstrap = (window as any).bootstrap;
-        if (bootstrap && bootstrap.Modal) {
-          const modal = new bootstrap.Modal(modalElement);
-          modal.show();
+  const handleToggleSave = async (job: IJobType) => {
+    if (!decoded || !decoded.user_id) {
+      if (typeof window !== "undefined") {
+        const modalElement = document.getElementById('saveJobLoginModal');
+        if (modalElement) {
+          const bootstrap = (window as any).bootstrap;
+          if (bootstrap && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          }
         }
       }
+      return;
     }
-    return;
-  }
+
     const isActive = wishlist.some((p) => p.projects_task_id === job.projects_task_id);
 
     try {
@@ -177,32 +237,31 @@ const handleToggleSave = async (job: IJobType) => {
           projects_task_id: job.projects_task_id,
         });
         dispatch(remove_from_wishlist(job.projects_task_id));
+        toast.success("Project removed from saved list");
       } else {
         const payload = {
           projects_task_id: job.projects_task_id,
         };
         await makePostRequest("api/v1/saved/save-project", payload);
         dispatch(add_to_wishlist(job));
+        toast.success("Project saved successfully!");
       }
     } catch (error) {
       console.error("Error toggling save status:", error);
+      toast.error("Failed to save project. Please try again.");
     }
   };
 
   const handleReset = () => {
     dispatch(resetFilter());
-    setPriceValue([0, priceValue[1]]);
-    setSelectedCategories([]);
+    const maxBudgetUSD = Math.max(...all_jobs.map((j: any) => j.budget || 0), 0);
+    const maxBudgetUserCurrency = convertToUserCurrency(maxBudgetUSD, userCurrency);
+    setPriceValue([0, Math.ceil(maxBudgetUserCurrency)]);
     setSelectedSkills([]);
+    setSelectedTypes([]);
     setShortValue("");
     setItemOffset(0);
-  };
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
-    );
-    setItemOffset(0);
+    toast.success("Filters reset successfully");
   };
 
   const toggleSkill = (skill: string) => {
@@ -212,11 +271,17 @@ const handleToggleSave = async (job: IJobType) => {
     setItemOffset(0);
   };
 
+  const toggleType = (type: string) => {
+    setSelectedTypes(prev =>
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+    setItemOffset(0);
+  };
+
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
     return (
-      // MODIFICATION 1: Removed the `favourite` class logic here
       <div className={`candidate-profile-card list-layout mb-25`}>
         <div className="d-flex">
           <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
@@ -305,7 +370,6 @@ const handleToggleSave = async (job: IJobType) => {
     const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
 
     return (
-      // MODIFICATION 2: Removed the `favourite` class logic here
       <div className={`candidate-profile-card grid-layout`}>
         <a
           onClick={() => handleToggleSave(item)}
@@ -402,65 +466,73 @@ const handleToggleSave = async (job: IJobType) => {
 
             {showFilters && (
               <div className="row g-3 mt-2">
-                {/* Categories */}
-                <div className="col-md-4">
-                  <label className="form-label fw-500">Categories</label>
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '10px' }}>
-                    {categories.map((cat) => (
-                      <div key={cat.category_id} className="form-check mb-2">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={selectedCategories.includes(cat.category_name)}
-                          onChange={() => toggleCategory(cat.category_name)}
-                          id={`cat-${cat.category_id}`}
-                        />
-                        <label className="form-check-label" htmlFor={`cat-${cat.category_id}`}>
-                          {cat.category_name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Skills */}
                 <div className="col-md-4">
                   <label className="form-label fw-500">Skills</label>
                   <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '10px' }}>
-                    {skills.map((skill) => (
-                      <div key={skill.skill_id} className="form-check mb-2">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={selectedSkills.includes(skill.skill_name)}
-                          onChange={() => toggleSkill(skill.skill_name)}
-                          id={`skill-${skill.skill_id}`}
-                        />
-                        <label className="form-check-label" htmlFor={`skill-${skill.skill_id}`}>
-                          {skill.skill_name}
-                        </label>
-                      </div>
-                    ))}
+                    {availableSkills.length === 0 ? (
+                      <p className="text-muted mb-0">No skills available</p>
+                    ) : (
+                      availableSkills.map((skill, idx) => (
+                        <div key={idx} className="form-check mb-2">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={selectedSkills.includes(skill)}
+                            onChange={() => toggleSkill(skill)}
+                            id={`skill-${idx}`}
+                          />
+                          <label className="form-check-label fw-500" htmlFor={`skill-${idx}`}>
+                            {skill}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Project Types */}
+                <div className="col-md-4">
+                  <label className="form-label fw-500">Project Type</label>
+                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '10px' }}>
+                    {availableTypes.length === 0 ? (
+                      <p className="text-muted mb-0">No types available</p>
+                    ) : (
+                      availableTypes.map((type, idx) => (
+                        <div key={idx} className="form-check mb-2">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={selectedTypes.includes(type)}
+                            onChange={() => toggleType(type)}
+                            id={`type-${idx}`}
+                          />
+                          <label className="form-check-label fw-500" htmlFor={`type-${idx}`}>
+                            {type}
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
                 {/* Budget & Sort */}
                 <div className="col-md-4">
-                  <label className="form-label fw-500">Budget Range</label>
+                  <label className="form-label fw-500">Budget Range ({userCurrency})</label>
                   <input
                     type="range"
                     className="form-range mb-2"
                     min="0"
-                    max={priceValue[1]}
-                    value={priceValue[0]}
+                    max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
+                    value={priceValue[1]}
                     onChange={(e) => {
-                      setPriceValue([Number(e.target.value), priceValue[1]]);
+                      setPriceValue([0, Number(e.target.value)]);
                       setItemOffset(0);
                     }}
                   />
                   <div className="d-flex justify-content-between mb-3">
-                    <span className="text-muted">₹{priceValue[0]}</span>
-                    <span className="text-muted">₹{priceValue[1]}</span>
+                    <span className="fw-500">{userCurrency} 0</span>
+                    <span className="fw-500">{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
                   </div>
                   <label className="form-label fw-500">Sort By Price</label>
                   <select
@@ -477,17 +549,17 @@ const handleToggleSave = async (job: IJobType) => {
             )}
 
             {/* Active Filters Display */}
-            {(selectedCategories.length > 0 || selectedSkills.length > 0) && (
+            {(selectedSkills.length > 0 || selectedTypes.length > 0) && (
               <div className="mt-3 pt-3" style={{ borderTop: '1px solid #e5e5e5' }}>
                 <div className="d-flex flex-wrap gap-2 align-items-center">
                   <span className="text-muted me-2">Active Filters:</span>
-                  {selectedCategories.map((cat) => (
-                    <span key={cat} className="badge bg-primary" style={{ fontSize: '13px', padding: '6px 12px' }}>
-                      {cat}
+                  {selectedTypes.map((type) => (
+                    <span key={type} className="badge bg-primary" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                      {type}
                       <button
                         className="btn-close btn-close-white ms-2"
                         style={{ fontSize: '10px' }}
-                        onClick={() => toggleCategory(cat)}
+                        onClick={() => toggleType(type)}
                       />
                     </span>
                   ))}
