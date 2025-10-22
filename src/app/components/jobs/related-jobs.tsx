@@ -77,7 +77,7 @@ const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
           <Slider {...slider_setting} ref={sliderRef} className="related-job-slider">
             {job_items.map((j) => (
               <div key={j.projects_task_id} className="item">
-                <JobGridItem item={j} />
+                <JobGridItem item={j} isActive={false} />
               </div>
             ))}
           </Slider>

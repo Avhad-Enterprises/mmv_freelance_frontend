@@ -282,7 +282,7 @@ const JobListThree = ({
 
               {/* View now depends directly on the 'grid_style' prop */}
               <div className={`accordion-box list-style ${!grid_style ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} />)}
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />)}
               </div>
 
               <div className={`accordion-box grid-style ${grid_style ? "show" : ""}`}>
@@ -290,7 +290,7 @@ const JobListThree = ({
                   {currentItems &&
                     currentItems.map((job) => (
                       <div key={job.projects_task_id} className="col-sm-6 mb-30">
-                        <JobGridItem item={job} onToggleSave={handleToggleSave} />
+                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />
                       </div>
                     ))}
                 </div>

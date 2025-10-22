@@ -83,7 +83,7 @@ const SearchItems = () => {
                 {/* List View */}
                 <div className={`accordion-box list-style ${viewType === "list" ? "show" : ""}`}>
                   {projects.map((project) => (
-                    <ListItemTwo key={project.projects_task_id} item={project} />
+                    <ListItemTwo key={project.projects_task_id} item={project} isActive={false} />
                   ))}
                 </div>
 
@@ -92,7 +92,7 @@ const SearchItems = () => {
                   <div className="row">
                     {projects.map((project) => (
                       <div key={project.projects_task_id} className="col-sm-6 mb-30">
-                        <JobGridItem item={project} />
+                        <JobGridItem item={project} isActive={false} />
                       </div>
                     ))}
                   </div>
