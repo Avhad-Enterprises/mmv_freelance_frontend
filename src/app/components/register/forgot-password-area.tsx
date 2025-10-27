@@ -6,7 +6,7 @@ import ForgotPasswordForm from "./ForgotPasswordForm"; // Step 1 Form
 import ResetPasswordForm from "./ResetPasswordForm"; // Step 2 Form
 
 // API base URL from your project
-const API_URL = "http://localhost:8000/api/v1";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
 
 const ForgotPasswordArea: React.FC = () => {
   const [step, setStep] = useState<"request" | "reset">("request");

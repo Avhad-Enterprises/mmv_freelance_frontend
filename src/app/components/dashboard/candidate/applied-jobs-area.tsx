@@ -20,7 +20,7 @@ interface IJob {
   project_title: string;
   budget: number;
   deadline: string;
-  category: string; // Changed from project_category to match IJobType
+  category: string;
   projects_type: string;
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
   skills_required?: string[];
@@ -81,7 +81,7 @@ const AppliedJobsArea = ({}: IProps) => {
           project_title: job.project_title || 'Untitled Project',
           budget: job.budget || 0,
           deadline: job.deadline || '',
-          category: job.project_category || 'N/A', // Map project_category to category
+          category: job.project_category || 'N/A',
           projects_type: job.projects_type || 'N/A',
           skills_required: job.skills_required || [],
           status: statusMap[job.status]?.text || 'Pending',
@@ -136,20 +136,26 @@ const AppliedJobsArea = ({}: IProps) => {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader />
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="main-title mb-0">Applied Jobs</h2>
         </div>
-        <div className="btn-group w-100" role="group" aria-label="Status Filter">
-          {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
-            <button
-              key={status}
-              type="button"
-              className={`btn-one flex-fill ${selectedStatus === status ? 'active' : ''}`}
-              onClick={() => handleStatusFilter(status as any)}
-            >
-              {status}
-            </button>
-          ))}
+        
+        {/* Improved Filter Section */}
+        <div className="mb-4">
+          <label className="form-label fw-semibold mb-2">Filter by Status:</label>
+          <div className="d-flex flex-wrap gap-2">
+            {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
+              <button
+                key={status}
+                type="button"
+                className={`btn-one ${selectedStatus === status ? 'active' : ''}`}
+                style={{ minWidth: '100px' }}
+                onClick={() => handleStatusFilter(status as any)}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

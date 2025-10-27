@@ -209,7 +209,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
             style={{ width: '20px', height: '20px', cursor: 'pointer' }}
           />
           <label htmlFor="terms-checkbox" style={{ cursor: 'pointer' }}>
-            I accept the <a href="http://localhost:3000/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+            I accept the <a href="https://makemyvid.io/terms-condition" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
             <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
           </label>
         </div>
@@ -225,7 +225,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
             style={{ width: '20px', height: '20px', cursor: 'pointer' }}
           />
           <label htmlFor="privacy-checkbox" style={{ cursor: 'pointer' }}>
-            I accept the <a href="http://localhost:3000/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            I accept the <a href="https://makemyvid.io/privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
             <span style={{ color: '#dc3545', marginLeft: '4px' }}>*</span>
           </label>
         </div>
