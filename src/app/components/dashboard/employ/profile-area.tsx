@@ -2,20 +2,17 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import { Country, State, City } from 'country-state-city';
-import _ from 'lodash'; // Using lodash for deep object comparison
+import _ from 'lodash';
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
 
-type IProps = {
-  // No props needed, using context
-};
+type IProps = {};
 
-// Simplified ProfileData type for Client view
 type ProfileData = {
   full_name: string;
   email: string;
   phone_number: string;
-  bio: string; // Will map to company_description
+  bio: string;
   address_line_first: string;
   address_line_second: string;
   city: string;
@@ -27,14 +24,13 @@ type ProfileData = {
   website?: string;
   social_links?: string[];
   company_size?: string;
-  required_services?: string[]; // Kept for work preferences, can be removed if not needed
+  required_services?: string[];
   work_arrangement?: string;
   project_frequency?: string;
   hiring_preferences?: string;
   tax_id?: string;
 };
 
-// Component is defined outside to prevent re-creation on render
 const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange, type = 'text', required = false }: {
   label: string;
   value?: string | number | null;
@@ -57,7 +53,6 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
     );
   }
 
-  // Edit mode
   if (!field || !editedData || !handleInputChange) return null;
 
   return (
@@ -81,8 +76,6 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
   );
 };
 
-// This component now includes its own Edit/Save/Cancel buttons, controlled
-// by the parent component. This modularizes the UI and logic.
 const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSave, onCancel, isSaving }: {
   title: string;
   sectionKey: string;
@@ -121,8 +114,6 @@ const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSa
   );
 };
 
-
-// Add animation styles for the floating save button
 const floatingButtonStyle = `
   @keyframes slideUp {
     from {
@@ -141,17 +132,14 @@ const DashboardProfileArea = ({}: IProps) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [tempChanges, setTempChanges] = useState<{ [section: string]: Partial<ProfileData> }>({});
 
-  // Compute the displayed data by merging profile data with temporary changes
   const displayData = useMemo(() => {
     if (!profileData) return null;
 
-    // Combine all temporary changes
     const allChanges = Object.values(tempChanges).reduce((acc, sectionChanges) => ({
       ...acc,
       ...sectionChanges
     }), {});
 
-    // Return merged data
     return {
       ...profileData,
       ...allChanges
@@ -164,16 +152,13 @@ const DashboardProfileArea = ({}: IProps) => {
   const [saving, setSaving] = useState<boolean>(false);
   const [userType, setUserType] = useState<string>("");
 
-  // Location states
   const [countries, setCountries] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
 
-  // Selected location ISO codes for dropdowns
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
   const [selectedStateCode, setSelectedStateCode] = useState<string>("");
 
-  // Client-specific dropdown options
   const companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
   const industries = ["Ad Agency", "Film Production", "E-commerce", "Tech Startup", "Healthcare", "Education", "Real Estate", "Automotive", "Food & Beverage", "Finance", "Non-profit", "Other"];
   const workArrangementOptions = [
@@ -192,7 +177,6 @@ const DashboardProfileArea = ({}: IProps) => {
     { value: "both", label: "Both Individuals and Agencies" },
   ];
 
-  // Utility to safely parse arrays from stringified JSON
   const safeArray = <T,>(val: any, fallback: T[] = []): T[] => {
     try {
       if (Array.isArray(val)) return val as T[];
@@ -205,7 +189,6 @@ const DashboardProfileArea = ({}: IProps) => {
     }
   };
 
-  // Initialize countries and manage location dropdown dependencies
   useEffect(() => setCountries(Country.getAllCountries()), []);
   useEffect(() => {
     if (selectedCountryCode) setStates(State.getStatesOfCountry(selectedCountryCode));
@@ -219,16 +202,22 @@ const DashboardProfileArea = ({}: IProps) => {
     else setCities([]);
   }, [selectedCountryCode, selectedStateCode]);
 
-
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+      // Use the new CLIENT profile endpoint
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+          'Content-Type': 'application/json' 
+        }
       });
+      
       if (!res.ok) throw new Error('Failed to fetch profile');
+      
       const response = await res.json();
+      
       if (response.success && response.data) {
         const { user, profile, userType: type } = response.data;
         setUserType(type);
@@ -241,7 +230,7 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
           email: user.email || "",
           phone_number: user.phone_number || "",
-          bio: profile?.company_description || user.bio || "", // Mapping for company description
+          bio: user.bio || "",
 
           // Company Info
           company_name: profile?.company_name,
@@ -256,9 +245,8 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           hiring_preferences: profile?.hiring_preferences,
           required_services: safeArray<string>(profile?.required_services),
 
-
           // Address
-          address_line_first: user.address_line_first || profile?.address || "",
+          address_line_first: user.address_line_first || "",
           address_line_second: user.address_line_second || "",
           city: user.city || "",
           state: stateObj?.isoCode || "",
@@ -266,8 +254,9 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           pincode: user.pincode || "",
           tax_id: profile?.tax_id,
         };
+        
         setProfileData(data);
-        setEditedData(JSON.parse(JSON.stringify(data))); // Deep copy to prevent mutation
+        setEditedData(JSON.parse(JSON.stringify(data)));
 
         if (countryObj) setSelectedCountryCode(countryObj.isoCode);
         if (stateObj) setSelectedStateCode(stateObj.isoCode);
@@ -283,7 +272,7 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
   useEffect(() => { void fetchUserProfile(); }, [fetchUserProfile]);
 
   const handleEdit = useCallback((section: string) => {
-    setEditedData(JSON.parse(JSON.stringify(profileData))); // Reset changes on new edit
+    setEditedData(JSON.parse(JSON.stringify(profileData)));
     if (profileData?.country) setSelectedCountryCode(profileData.country);
     if (profileData?.state) setSelectedStateCode(profileData.state);
     setEditingSection(section);
@@ -292,7 +281,6 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
   const handleCancel = useCallback(() => {
     setEditingSection(null);
     setEditedData(profileData);
-    // Clear temporary changes for the current section if cancelled
     setTempChanges(prev => {
       const newTempChanges = { ...prev };
       if (editingSection) {
@@ -304,10 +292,10 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
 
   const handleInputChange = useCallback((field: keyof ProfileData, value: any) => {
     if (field === 'phone_number' || field === 'tax_id') {
-      value = value.replace(/\D/g, ''); // Remove non-digits
+      value = value.replace(/\D/g, '');
     }
     if (field === 'phone_number') {
-      value = value.slice(0, 10); // Limit to 10 digits
+      value = value.slice(0, 10);
     }
 
     setEditedData(prev => prev ? { ...prev, [field]: value } : null);
@@ -338,7 +326,6 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
     });
   }, []);
 
-  // Utility to find changed fields
   const getChangedFields = (original: ProfileData, edited: ProfileData): Partial<ProfileData> => {
     const changes = {} as Partial<ProfileData>;
     (Object.keys(edited) as Array<keyof ProfileData>).forEach(key => {
@@ -352,7 +339,6 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
     return changes;
   };
 
-  // Generic save handler for drafts
   const handleSave = (section: string) => {
     if (!editedData || !profileData) return;
     setSaving(true);
@@ -366,7 +352,6 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
       return;
     }
 
-    // Store changes temporarily
     setTempChanges(prev => ({
       ...prev,
       [section]: changes
@@ -382,7 +367,6 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
     setSaving(true);
 
     try {
-      // Combine all temporary changes
       const allChanges = Object.values(tempChanges).reduce((acc, sectionChanges) => ({
         ...acc,
         ...sectionChanges
@@ -394,14 +378,14 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         return;
       }
 
-      // Split changes into user and profile payloads
+      // Split changes into user and profile payloads based on API documentation
       const userFields: (keyof ProfileData)[] = [
         'full_name', 'email', 'phone_number', 'bio',
         'address_line_first', 'address_line_second', 'city', 'state', 'country', 'pincode'
       ];
       
       const clientProfileFields: (keyof ProfileData)[] = [
-        'company_name', 'website', 'industry', 'social_links', 'company_size',
+        'company_name', 'website', 'industry', 'company_size', 'required_services',
         'work_arrangement', 'project_frequency', 'hiring_preferences', 'tax_id'
       ];
 
@@ -432,16 +416,14 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         userPayload.state = State.getStateByCodeAndCountry(userPayload.state, profileData.country)?.name || '';
       }
 
-      // For client, 'bio' maps to 'company_description' in the profile payload
-      if (userPayload.bio) {
-        profilePayload.company_description = userPayload.bio;
-      }
+      const apiHeaders = { 
+        'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+        'Content-Type': 'application/json' 
+      };
 
-      const apiHeaders = { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' };
-
-      // Make API calls only if there are changes for that payload
+      // Update user information using /users/me endpoint
       if (Object.keys(userPayload).length > 0) {
-const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           method: 'PATCH',
           headers: apiHeaders,
           body: JSON.stringify(userPayload)
@@ -452,21 +434,22 @@ const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`
         }
       }
 
+      // Update client profile using /clients/profile endpoint
       if (Object.keys(profilePayload).length > 0) {
-const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
           method: 'PATCH',
           headers: apiHeaders,
           body: JSON.stringify(profilePayload)
         });
         if (!profileRes.ok) {
           const errorBody = await profileRes.json();
-          throw new Error(errorBody.message || `Failed to update client profile data`);
+          throw new Error(errorBody.message || 'Failed to update client profile data');
         }
       }
 
       toast.success("All changes saved successfully!");
-      setTempChanges({}); // Clear temporary changes
-      await fetchUserProfile(); // Re-fetch data to sync with backend
+      setTempChanges({});
+      await fetchUserProfile();
 
     } catch (err: any) {
       console.error("Failed to save all changes:", err);
@@ -483,13 +466,12 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/
       <style dangerouslySetInnerHTML={{ __html: floatingButtonStyle }} />
       <div className="dashboard-body">
         <div className="position-relative">
-          {/* header start */}
           <DashboardHeader />
-          {/* header end */}
           
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="main-title">My Profile</h2>
           </div>
+          
           {Object.keys(tempChanges).length > 0 && (
             <div style={{
               position: 'fixed',
@@ -560,30 +542,6 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/
                         ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
                         </div>
                     </div>
-                )}
-
-                {(profileData.social_links?.length || isEditModeFor("companyInfo")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Social Links:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("companyInfo") ? (
-                        <div>
-                          {(editedData.social_links || []).map((link, index) => (
-                            <div key={index} className="input-group mb-2">
-                              <input type="url" className="form-control" value={link} placeholder="https://linkedin.com/company/..."
-                                onChange={(e) => updateSocialLink(index, e.target.value)} />
-                              <button className="btn btn-outline-danger" type="button" onClick={() => removeSocialLink(index)}>Remove</button>
-                            </div>
-                          ))}
-                          <button className="btn btn-outline-success mt-2" type="button" onClick={addSocialLink}>+ Add Social Link</button>
-                        </div>
-                      ) : (
-                        (displayData.social_links || []).map((link: string, index: number) => (
-                          <div key={index} className="mb-1"><a href={link} target="_blank" rel="noopener noreferrer" className="text-primary" style={{ textDecoration: 'none' }}>{link}</a></div>
-                        ))
-                      )}
-                    </div>
-                  </div>
                 )}
 
                 {(profileData.company_size || isEditModeFor("companyInfo")) && (
@@ -706,7 +664,6 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/
                 <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Tax ID" value={displayData.tax_id} field="tax_id" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
               </InfoSection>
-
             </>
           )}
         </div>
