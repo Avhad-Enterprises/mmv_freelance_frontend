@@ -47,16 +47,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
         {/* Left side - User Role */}
         <div className="user-role" style={{
           fontSize: '14px',
-          color: '#667eea',
-          fontWeight: '700',
+          color: '#244034',
+          fontWeight: '600',
           textTransform: 'uppercase',
           letterSpacing: '0.5px',
           padding: '8px 16px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '20px',
-          border: '2px solid #667eea',
+          backgroundColor: '#EFF6F3',
+          borderRadius: '15px',
+          border: '2px solid #31795A',
           whiteSpace: 'nowrap',
-          minWidth: 'fit-content'
+          minWidth: 'fit-content',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
         }}>
           {userRole || 'Loading...'}
         </div>
