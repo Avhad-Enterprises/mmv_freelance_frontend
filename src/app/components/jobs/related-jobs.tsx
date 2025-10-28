@@ -59,11 +59,7 @@ const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
   };
 
   if (job_items.length === 0) {
-    return (
-      <div className="text-center py-5 text-muted">
-        No related jobs found.
-      </div>
-    );
+    return null;
   }
 
   return (
