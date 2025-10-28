@@ -300,14 +300,14 @@ const JobListThree = ({
                   {currentItems &&
                     currentItems.map((job) => (
                       <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
-                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />
+                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
                       </div>
                     ))}
                 </div>
               </div>
 
               <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />)}
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
               </div>
 
               {currentItems && currentItems.length === 0 && (

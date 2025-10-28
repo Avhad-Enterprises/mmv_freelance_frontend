@@ -67,6 +67,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
   const [item, setItem] = useState<IBlogDataType | null>(null);
   const [allBlogs, setAllBlogs] = useState<IBlogDataType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     const fetchAndSetBlog = async () => {
@@ -139,14 +140,34 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
 
                   {item.featured_image && (
                     <div className="img-meta mb-15">
-                      <Image
-                        src={item.featured_image}
-                        alt={item.title || "Blog Feature Image"}
-                        className="lazy-img"
-                        width={800}
-                        height={400}
-                        style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
-                      />
+                      {!imageError ? (
+                        <Image
+                          src={item.featured_image}
+                          alt={item.title || "Blog Feature Image"}
+                          className="lazy-img"
+                          width={800}
+                          height={400}
+                          style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+                          unoptimized={true}
+                          onError={() => setImageError(true)}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '100%',
+                            height: '400px',
+                            background: '#f3f4f6',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#6b7280',
+                            fontSize: '16px',
+                            borderRadius: '8px'
+                          }}
+                        >
+                          Image not available
+                        </div>
+                      )}
                     </div>
                   )}
 

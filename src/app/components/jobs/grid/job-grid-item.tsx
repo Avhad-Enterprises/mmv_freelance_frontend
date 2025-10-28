@@ -26,8 +26,8 @@ const JobGridItem = ({
   // The 'isActive' const now comes directly from props.
 
   return (
-    // 'isActive' prop now controls the 'favourite' class
-    <div className={`candidate-profile-card grid-layout ${isActive ? "favourite" : ""}`}>
+    // Removed favourite class - only heart icon should change
+    <div className="candidate-profile-card text-center grid-layout mb-25">
       {onToggleSave && (
         <a
           onClick={() => onToggleSave(item)}
@@ -40,7 +40,7 @@ const JobGridItem = ({
         </a>
       )}
 
-      <div className="cadidate-avatar online position-relative d-block me-auto ms-auto mb-3">
+      <div className="cadidate-avatar online position-relative d-block m-auto">
         <Link href={`/job-details-v1/${projects_task_id}`} className="rounded-circle">
           <div
             className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
@@ -58,40 +58,49 @@ const JobGridItem = ({
         </Link>
       </div>
 
-      <div className="text-center mb-2">
-        <h4 className="candidate-name mb-2">
-          <Link href={`/job-details-v1/${projects_task_id}`} className="tran3s">
-            {project_title}
-          </Link>
-        </h4>
-
-        <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
-          {item.skills_required && item.skills_required.slice(0, 1).map((s, i) => (
-            <li key={i} className="text-nowrap">{s}</li>
-          ))}
-          {item.skills_required && item.skills_required.length > 1 && (
-            <li className="more text-nowrap">{item.skills_required.length - 1}+</li>
-          )}
-        </ul>
-      </div>
-
-      <div className="candidate-info text-center mb-3">
-        <span>Budget</span>
-        <div>${budget ?? 0}</div>
-      </div>
-
-      <div className="candidate-info text-center mb-3">
-        <span>Type</span>
-        <div>{projects_type || 'Not specified'}</div>
-      </div>
-
-      <div className="d-flex justify-content-center">
-        <Link
-          href={`/job-details-v1/${projects_task_id}`}
-          className="profile-btn tran3s"
-        >
-          View Details
+      <h4 className="candidate-name mt-15 mb-0">
+        <Link href={`/job-details-v1/${projects_task_id}`} className="tran3s">
+          {project_title}
         </Link>
+      </h4>
+
+      <div className="candidate-post">
+        {item.project_category || 'Project'}
+      </div>
+
+      <ul className="cadidate-skills style-none d-flex flex-wrap align-items-center justify-content-center pt-30 sm-pt-20 pb-10">
+        {item.skills_required && item.skills_required.slice(0, 1).map((s, i) => (
+          <li key={i}>{s}</li>
+        ))}
+        {item.skills_required && item.skills_required.length > 1 && (
+          <li className="more">{item.skills_required.length - 1}+</li>
+        )}
+      </ul>
+
+      <div className="row gx-1">
+        <div className="col-6">
+          <div className="candidate-info mt-10">
+            <span>Budget</span>
+            <div>${budget ?? 0}</div>
+          </div>
+        </div>
+        <div className="col-6">
+          <div className="candidate-info mt-10">
+            <span>Type</span>
+            <div>{projects_type || 'Not specified'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row gx-2 pt-25 sm-pt-10">
+        <div className="col-12">
+          <Link
+            href={`/job-details-v1/${projects_task_id}`}
+            className="profile-btn tran3s w-100 mt-5"
+          >
+            View Details
+          </Link>
+        </div>
       </div>
     </div>
   );

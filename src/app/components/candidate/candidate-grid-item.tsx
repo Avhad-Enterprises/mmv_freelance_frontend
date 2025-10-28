@@ -34,8 +34,7 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
 }) => {
   return (
     <div
-      className={`candidate-profile-card ${isSaved ? "favourite" : ""} text-center ${style_2 ? "border-0" : ""
-        } grid-layout mb-25`}
+      className={`candidate-profile-card text-center grid-layout mb-25`}
     >
       {/* Heart Save Button */}
       <button
@@ -72,7 +71,7 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
           : item.post?.languages || "N/A"}
       </div>
 
-      <ul className="cadidate-skills style-none d-flex flex-wrap align-items-center justify-content-center justify-content-md-between pt-30 sm-pt-20 pb-10">
+      <ul className="cadidate-skills style-none d-flex flex-wrap align-items-center justify-content-center pt-30 sm-pt-20 pb-10">
         {(item.skill?.languages ?? []).slice(0, 1).map((lang, i) => (
           <li key={i}>{lang}</li>
         ))}
@@ -84,13 +83,13 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
 
 
       <div className="row gx-1">
-        <div className="col-md-6">
+        <div className="col-6">
           <div className="candidate-info mt-10">
             <span>Budget</span>
             <div>{item.budget ? `${item.budget} / month` : "Negotiable"}</div>
           </div>
         </div>
-        <div className="col-md-6">
+        <div className="col-6">
           <div className="candidate-info mt-10">
             <span>Location</span>
             <div>{`${item.city || "Unknown"}, ${item.country || "Unknown"}`}</div>
@@ -99,17 +98,12 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
       </div>
 
       <div className="row gx-2 pt-25 sm-pt-10">
-        <div className="col-md-6">
+        <div className="col-12">
           <Link
             href={`/candidate-profile-v1/${item.username}`}
             className="profile-btn tran3s w-100 mt-5"
           >
             View Profile
-          </Link>
-        </div>
-        <div className="col-md-6">
-          <Link href="/candidate-profile-v1" className="msg-btn tran3s w-100 mt-5">
-            Message
           </Link>
         </div>
       </div>

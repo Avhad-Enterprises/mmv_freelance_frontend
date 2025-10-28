@@ -3,13 +3,18 @@ import React from "react";
 import Image from "next/image";
 import icon from "@/assets/dashboard/images/icon/icon_22.svg";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/redux/hook";
+import { clear_wishlist } from "@/redux/features/wishlist";
 
 const LogoutModal = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleLogout = () => {
     // Clear token / user data from storage
     localStorage.removeItem("token"); // example
+    // Clear wishlist on logout
+    dispatch(clear_wishlist());
     // Redirect to login or homepage
     router.push("/");
   };

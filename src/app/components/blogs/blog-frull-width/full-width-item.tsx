@@ -21,17 +21,38 @@ const FullWidthItem = ({ blog }: { blog: IBlogDataType }) => {
   const imageUrl = featured_image;
   console.log(`Image URL: ${imageUrl}`); // Debugging log
 
+  const [imageError, setImageError] = React.useState(false);
+
   return (
     <article className="blog-meta-two box-layout mb-50 lg-mb-30">
       <figure className="post-img m0">
         <Link href={`/blog-details/${blog_id}`} className="w-100 d-block">
-          <Image
-            src={imageUrl || ""}
-            alt="blog-img"
-            width={600}
-            height={400}
-            className="lazy-img w-100 tran4s"
-          />
+          {!imageError && imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt="blog-img"
+              width={600}
+              height={400}
+              className="lazy-img w-100 tran4s"
+              unoptimized={true}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '400px',
+                background: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6b7280',
+                fontSize: '14px'
+              }}
+            >
+              Image not available
+            </div>
+          )}
         </Link>
         {tags?.[0] && (
   <Link href={`/blog-details/${blog_id}`} className="tags fw-500">

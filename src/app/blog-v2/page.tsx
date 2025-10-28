@@ -90,7 +90,6 @@ const BlogV2Page = () => {
           onSelectTag={handleSelectTag}
         />
 
-        <JobPortalIntro top_border={true} />
         <FooterOne />
       </div>
     </Wrapper>
