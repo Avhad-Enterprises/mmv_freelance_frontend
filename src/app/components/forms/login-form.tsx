@@ -9,6 +9,7 @@ import icon from "@/assets/images/icon/icon_60.svg";
 import toast from "react-hot-toast";
 import { makePostRequest } from "@/utils/api";
 import TokenRefreshService from "@/utils/tokenRefresh";
+import { useUser } from "@/context/UserContext";
 
 type IFormData = { email: string; password: string; rememberMe: boolean };
 
@@ -27,6 +28,7 @@ interface LoginFormProps {
 // ✅ The component props can be simplified as they are no longer needed
 const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => {
   const [showPass, setShowPass] = useState<boolean>(false);
+  const { refreshUserData } = useUser();
   // ❌ router is no longer needed
   // const router = useRouter(); 
 
@@ -57,6 +59,9 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
           console.log("Token stored in sessionStorage (session-only)");
         }
 
+        // Dispatch custom event to notify UserContext of token change
+        window.dispatchEvent(new CustomEvent('tokenChanged'));
+
         reset();
 
         // Start automatic token refresh monitoring
@@ -71,29 +76,57 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         // Handle case where roles might be a single string instead of array
         const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
 
-        // 3. Show a success message
-        toast.success("Login successful! Redirecting to dashboard...");
+        console.log('Full decoded token payload:', decodedPayload);
+        console.log('Extracted user roles:', userRoles);
+        console.log('Roles array:', rolesArray);
 
-        // 4. Call the onLoginSuccess callback if provided
+        // 4. Refresh user data to ensure UserContext is updated
+        try {
+          await refreshUserData();
+          console.log('User data refreshed successfully');
+        } catch (error) {
+          console.error('Failed to refresh user data:', error);
+        }
+
+        // 4. Close modal if in modal mode
+        if (isModal) {
+          const modalElement = document.getElementById('loginModal');
+          if (modalElement) {
+            // Use Bootstrap's data API to hide the modal
+            modalElement.classList.remove('show');
+            modalElement.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) {
+              backdrop.remove();
+            }
+          }
+        }
+
+        // 5. Call the onLoginSuccess callback if provided
         if (onLoginSuccess) {
           onLoginSuccess();
         }
 
-        // 5. Redirect to appropriate dashboard based on role
+        // 7. Show success message and redirect
+        toast.success("Login successful! Redirecting to dashboard...");
+
+        // 8. Redirect to appropriate dashboard based on role
         setTimeout(() => {
           if (rolesArray.includes('CLIENT') || rolesArray.includes('client')) {
+            console.log('Redirecting to client dashboard');
             window.location.href = '/dashboard/employ-dashboard';
           } else if (rolesArray.includes('VIDEOGRAPHER') || rolesArray.includes('videographer') || 
                      rolesArray.includes('VIDEO_EDITOR') || rolesArray.includes('video_editor') ||
                      rolesArray.includes('videoEditor')) {
+            console.log('Redirecting to freelancer dashboard');
             window.location.href = '/dashboard/candidate-dashboard';
           } else {
+            console.log('No recognized role, redirecting to home');
             // Fallback to home if no recognized role
             window.location.href = '/';
           }
-        }, 500); // 500ms delay
-
-      } else {
+        }, 300); // Reduced delay to 300ms      } else {
         toast.error(result?.message || "Login failed: No token received.");
       }
     } catch (error: any) {

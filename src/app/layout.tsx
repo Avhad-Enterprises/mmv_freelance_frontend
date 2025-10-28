@@ -8,6 +8,7 @@ import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
 import { Toaster } from "react-hot-toast";
 import { SidebarProvider } from "@/context/SidebarContext"; //
+import { UserProvider } from "@/context/UserContext";
 
 const gordita = localFont({
   src: [
@@ -62,10 +63,12 @@ export default function RootLayout({
           <title>MMV</title>
         </Head>
         <Providers>
-          <SidebarProvider> {/*yaha wrap kar diya */}
-            <Toaster position="top-right" />
-            {children}
-          </SidebarProvider>
+          <UserProvider>
+            <SidebarProvider> {/*yaha wrap kar diya */}
+              <Toaster position="top-right" />
+              {children}
+            </SidebarProvider>
+          </UserProvider>
         </Providers>
         <BackToTopCom />
         <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" />
