@@ -66,9 +66,12 @@ const JobGridItem = ({
         </h4>
 
         <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
-          {item.skills_required && item.skills_required.slice(0, 2).map((s, i) => (
+          {item.skills_required && item.skills_required.slice(0, 1).map((s, i) => (
             <li key={i} className="text-nowrap">{s}</li>
           ))}
+          {item.skills_required && item.skills_required.length > 1 && (
+            <li className="more text-nowrap">{item.skills_required.length - 1}+</li>
+          )}
         </ul>
       </div>
 

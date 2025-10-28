@@ -13,7 +13,6 @@ import { CategoryCardWrapper } from "./components/category/category-section-2";
 import { how_works_data } from "@/data/how-works-data";
 import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
-import BlogFive from "./components/blogs/blog-two";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
 
@@ -164,10 +163,6 @@ const HomeSix = () => {
           </div>
         </section>
         {/* faq end */}
-
-        {/* blog start */}
-        <BlogFive/>
-        {/* blog end */}
 
         {/* fancy banner start */}
         <FancyBannerSeven/>

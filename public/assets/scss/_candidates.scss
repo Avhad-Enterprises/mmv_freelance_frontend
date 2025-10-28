@@ -16,6 +16,9 @@
         display: flex;
         flex-direction: column;
         width: 100%;
+        min-height: 380px;
+        height: 100%;
+        justify-content: space-between;
         .save-btn {
             color: #b9b9b9;
             position: absolute;
@@ -25,6 +28,21 @@
             &:hover {
                 color: $color-three;
             }
+        }
+        .cadidate-avatar {
+            flex-shrink: 0;
+        }
+        .candidate-name {
+            flex-shrink: 0;
+        }
+        .candidate-post {
+            flex-shrink: 0;
+        }
+        .cadidate-skills {
+            flex-shrink: 0;
+        }
+        .candidate-info {
+            flex-shrink: 0;
         }
     }
     &.favourite::before {

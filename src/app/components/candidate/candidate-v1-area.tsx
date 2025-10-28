@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidate-login-modal";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item"; // Using your desired item component
+import CandidateGridItem from "@/app/components/candidate/candidate-grid-item";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-new";
 import ShortSelect from "@/app/components/common/short-select";
 import Pagination from "@/ui/pagination";
@@ -48,6 +49,9 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 6;
+
+  // View type state
+  const [jobType, setJobType] = useState<string>("list");
 
   const loginModalRef = useRef<any>(null);
 
@@ -284,7 +288,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                     All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
                   </div>
                   <div className="d-flex align-items-center">
-                    <div className="short-filter d-flex align-items-center">
+                    <div className="short-filter d-flex align-items-center me-3">
                       <div className="text-dark fw-500 me-2">Sort:</div>
                       <NiceSelect
                         options={[
@@ -297,10 +301,58 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                         name="Budget Sort"
                       />
                     </div>
+                    <div className="d-flex align-items-center">
+                      <button
+                        onClick={() => setJobType("list")}
+                        className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
+                        title="Active List"
+                      >
+                        <i className="bi bi-list"></i>
+                      </button>
+                      <button
+                        onClick={() => setJobType("grid")}
+                        className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
+                        title="Active Grid"
+                      >
+                        <i className="bi bi-grid"></i>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="accordion-box list-style show">
+                <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
+                  <div className="row">
+                    {loading && <div className="text-center p-5 col-12"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+                    {error && <p className="text-danger text-center p-5 col-12">{error}</p>}
+                    
+                    {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
+                      <div key={apiCandidate.user_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
+                        <CandidateGridItem
+                          item={{
+                            user_id: apiCandidate.user_id,
+                            username: apiCandidate.username,
+                            first_name: apiCandidate.first_name,
+                            last_name: apiCandidate.last_name,
+                            city: apiCandidate.city,
+                            country: apiCandidate.country,
+                            profile_picture: apiCandidate.profile_picture || undefined,
+                            skill: { languages: apiCandidate.skills },
+                            post: apiCandidate.profile_title || 'Freelancer',
+                            budget: parseFloat(apiCandidate.rate_amount),
+                          }}
+                          isSaved={savedCandidates.includes(apiCandidate.user_id)}
+                          onToggleSave={handleToggleSave}
+                        />
+                      </div>
+                    ))}
+
+                    {!loading && currentDisplayCandidates.length === 0 && (
+                       <div className="text-center p-5 col-12"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
+                    )}
+                  </div>
+                </div>
+
+                <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
                   {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
                   {error && <p className="text-danger text-center p-5">{error}</p>}
                   

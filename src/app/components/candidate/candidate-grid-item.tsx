@@ -73,11 +73,11 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
       </div>
 
       <ul className="cadidate-skills style-none d-flex flex-wrap align-items-center justify-content-center justify-content-md-between pt-30 sm-pt-20 pb-10">
-        {(item.skill?.languages ?? []).slice(0, 3).map((lang, i) => (
+        {(item.skill?.languages ?? []).slice(0, 1).map((lang, i) => (
           <li key={i}>{lang}</li>
         ))}
-        {(item.skill?.languages?.length ?? 0) > 3 && (
-          <li className="more">{(item.skill?.languages?.length ?? 0) - 3}+</li>
+        {(item.skill?.languages?.length ?? 0) > 1 && (
+          <li className="more">{(item.skill?.languages?.length ?? 0) - 1}+</li>
         )}
       </ul>
 

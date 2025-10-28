@@ -45,7 +45,8 @@ const JobListThree = ({
   // Add dropdown filter states
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSkill, setSelectedSkill] = useState("");
-  // The 'jobType' state has been removed as it's no longer needed.
+  // Add view type state for toggle functionality
+  const [jobType, setJobType] = useState<string>("list");
 
   // Redux
   const dispatch = useAppDispatch();
@@ -276,24 +277,37 @@ const JobListThree = ({
                       name="Price Sort"
                     />
                   </div>
-                  {/* --- REMOVED --- The List/Grid view buttons were here */}
+                  <button
+                    onClick={() => setJobType("list")}
+                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
+                    title="Active List"
+                  >
+                    <i className="bi bi-list"></i>
+                  </button>
+                  <button
+                    onClick={() => setJobType("grid")}
+                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
+                    title="Active Grid"
+                  >
+                    <i className="bi bi-grid"></i>
+                  </button>
                 </div>
               </div>
 
-              {/* View now depends directly on the 'grid_style' prop */}
-              <div className={`accordion-box list-style ${!grid_style ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />)}
-              </div>
-
-              <div className={`accordion-box grid-style ${grid_style ? "show" : ""}`}>
+              {/* View now depends on the jobType state */}
+              <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
                 <div className="row">
                   {currentItems &&
                     currentItems.map((job) => (
-                      <div key={job.projects_task_id} className="col-sm-6 mb-30">
+                      <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
                         <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />
                       </div>
                     ))}
                 </div>
+              </div>
+
+              <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />)}
               </div>
 
               {currentItems && currentItems.length === 0 && (
