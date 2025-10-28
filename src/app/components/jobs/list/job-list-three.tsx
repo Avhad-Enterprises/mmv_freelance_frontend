@@ -43,8 +43,8 @@ const JobListThree = ({
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
   // Add dropdown filter states
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSkill, setSelectedSkill] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   // Add view type state for toggle functionality
   const [jobType, setJobType] = useState<string>("list");
 
@@ -108,16 +108,20 @@ const JobListThree = ({
     let filteredData = all_jobs;
 
     // Use local state for category and skill filtering
-    if (selectedCategory) {
+    if (selectedCategories.length > 0) {
       filteredData = filteredData.filter((item) =>
-        item.project_category?.toLowerCase() === selectedCategory.toLowerCase()
+        item.project_category && selectedCategories.some(cat => 
+          cat.toLowerCase() === item.project_category?.toLowerCase()
+        )
       );
     }
 
-    if (selectedSkill) {
+    if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
         item.skills_required?.some(
-          (jobSkill) => jobSkill && jobSkill.toLowerCase() === selectedSkill.toLowerCase()
+          (jobSkill) => jobSkill && selectedSkills.some(skill => 
+            skill.toLowerCase() === jobSkill.toLowerCase()
+          )
         )
       );
     }
@@ -151,7 +155,7 @@ const JobListThree = ({
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset, itemsPerPage, selectedCategory, selectedSkill, projects_type,
+    itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
     all_jobs, priceValue, shortValue, search_key,
   ]);
 
@@ -250,10 +254,10 @@ const JobListThree = ({
               maxPrice={priceValue[1]}
               all_categories={categories}
               all_skills={skills}
-              onCategoryChange={setSelectedCategory}
-              onSkillChange={setSelectedSkill}
-              selectedCategory={selectedCategory}
-              selectedSkill={selectedSkill}
+              onCategoryChange={setSelectedCategories}
+              onSkillChange={setSelectedSkills}
+              selectedCategories={selectedCategories}
+              selectedSkills={selectedSkills}
             />
           </div>
 

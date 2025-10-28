@@ -1,28 +1,31 @@
 import React from "react";
-import NiceSelect from "@/ui/nice-select";
+import Select from 'react-select';
 
 const FilterJobSkills = ({
   skills,
   onChange,
+  value,
 }: {
   skills: { skill_id: number; skill_name: string }[];
-  onChange: (value: string) => void;
+  onChange: (values: string[]) => void;
+  value: string[];
 }) => {
-  const options = [
-    { value: "", label: "Select Skill" }, // Default option
-    ...skills.map((skill) => ({
-      value: skill.skill_name,
-      label: skill.skill_name,
-    })),
-  ];
+  const options = skills.map((skill) => ({
+    value: skill.skill_name,
+    label: skill.skill_name,
+  }));
 
   return (
-    <NiceSelect
+    <Select
+      isMulti
       options={options}
-      defaultCurrent={0}
-      onChange={(item) => onChange(item.value)}
-      cls="bg-white"
-      name="Skills"
+      value={options.filter(option => value.includes(option.value))}
+      onChange={(selectedOptions) => {
+        onChange(selectedOptions ? selectedOptions.map(option => option.value) : []);
+      }}
+      className="basic-multi-select"
+      classNamePrefix="select"
+      placeholder="Select Skills"
     />
   );
 };
