@@ -26,10 +26,10 @@ type IProps = {
   maxPrice: number;
   all_categories: ICategory[]; // <-- ADDED
   all_skills: ISkill[];       // <-- ADDED
-  onCategoryChange: (value: string) => void; // <-- ADDED
-  onSkillChange: (value: string) => void;    // <-- ADDED
-  selectedCategory: string; // <-- ADDED
-  selectedSkill: string;    // <-- ADDED
+  onCategoryChange: (values: string[]) => void; // <-- UPDATED
+  onSkillChange: (values: string[]) => void;    // <-- UPDATED
+  selectedCategories: string[]; // <-- UPDATED
+  selectedSkills: string[];    // <-- UPDATED
 };
 
 const FilterArea = ({
@@ -40,16 +40,16 @@ const FilterArea = ({
   all_skills,
   onCategoryChange,
   onSkillChange,
-  selectedCategory,
-  selectedSkill
+  selectedCategories,
+  selectedSkills
 }: IProps) => {
   const dispatch = useAppDispatch();
 
   const handleReset = () => {
     dispatch(resetFilter());
     setPriceValue([0, maxPrice]);
-    onCategoryChange(""); // Reset category
-    onSkillChange("");    // Reset skill
+    onCategoryChange([]); // Reset categories
+    onSkillChange([]);    // Reset skills
   };
 
   return (
@@ -76,19 +76,19 @@ const FilterArea = ({
 
         {/* Category */}
         <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="false">Category</a>
-          <div className="collapse" id="collapseCategory">
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="true">Category</a>
+          <div className="collapse show" id="collapseCategory">
             {/* Use dropdown filter */}
-            <FilterJobCategory categories={all_categories} onChange={onCategoryChange} />
+            <FilterJobCategory categories={all_categories} onChange={onCategoryChange} value={selectedCategories} />
           </div>
         </div>
 
         {/* Skills Section */}
         <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark collapsed" data-bs-toggle="collapse" href="#collapseSkills" role="button" aria-expanded="false">Skills</a>
-          <div className="collapse" id="collapseSkills">
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseSkills" role="button" aria-expanded="true">Skills</a>
+          <div className="collapse show" id="collapseSkills">
              {/* Use dropdown filter */}
-            <FilterJobSkills skills={all_skills} onChange={onSkillChange} />
+            <FilterJobSkills skills={all_skills} onChange={onSkillChange} value={selectedSkills} />
           </div>
         </div>
 

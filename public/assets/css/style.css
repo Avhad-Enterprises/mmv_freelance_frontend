@@ -5970,15 +5970,6 @@ iframe {
   left: -30px;
   transform: rotate(45deg);
 }
-.candidate-profile-card.favourite::after {
-  content: "\f586";
-  font-family: bootstrap-icons !important;
-  position: absolute;
-  color: #fff;
-  font-size: 13px;
-  top: 4px;
-  left: 7px;
-}
 .candidate-profile-card .cadidate-avatar {
   width: 80px;
   height: 80px;

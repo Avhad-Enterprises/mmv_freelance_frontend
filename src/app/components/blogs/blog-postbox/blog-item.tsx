@@ -18,18 +18,38 @@ const BlogItem = ({ blog, style_2 = false }: { blog: IBlogDataType; style_2?: bo
 
   const formattedDate = new Date(created_at || '').toLocaleDateString();
 
+  const [imageError, setImageError] = React.useState(false);
+
   return (
     <article className={`blog-meta-two ${style_2 ? "mb-60" : "mb-75"} lg-mb-40`}>
       <figure className="post-img m0">
         <Link href={`/blog-details/${blog_id}`} className="w-100 d-block">
-          <Image
-            src={imageUrl || ''}
-            alt="blog-img"
-            width={500}
-            height={300}
-            className="lazy-img w-100 tran4s"
-            unoptimized={true} // Use unoptimized for external URLs
-          />
+          {!imageError && imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt="blog-img"
+              width={500}
+              height={300}
+              className="lazy-img w-100 tran4s"
+              unoptimized={true}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '300px',
+                background: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6b7280',
+                fontSize: '14px'
+              }}
+            >
+              Image not available
+            </div>
+          )}
         </Link>
         {tags && tags.length > 0 && (
           <Link href={`/blog-details/${blog_id}`} className="tags color-two fw-500">

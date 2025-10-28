@@ -43,8 +43,8 @@ const JobListThree = ({
   const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
   // Add dropdown filter states
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSkill, setSelectedSkill] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   // Add view type state for toggle functionality
   const [jobType, setJobType] = useState<string>("list");
 
@@ -108,16 +108,20 @@ const JobListThree = ({
     let filteredData = all_jobs;
 
     // Use local state for category and skill filtering
-    if (selectedCategory) {
+    if (selectedCategories.length > 0) {
       filteredData = filteredData.filter((item) =>
-        item.project_category?.toLowerCase() === selectedCategory.toLowerCase()
+        item.project_category && selectedCategories.some(cat => 
+          cat.toLowerCase() === item.project_category?.toLowerCase()
+        )
       );
     }
 
-    if (selectedSkill) {
+    if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
         item.skills_required?.some(
-          (jobSkill) => jobSkill && jobSkill.toLowerCase() === selectedSkill.toLowerCase()
+          (jobSkill) => jobSkill && selectedSkills.some(skill => 
+            skill.toLowerCase() === jobSkill.toLowerCase()
+          )
         )
       );
     }
@@ -151,7 +155,7 @@ const JobListThree = ({
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset, itemsPerPage, selectedCategory, selectedSkill, projects_type,
+    itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
     all_jobs, priceValue, shortValue, search_key,
   ]);
 
@@ -250,10 +254,10 @@ const JobListThree = ({
               maxPrice={priceValue[1]}
               all_categories={categories}
               all_skills={skills}
-              onCategoryChange={setSelectedCategory}
-              onSkillChange={setSelectedSkill}
-              selectedCategory={selectedCategory}
-              selectedSkill={selectedSkill}
+              onCategoryChange={setSelectedCategories}
+              onSkillChange={setSelectedSkills}
+              selectedCategories={selectedCategories}
+              selectedSkills={selectedSkills}
             />
           </div>
 
@@ -300,14 +304,14 @@ const JobListThree = ({
                   {currentItems &&
                     currentItems.map((job) => (
                       <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
-                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />
+                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
                       </div>
                     ))}
                 </div>
               </div>
 
               <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={wishlist.some((p) => p.projects_task_id === job.projects_task_id)} />)}
+                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
               </div>
 
               {currentItems && currentItems.length === 0 && (

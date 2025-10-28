@@ -29,7 +29,7 @@ const BlogPostboxArea = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await makeGetRequest("api/v1/blog/getallblogs");
+        const response = await makeGetRequest("api/v1/blog");
 
         if (Array.isArray(response.data.data)) {
           setBlogs(response.data.data);

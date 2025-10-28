@@ -1,28 +1,31 @@
 import React from "react";
-import NiceSelect from "@/ui/nice-select";
+import Select from 'react-select';
 
 const FilterJobCategory = ({
   categories,
   onChange,
+  value,
 }: {
   categories: { category_id: number; category_name: string }[];
-  onChange: (value: string) => void;
+  onChange: (values: string[]) => void;
+  value: string[];
 }) => {
-  const options = [
-    { value: "", label: "Select Category" }, // Default option
-    ...categories.map((category) => ({
-      value: category.category_name,
-      label: category.category_name,
-    })),
-  ];
+  const options = categories.map((category) => ({
+    value: category.category_name,
+    label: category.category_name,
+  }));
 
   return (
-    <NiceSelect
+    <Select
+      isMulti
       options={options}
-      defaultCurrent={0}
-      onChange={(item) => onChange(item.value)}
-      cls="bg-white"
-      name="Category"
+      value={options.filter(option => value.includes(option.value))}
+      onChange={(selectedOptions) => {
+        onChange(selectedOptions ? selectedOptions.map(option => option.value) : []);
+      }}
+      className="basic-multi-select"
+      classNamePrefix="select"
+      placeholder="Select Categories"
     />
   );
 };

@@ -6,7 +6,7 @@ const useDecodedToken = () => {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
       if (token) {
         try {
           const base64Payload = token.split(".")[1];
