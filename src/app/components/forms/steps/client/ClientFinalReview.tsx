@@ -182,7 +182,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
 
   return (
     <div className="row">
-      <Toaster position="top-right" />
       <h4 className="mb-25">Final Review</h4>
       <p className="mb-25">Please review your information carefully before submitting.</p>
       {Object.entries(sections).map(([title, values]) => (

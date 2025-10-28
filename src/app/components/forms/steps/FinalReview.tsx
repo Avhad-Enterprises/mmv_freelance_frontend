@@ -157,7 +157,6 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
 
   return (
     <div className="final-review">
-      <Toaster position="top-right" />
       <div className="row">
         <div className="col-12">
           <h3 className="text-center mb-4">Review Your Information</h3>
