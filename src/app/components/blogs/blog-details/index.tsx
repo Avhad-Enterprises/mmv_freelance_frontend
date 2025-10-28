@@ -76,7 +76,7 @@ const BlogDetailsArea = ({ blogId }: { blogId: number }) => {
 
       try {
         // Step 1: Fetch ALL blogs from the single endpoint
-        const res = await makeGetRequest('api/v1/blog/getallblogs');
+        const res = await makeGetRequest('api/v1/blog');
         
         if (res?.data?.data && Array.isArray(res.data.data)) {
           const blogs: IBlogDataType[] = res.data.data;

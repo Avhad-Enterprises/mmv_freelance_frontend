@@ -9,10 +9,6 @@ const JobPortalIntroThree = () => {
           <div className="row align-items-center">
             <div className="col-lg-7">
               <div className="text-center text-lg-start wow fadeInUp" data-wow-delay="0.3s">
-                <h2>Most complete job portal.</h2>
-                <p className="text-md m0 md-pb-20">
-                  Signup and start find your job or talents.
-                </p>
               </div>
             </div>
             <div className="col-lg-5">

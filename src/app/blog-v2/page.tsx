@@ -25,7 +25,7 @@ const BlogV2Page = () => {
     const fetchBlogs = async () => {
       try {
         setLoading(true);
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/blog/getallblogs`;
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/blog`;
         const response = await axios.get(apiUrl);
         if (response.data && Array.isArray(response.data.data)) {
           const formattedBlogs = response.data.data.map((blog: any) => ({
