@@ -35,10 +35,12 @@ const HomeSix = () => {
           setIsAuthenticated(true);
         } else {
           localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
           setIsAuthenticated(false);
         }
       } catch (error) {
         localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         setIsAuthenticated(false);
       }
     }

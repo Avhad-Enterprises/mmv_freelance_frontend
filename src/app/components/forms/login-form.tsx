@@ -6,16 +6,16 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ErrorMsg from "../common/error-msg";
 import icon from "@/assets/images/icon/icon_60.svg";
-// ❌ We no longer need the router for redirection
-// import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { makePostRequest } from "@/utils/api";
+import TokenRefreshService from "@/utils/tokenRefresh";
 
-type IFormData = { email: string; password: string; };
+type IFormData = { email: string; password: string; rememberMe: boolean };
 
 const schema = Yup.object().shape({
   email: Yup.string().required("Email is required").email("Invalid email format").label("Email"),
   password: Yup.string().required("Password is required").min(6, "Password must be at least 6 characters").label("Password"),
+  rememberMe: Yup.boolean().default(false),
 });
 
 // Props interface for LoginForm
@@ -35,14 +35,33 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
   // ✅ This is the only part that needs to be changed
   const onSubmit = async (data: IFormData) => {
     try {
-      const res = await makePostRequest("api/v1/auth/login", data);
+      const res = await makePostRequest("api/v1/auth/login", {
+        email: data.email,
+        password: data.password,
+        rememberMe: data.rememberMe // Send remember me preference to backend
+      });
       const result = res.data;
       const token = result?.data?.token;
 
       if (token) {
-        // 1. Store the token as before
-        localStorage.setItem("token", token);
+        // Store token based on remember me preference
+        if (data.rememberMe) {
+          // Keep user logged in across browser sessions
+          localStorage.setItem("token", token);
+          console.log("Token stored in localStorage (persistent)");
+        } else {
+          // Session-only login
+          sessionStorage.setItem("token", token);
+          // Also store in localStorage for backward compatibility with existing code
+          localStorage.setItem("token", token);
+          console.log("Token stored in sessionStorage (session-only)");
+        }
+
         reset();
+
+        // Start automatic token refresh monitoring
+        const tokenRefreshService = TokenRefreshService.getInstance();
+        tokenRefreshService.startAutoRefresh();
 
         // 2. Decode token to get user role
         const base64Payload = token.split(".")[1];
@@ -130,7 +149,11 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         <div className="col-12">
           <div className="agreement-checkbox d-flex justify-content-between align-items-center">
             <div>
-              <input type="checkbox" id="remember" />
+              <input 
+                type="checkbox" 
+                id="remember" 
+                {...register("rememberMe")}
+              />
               <label htmlFor="remember">Keep me logged in</label>
             </div>
             <a href="#">Forget Password?</a>

@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React from 'react';
+import TokenRefreshService from '@/utils/tokenRefresh';
 import Image from "next/image";
 import icon from "@/assets/dashboard/images/icon/icon_22.svg";
 import { useRouter } from "next/navigation";
@@ -12,7 +13,12 @@ const LogoutModal = () => {
 
   const handleLogout = () => {
     // Clear token / user data from storage
-    localStorage.removeItem("token"); // example
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    
+    // Stop automatic token refresh monitoring
+    const tokenRefreshService = TokenRefreshService.getInstance();
+    tokenRefreshService.clearTokens();
     // Clear wishlist on logout
     dispatch(clear_wishlist());
     // Redirect to login or homepage

@@ -5,6 +5,7 @@ import { useAppDispatch } from "@/redux/hook";
 import { animationCreate } from "@/utils/utils";
 import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
+import TokenExpiryWarning from "@/app/components/common/token-expiry-warning";
 
 if (typeof window !== "undefined") {
   require("bootstrap/dist/js/bootstrap");
@@ -28,6 +29,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     <>
       {children} 
       <ToastContainer />
+      <TokenExpiryWarning />
     </>
   );
 };

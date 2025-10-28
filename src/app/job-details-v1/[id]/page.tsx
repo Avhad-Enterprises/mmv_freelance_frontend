@@ -31,6 +31,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
           setIsAuthenticated(true);
         } else {
           localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
         }
       } catch (error) {
         console.error("Invalid token:", error);
