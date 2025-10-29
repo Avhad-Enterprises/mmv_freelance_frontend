@@ -174,7 +174,7 @@ const CandidateV1Area = () => {
     fetchCandidates();
   }, []);
 
-  // Effect to fetch user's favorite candidates
+  // Effect to fetch favorites on component mount
   useEffect(() => {
     const fetchFavorites = async () => {
       setLoadingFavorites(true);
@@ -211,6 +211,11 @@ const CandidateV1Area = () => {
     };
     fetchFavorites();
   }, []);
+  
+  // Effect to automatically apply filters when selections change
+  useEffect(() => {
+    applyFilters();
+  }, [selectedSkills, selectedLocations, selectedSuperpowers]);
   
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
@@ -371,7 +376,6 @@ const CandidateV1Area = () => {
                   onSkillChange={setSelectedSkills}
                   onLocationChange={setSelectedLocations}
                   onSuperpowerChange={setSelectedSuperpowers}
-                  onApplyFilter={applyFilters}
                   skills={allSkills}
                   locations={allLocations}
                   superpowers={allSuperpowers}
