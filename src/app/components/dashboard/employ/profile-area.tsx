@@ -390,62 +390,32 @@ const DashboardProfileArea = ({}: IProps) => {
         return;
       }
 
-      // Split changes into user and profile payloads based on API documentation
-      const userFields: (keyof ProfileData)[] = [
-        'first_name', 'last_name', 'email', 'phone_number', 'phone_verified', 'email_verified',
-        'bio', 'address_line_first', 'address_line_second', 'city', 'state', 'country', 'pincode'
-      ];
-      
-      const clientProfileFields: (keyof ProfileData)[] = [
-        'company_name', 'website', 'industry', 'company_size', 'social_links', 'tax_id', 'business_documents', 'work_arrangement',
-        'project_frequency', 'hiring_preferences', 'payment_method'
-      ];
+      // Create unified payload for the clients/profile endpoint
+      const unifiedPayload: { [key: string]: any } = {};
 
-      const userPayload: { [key: string]: any } = {};
-      const profilePayload: { [key: string]: any } = {};
-
-      // Populate payloads
+      // Populate unified payload with all changes
       for (const key in allChanges) {
         const typedKey = key as keyof ProfileData;
-        if (userFields.includes(typedKey)) {
-          userPayload[typedKey] = (allChanges as any)[typedKey];
-        } else if (clientProfileFields.includes(typedKey)) {
-          profilePayload[typedKey] = (allChanges as any)[typedKey];
-        }
+        unifiedPayload[typedKey] = (allChanges as any)[typedKey];
       }
 
-      // Handle special fields for user payload
-      if (userPayload.country) {
-        userPayload.country = Country.getCountryByCode(userPayload.country)?.name || '';
+      // Handle special field mappings
+      if (unifiedPayload.country) {
+        unifiedPayload.country = Country.getCountryByCode(unifiedPayload.country)?.name || '';
       }
-      if (userPayload.state && profileData.country) {
-        userPayload.state = State.getStateByCodeAndCountry(userPayload.state, profileData.country)?.name || '';
-      }
-
-      const apiHeaders = { 
-        'Authorization': `Bearer ${authCookies.getToken()}`, 
-        'Content-Type': 'application/json' 
-      };
-
-      // Update user information using /users/me endpoint
-      if (Object.keys(userPayload).length > 0) {
-        const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-          method: 'PATCH',
-          headers: apiHeaders,
-          body: JSON.stringify(userPayload)
-        });
-        if (!userRes.ok) {
-          const errorBody = await userRes.json();
-          throw new Error(errorBody.message || 'Failed to update user data');
-        }
+      if (unifiedPayload.state && profileData.country) {
+        unifiedPayload.state = State.getStateByCodeAndCountry(unifiedPayload.state, profileData.country)?.name || '';
       }
 
-      // Update client profile using /clients/profile endpoint
-      if (Object.keys(profilePayload).length > 0) {
+      // Make unified API call for clients
+      if (userType === 'CLIENT' && Object.keys(unifiedPayload).length > 0) {
         const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
           method: 'PATCH',
-          headers: apiHeaders,
-          body: JSON.stringify(profilePayload)
+          headers: { 
+            'Authorization': `Bearer ${authCookies.getToken()}`, 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(unifiedPayload)
         });
         if (!profileRes.ok) {
           const errorBody = await profileRes.json();

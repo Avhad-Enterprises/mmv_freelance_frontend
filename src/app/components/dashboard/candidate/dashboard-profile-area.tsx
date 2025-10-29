@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Country, State, City } from 'country-state-city';
 import _ from 'lodash'; // Using lodash for deep object comparison
 import { useSidebar } from "@/context/SidebarContext";
+import { useUser } from "@/context/UserContext";
 import { authCookies } from "@/utils/cookies";
 
 type IProps = {
@@ -15,7 +16,8 @@ type Service = { title: string; rate: string; currency: string };
 type PreviousWork = { title: string; description: string; url: string };
 
 type ProfileData = {
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone_number: string;
   bio: string;
@@ -38,6 +40,32 @@ type ProfileData = {
   currency?: string;
   short_description?: string;
   portfolio_links?: string[];
+  // Additional videographer-specific fields
+  username?: string;
+  website?: string;
+  timezone?: string;
+  profile_title?: string;
+  base_skills?: string[];
+  work_type?: string;
+  hours_per_week?: string;
+  hire_count?: number;
+  total_earnings?: number;
+  time_spent?: number;
+  projects_applied?: number[];
+  projects_completed?: number[];
+  // Additional fields from unified API
+  email_notifications?: boolean;
+  phone_verified?: boolean;
+  email_verified?: boolean;
+  software_skills?: string[];
+  certification?: any;
+  education?: any;
+  id_type?: string;
+  id_document_url?: string;
+  kyc_verified?: boolean;
+  aadhaar_verification?: boolean;
+  payment_method?: any;
+  bank_account_info?: any;
 };
 
 // Component is defined outside to prevent re-creation on render
@@ -144,6 +172,7 @@ const floatingButtonStyle = `
 
 const DashboardProfileArea = ({}: IProps) => {
   const { setIsOpenSidebar } = useSidebar();
+  const { currentRole } = useUser();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [tempChanges, setTempChanges] = useState<{ [section: string]: Partial<ProfileData> }>({});
   
@@ -263,8 +292,19 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-      // For video editors, use the single videoeditors/profile endpoint that returns both user and profile data
-      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videoeditors/profile`, {
+      // Determine the API endpoint based on user role
+      let endpoint = '';
+      if (currentRole === 'Video Editor') {
+        endpoint = 'videoeditors/profile';
+      } else if (currentRole === 'Videographer') {
+        endpoint = 'videographers/profile';
+      } else {
+        // Default to videoeditors for backward compatibility
+        endpoint = 'videoeditors/profile';
+      }
+
+      // Use the unified role-specific endpoint that returns both user and profile data
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${endpoint}`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
@@ -308,7 +348,8 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       }
 
       const data: ProfileData = {
-        full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        first_name: user.first_name || "",
+        last_name: user.last_name || "",
         email: user.email || "",
         phone_number: user.phone_number || user.phone || "", // Unified API uses 'phone_number', fallback to 'phone'
         bio: user.bio || profile?.short_description || "",
@@ -328,10 +369,36 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         rate_amount: profile?.rate_amount,
         currency: profile?.currency || "INR",
         short_description: profile?.short_description,
+        // Additional videographer-specific fields
+        username: user.username,
+        website: user.website,
+        timezone: user.timezone,
+        profile_title: profile?.profile_title,
+        skill_tags: safeArray<string>(profile?.skill_tags),
+        base_skills: safeArray<string>(profile?.base_skills),
+        work_type: profile?.work_type,
+        hours_per_week: profile?.hours_per_week,
+        hire_count: profile?.hire_count,
+        total_earnings: profile?.total_earnings,
+        time_spent: profile?.time_spent,
+        projects_applied: safeArray<number>(profile?.projects_applied),
+        projects_completed: safeArray<number>(profile?.projects_completed),
+        // Additional fields from unified API
+        email_notifications: user.email_notifications,
+        phone_verified: user.phone_verified,
+        email_verified: user.email_verified,
+        software_skills: safeArray<string>(profile?.software_skills),
+        certification: profile?.certification,
+        education: profile?.education,
+        id_type: profile?.id_type,
+        id_document_url: profile?.id_document_url,
+        kyc_verified: profile?.kyc_verified,
+        aadhaar_verification: profile?.aadhaar_verification,
+        payment_method: profile?.payment_method,
+        bank_account_info: profile?.bank_account_info,
         // These are not directly used but part of the type
         services: [],
         previous_works: [],
-        skill_tags: [],
       };
 
       setProfileData(data);
@@ -346,7 +413,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentRole]);
 
   useEffect(() => { void fetchUserProfile(); }, [fetchUserProfile]);
 
@@ -481,13 +548,6 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         }
 
         // Handle special field mappings
-        if (unifiedPayload.full_name) {
-            const nameParts = unifiedPayload.full_name.split(' ');
-            unifiedPayload.first_name = nameParts[0] || "";
-            unifiedPayload.last_name = nameParts.slice(1).join(' ') || "";
-            delete unifiedPayload.full_name;
-        }
-
         // Phone number field is already phone_number, no mapping needed
         // The API expects phone_number field
 
@@ -498,9 +558,16 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
             unifiedPayload.state = State.getStateByCodeAndCountry(unifiedPayload.state, profileData.country)?.name || '';
         }
 
-        // Make unified API call for video editors
-        if (userType === 'VIDEO_EDITOR' && Object.keys(unifiedPayload).length > 0) {
-            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videoeditors/profile`, {
+        // Make unified API call based on user type
+        let endpoint = '';
+        if (userType === 'VIDEO_EDITOR') {
+            endpoint = 'videoeditors/profile';
+        } else if (userType === 'VIDEOGRAPHER') {
+            endpoint = 'videographers/profile';
+        }
+
+        if (endpoint && Object.keys(unifiedPayload).length > 0) {
+            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${endpoint}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(unifiedPayload)
@@ -580,9 +647,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                 </div>
               )} */}
               
-              <InfoRow label="Full Name" value={displayData.full_name} field="full_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
+              <InfoRow label="First Name" value={displayData.first_name} field="first_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
+              <InfoRow label="Last Name" value={displayData.last_name} field="last_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
               <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
               <InfoRow label="Phone Number" value={displayData.phone_number} field="phone_number" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+
+              {(profileData.website || isEditModeFor("basicInfo")) && (
+                <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+              )}
+
+              {(profileData.profile_title || isEditModeFor("basicInfo")) && (
+                <InfoRow label="Profile Title" value={displayData.profile_title} field="profile_title" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+              )}
 
               {(profileData.availability || isEditModeFor("basicInfo")) && (
                 <div className="row mb-3">
@@ -732,6 +808,42 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                       </div>
                   </div>
               )}
+              {(profileData.base_skills?.length || isEditModeFor("skills")) && (
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("skills") ? (
+                      <div>
+                        <input type="text" className="form-control" placeholder="Add equipment or base skill (e.g., Canon EOS R5)"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const value = (e.target as HTMLInputElement).value.trim();
+                              if (value && !(editedData.base_skills || []).includes(value)) {
+                                handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
+                                (e.target as HTMLInputElement).value = '';
+                              }
+                            }
+                          }} />
+                        <div className="d-flex flex-wrap gap-2 mt-2">
+                          {(editedData.base_skills || []).map((skill, idx) => (
+                            <span key={idx} className="badge bg-warning text-dark" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                              {skill}
+                              <button type="button" className="btn-close ms-2" style={{ fontSize: '10px' }}
+                                onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
+                              />
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="d-flex flex-wrap gap-2">
+                        {(displayData.base_skills || []).map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </InfoSection>
 
             {(profileData.rate_amount || isEditModeFor("rates")) && (
@@ -753,6 +865,39 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                     )}
                   </div>
                 </div>
+
+                {(profileData.work_type || isEditModeFor("rates")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Work Type:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("rates") ? (
+                        <select className="form-select" value={editedData.work_type || ''} onChange={(e) => handleInputChange('work_type', e.target.value)}>
+                          <option value="">Select work type</option>
+                          <option value="remote">Remote</option>
+                          <option value="onsite">On-site</option>
+                          <option value="hybrid">Hybrid</option>
+                        </select>
+                      ) : (displayData.work_type)}
+                    </div>
+                  </div>
+                )}
+
+                {(profileData.hours_per_week || isEditModeFor("rates")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Hours per Week:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("rates") ? (
+                        <select className="form-select" value={editedData.hours_per_week || ''} onChange={(e) => handleInputChange('hours_per_week', e.target.value)}>
+                          <option value="">Select hours per week</option>
+                          <option value="10_20">10-20 hours</option>
+                          <option value="20_30">20-30 hours</option>
+                          <option value="30_40">30-40 hours</option>
+                          <option value="full_time">Full time</option>
+                        </select>
+                      ) : (displayData.hours_per_week)}
+                    </div>
+                  </div>
+                )}
               </InfoSection>
             )}
 
@@ -774,6 +919,63 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                     <div key={index} className="mb-2"><a href={link} target="_blank" rel="noopener noreferrer">View Link {index + 1}</a></div>
                   ))
                 )}
+              </InfoSection>
+            )}
+
+            {(
+              (profileData.hire_count !== undefined && profileData.hire_count > 0) ||
+              (profileData.total_earnings !== undefined && profileData.total_earnings > 0) ||
+              (profileData.time_spent !== undefined && profileData.time_spent > 0) ||
+              (profileData.projects_completed && profileData.projects_completed.length > 0) ||
+              (profileData.projects_applied && profileData.projects_applied.length > 0)
+            ) && (
+              <InfoSection title="Statistics" sectionKey="statistics" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                <div className="row">
+                  {(profileData.hire_count !== undefined && profileData.hire_count > 0) && (
+                    <div className="col-md-6 mb-3">
+                      <div className="text-center p-3 bg-light rounded">
+                        <h3 className="text-primary mb-1">{displayData.hire_count}</h3>
+                        <p className="mb-0 text-muted">Total Hires</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(profileData.total_earnings !== undefined && profileData.total_earnings > 0) && (
+                    <div className="col-md-6 mb-3">
+                      <div className="text-center p-3 bg-success rounded text-white">
+                        <h3 className="mb-1">₹{displayData.total_earnings?.toLocaleString()}</h3>
+                        <p className="mb-0">Total Earnings</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(profileData.time_spent !== undefined && profileData.time_spent > 0) && (
+                    <div className="col-md-6 mb-3">
+                      <div className="text-center p-3 bg-info rounded text-white">
+                        <h3 className="mb-1">{Math.round((displayData.time_spent || 0) / 60)}h</h3>
+                        <p className="mb-0">Time Spent</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(profileData.projects_completed && profileData.projects_completed.length > 0) && (
+                    <div className="col-md-6 mb-3">
+                      <div className="text-center p-3 bg-warning rounded">
+                        <h3 className="text-dark mb-1">{displayData.projects_completed?.length}</h3>
+                        <p className="mb-0 text-dark">Projects Completed</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {(profileData.projects_applied && profileData.projects_applied.length > 0) && (
+                    <div className="col-md-6 mb-3">
+                      <div className="text-center p-3 bg-secondary rounded text-white">
+                        <h3 className="mb-1">{displayData.projects_applied?.length}</h3>
+                        <p className="mb-0">Projects Applied</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </InfoSection>
             )}
 
