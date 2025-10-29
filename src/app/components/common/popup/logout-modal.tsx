@@ -6,21 +6,25 @@ import icon from "@/assets/dashboard/images/icon/icon_22.svg";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hook";
 import { clear_wishlist } from "@/redux/features/wishlist";
+import { authCookies } from "@/utils/cookies";
 
 const LogoutModal = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
   const handleLogout = () => {
-    // Clear token / user data from storage
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    
+    // Clear token from all storage methods
+    authCookies.removeToken(); // Clear cookie token
+    localStorage.removeItem("token"); // Clear localStorage fallback
+    sessionStorage.removeItem("token"); // Clear sessionStorage
+
     // Stop automatic token refresh monitoring
     const tokenRefreshService = TokenRefreshService.getInstance();
     tokenRefreshService.clearTokens();
+
     // Clear wishlist on logout
     dispatch(clear_wishlist());
+
     // Redirect to login or homepage
     router.push("/");
   };

@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { authCookies } from "@/utils/cookies";
 
 interface UserData {
   user_id?: number;
@@ -12,24 +13,45 @@ interface UserData {
 
 interface UserContextType {
   userData: UserData | null;
-  userRole: string;
+  userRoles: string[];
+  currentRole: string;
   isLoading: boolean;
   refreshUserData: () => Promise<void>;
+  setCurrentRole: (role: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [userRole, setUserRole] = useState<string>("Loading...");
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [currentRole, setCurrentRole] = useState<string>("Loading...");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchUserData = async () => {
     try {
+      // Get token from cookies
+      const token = authCookies.getToken();
+
+      // If no token, user is not authenticated
+      if (!token) {
+        console.log('No authentication token found - user not authenticated');
+        setUserRoles([]);
+        setCurrentRole('Not Authenticated');
+        setIsLoading(false);
+        return;
+      }
+
+      // Decode token to get roles
+      const base64Payload = token.split(".")[1];
+      const decodedPayload = JSON.parse(atob(base64Payload));
+      const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
+      const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -56,7 +78,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         console.log('User data extracted:', data);
         setUserData(data);
 
-        // Map account_type to display name
+        // Map roles to display names
         const roleMap: { [key: string]: string } = {
           'freelancer': 'Freelancer',
           'videographer': 'Videographer',
@@ -65,9 +87,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           'client': 'Client'
         };
 
-        const displayRole = roleMap[data.account_type] || data.account_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        console.log('Setting role:', displayRole);
-        setUserRole(displayRole);
+        const displayRoles = rolesArray.map(role => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
+        console.log('Setting roles:', displayRoles);
+        setUserRoles(displayRoles);
+        setCurrentRole(displayRoles[0] || 'User'); // Set first role as current
       }
     } catch (error) {
       console.error('Failed to fetch user data:', error);
@@ -86,7 +109,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UserContext.Provider value={{ userData, userRole, isLoading, refreshUserData }}>
+    <UserContext.Provider value={{ userData, userRoles, currentRole, isLoading, refreshUserData, setCurrentRole }}>
       {children}
     </UserContext.Provider>
   );

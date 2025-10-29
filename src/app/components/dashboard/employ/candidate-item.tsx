@@ -21,28 +21,26 @@ const CandidateItem = ({ item }: CandidateItemProps) => {
     <div className="candidate-profile-card list-layout border-0 mb-25">
       <div className="d-flex">
         <div className="candidate-avatar online position-relative d-block me-auto ms-auto">
-          <a href="#" className="rounded-circle">
+          <div className="rounded-circle">
             <img
-              // src={item.img || "https://share.google/images/Lbox26Y4DHg7EWM7e"}
-              alt="image"
+              src={item.img && item.img.trim() !== '' ? item.img : 'https://via.placeholder.com/60'}
+              alt={item.username || 'image'}
               className="lazy-img rounded-circle"
-              style={{ height: "auto" }}
-              width={60}
-              height={60}
+              style={{ width: '60px', height: '60px', objectFit: 'cover' }}
               onError={(e) => {
-                e.currentTarget.src = "https://share.google/images/Lbox26Y4DHg7EWM7e";
+                e.currentTarget.src = 'https://via.placeholder.com/60';
               }}
             />
-          </a>
+          </div>
         </div>
         <div className="right-side">
           <div className="row gx-1 align-items-center">
             <div className="col-xl-3">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
-                  <a href="#" className="tran3s">
+                  <span className="tran3s">
                     {item.username}
-                  </a>
+                  </span>
                 </h4>
                 <div className="candidate-post">{item.email}</div>
                 <ul className="candidate-skills style-none d-flex align-items-center">

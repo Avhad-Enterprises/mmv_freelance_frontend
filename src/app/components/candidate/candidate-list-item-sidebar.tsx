@@ -38,7 +38,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
           {/* This link can remain for SEO purposes or right-click behavior, but the main action is the button */}
-          <Link href={`/candidate-profile-v1/${item.user_id}`} className="rounded-circle">
+          <div className="rounded-circle">
             <Image
               src={item.profile_picture || "/images/default-avatar.png"}
               alt="Candidate"
@@ -47,16 +47,16 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
               className="lazy-img rounded-circle"
               style={{ objectFit: 'cover' }}
             />
-          </Link>
+          </div>
         </div>
         <div className="right-side">
           <div className="row gx-1 align-items-center">
             <div className="col-xl-3">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
-                  <Link href={`/candidate-profile-v1/${item.user_id}`} className="tran3s">
+                  <span className="tran3s">
                     {item.first_name} {item.last_name}
-                  </Link>
+                  </span>
                 </h4>
                 
                 <ul className="cadidate-skills style-none d-flex align-items-center">
