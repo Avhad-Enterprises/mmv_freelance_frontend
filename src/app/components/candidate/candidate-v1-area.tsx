@@ -8,6 +8,7 @@ import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v
 import ShortSelect from "@/app/components/common/short-select";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
+import { authCookies } from "@/utils/cookies";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -81,7 +82,7 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
         return;
       }
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) return;
 
 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
@@ -130,7 +131,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelanc
       if (isAuthenticated && currentUserId && userType === 'CLIENT') {
         setLoadingFavorites(true);
         try {
-          const token = localStorage.getItem('token');
+          const token = authCookies.getToken();
           if (!token) return;
 
 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/listfreelancers`, {

@@ -8,6 +8,7 @@ import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { authCookies } from "@/utils/cookies";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -179,7 +180,7 @@ const CandidateV1Area = () => {
     const fetchFavorites = async () => {
       setLoadingFavorites(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) {
           setSavedCandidates([]);
           setFavoriteIds({});
@@ -219,7 +220,7 @@ const CandidateV1Area = () => {
   
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (!token) {
         toast.error("Please log in to save candidates.");
         return;

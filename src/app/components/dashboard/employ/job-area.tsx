@@ -11,6 +11,7 @@ import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
 import JobsList from "./JobsList";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
+import { authCookies } from "@/utils/cookies";
 // Bootstrap will be imported dynamically on the client side
 
 export interface ProjectSummary {
@@ -105,7 +106,7 @@ const EmployJobArea: FC = () => {
     const fetchFavorites = async () => {
       setLoadingFavorites(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) {
           setSavedApplicants([]);
           setFavoriteIds({});
@@ -200,7 +201,7 @@ const EmployJobArea: FC = () => {
 
   // Event Handler to Add/Remove Favorites
   const handleToggleSave = async (applicantId: number) => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (!token) {
       toast.error("Please log in to save applicants.");
       return;

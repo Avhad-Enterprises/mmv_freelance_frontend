@@ -15,6 +15,7 @@ import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
+import { authCookies } from "@/utils/cookies";
 
 interface DecodedToken {
   exp: number;
@@ -26,21 +27,19 @@ const HomeSix = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status
-    const token = localStorage.getItem('token');
+    // Check authentication status from cookies
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
           setIsAuthenticated(false);
         }
       } catch (error) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        authCookies.removeToken();
         setIsAuthenticated(false);
       }
     }

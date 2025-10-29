@@ -5,6 +5,7 @@ import { Country, State, City } from 'country-state-city';
 import _ from 'lodash';
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
+import { authCookies } from "@/utils/cookies";
 
 type IProps = {};
 
@@ -209,7 +210,7 @@ const DashboardProfileArea = ({}: IProps) => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
         method: 'GET',
         headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+          'Authorization': `Bearer ${authCookies.getToken()}`, 
           'Content-Type': 'application/json' 
         }
       });
@@ -417,7 +418,7 @@ const DashboardProfileArea = ({}: IProps) => {
       }
 
       const apiHeaders = { 
-        'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+        'Authorization': `Bearer ${authCookies.getToken()}`, 
         'Content-Type': 'application/json' 
       };
 

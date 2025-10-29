@@ -1,12 +1,14 @@
 
 import { useEffect, useState } from "react";
+import { authCookies } from "@/utils/cookies";
 
 const useDecodedToken = () => {
   const [decoded, setDecoded] = useState<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+      const token = authCookies.getToken();
+
       if (token) {
         try {
           const base64Payload = token.split(".")[1];

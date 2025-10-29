@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { Country, State, City } from 'country-state-city';
 import _ from 'lodash'; // Using lodash for deep object comparison
 import { useSidebar } from "@/context/SidebarContext";
+import { authCookies } from "@/utils/cookies";
 
 type IProps = {
   // No props needed, using context
@@ -265,7 +266,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       // Fetch basic user info
       const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
       
       if (!userRes.ok) throw new Error('Failed to fetch user data');
@@ -289,7 +290,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
 
       const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
         method: 'GET',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
+        headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
 
       let profile = null;
@@ -501,7 +502,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         if (Object.keys(userPayload).length > 0) {
 const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
                 method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(userPayload)
             });
             if (!userRes.ok) {
@@ -524,7 +525,7 @@ const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`
 
             const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
                 method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(profilePayload)
             });
             if (!profileRes.ok) {
