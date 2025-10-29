@@ -81,7 +81,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           </form>
 
           {/* Notifications */}
-          <div className="profile-notification ms-2 ms-md-5 me-4">
+          {/* <div className="profile-notification ms-2 ms-md-5 me-4">
             <button
               className="noti-btn dropdown-toggle"
               type="button"
@@ -104,7 +104,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
                 </ul>
               </li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Post Job Button */}
           <div>

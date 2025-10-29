@@ -262,51 +262,78 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+      // Fetch basic user info
+      const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
       });
-      if (!res.ok) throw new Error('Failed to fetch profile');
-      const response = await res.json();
-      if (response.success && response.data) {
-        const { user, profile, userType: type } = response.data;
-        setUserType(type);
+      
+      if (!userRes.ok) throw new Error('Failed to fetch user data');
+      const userResponse = await userRes.json();
+      
+      if (!userResponse.success) throw new Error('Failed to fetch user data');
+      
+      const { user, userType: type } = userResponse.data;
+      setUserType(type);
 
-        const countryObj = Country.getCountryByCode(user.country);
-        const stateObj = countryObj ? State.getStatesOfCountry(countryObj.isoCode).find(s => s.name === user.state) : null;
-        
-        const data: ProfileData = {
-          full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
-          email: user.email || "",
-          phone_number: user.phone_number || "",
-          bio: user.bio || profile?.short_description || "",
-          address_line_first: user.address_line_first || profile?.address || "",
-          address_line_second: user.address_line_second || "",
-          city: user.city || "",
-          state: stateObj?.isoCode || "",
-          country: user.country || "",
-          pincode: user.pincode || "",
-          skills: safeArray<string>(profile?.skills),
-          superpowers: safeArray<string>(profile?.superpowers),
-          languages: safeArray<string>(profile?.languages),
-          portfolio_links: safeArray<string>(profile?.portfolio_links),
-          availability: profile?.availability,
-          experience_level: profile?.experience_level,
-          role: profile?.role,
-          rate_amount: profile?.rate_amount,
-          currency: profile?.currency || "INR",
-          short_description: profile?.short_description,
-          // These are not directly used but part of the type
-          services: [], 
-          previous_works: [],
-          skill_tags: [],
-        };
-        setProfileData(data);
-        setEditedData(JSON.parse(JSON.stringify(data))); // Deep copy to prevent mutation
-
-        if (countryObj) setSelectedCountryCode(countryObj.isoCode);
-        if (stateObj) setSelectedStateCode(stateObj.isoCode);
+      // Fetch role-specific profile data
+      let profileEndpoint = '';
+      if (type === 'videographer') {
+        profileEndpoint = '/api/v1/videographers/profile';
+      } else if (type === 'video_editor') {
+        profileEndpoint = '/api/v1/videoeditors/profile';
+      } else {
+        // Fallback for other freelancer types
+        profileEndpoint = '/api/v1/freelancer-profiles/me';
       }
+
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' }
+      });
+
+      let profile = null;
+      if (profileRes.ok) {
+        const profileResponse = await profileRes.json();
+        if (profileResponse.success) {
+          profile = profileResponse.data?.profile || profileResponse.data;
+        }
+      }
+
+      const countryObj = Country.getCountryByCode(user.country);
+      const stateObj = countryObj ? State.getStatesOfCountry(countryObj.isoCode).find(s => s.name === user.state) : null;
+      
+      const data: ProfileData = {
+        full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+        email: user.email || "",
+        phone_number: user.phone_number || "",
+        bio: user.bio || profile?.short_description || "",
+        address_line_first: user.address_line_first || profile?.address || "",
+        address_line_second: user.address_line_second || "",
+        city: user.city || "",
+        state: stateObj?.isoCode || "",
+        country: user.country || "",
+        pincode: user.pincode || "",
+        skills: safeArray<string>(profile?.skills),
+        superpowers: safeArray<string>(profile?.superpowers),
+        languages: safeArray<string>(profile?.languages),
+        portfolio_links: safeArray<string>(profile?.portfolio_links),
+        availability: profile?.availability,
+        experience_level: profile?.experience_level,
+        role: profile?.role,
+        rate_amount: profile?.rate_amount,
+        currency: profile?.currency || "INR",
+        short_description: profile?.short_description,
+        // These are not directly used but part of the type
+        services: [], 
+        previous_works: [],
+        skill_tags: [],
+      };
+      setProfileData(data);
+      setEditedData(JSON.parse(JSON.stringify(data))); // Deep copy to prevent mutation
+
+      if (countryObj) setSelectedCountryCode(countryObj.isoCode);
+      if (stateObj) setSelectedStateCode(stateObj.isoCode);
     } catch (err) {
       console.error("Failed to fetch user profile", err);
       toast.error("Failed to load profile data");
@@ -485,7 +512,17 @@ const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`
 
         const freelancerTypes = ["freelancer", "video_editor", "videographer"];
         if (userType && freelancerTypes.includes(userType) && Object.keys(profilePayload).length > 0) {
-const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancer-profiles/me`, {
+            let profileEndpoint = '';
+            if (userType === 'videographer') {
+                profileEndpoint = '/api/v1/videographers/profile';
+            } else if (userType === 'video_editor') {
+                profileEndpoint = '/api/v1/videoeditors/profile';
+            } else {
+                // Fallback for other freelancer types
+                profileEndpoint = '/api/v1/freelancer-profiles/me';
+            }
+
+            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify(profilePayload)
@@ -557,13 +594,13 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freela
         {!loading && profileData && editedData && displayData && (
           <>
             <InfoSection title="Basic Information" sectionKey="basicInfo" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              {!isEditModeFor("basicInfo") && userType && (
+              {/* {!isEditModeFor("basicInfo") && userType && (
                 <div className="mb-4">
                   <span className="badge bg-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
                     {userType.replace(/_/g, ' ')}
                   </span>
                 </div>
-              )}
+              )} */}
               
               <InfoRow label="Full Name" value={displayData.full_name} field="full_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
               <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />

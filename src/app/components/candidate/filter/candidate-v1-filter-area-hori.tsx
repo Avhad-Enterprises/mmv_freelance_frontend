@@ -7,23 +7,29 @@ import FilterCandidateLocation from "./filter-location-hori";
 type Props = {
   onSkillChange: (values: string[]) => void;
   onLocationChange: (values: string[]) => void;
+  onSuperpowerChange: (values: string[]) => void;
   onApplyFilter: () => void;
   onClearFilters: () => void;
   skills: string[];
   locations: string[];
+  superpowers: string[];
   selectedSkills: string[];
   selectedLocations: string[];
+  selectedSuperpowers: string[];
 };
 
 const CandidateV1FilterArea = ({
   onSkillChange,
   onLocationChange,
+  onSuperpowerChange,
   onApplyFilter,
   onClearFilters,
   skills,
   locations,
+  superpowers,
   selectedSkills,
   selectedLocations,
+  selectedSuperpowers,
 }: Props) => {
   // Handler to remove a single skill
   const handleRemoveSkill = (skillToRemove: string) => {
@@ -37,14 +43,20 @@ const CandidateV1FilterArea = ({
     onLocationChange(newLocations);
   };
 
-  const hasSelections = selectedSkills.length > 0 || selectedLocations.length > 0;
+  // Handler to remove a single superpower
+  const handleRemoveSuperpower = (superpowerToRemove: string) => {
+    const newSuperpowers = selectedSuperpowers.filter(sp => sp !== superpowerToRemove);
+    onSuperpowerChange(newSuperpowers);
+  };
+
+  const hasSelections = selectedSkills.length > 0 || selectedLocations.length > 0 || selectedSuperpowers.length > 0;
 
   return (
     <div className="p-4 rounded-3" style={{ backgroundColor: '#f0f5f3' }}>
       {/* This row contains the dropdowns and buttons */}
       <div className="row g-3 align-items-end">
         {/* --- Skill Filter --- */}
-        <div className="col-lg-4 col-md-6">
+        <div className="col-lg-3 col-md-6">
           <div className="filter-title fw-500 text-dark mb-2">Skill</div>
           <FilterSkills
             skills={skills}
@@ -54,8 +66,19 @@ const CandidateV1FilterArea = ({
           />
         </div>
 
+        {/* --- Superpower Filter --- */}
+        <div className="col-lg-3 col-md-6">
+          <div className="filter-title fw-500 text-dark mb-2">Superpower</div>
+          <FilterSkills
+            skills={superpowers}
+            onChange={onSuperpowerChange}
+            selectedValues={selectedSuperpowers}
+            placeholder="Select Superpowers"
+          />
+        </div>
+
         {/* --- Location Filter --- */}
-        <div className="col-lg-4 col-md-6">
+        <div className="col-lg-3 col-md-6">
           <div className="filter-title fw-500 text-dark mb-2">Location</div>
           <FilterCandidateLocation
             locations={locations}
@@ -66,7 +89,7 @@ const CandidateV1FilterArea = ({
         </div>
         
         {/* --- Action Buttons --- */}
-        <div className="col-lg-4 col-md-12">
+        <div className="col-lg-3 col-md-12">
           <div className="d-flex gap-2 mt-md-0 mt-3">
             <button
               onClick={onApplyFilter}
@@ -96,6 +119,20 @@ const CandidateV1FilterArea = ({
               <span style={{ color: 'white' }}>{skill}</span>
               <button 
                 onClick={() => handleRemoveSkill(skill)} 
+                className="btn-close ms-2" 
+                style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+              ></button>
+            </div>
+          ))}
+          {selectedSuperpowers.map(superpower => (
+            <div 
+              key={superpower} 
+              className="btn-eight fw-500 d-flex align-items-center" 
+              style={{ backgroundColor: '#FF6B35', color: 'white' }}
+            >
+              <span style={{ color: 'white' }}>{superpower}</span>
+              <button 
+                onClick={() => handleRemoveSuperpower(superpower)} 
                 className="btn-close ms-2" 
                 style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
               ></button>

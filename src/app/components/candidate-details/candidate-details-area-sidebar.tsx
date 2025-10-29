@@ -74,7 +74,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onBackToList }: CandidateDe
                 
                 {/* --- BACK BUTTON MODIFIED HERE --- */}
                 <button onClick={onBackToList} className="btn-two mb-30">
-                  ← Back to Candidates
+                  ← Back to Saved Candidates
                 </button>
 
                 <div className="inner-card border-style mb-65 lg-mb-40">

@@ -219,14 +219,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
 
   return (
     <>
-      <div className="dashboard-body">
+      <div className="dashboard-body" style={{ backgroundColor: '#f0f5f3', minHeight: '100vh' }}>
         <div className="position-relative">
           <DashboardHeader />
           
           <section className="job-details pt-50 pb-50">
             <div className="container-fluid">
               <div className="row">
-                {/* Left Side: Details */}
+                {/* Left Side: Details - Green Background */}
                 <div className="col-xxl-9 col-xl-8">
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
                     
@@ -291,10 +291,10 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                   </div>
                 </div>
 
-                {/* Right Side: Metadata */}
+                {/* Right Side: Metadata - White Island */}
                 <div className="col-xxl-3 col-xl-4">
-                  <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50">
-                    <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize">
+                  <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50 bg-white rounded-3 p-4" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                    <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize fw-500">
                       {job.project_title}
                     </div>
                     <div className="border-top mt-40 pt-40">
