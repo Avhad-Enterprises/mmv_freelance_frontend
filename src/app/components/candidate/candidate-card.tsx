@@ -43,7 +43,7 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
     <div className={`candidate-card h-100 mb-4 p-3 border rounded ${viewType === 'list' ? 'w-100' : ''}`}>
       <div className="d-flex align-items-start h-100">
         <img
-          src={candidate.profile_picture}
+          src={candidate.profile_picture && candidate.profile_picture.trim() !== '' ? candidate.profile_picture : 'https://via.placeholder.com/150'}
           alt={`${candidate.first_name} ${candidate.last_name}`.trim()}
           className="rounded-circle me-3"
           style={{ width: '80px', height: '80px', objectFit: 'cover' }}

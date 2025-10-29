@@ -73,7 +73,7 @@ const CandidateAside = ({}: IProps) => {
                         <div className="user-avatar online position-relative rounded-circle" style={{
                             width: '50px',
                             height: '50px',
-                            background: profilePictureUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: profilePictureUrl && profilePictureUrl.trim() !== '' ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -82,7 +82,7 @@ const CandidateAside = ({}: IProps) => {
                             color: 'white',
                             overflow: 'hidden'
                         }}>
-                            {profilePictureUrl ? (
+                            {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
                                 <Image
                                     src={profilePictureUrl}
                                     alt="Profile Picture"

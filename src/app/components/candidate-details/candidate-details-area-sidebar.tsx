@@ -165,7 +165,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onBackToList }: CandidateDe
                 <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40">
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
-                      {profile_picture ? (
+                      {profile_picture && profile_picture.trim() !== '' ? (
                         <Image src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
                       ) : (
                         <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
