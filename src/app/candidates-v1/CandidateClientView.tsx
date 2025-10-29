@@ -6,6 +6,7 @@ import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
 import CandidateV1Area from '../components/candidate/candidate-v1-area';
 import FooterOne from '@/layouts/footers/footer-one';
+import { authCookies } from '@/utils/cookies';
 
 interface DecodedToken {
   exp: number;
@@ -17,20 +18,18 @@ const CandidateClientView = () => {
 
   useEffect(() => {
     // This effect runs only on initial component mount
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
           setIsAuthenticated(false);
         }
       } catch (error) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        authCookies.removeToken();
         setIsAuthenticated(false);
       }
     }

@@ -8,6 +8,7 @@ import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { authCookies } from "@/utils/cookies";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -174,12 +175,12 @@ const CandidateV1Area = () => {
     fetchCandidates();
   }, []);
 
-  // Effect to fetch user's favorite candidates
+  // Effect to fetch favorites on component mount
   useEffect(() => {
     const fetchFavorites = async () => {
       setLoadingFavorites(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) {
           setSavedCandidates([]);
           setFavoriteIds({});
@@ -212,9 +213,14 @@ const CandidateV1Area = () => {
     fetchFavorites();
   }, []);
   
+  // Effect to automatically apply filters when selections change
+  useEffect(() => {
+    applyFilters();
+  }, [selectedSkills, selectedLocations, selectedSuperpowers]);
+  
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (!token) {
         toast.error("Please log in to save candidates.");
         return;
@@ -371,7 +377,6 @@ const CandidateV1Area = () => {
                   onSkillChange={setSelectedSkills}
                   onLocationChange={setSelectedLocations}
                   onSuperpowerChange={setSelectedSuperpowers}
-                  onApplyFilter={applyFilters}
                   skills={allSkills}
                   locations={allLocations}
                   superpowers={allSuperpowers}

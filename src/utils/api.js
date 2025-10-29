@@ -1,5 +1,6 @@
 import axios from "axios";
 import TokenRefreshService from "./tokenRefresh";
+import { authCookies } from "./cookies";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 //  const BASE_URL = "https://api.makemyvid.io/";
@@ -28,8 +29,8 @@ apiClient.interceptors.request.use(
       config.url?.includes(endpoint)
     );
     
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    console.log("API Request - Token from storage:", token);
+        const token = authCookies.getToken();
+    console.log("API Request - Token from cookies:", token);
     
     // Only add Authorization header if:
     // 1. Token exists and is valid
@@ -54,62 +55,36 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      console.error("Authentication failed - attempting token refresh");
+    // Handle 401 errors by clearing tokens and redirecting
+    if (error.response?.status === 401) {
+      console.error("Authentication failed - clearing tokens and redirecting");
 
-      // Don't retry login requests
-      if (originalRequest.url?.includes('/auth/login')) {
-        tokenRefreshService.clearTokens();
-        return Promise.reject(error);
-      }
+      const tokenRefreshService = TokenRefreshService.getInstance();
+      tokenRefreshService.clearTokens();
 
-      // Don't retry refresh requests to avoid infinite loops
-      if (originalRequest.url?.includes('/auth/refresh')) {
-        tokenRefreshService.clearTokens();
-        return Promise.reject(error);
-      }
+      // List of public endpoints that don't require authentication
+      const publicEndpoints = [
+        'api/v1/projects-tasks/listings',
+        'api/v1/categories',
+        'api/v1/skills',
+        'api/v1/contact/submit',
+        '/auth/login',
+        '/auth/register'
+      ];
 
-      originalRequest._retry = true;
+      // Check if the failed request was to a public endpoint
+      const isPublicEndpoint = publicEndpoints.some(endpoint =>
+        originalRequest.url?.includes(endpoint)
+      );
 
-      try {
-        // Attempt to refresh the token
-        const newToken = await tokenRefreshService.refreshToken();
-
-        // Update the authorization header with the new token
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-        // Retry the original request with the new token
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        console.error("Token refresh failed, clearing tokens:", refreshError);
-
-        // Clear tokens and redirect
-        tokenRefreshService.clearTokens();
-
-        // List of public endpoints that don't require authentication
-        const publicEndpoints = [
-          'api/v1/projects-tasks/listings',
-          'api/v1/categories',
-          'api/v1/skills',
-          'api/v1/contact/submit'
-        ];
-
-        // Check if the failed request was to a public endpoint
-        const isPublicEndpoint = publicEndpoints.some(endpoint =>
-          originalRequest.url?.includes(endpoint)
-        );
-
-        // Only redirect if this is NOT a public endpoint
-        if (!isPublicEndpoint) {
-          if (typeof window !== 'undefined') {
-            // Only redirect if not already on home page
-            if (window.location.pathname !== '/') {
-              window.location.href = '/';
-            }
+      // Only redirect if this is NOT a public endpoint or login/register
+      if (!isPublicEndpoint) {
+        if (typeof window !== 'undefined') {
+          // Only redirect if not already on home page
+          if (window.location.pathname !== '/') {
+            window.location.href = '/';
           }
         }
-
-        return Promise.reject(refreshError);
       }
     }
 

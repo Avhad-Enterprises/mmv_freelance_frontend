@@ -10,6 +10,7 @@ import RelatedJobs from '@/app/components/jobs/related-jobs';
 import FooterOne from '@/layouts/footers/footer-one';
 import { IJobType } from '@/types/job-data-type';
 import { makeGetRequest } from '@/utils/api';
+import { authCookies } from '@/utils/cookies';
 
 // Define a simple type for the decoded token payload
 interface DecodedToken {
@@ -23,15 +24,14 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
 
   // --- Effect for authentication check ---
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
         }
       } catch (error) {
         console.error("Invalid token:", error);

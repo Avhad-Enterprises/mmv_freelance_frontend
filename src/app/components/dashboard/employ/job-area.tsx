@@ -11,6 +11,7 @@ import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
 import JobsList from "./JobsList";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
+import { authCookies } from "@/utils/cookies";
 // Bootstrap will be imported dynamically on the client side
 
 export interface ProjectSummary {
@@ -105,7 +106,7 @@ const EmployJobArea: FC = () => {
     const fetchFavorites = async () => {
       setLoadingFavorites(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) {
           setSavedApplicants([]);
           setFavoriteIds({});
@@ -149,8 +150,39 @@ const EmployJobArea: FC = () => {
     setApplicantsError(null);
 
     try {
-      const response = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
-      const applicantsData: Applicant[] = response.data?.data || [];
+      // Fetch applications
+      const applicationsResponse = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
+      const rawApplicants = applicationsResponse.data?.data || [];
+      
+      // Fetch all freelancers to get profile pictures and additional data
+      const freelancersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+      if (!freelancersResponse.ok) throw new Error(`Failed to fetch freelancer data`);
+      const freelancersData = await freelancersResponse.json();
+      const freelancers = freelancersData.data || [];
+      
+      // Create a map of user_id to freelancer data for quick lookup
+      const freelancerMap = new Map();
+      freelancers.forEach((freelancer: any) => {
+        freelancerMap.set(freelancer.user_id, freelancer);
+      });
+      
+      // Map API response to match Applicant interface, enriched with freelancer data
+      const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
+        const freelancer = freelancerMap.get(app.user_id);
+        return {
+          applied_projects_id: app.applied_projects_id,
+          user_id: app.user_id,
+          first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
+          last_name: app.applicant?.last_name || freelancer?.last_name || '',
+          email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
+          profile_picture: freelancer?.profile_picture || '',
+          status: app.status,
+          bio: freelancer?.bio || freelancer?.short_description || null,
+          skills: freelancer?.skills || [],
+          applied_date: app.created_at,
+        };
+      });
+      
       setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
@@ -169,7 +201,7 @@ const EmployJobArea: FC = () => {
 
   // Event Handler to Add/Remove Favorites
   const handleToggleSave = async (applicantId: number) => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (!token) {
       toast.error("Please log in to save applicants.");
       return;
@@ -262,16 +294,23 @@ const EmployJobArea: FC = () => {
     }
 
     try {
-      // Update applicant status
-      await makePatchRequest(`api/v1/projects-tasks/${applicationId}/status`, {
-        status: newStatus === 3 ? 0 : newStatus, // Map Rejected (3) to Pending (0) for the endpoint
+      // Update application status using the correct endpoint
+      await makePatchRequest(`api/v1/applications/update-status`, {
+        applied_projects_id: applicationId,
+        status: newStatus,
       });
+
+      // Update local state immediately after successful API call
+      setApplicants(prev => prev.map(app => 
+        app.applied_projects_id === applicationId 
+          ? { ...app, status: newStatus } 
+          : app
+      ));
 
       // Update project status (only for Assigned or Completed)
       if (newStatus === 1 || newStatus === 2) {
         await makePatchRequest(`api/v1/projects-tasks/${projectId}/status`, {
           status: newProjectStatus,
-          // Note: We don't have user_id here, might need to adjust API call
         });
       }
 
@@ -339,16 +378,74 @@ const EmployJobArea: FC = () => {
   }, []);
 
   // Handler for viewing applicant profile
-  const handleViewProfile = (applicantId: number) => {
+  const handleViewProfile = async (applicantId: number) => {
     setLoadingProfile(true);
-    const applicant = applicants.find(a => a.user_id === applicantId);
-    if (applicant) {
-      setSelectedApplicant(mapApplicantToIFreelancer(applicant));
-    } else {
-      toast.error("Applicant profile not found. Please try again.");
-      console.error("Applicant not found in local state:", applicantId);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`Failed to fetch freelancer data`);
+
+      const responseData = await response.json();
+      const foundFreelancer = responseData.data?.find((f: any) => f.user_id === applicantId);
+
+      if (foundFreelancer) {
+        // Process YouTube links to extract ID and URL
+        const youtubeVideos = (foundFreelancer.portfolio_links || [])
+          .filter((link: string) => link.includes("youtube.com/watch?v="))
+          .map((link: string) => {
+            const videoId = link.split('v=')[1]?.split('&')[0] || '';
+            return { id: videoId, url: link };
+          })
+          .filter((video: any) => video.id !== '');
+
+        // Map raw API data to IFreelancer
+        const mappedFreelancer: IFreelancer = {
+          user_id: foundFreelancer.user_id,
+          first_name: foundFreelancer.first_name,
+          last_name: foundFreelancer.last_name,
+          bio: foundFreelancer.bio || foundFreelancer.short_description || null,
+          profile_picture: foundFreelancer.profile_picture || null,
+          skills: foundFreelancer.skills || [],
+          superpowers: foundFreelancer.superpowers || [],
+          languages: foundFreelancer.languages || [],
+          city: foundFreelancer.city || null,
+          country: foundFreelancer.country || null,
+          email: `${foundFreelancer.username || 'unknown'}@example.com`,
+          rate_amount: foundFreelancer.rate_amount || "0.00",
+          currency: foundFreelancer.currency || "USD",
+          availability: foundFreelancer.availability || "not specified",
+          latitude: foundFreelancer.latitude || null,
+          longitude: foundFreelancer.longitude || null,
+          profile_title: foundFreelancer.profile_title || null,
+          short_description: foundFreelancer.short_description || null,
+          youtube_videos: youtubeVideos,
+          experience_level: foundFreelancer.experience_level || null,
+          work_type: foundFreelancer.work_type || null,
+          hours_per_week: foundFreelancer.hours_per_week || null,
+          kyc_verified: foundFreelancer.kyc_verified,
+          aadhaar_verification: foundFreelancer.aadhaar_verification,
+          hire_count: foundFreelancer.hire_count,
+          review_id: foundFreelancer.review_id,
+          total_earnings: foundFreelancer.total_earnings,
+          time_spent: foundFreelancer.time_spent,
+          role_name: foundFreelancer.role_name || null,
+          experience: foundFreelancer.experience || [],
+          education: foundFreelancer.education || [],
+          previous_works: foundFreelancer.previous_works || [],
+          certification: foundFreelancer.certification || [],
+          services: foundFreelancer.services || [],
+          portfolio_links: foundFreelancer.portfolio_links || [],
+        };
+        setSelectedApplicant(mappedFreelancer);
+      } else {
+        toast.error("Freelancer profile not found. Please try again.");
+        console.error("Freelancer not found in API:", applicantId);
+      }
+    } catch (err: any) {
+      toast.error("Failed to load profile. Please try again.");
+      console.error("Error fetching freelancer:", err);
+    } finally {
+      setLoadingProfile(false);
     }
-    setLoadingProfile(false);
   };
 
   // Handler for going back to applicants list

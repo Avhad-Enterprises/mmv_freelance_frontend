@@ -5,6 +5,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
+import { authCookies } from "@/utils/cookies";
 
 // Status Mapping
 const statusMap: Record<number, { text: string; className: string }> = {
@@ -54,7 +55,7 @@ const AppliedJobsArea = ({}: IProps) => {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem('token');
+        const token = authCookies.getToken();
         if (!token) {
           setError('Authentication token not found. Please log in.');
           return;

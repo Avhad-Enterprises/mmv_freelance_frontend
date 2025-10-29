@@ -18,7 +18,6 @@ const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
     <CandidateDetailsArea
       freelancer={selectedApplicant}
       loading={loadingProfile}
-      onBackToList={onBackToApplicants}
     />
   );
 };

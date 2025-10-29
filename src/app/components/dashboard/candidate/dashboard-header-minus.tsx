@@ -72,13 +72,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
             <span></span>
           </button>
 
-          {/* Search Form */}
+          {/* Search Form - Commented out as it's not working */}
+          {/*
           <form action="#" className="search-form me-2 me-md-5">
             <input type="text" placeholder="Search here.." />
             <button type="submit">
               <Image src={search} alt="search" className="lazy-img m-auto" />
             </button>
           </form>
+          */}
 
           {/* Notifications */}
           {/* <div className="profile-notification ms-2 ms-md-5 me-4">

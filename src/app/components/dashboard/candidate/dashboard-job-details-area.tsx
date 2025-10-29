@@ -5,6 +5,7 @@ import DashboardHeader from './dashboard-header-minus';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
+import { authCookies } from "@/utils/cookies";
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -34,7 +35,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [applicationId, setApplicationId] = useState<number | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     setIsLoggedIn(!!token);
 
     const initialize = async () => {

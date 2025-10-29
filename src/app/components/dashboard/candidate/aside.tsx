@@ -6,6 +6,8 @@ import DeleteAccountModal from "../../forms/DeleteAccountModal";
 import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
+import ProfilePictureModal from "../../common/ProfilePictureModal";
+import toast from "react-hot-toast";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -43,7 +45,10 @@ type IProps = {
 const CandidateAside = ({}: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
-    const { userData, userRoles, currentRole, setCurrentRole } = useUser();
+    const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
+    
+    const [showProfilePicModal, setShowProfilePicModal] = useState(false);
+    const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
     
     const fullName = userData 
         ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
@@ -59,6 +64,19 @@ const CandidateAside = ({}: IProps) => {
         } else if (role.toLowerCase().includes('videographer') || role.toLowerCase().includes('video editor') || role.toLowerCase().includes('freelancer')) {
             window.location.href = '/dashboard/candidate-dashboard';
         }
+    };
+
+    const openProfilePicModal = () => {
+        setShowProfilePicModal(true);
+    };
+
+    const handleProfilePicUpdate = () => {
+        // Update the cache-busting key to force image refresh
+        setProfilePicKey(Date.now());
+        // Add a small delay to ensure the API has processed the upload
+        setTimeout(() => {
+            refreshUserData();
+        }, 1000);
     };
 
     useEffect(() => {
@@ -94,28 +112,44 @@ const CandidateAside = ({}: IProps) => {
                     {/* User Info */}
                     <div className="user-data">
                         <div className="user-avatar online position-relative rounded-circle" style={{
-                            width: '50px',
-                            height: '50px',
+                            width: '75px',
+                            height: '75px',
                             background: profilePictureUrl && profilePictureUrl.trim() !== '' ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '20px',
+                            fontSize: '30px',
                             fontWeight: 'bold',
                             color: 'white',
-                            overflow: 'hidden'
-                        }}>
+                            overflow: 'hidden',
+                            cursor: 'pointer'
+                        }} onClick={openProfilePicModal}>
                             {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
                                 <Image
-                                    src={profilePictureUrl}
+                                    src={`${profilePictureUrl}?t=${profilePicKey}`}
                                     alt="Profile Picture"
-                                    width={50}
-                                    height={50}
+                                    width={75}
+                                    height={75}
                                     style={{ objectFit: 'cover' }}
                                 />
                             ) : (
                                 fullName.charAt(0).toUpperCase()
                             )}
+                            {/* Edit overlay */}
+                            <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                                 style={{
+                                     width: '28px',
+                                     height: '28px',
+                                     backgroundColor: '#D2F34C',
+                                     cursor: 'pointer',
+                                     border: '3px solid white',
+                                     zIndex: 20,
+                                     fontSize: '14px',
+                                     boxShadow: '0 3px 10px rgba(0,0,0,0.2)'
+                                 }}
+                                 onClick={openProfilePicModal}>
+                                <i className="bi bi-pencil-fill" style={{ color: '#244034', fontSize: '12px', fontWeight: 'bold' }}></i>
+                            </div>
                         </div>
                         <div className="user-name-data">
                             <button className="user-name dropdown-toggle" type="button" id="profile-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
@@ -183,6 +217,14 @@ const CandidateAside = ({}: IProps) => {
             </aside>
             {/* <DeleteAccountModal /> */}
             <LogoutModal />
+
+            {/* Profile Picture Update Modal */}
+            <ProfilePictureModal
+                isOpen={showProfilePicModal}
+                onClose={() => setShowProfilePicModal(false)}
+                currentPictureUrl={profilePictureUrl}
+                onUpdate={handleProfilePicUpdate}
+            />
         </>
     );
 };

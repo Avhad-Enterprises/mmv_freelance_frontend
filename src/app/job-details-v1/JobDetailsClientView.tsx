@@ -11,6 +11,7 @@ import JobDetailsBreadcrumb from '../components/jobs/breadcrumb/job-details-brea
 import JobDetailsV1Area from '../components/job-details/job-details-v1-area';
 import job_data from '@/data/job-data';
 import RelatedJobs from '../components/jobs/related-jobs';
+import { authCookies } from '@/utils/cookies';
 
 // Define a simple type for the decoded token payload
 interface DecodedToken {
@@ -23,15 +24,14 @@ const JobDetailsClientView = () => {
 
   useEffect(() => {
     // Check for a valid token on page load
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
         }
       } catch (error) {
         console.error("Invalid token:", error);

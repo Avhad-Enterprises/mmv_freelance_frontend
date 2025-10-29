@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { authCookies } from "@/utils/cookies";
 
 const ChangePasswordArea = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -30,7 +31,7 @@ const ChangePasswordArea = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = authCookies.getToken();
       if (!token) {
         setLoading(false);
         toast.error("Authentication token not found. Please log in again.");

@@ -5,6 +5,7 @@ import { IJobType } from '@/types/job-data-type';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import { authCookies } from '@/utils/cookies';
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1`;
 
@@ -15,7 +16,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
+      const token = authCookies.getToken();
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
@@ -49,7 +50,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [applicationId, setApplicationId] = useState<number | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     setIsLoggedIn(!!token);
 
     const initialize = async () => {

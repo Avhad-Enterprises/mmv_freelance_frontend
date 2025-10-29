@@ -5,6 +5,7 @@ import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
 import JobListThree from '../components/jobs/list/job-list-three';
 import FooterOne from '@/layouts/footers/footer-one';
+import { authCookies } from '@/utils/cookies';
 
 interface DecodedToken {
   exp: number;
@@ -14,15 +15,14 @@ const JobListClientView = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
         }
       } catch (error) {
         console.error("Invalid token:", error);

@@ -8,7 +8,6 @@ type Props = {
   onSkillChange: (values: string[]) => void;
   onLocationChange: (values: string[]) => void;
   onSuperpowerChange: (values: string[]) => void;
-  onApplyFilter: () => void;
   onClearFilters: () => void;
   skills: string[];
   locations: string[];
@@ -22,7 +21,6 @@ const CandidateV1FilterArea = ({
   onSkillChange,
   onLocationChange,
   onSuperpowerChange,
-  onApplyFilter,
   onClearFilters,
   skills,
   locations,
@@ -92,16 +90,10 @@ const CandidateV1FilterArea = ({
         <div className="col-lg-3 col-md-12">
           <div className="d-flex gap-2 mt-md-0 mt-3">
             <button
-              onClick={onApplyFilter}
-              className="btn-ten fw-500 text-white text-center tran3s flex-grow-1"
-            >
-              Apply Filter
-            </button>
-            <button
               onClick={onClearFilters}
-              className="btn-eight fw-500 text-center tran3s flex-grow-1"
+              className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
             >
-              Clear
+              Reset Filters
             </button>
           </div>
         </div>

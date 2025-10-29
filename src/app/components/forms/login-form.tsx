@@ -49,16 +49,17 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
       const token = result?.data?.token;
 
       if (token) {
+        // Clear any existing tokens from all storage locations
+        if (typeof window !== 'undefined') {
+          authCookies.removeToken();
+        }
+        
         // Store token using cookies
         authCookies.setToken(token, data.rememberMe);
 
         console.log(`Token stored in cookies (${data.rememberMe ? 'persistent' : 'session'})`);
 
         reset();
-
-        // Start automatic token refresh monitoring
-        const tokenRefreshService = TokenRefreshService.getInstance();
-        tokenRefreshService.startAutoRefresh();
 
         // 2. Decode token to get user role
         const base64Payload = token.split(".")[1];
@@ -67,6 +68,9 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
 
         // Handle case where roles might be a single string instead of array
         const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+        
+        // Normalize roles to uppercase for consistent comparison
+        const normalizedRoles = rolesArray.map((role: string) => role.toUpperCase());
 
         // 3. Show a success message
         toast.success("Login successful! Redirecting to dashboard...");
@@ -78,11 +82,11 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
 
         // 5. Redirect to appropriate dashboard based on role
         setTimeout(() => {
-          if (rolesArray.includes('CLIENT') || rolesArray.includes('client')) {
+          if (normalizedRoles.includes('CLIENT')) {
             window.location.href = '/dashboard/employ-dashboard';
-          } else if (rolesArray.includes('VIDEOGRAPHER') || rolesArray.includes('videographer') || 
-                     rolesArray.includes('VIDEO_EDITOR') || rolesArray.includes('video_editor') ||
-                     rolesArray.includes('videoEditor')) {
+          } else if (normalizedRoles.includes('VIDEOGRAPHER') || 
+                     normalizedRoles.includes('VIDEO_EDITOR') ||
+                     normalizedRoles.includes('VIDEOEDITOR')) {
             window.location.href = '/dashboard/candidate-dashboard';
           } else {
             // Fallback to home if no recognized role

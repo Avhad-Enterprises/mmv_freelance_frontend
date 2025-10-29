@@ -6,6 +6,7 @@ import Wrapper from "@/layouts/wrapper";
 import FooterOne from "@/layouts/footers/footer-one";
 import MapArea from "../components/contact/map-area";
 import ContactArea from "../components/contact/contact-area";
+import { authCookies } from "@/utils/cookies";
 
 interface DecodedToken {
   exp: number;
@@ -17,20 +18,18 @@ const ContactPage = () => {
 
   useEffect(() => {
     // Check authentication status
-    const token = localStorage.getItem('token');
+    const token = authCookies.getToken();
     if (token) {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         if (decodedToken.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
         } else {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          authCookies.removeToken();
           setIsAuthenticated(false);
         }
       } catch (error) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
+        authCookies.removeToken();
         setIsAuthenticated(false);
       }
     }
