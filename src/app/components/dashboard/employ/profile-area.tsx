@@ -10,9 +10,13 @@ import { authCookies } from "@/utils/cookies";
 type IProps = {};
 
 type ProfileData = {
-  full_name: string;
+  // Basic User Info
+  first_name: string;
+  last_name: string;
   email: string;
   phone_number: string;
+  phone_verified: boolean;
+  email_verified: boolean;
   bio: string;
   address_line_first: string;
   address_line_second: string;
@@ -20,16 +24,19 @@ type ProfileData = {
   state: string;
   country: string;
   pincode: string;
+
+  // Client Profile Info
   company_name?: string;
   industry?: string;
   website?: string;
   social_links?: string[];
   company_size?: string;
-  required_services?: string[];
+  tax_id?: string;
+  business_documents?: string[];
   work_arrangement?: string;
   project_frequency?: string;
   hiring_preferences?: string;
-  tax_id?: string;
+  payment_method?: any;
 };
 
 const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange, type = 'text', required = false }: {
@@ -160,8 +167,8 @@ const DashboardProfileArea = ({}: IProps) => {
   const [selectedCountryCode, setSelectedCountryCode] = useState<string>("");
   const [selectedStateCode, setSelectedStateCode] = useState<string>("");
 
-  const companySizes = ["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"];
-  const industries = ["Ad Agency", "Film Production", "E-commerce", "Tech Startup", "Healthcare", "Education", "Real Estate", "Automotive", "Food & Beverage", "Finance", "Non-profit", "Other"];
+  const companySizes = ["1-10", "11-50", "51-200", "201-500", "500+"];
+  const industries = ["film_production", "ad_agency", "marketing", "events", "real_estate", "education", "e_commerce", "technology", "entertainment", "corporate", "other"];
   const workArrangementOptions = [
     { value: "remote", label: "Remote" },
     { value: "on_site", label: "On-site" },
@@ -228,9 +235,12 @@ const DashboardProfileArea = ({}: IProps) => {
 
         const data: ProfileData = {
           // Basic Info
-          full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
+          first_name: user.first_name || "",
+          last_name: user.last_name || "",
           email: user.email || "",
           phone_number: user.phone_number || "",
+          phone_verified: user.phone_verified || false,
+          email_verified: user.email_verified || false,
           bio: user.bio || "",
 
           // Company Info
@@ -244,7 +254,7 @@ const DashboardProfileArea = ({}: IProps) => {
           work_arrangement: profile?.work_arrangement,
           project_frequency: profile?.project_frequency,
           hiring_preferences: profile?.hiring_preferences,
-          required_services: safeArray<string>(profile?.required_services),
+          payment_method: profile?.payment_method,
 
           // Address
           address_line_first: user.address_line_first || "",
@@ -254,6 +264,7 @@ const DashboardProfileArea = ({}: IProps) => {
           country: countryObj?.isoCode || "",
           pincode: user.pincode || "",
           tax_id: profile?.tax_id,
+          business_documents: safeArray<string>(profile?.business_documents),
         };
         
         setProfileData(data);
@@ -381,13 +392,13 @@ const DashboardProfileArea = ({}: IProps) => {
 
       // Split changes into user and profile payloads based on API documentation
       const userFields: (keyof ProfileData)[] = [
-        'full_name', 'email', 'phone_number', 'bio',
-        'address_line_first', 'address_line_second', 'city', 'state', 'country', 'pincode'
+        'first_name', 'last_name', 'email', 'phone_number', 'phone_verified', 'email_verified',
+        'bio', 'address_line_first', 'address_line_second', 'city', 'state', 'country', 'pincode'
       ];
       
       const clientProfileFields: (keyof ProfileData)[] = [
-        'company_name', 'website', 'industry', 'company_size', 'required_services',
-        'work_arrangement', 'project_frequency', 'hiring_preferences', 'tax_id'
+        'company_name', 'website', 'industry', 'company_size', 'social_links', 'tax_id', 'business_documents', 'work_arrangement',
+        'project_frequency', 'hiring_preferences', 'payment_method'
       ];
 
       const userPayload: { [key: string]: any } = {};
@@ -404,12 +415,6 @@ const DashboardProfileArea = ({}: IProps) => {
       }
 
       // Handle special fields for user payload
-      if (userPayload.full_name) {
-        const nameParts = userPayload.full_name.split(' ');
-        userPayload.first_name = nameParts[0] || "";
-        userPayload.last_name = nameParts.slice(1).join(' ') || "";
-        delete userPayload.full_name;
-      }
       if (userPayload.country) {
         userPayload.country = Country.getCountryByCode(userPayload.country)?.name || '';
       }
@@ -508,7 +513,8 @@ const DashboardProfileArea = ({}: IProps) => {
           {!loading && profileData && editedData && displayData && (
             <>
               <InfoSection title="Basic Information" sectionKey="basicInfo" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                <InfoRow label="Full Name" value={displayData.full_name} field="full_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} required={true} />
+                <InfoRow label="First Name" value={displayData.first_name} field="first_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} required={true} />
+                <InfoRow label="Last Name" value={displayData.last_name} field="last_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} required={true} />
                 <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} type="email" required={true} />
                 <InfoRow label="Phone Number" value={displayData.phone_number} field="phone_number" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} type="tel" required={false} />
               </InfoSection>
@@ -523,7 +529,7 @@ const DashboardProfileArea = ({}: IProps) => {
                         <select className="form-select" value={editedData.industry || ''} onChange={(e) => handleInputChange('industry', e.target.value)} required={true}>
                           <option value="">Select Industry</option>
                           {industries.map(industry => (
-                            <option key={industry} value={industry.toLowerCase().replace(/\s/g, '_')}>{industry}</option>
+                            <option key={industry} value={industry}>{industry.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</option>
                           ))}
                         </select>
                       ) : (displayData.industry?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))}
@@ -557,6 +563,53 @@ const DashboardProfileArea = ({}: IProps) => {
                           ))}
                         </select>
                       ) : (displayData.company_size)}
+                    </div>
+                  </div>
+                )}
+
+                {(profileData.social_links || isEditModeFor("companyInfo")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Social Links:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("companyInfo") ? (
+                        <div>
+                          {(editedData.social_links || []).map((link, index) => (
+                            <div key={index} className="d-flex mb-2">
+                              <input
+                                type="url"
+                                className="form-control me-2"
+                                value={link}
+                                onChange={(e) => updateSocialLink(index, e.target.value)}
+                                placeholder="https://..."
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => removeSocialLink(index)}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={addSocialLink}
+                          >
+                            Add Social Link
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          {displayData.social_links && displayData.social_links.length > 0 ? (
+                            displayData.social_links.map((link, index) => (
+                              <div key={index}>
+                                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                              </div>
+                            ))
+                          ) : 'No social links provided'}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -664,6 +717,45 @@ const DashboardProfileArea = ({}: IProps) => {
                 </div>
                 <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Tax ID" value={displayData.tax_id} field="tax_id" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+
+                {(profileData.business_documents || isEditModeFor("address")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Business Documents:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("address") ? (
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={(editedData.business_documents || []).join(', ')}
+                          onChange={(e) => handleInputChange('business_documents', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
+                          placeholder="document1.pdf, document2.pdf"
+                        />
+                      ) : (
+                        displayData.business_documents && displayData.business_documents.length > 0
+                          ? displayData.business_documents.join(', ')
+                          : 'No documents provided'
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {(profileData.payment_method || isEditModeFor("address")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Payment Method:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("address") ? (
+                        <select className="form-select" value={editedData.payment_method || ''} onChange={(e) => handleInputChange('payment_method', e.target.value)}>
+                          <option value="">Select Payment Method</option>
+                          <option value="bank_transfer">Bank Transfer</option>
+                          <option value="paypal">PayPal</option>
+                          <option value="stripe">Stripe</option>
+                          <option value="check">Check</option>
+                          <option value="other">Other</option>
+                        </select>
+                      ) : (displayData.payment_method || 'Not specified')}
+                    </div>
+                  </div>
+                )}
               </InfoSection>
             </>
           )}
