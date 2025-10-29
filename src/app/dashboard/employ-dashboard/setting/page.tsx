@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import DashboardSettingArea from '@/app/components/dashboard/candidate/dashboard-setting';
+import DashboardSettingArea from '@/app/components/dashboard/employ/dashboard-setting';
 
 const EmployDashboardSettingPage = () => {
   return <DashboardSettingArea />;

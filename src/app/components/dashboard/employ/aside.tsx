@@ -11,7 +11,6 @@ import { useUser } from "@/context/UserContext";
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
 import profile_icon_2 from "@/assets/dashboard/images/icon/icon_24.svg";
-import profile_icon_3 from "@/assets/dashboard/images/icon/icon_25.svg";
 import logout from "@/assets/dashboard/images/icon/icon_9.svg";
 import nav_1 from "@/assets/dashboard/images/icon/icon_1.svg";
 import nav_1_active from "@/assets/dashboard/images/icon/icon_1_active.svg";
@@ -34,8 +33,8 @@ const nav_data = [
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/employ-dashboard/jobs", title: "My Jobs" },
     { id: 5, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/employ-dashboard/submit-job", title: "Chat" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/employ-dashboard/saved-candidate", title: "Saved Candidate" },
-    { id: 7,icons: nav_2, icon_active: nav_2_active ,link: "/dashboard/employ-dashboard/Candidates", title: "Candidates"}
-    // { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
+    { id: 7,icons: nav_2, icon_active: nav_2_active ,link: "/dashboard/employ-dashboard/Candidates", title: "Candidates"},
+    { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
 ];
 
 type IProps = {
@@ -45,13 +44,36 @@ type IProps = {
 const EmployAside = ({}: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
-    const { userData } = useUser();
+    const { userData, userRoles, currentRole, setCurrentRole } = useUser();
     
     const fullName = userData 
         ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
         : "Loading...";
     
     const profilePictureUrl = userData?.profile_picture || null;
+
+    const handleRoleSwitch = (role: string) => {
+        setCurrentRole(role);
+        // Redirect based on role
+        if (role.toLowerCase().includes('client')) {
+            window.location.href = '/dashboard/employ-dashboard';
+        } else if (role.toLowerCase().includes('videographer') || role.toLowerCase().includes('video editor') || role.toLowerCase().includes('freelancer')) {
+            window.location.href = '/dashboard/candidate-dashboard';
+        }
+    };
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const initDropdowns = async () => {
+                const bootstrap = await import('bootstrap');
+                const dropdownElements = document.querySelectorAll('.dropdown-toggle');
+                dropdownElements.forEach((element) => {
+                    new bootstrap.Dropdown(element);
+                });
+            };
+            initDropdowns();
+        }
+    }, []);
 
     return (
         <>
@@ -120,12 +142,22 @@ const EmployAside = ({}: IProps) => {
                                         <span className="ms-2 ps-1">Account Settings</span>
                                     </Link>
                                 </li>
-                                <li>
-                                    <a className="dropdown-item d-flex align-items-center" href="#">
-                                        <Image src={profile_icon_3} alt="icon" className="lazy-img" />
-                                        <span className="ms-2 ps-1">Notification</span>
-                                    </a>
-                                </li>
+                                {userRoles.length > 1 && (
+                                    <>
+                                        <li><hr className="dropdown-divider" /></li>
+                                        <li><h6 className="dropdown-header">Switch Role</h6></li>
+                                        {userRoles.map((role, index) => (
+                                            <li key={index}>
+                                                <button
+                                                    className={`dropdown-item ${role === currentRole ? 'active' : ''}`}
+                                                    onClick={() => handleRoleSwitch(role)}
+                                                >
+                                                    {role}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </>
+                                )}
                             </ul>
                         </div>
                     </div>

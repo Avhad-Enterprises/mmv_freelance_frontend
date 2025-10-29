@@ -11,10 +11,9 @@ import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
 type CandidateDetailsAreaProps = {
   freelancer: IFreelancer | null;
   loading: boolean;
-  onBackToList: () => void; // New prop for back button
 };
 
-const CandidateDetailsArea = ({ freelancer, loading, onBackToList }: CandidateDetailsAreaProps) => {
+const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps) => {
   if (loading) return <div className="container text-center p-5"> <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div> </div>;
   if (!freelancer) return <div className="container text-center p-5"><p>No freelancer data found.</p></div>;
 
@@ -72,11 +71,6 @@ const CandidateDetailsArea = ({ freelancer, loading, onBackToList }: CandidateDe
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
                 
-                {/* --- BACK BUTTON MODIFIED HERE --- */}
-                <button onClick={onBackToList} className="btn-two mb-30">
-                  ← Back to Saved Candidates
-                </button>
-
                 <div className="inner-card border-style mb-65 lg-mb-40">
                   <h3 className="title">Bio</h3>
                   <p>{bio}</p>

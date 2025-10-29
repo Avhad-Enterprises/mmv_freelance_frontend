@@ -16,9 +16,10 @@ const BlogItemTwo = ({ blog }: { blog: IBlogDataType }) => {
         <Link href={`/blog-details/${blog.blog_id}`} className="w-100 d-block">
           {/*Use standard <img> since blog.featured_image is a string URL */}
           <img
-            src={blog.featured_image}
+            src={blog.featured_image && blog.featured_image.trim() !== '' ? blog.featured_image : 'https://via.placeholder.com/800x450'}
             alt={blog.title}
             className="lazy-img w-100 tran4s blog-img"
+            onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/800x450'; }}
           />
         </Link>
       </figure>

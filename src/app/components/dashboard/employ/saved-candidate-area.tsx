@@ -295,10 +295,6 @@ const SavedCandidateArea = () => {
     setLoadingProfile(false);
   };
 
-  const handleBackToList = () => {
-    setSelectedFreelancer(null);
-  };
-
   // --- Derived State for Rendering ---
   const indexOfLast = currentPage * ITEMS_PER_PAGE;
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
@@ -314,7 +310,7 @@ const SavedCandidateArea = () => {
         
         {selectedFreelancer ? (
           // Render CandidateDetailsArea if a freelancer is selected
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} onBackToList={handleBackToList} />
+          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
         ) : (
           // Otherwise, render the list of saved candidates
           <>

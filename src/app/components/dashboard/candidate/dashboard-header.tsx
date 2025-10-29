@@ -35,7 +35,7 @@ type DashboardHeaderProps = {
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
   const { setIsOpenSidebar } = useSidebar();
-  const { userRole } = useUser();
+  const { currentRole } = useUser();
 
   const handleOpenSidebar = () => {
     setIsOpenSidebar(true);
@@ -59,7 +59,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           minWidth: 'fit-content',
           boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
         }}>
-          {userRole || 'Loading...'}
+          {currentRole || 'Loading...'}
         </div>
 
         {/* Right side - Search, Notifications, Post Job */}

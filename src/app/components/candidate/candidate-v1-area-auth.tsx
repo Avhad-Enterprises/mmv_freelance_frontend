@@ -336,10 +336,6 @@ const CandidateV1Area = () => {
     setLoadingProfile(false);
   };
 
-  const handleBackToList = () => {
-    setSelectedFreelancer(null);
-  };
-
   // --- Derived State for Rendering ---
   const indexOfLast = currentPage * ITEMS_PER_PAGE;
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
@@ -358,7 +354,7 @@ const CandidateV1Area = () => {
         <h2 className="main-title">Candidates</h2>
         
         {selectedFreelancer ? (
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} onBackToList={handleBackToList} />
+          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
         ) : (
           <>
             <div className="bg-white card-box border-20 mb-40">

@@ -3,9 +3,14 @@
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
-import toast from "react-hot-toast";
+import toast, { Toaster } from 'react-hot-toast';
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
+import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
+import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import JobsList from "./JobsList";
+import ApplicantsList from "./ApplicantsList";
+import ApplicantProfile from "./ApplicantProfile";
 // Bootstrap will be imported dynamically on the client side
 
 export interface ProjectSummary {
@@ -26,28 +31,27 @@ export interface Applicant {
   profile_picture: string;
   status: 0 | 1 | 2 | 3; // 0: Pending, 1: Approved, 2: Completed, 3: Rejected
   bio: string | null;
+  skills?: string[]; // Add skills field
+  applied_date?: string; // Add applied date field
 }
 
-interface ApplicantsState {
-  [projectId: string]: {
-    loading: boolean;
-    error: string | null;
-    data: Applicant[];
-  };
-}
-
-interface IProps {
-  // No props needed, using context
-}
-
-const EmployJobArea: FC<IProps> = ({}) => {
+const EmployJobArea: FC = () => {
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
-  const [applicantsByProject, setApplicantsByProject] = useState<ApplicantsState>({});
+  const [selectedProjectForApplicants, setSelectedProjectForApplicants] = useState<ProjectSummary | null>(null);
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
+  const [applicantsLoading, setApplicantsLoading] = useState(false);
+  const [applicantsError, setApplicantsError] = useState<string | null>(null);
+  const [savedApplicants, setSavedApplicants] = useState<number[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<{ [applicantId: number]: number }>({});
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+
+  // State for viewing applicant profiles
+  const [selectedApplicant, setSelectedApplicant] = useState<IFreelancer | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -60,7 +64,7 @@ const EmployJobArea: FC<IProps> = ({}) => {
       };
       initDropdowns();
     }
-  }, [expandedProjectId]);
+  }, []);
 
   const fetchClientData = useCallback(async () => {
     if (isPostingJob) return;
@@ -96,38 +100,127 @@ const EmployJobArea: FC<IProps> = ({}) => {
 
   useEffect(() => { fetchClientData(); }, [fetchClientData]);
 
+  // Effect to fetch user's favorite applicants
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      setLoadingFavorites(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setSavedApplicants([]);
+          setFavoriteIds({});
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/my-favorites`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch favorites');
+
+        const result = await response.json();
+        if (result.data && Array.isArray(result.data)) {
+          const savedIds = result.data.map((fav: any) => fav.freelancer_id);
+          const favIds = result.data.reduce((acc: any, fav: any) => {
+            acc[fav.freelancer_id] = fav.id;
+            return acc;
+          }, {});
+          setSavedApplicants(savedIds);
+          setFavoriteIds(favIds);
+        }
+      } catch (err) {
+        console.error("Error loading favorites:", err);
+        setSavedApplicants([]);
+        setFavoriteIds({});
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+    fetchFavorites();
+  }, []);
+
   const handleReturnToList = () => {
     setIsPostingJob(false);
     fetchClientData();
   };
 
-  const handleViewApplicantsClick = async (projectId: string) => {
-    if (expandedProjectId === projectId) {
-      setExpandedProjectId(null);
-      return;
-    }
-    setExpandedProjectId(projectId);
-
-    if (applicantsByProject[projectId]?.data?.length > 0) return;
-
-    setApplicantsByProject(prev => ({
-      ...prev,
-      [projectId]: { loading: true, error: null, data: [] },
-    }));
+  const handleViewApplicantsClick = async (project: ProjectSummary) => {
+    setSelectedProjectForApplicants(project);
+    setApplicantsLoading(true);
+    setApplicantsError(null);
 
     try {
-      const response = await makeGetRequest(`api/v1/applications/projects/${projectId}/applications`);
+      const response = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
       const applicantsData: Applicant[] = response.data?.data || [];
-      setApplicantsByProject(prev => ({
-        ...prev,
-        [projectId]: { loading: false, error: null, data: applicantsData },
-      }));
+      setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
-      setApplicantsByProject(prev => ({
-        ...prev,
-        [projectId]: { loading: false, error: message, data: [] },
-      }));
+      setApplicantsError(message);
+      setApplicants([]);
+    } finally {
+      setApplicantsLoading(false);
+    }
+  };
+
+  const handleBackToJobs = () => {
+    setSelectedProjectForApplicants(null);
+    setApplicants([]);
+    setApplicantsError(null);
+  };
+
+  // Event Handler to Add/Remove Favorites
+  const handleToggleSave = async (applicantId: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error("Please log in to save applicants.");
+      return;
+    }
+
+    const isCurrentlySaved = savedApplicants.includes(applicantId);
+
+    try {
+      if (isCurrentlySaved) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: applicantId })
+        });
+
+        if (!response.ok) throw new Error("Failed to remove from favorites");
+
+        setSavedApplicants(prev => prev.filter(id => id !== applicantId));
+        setFavoriteIds(prev => {
+          const newFavs = { ...prev };
+          delete newFavs[applicantId];
+          return newFavs;
+        });
+        toast.success('Removed from favorites!');
+      } else {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: applicantId })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add to favorites");
+        }
+
+        const result = await response.json();
+
+        setSavedApplicants(prev => [...prev, applicantId]);
+        setFavoriteIds(prev => ({ ...prev, [applicantId]: result.data.id }));
+        toast.success('Added to favorites!');
+      }
+    } catch (err: any) {
+      console.error("Error toggling favorite:", err);
+      toast.error(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -136,74 +229,56 @@ const EmployJobArea: FC<IProps> = ({}) => {
     applicationId: number,
     newStatus: Applicant['status']
   ) => {
-    const currentApplicants = applicantsByProject[projectId]?.data || [];
-    const applicantIndex = currentApplicants.findIndex(a => a.applied_projects_id === applicationId);
-    if (applicantIndex === -1) return;
+    // Check if another applicant is already assigned or completed by looking at projects
+    const currentProject = projects.find(p => p.project_id === projectId);
+    if (!currentProject) return;
 
-    // Check if another applicant is already assigned or completed
     if (newStatus === 1) {
-      const hasAssigned = currentApplicants.some(a => a.status === 1 && a.applied_projects_id !== applicationId);
-      if (hasAssigned) {
+      // Check if project is already assigned
+      if (currentProject.status === 1) {
         toast.error("❌ Only one applicant can be assigned to this project.");
         return;
       }
     }
     if (newStatus === 2) {
-      const hasCompleted = currentApplicants.some(a => a.status === 2 && a.applied_projects_id !== applicationId);
-      if (hasCompleted) {
-        toast.error("❌ This project is already marked as completed by another applicant.");
+      // Check if project is already completed
+      if (currentProject.status === 2) {
+        toast.error("❌ This project is already marked as completed.");
         return;
       }
     }
 
-    const originalApplicants = JSON.parse(JSON.stringify(currentApplicants));
-    const updatedApplicants = [...currentApplicants];
-    updatedApplicants[applicantIndex].status = newStatus;
-
-    setApplicantsByProject(prev => ({
-      ...prev,
-      [projectId]: { ...prev[projectId], data: updatedApplicants },
-    }));
-
-    // Determine new project status
+    // Optimistically update project status
+    const originalProjects = JSON.parse(JSON.stringify(projects));
     let newProjectStatus: number | null = null;
     if (newStatus === 2) newProjectStatus = 2; // Completed
     else if (newStatus === 1) newProjectStatus = 1; // Assigned
-    // For Rejected (3), don't update project status
 
-    const originalProjects = JSON.parse(JSON.stringify(projects));
     if (newProjectStatus !== null) {
-    // FIX: Create a new const here. TypeScript will infer its type as 'number'.
-    const finalProjectStatus = newProjectStatus;
-
-    const updatedProjects = projects.map(p =>
-      p.project_id === projectId ? { ...p, status: finalProjectStatus } : p // Use the new const
-    );
-    setProjects(updatedProjects);
-  }
+      const updatedProjects = projects.map(p =>
+        p.project_id === projectId ? { ...p, status: newProjectStatus! } : p
+      );
+      setProjects(updatedProjects);
+    }
 
     try {
-      // 1️⃣ Update applicant status
-      // Use PATCH /api/v1/projects-tasks/:id/status with applied_projects_id, but only send status
+      // Update applicant status
       await makePatchRequest(`api/v1/projects-tasks/${applicationId}/status`, {
         status: newStatus === 3 ? 0 : newStatus, // Map Rejected (3) to Pending (0) for the endpoint
       });
 
-      // 2️⃣ Update project status (only for Assigned or Completed)
+      // Update project status (only for Assigned or Completed)
       if (newStatus === 1 || newStatus === 2) {
         await makePatchRequest(`api/v1/projects-tasks/${projectId}/status`, {
           status: newProjectStatus,
-          user_id: currentApplicants[applicantIndex].user_id, // Assuming user_id is correct for freelancer_id
+          // Note: We don't have user_id here, might need to adjust API call
         });
       }
 
       toast.success("✅ Applicant and project updated successfully!");
     } catch (err: any) {
       console.error("Failed to update applicant/project:", err);
-      setApplicantsByProject(prev => ({
-        ...prev,
-        [projectId]: { ...prev[projectId], data: originalApplicants },
-      }));
+      // Revert project status on error
       if (newProjectStatus !== null) {
         setProjects(originalProjects);
       }
@@ -222,119 +297,126 @@ const EmployJobArea: FC<IProps> = ({}) => {
     }
   };
 
+  // Helper function to map Applicant to IFreelancer
+  const mapApplicantToIFreelancer = useCallback((applicant: Applicant): IFreelancer => {
+    return {
+      user_id: applicant.user_id,
+      first_name: applicant.first_name,
+      last_name: applicant.last_name,
+      bio: applicant.bio || null,
+      profile_picture: applicant.profile_picture || null,
+      skills: applicant.skills || [],
+      superpowers: [], // Not available in applicant data
+      languages: [], // Not available in applicant data
+      city: null, // Not available in applicant data
+      country: null, // Not available in applicant data
+      email: applicant.email,
+      rate_amount: "0.00", // Not available in applicant data
+      currency: "USD",
+      availability: "not specified",
+      latitude: null,
+      longitude: null,
+      profile_title: null, // Not available in applicant data
+      short_description: null, // Not available in applicant data
+      youtube_videos: [], // Not available in applicant data
+      experience_level: null, // Not available in applicant data
+      work_type: null,
+      hours_per_week: null,
+      kyc_verified: false, // Not available in applicant data
+      aadhaar_verification: false, // Not available in applicant data
+      hire_count: 0, // Not available in applicant data
+      review_id: 0, // Not available in applicant data
+      total_earnings: 0, // Not available in applicant data
+      time_spent: 0, // Not available in applicant data
+      role_name: null,
+      experience: [], // Not available in applicant data
+      education: [], // Not available in applicant data
+      previous_works: [], // Not available in applicant data
+      certification: [], // Not available in applicant data
+      services: [], // Not available in applicant data
+      portfolio_links: [], // Not available in applicant data
+    };
+  }, []);
+
+  // Handler for viewing applicant profile
+  const handleViewProfile = (applicantId: number) => {
+    setLoadingProfile(true);
+    const applicant = applicants.find(a => a.user_id === applicantId);
+    if (applicant) {
+      setSelectedApplicant(mapApplicantToIFreelancer(applicant));
+    } else {
+      toast.error("Applicant profile not found. Please try again.");
+      console.error("Applicant not found in local state:", applicantId);
+    }
+    setLoadingProfile(false);
+  };
+
+  // Handler for going back to applicants list
+  const handleBackToApplicants = () => {
+    setSelectedApplicant(null);
+  };
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
+        <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
-          <h2 className="main-title m0">{isPostingJob ? "Post a New Job" : "My Jobs"}</h2>
-          {!isPostingJob && (
+          <h2 className="main-title m0">
+            {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Job" : "My Jobs")}
+          </h2>
+          {!isPostingJob && !selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
               Post a Job
             </button>
           )}
+          {selectedApplicant && (
+            <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
+              ← Back to Applicants
+            </button>
+          )}
+          {selectedProjectForApplicants && !selectedApplicant && (
+            <button className="dash-btn-two tran3s" onClick={handleBackToJobs}>
+              ← Back to Jobs
+            </button>
+          )}
         </div>
 
-        {isPostingJob ? (
-          <PostJobForm onBackToList={handleReturnToList} />
+        {selectedApplicant ? (
+          // Profile View
+          <ApplicantProfile
+            selectedApplicant={selectedApplicant}
+            loadingProfile={loadingProfile}
+            onBackToApplicants={handleBackToApplicants}
+          />
+        ) : selectedProjectForApplicants ? (
+          // Applicants View
+          <ApplicantsList
+            applicants={applicants}
+            applicantsLoading={applicantsLoading}
+            applicantsError={applicantsError}
+            savedApplicants={savedApplicants}
+            selectedProjectForApplicants={selectedProjectForApplicants}
+            onViewProfile={handleViewProfile}
+            onToggleSave={handleToggleSave}
+            onUpdateApplicantStatus={handleUpdateApplicantStatus}
+            getStatusInfo={getStatusInfo}
+          />
         ) : (
-          <div className="bg-white card-box border-20">
-            <div className="table-responsive">
-              <table className="table job-alert-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Budget</th>
-                    <th>Date Created</th>
-                    <th className="text-end">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading && <tr><td colSpan={5} className="text-center">Loading...</td></tr>}
-                  {error && <tr><td colSpan={5} className="text-center text-danger">{error}</td></tr>}
-                  {!loading && projects.length === 0 && <tr><td colSpan={5} className="text-center">No jobs found. Post one to get started!</td></tr>}
-
-                  {projects.map((project) => (
-                    <Fragment key={project.project_id}>
-                      <tr className="align-middle">
-                        <td>{project.title}</td>
-                        <td>{project.category}</td>
-                        <td>${project.budget}</td>
-                        <td>{new Date(project.date_created).toLocaleDateString()}</td>
-                        <td className="text-end">
-                          <div className="d-inline-flex gap-2 align-items-center">
-                            <button
-                              className="btn btn-sm btn-outline-primary"
-                              onClick={() => handleViewApplicantsClick(project.project_id)}
-                            >
-                              {expandedProjectId === project.project_id ? "Hide Applicants" : "View Applicants"}
-                            </button>
-                          </div>
-                          <span className={`fw-bold ms-3 ${getStatusInfo(project.status).className}`}>
-                            {getStatusInfo(project.status).text}
-                          </span>
-                        </td>
-                      </tr>
-
-                      {expandedProjectId === project.project_id && (
-                        <tr>
-                          <td colSpan={5} style={{ padding: '0.5rem 1.5rem', backgroundColor: '#f8f9fa' }}>
-                            <div className="applicants-container py-3">
-                              <h5>Applicants for: {project.title}</h5>
-                              {applicantsByProject[project.project_id]?.loading && <p>Loading applicants...</p>}
-                              {applicantsByProject[project.project_id]?.error && <p className="text-danger">{applicantsByProject[project.project_id].error}</p>}
-
-                              {!applicantsByProject[project.project_id]?.loading &&
-                              !applicantsByProject[project.project_id]?.error && (
-                                applicantsByProject[project.project_id]?.data.length > 0 ? (
-                                  <ul className="list-group list-group-flush">
-                                    {applicantsByProject[project.project_id].data.map(applicant => {
-                                      const status = getStatusInfo(applicant.status);
-                                      return (
-                                        <li key={applicant.applied_projects_id} className="list-group-item d-flex justify-content-between align-items-center px-0">
-                                          <div className="d-flex align-items-center gap-3">
-                                            <img
-                                              src={applicant.profile_picture || 'https://via.placeholder.com/50'}
-                                              alt={`${applicant.first_name} profile`}
-                                              style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }}
-                                            />
-                                            <div>
-                                              <strong>{applicant.first_name} {applicant.last_name}</strong>
-                                              <div className="text-muted small">{applicant.email}</div>
-                                            </div>
-                                          </div>
-                                          <div className="d-flex align-items-center gap-3">
-                                            <span className={`fw-bold ${status.className}`}>{status.text}</span>
-                                            <div className="dropdown">
-                                              <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                Actions
-                                              </button>
-                                              <ul className="dropdown-menu">
-                                                {applicant.status !== 1 && <li><button className="dropdown-item" onClick={() => handleUpdateApplicantStatus(project.project_id, applicant.applied_projects_id, 1)}>Approve</button></li>}
-                                                {applicant.status !== 3 && applicant.status !== 2 && <li><button className="dropdown-item" onClick={() => handleUpdateApplicantStatus(project.project_id, applicant.applied_projects_id, 3)}>Reject</button></li>}
-                                                {applicant.status === 1 && <li><button className="dropdown-item" onClick={() => handleUpdateApplicantStatus(project.project_id, applicant.applied_projects_id, 2)}>Mark as Completed</button></li>}
-                                              </ul>
-                                            </div>
-                                          </div>
-                                        </li>
-                                      );
-                                    })}
-                                  </ul>
-                                ) : (
-                                  <p>No applicants for this job yet.</p>
-                                )
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          // Jobs View
+          <>
+            {isPostingJob ? (
+              <PostJobForm onBackToList={handleReturnToList} />
+            ) : (
+              <JobsList
+                projects={projects}
+                loading={loading}
+                error={error}
+                onViewApplicants={handleViewApplicantsClick}
+                getStatusInfo={getStatusInfo}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
