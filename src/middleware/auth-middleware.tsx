@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useDecodedToken from '@/hooks/useDecodedToken';
+import { authCookies } from '@/utils/cookies';
 
 interface AuthMiddlewareProps {
   children: React.ReactNode;
@@ -21,9 +22,9 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
 
   useEffect(() => {
     const checkAuth = () => {
-      // Check if token exists
-      const token = localStorage.getItem('token');
-      
+      // Check if token exists in cookies
+      const token = authCookies.getToken();
+
       if (!token || token === 'null' || token === 'undefined') {
         console.log('No valid token found, redirecting to login');
         router.push(redirectTo);

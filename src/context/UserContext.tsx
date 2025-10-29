@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { authCookies } from "@/utils/cookies";
 
 interface UserData {
   user_id?: number;
@@ -26,10 +27,21 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserData = async () => {
     try {
+      // Get token from cookies
+      const token = authCookies.getToken();
+
+      // If no token, user is not authenticated
+      if (!token) {
+        console.log('No authentication token found - user not authenticated');
+        setUserRole('Not Authenticated');
+        setIsLoading(false);
+        return;
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });

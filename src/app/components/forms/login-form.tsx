@@ -9,6 +9,7 @@ import icon from "@/assets/images/icon/icon_60.svg";
 import toast from "react-hot-toast";
 import { makePostRequest } from "@/utils/api";
 import TokenRefreshService from "@/utils/tokenRefresh";
+import { authCookies } from "@/utils/cookies";
 
 type IFormData = { email: string; password: string; rememberMe: boolean };
 
@@ -48,18 +49,10 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
       const token = result?.data?.token;
 
       if (token) {
-        // Store token based on remember me preference
-        if (data.rememberMe) {
-          // Keep user logged in across browser sessions
-          localStorage.setItem("token", token);
-          console.log("Token stored in localStorage (persistent)");
-        } else {
-          // Session-only login
-          sessionStorage.setItem("token", token);
-          // Also store in localStorage for backward compatibility with existing code
-          localStorage.setItem("token", token);
-          console.log("Token stored in sessionStorage (session-only)");
-        }
+        // Store token using cookies
+        authCookies.setToken(token, data.rememberMe);
+
+        console.log(`Token stored in cookies (${data.rememberMe ? 'persistent' : 'session'})`);
 
         reset();
 

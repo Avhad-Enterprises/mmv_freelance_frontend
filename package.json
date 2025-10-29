@@ -1,5 +1,5 @@
 {
-  "name": "jobi",
+  "name": "mmv-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -30,6 +30,7 @@
     "eslint-config-next": "13.4.4",
     "hugeicons-react": "^0.3.0",
     "install": "^0.13.0",
+    "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "jwt-token": "^1.0.9",
     "lodash": "^4.17.21",
