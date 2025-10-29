@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 // Interface defining the props for this component
@@ -39,8 +39,49 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
   onUpdateApplicantStatus,
   getStatusInfo
 }) => {
+  // Modal state for approval confirmation
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [applicantToApprove, setApplicantToApprove] = useState<Applicant | null>(null);
+  const approveModalRef = useRef<any>(null);
+
+  // Initialize Bootstrap modal
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const bootstrap = require('bootstrap');
+      const modalElement = document.getElementById('approveConfirmationModal');
+      if (modalElement) {
+        approveModalRef.current = new bootstrap.Modal(modalElement);
+      }
+    }
+  }, []);
+
+  // Handle approve button click - show modal
+  const handleApproveClick = (applicant: Applicant) => {
+    setApplicantToApprove(applicant);
+    setShowApproveModal(true);
+    approveModalRef.current?.show();
+  };
+
+  // Handle confirm approval
+  const handleConfirmApprove = () => {
+    if (applicantToApprove && selectedProjectForApplicants) {
+      onUpdateApplicantStatus(selectedProjectForApplicants.project_id, applicantToApprove.applied_projects_id, 1);
+      approveModalRef.current?.hide();
+      setShowApproveModal(false);
+      setApplicantToApprove(null);
+    }
+  };
+
+  // Handle cancel approval
+  const handleCancelApprove = () => {
+    approveModalRef.current?.hide();
+    setShowApproveModal(false);
+    setApplicantToApprove(null);
+  };
+
   return (
-    <div className="candidate-profile-area">
+    <>
+      <div className="candidate-profile-area">
       <div className="accordion-box list-style show">
         {applicantsLoading && (
           <div className="text-center p-5">
@@ -67,7 +108,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
           applicants.map(applicant => {
             const status = getStatusInfo(applicant.status);
             return (
-              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-4" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25">
                 <div className="d-flex align-items-center">
                   <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
                     <Image
@@ -145,7 +186,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                 <li>
                                   <button
                                     className="dropdown-item"
-                                    onClick={() => selectedProjectForApplicants && onUpdateApplicantStatus(selectedProjectForApplicants.project_id, applicant.applied_projects_id, 1)}
+                                    onClick={() => handleApproveClick(applicant)}
                                     style={{ color: '#31795A', fontWeight: '500' }}
                                   >
                                     Approve
@@ -186,8 +227,29 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
           })
         )}
       </div>
+
+      {/* Approval Confirmation Modal */}
+      <div className="modal fade" id="approveConfirmationModal" tabIndex={-1} aria-labelledby="approveConfirmationModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="approveConfirmationModalLabel">Confirm Approval</h5>
+              <button type="button" className="btn-close" onClick={handleCancelApprove} aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to approve <strong>{applicantToApprove?.first_name} {applicantToApprove?.last_name}</strong> for this project?</p>
+              <p className="text-muted">This action will assign the freelancer to your project and update their status to "Approved".</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleCancelApprove}>Cancel</button>
+              <button type="button" className="btn btn-success" onClick={handleConfirmApprove}>Yes, Approve</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  </>
+);
 };
 
 export default ApplicantsList;
