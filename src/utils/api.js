@@ -19,7 +19,8 @@ apiClient.interceptors.request.use(
     const publicEndpoints = [
       'api/v1/projects-tasks/listings',
       'api/v1/categories',
-      'api/v1/skills'
+      'api/v1/skills',
+      'api/v1/contact/submit'
     ];
     
     // Check if this is a request to a public endpoint
@@ -89,7 +90,8 @@ apiClient.interceptors.response.use(
         const publicEndpoints = [
           'api/v1/projects-tasks/listings',
           'api/v1/categories',
-          'api/v1/skills'
+          'api/v1/skills',
+          'api/v1/contact/submit'
         ];
 
         // Check if the failed request was to a public endpoint
