@@ -263,21 +263,27 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch basic user info
+      // First get user type from users/me endpoint
       const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
       
-      if (!userRes.ok) throw new Error('Failed to fetch user data');
+      if (!userRes.ok) {
+        const errorData = await userRes.json();
+        throw new Error(errorData.message || 'Failed to fetch user data');
+      }
+      
       const userResponse = await userRes.json();
       
-      if (!userResponse.success) throw new Error('Failed to fetch user data');
+      if (!userResponse.success) {
+        throw new Error(userResponse.message || 'Failed to fetch user data');
+      }
       
-      const { user, userType: type } = userResponse.data;
+      const { userType: type } = userResponse.data;
       setUserType(type);
 
-      // Fetch role-specific profile data
+      // Now use the appropriate profile endpoint based on user type
       let profileEndpoint = '';
       if (type === 'videographer') {
         profileEndpoint = '/api/v1/videographers/profile';
@@ -292,24 +298,30 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         method: 'GET',
         headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
-
-      let profile = null;
-      if (profileRes.ok) {
-        const profileResponse = await profileRes.json();
-        if (profileResponse.success) {
-          profile = profileResponse.data?.profile || profileResponse.data;
-        }
+      
+      if (!profileRes.ok) {
+        const errorData = await profileRes.json();
+        throw new Error(errorData.message || 'Failed to fetch profile data');
+      }
+      
+      const profileResponse = await profileRes.json();
+      
+      if (!profileResponse.success) {
+        throw new Error(profileResponse.message || 'Failed to fetch profile data');
       }
 
+      const { user, profile } = profileResponse.data;
+
+      // Get country and state objects for location dropdowns
       const countryObj = Country.getCountryByCode(user.country);
       const stateObj = countryObj ? State.getStatesOfCountry(countryObj.isoCode).find(s => s.name === user.state) : null;
       
       const data: ProfileData = {
         full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
         email: user.email || "",
-        phone_number: user.phone_number || "",
+        phone_number: user.phone || "", // API uses 'phone' field
         bio: user.bio || profile?.short_description || "",
-        address_line_first: user.address_line_first || profile?.address || "",
+        address_line_first: user.address_line_first || "",
         address_line_second: user.address_line_second || "",
         city: user.city || "",
         state: stateObj?.isoCode || "",
@@ -330,14 +342,16 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         previous_works: [],
         skill_tags: [],
       };
+      
       setProfileData(data);
       setEditedData(JSON.parse(JSON.stringify(data))); // Deep copy to prevent mutation
 
       if (countryObj) setSelectedCountryCode(countryObj.isoCode);
       if (stateObj) setSelectedStateCode(stateObj.isoCode);
-    } catch (err) {
+      
+    } catch (err: any) {
       console.error("Failed to fetch user profile", err);
-      toast.error("Failed to load profile data");
+      toast.error(err.message || "Failed to load profile data");
     } finally {
       setLoading(false);
     }
