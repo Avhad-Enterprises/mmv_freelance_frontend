@@ -306,7 +306,16 @@ const SavedCandidateArea = () => {
       <div className="position-relative">
         <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
-        <h2 className="main-title">My Saved Candidates</h2> {/* Updated title */}
+        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+          <h2 className="main-title m0">
+            {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "My Saved Candidates"}
+          </h2>
+          {selectedFreelancer && (
+            <button className="dash-btn-two tran3s" onClick={() => setSelectedFreelancer(null)}>
+              ← Back to Saved Candidates
+            </button>
+          )}
+        </div>
         
         {selectedFreelancer ? (
           // Render CandidateDetailsArea if a freelancer is selected

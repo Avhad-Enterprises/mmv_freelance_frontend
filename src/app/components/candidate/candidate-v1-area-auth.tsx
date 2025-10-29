@@ -351,7 +351,16 @@ const CandidateV1Area = () => {
       <div className="position-relative">
         <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
-        <h2 className="main-title">Candidates</h2>
+        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+          <h2 className="main-title m0">
+            {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "Candidates"}
+          </h2>
+          {selectedFreelancer && (
+            <button className="dash-btn-two tran3s" onClick={() => setSelectedFreelancer(null)}>
+              ← Back to Candidates
+            </button>
+          )}
+        </div>
         
         {selectedFreelancer ? (
           <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />

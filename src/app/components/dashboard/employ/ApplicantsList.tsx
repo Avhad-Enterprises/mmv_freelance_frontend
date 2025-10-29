@@ -67,8 +67,8 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
           applicants.map(applicant => {
             const status = getStatusInfo(applicant.status);
             return (
-              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25">
-                <div className="d-flex">
+              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-4" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+                <div className="d-flex align-items-center">
                   <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
                     <Image
                       src={applicant.profile_picture || "/images/default-avatar.png"}
@@ -123,15 +123,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                             <i className={`bi ${savedApplicants.includes(applicant.user_id) ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                           </button>
 
-                          <button
-                            type="button"
-                            className="btn profile-btn tran3s ms-md-2"
-                            onClick={() => onViewProfile(applicant.user_id)}
-                          >
-                            View Profile
-                          </button>
-
-                          <div className="dropdown">
+                          <div className="dropdown ms-2">
                             <button
                               className="btn dropdown-toggle profile-btn tran3s"
                               type="button"
@@ -141,6 +133,14 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                               Actions
                             </button>
                             <ul className="dropdown-menu">
+                              <li>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => onViewProfile(applicant.user_id)}
+                                >
+                                  View Profile
+                                </button>
+                              </li>
                               {applicant.status !== 1 && (
                                 <li>
                                   <button
