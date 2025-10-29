@@ -162,7 +162,7 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
               />
               <label htmlFor="remember">Keep me logged in</label>
             </div>
-            <a href="#">Forget Password?</a>
+            <a href="/forgot-password">Forget Password?</a>
           </div>
         </div>
         <div className="col-12">
