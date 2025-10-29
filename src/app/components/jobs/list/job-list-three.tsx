@@ -11,6 +11,7 @@ import { makeGetRequest, makePostRequest, makeDeleteRequest } from "@/utils/api"
 import { add_to_wishlist, remove_from_wishlist } from "@/redux/features/wishlist";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
+import toast from 'react-hot-toast';
 
 // Define simple types for categories and skills for clarity
 interface ICategory {
@@ -40,7 +41,6 @@ const JobListThree = ({
   const [filterItems, setFilterItems] = useState<IJobType[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
-  const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
   const [shortValue, setShortValue] = useState("");
   // Add dropdown filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -74,8 +74,6 @@ const JobListThree = ({
 
         const jobsData = jobsRes.data.data || [];
         setAllJobs(jobsData);
-        const maxBudget = Math.max(...jobsData.map((j: any) => j.budget || 0), 0);
-        setPriceValue([0, maxBudget || 10000]);
 
         setCategories(categoriesRes.data.data || []);
         setSkills(skillsRes.data.data || []);
@@ -133,10 +131,6 @@ const JobListThree = ({
       );
     }
 
-    filteredData = filteredData.filter(
-      (item) => (item.budget ?? 0) >= priceValue[0] && (item.budget ?? 0) <= priceValue[1]
-    );
-
     if (search_key) {
       filteredData = filteredData.filter((item) =>
         item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
@@ -156,7 +150,7 @@ const JobListThree = ({
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
-    all_jobs, priceValue, shortValue, search_key,
+    all_jobs, shortValue, search_key,
   ]);
 
   // --- Event Handlers ---
@@ -197,6 +191,7 @@ const JobListThree = ({
             projects_task_id: job.projects_task_id,
           });
           dispatch(remove_from_wishlist(job.projects_task_id));
+          toast.success('Project removed from saved list');
         }
       } else {
         if (job.projects_task_id !== undefined) {
@@ -210,10 +205,12 @@ const JobListThree = ({
 
           await makePostRequest("api/v1/saved/create", payload);
           dispatch(add_to_wishlist(job));
+          toast.success('Project saved successfully');
         }
       }
     } catch (error) {
       console.error("Error toggling wishlist:", error);
+      toast.error('Failed to save/unsave project. Please try again.');
     }
   };
 
@@ -249,9 +246,6 @@ const JobListThree = ({
               Filter
             </button>
             <FilterArea
-              priceValue={priceValue}
-              setPriceValue={setPriceValue}
-              maxPrice={priceValue[1]}
               all_categories={categories}
               all_skills={skills}
               onCategoryChange={setSelectedCategories}

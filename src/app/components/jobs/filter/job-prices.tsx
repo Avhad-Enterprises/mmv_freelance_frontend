@@ -43,7 +43,7 @@ const JobPrices = ({ priceValue, setPriceValue, maxPrice }: IProps) => {
               onChange={() => handleRangeChange(range.value)}
               style={{ display: 'none' }}
             />
-            
+
             {/* The label is styled to look and act like a button */}
             <label
               htmlFor={range.label}

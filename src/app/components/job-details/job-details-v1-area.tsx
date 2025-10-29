@@ -48,17 +48,45 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [isCheckingApplication, setIsCheckingApplication] = useState(true);
+  
+  // Ref to prevent duplicate useEffect runs
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
+    console.log('=== JobDetailsV1Area useEffect triggered ===');
+    console.log('Job ID:', job?.projects_task_id);
+    console.log('Job object reference:', job);
+    console.log('Has initialized:', hasInitialized.current);
+    
+    // Prevent duplicate initialization in development mode
+    if (hasInitialized.current) {
+      console.log('Skipping duplicate initialization');
+      return;
+    }
+    
     const token = authCookies.getToken();
     setIsLoggedIn(!!token);
+    console.log('User logged in:', !!token);
+    
+    // Reset states when job changes
+    setIsApplied(false);
+    setApplicationId(null);
+    setIsCheckingApplication(true);
+    hasInitialized.current = false; // Reset initialization flag for new job
+    console.log('States reset: isApplied=false, applicationId=null, isCheckingApplication=true, hasInitialized=false');
 
     const initialize = async () => {
       if (token) {
         await fetchUserIdAndInitialState();
+      } else {
+        setIsCheckingApplication(false);
+        console.log('No token, user not logged in');
       }
     };
     initialize();
+    
+    hasInitialized.current = true;
 
     if (typeof window !== 'undefined') {
       const bootstrap = require('bootstrap');
@@ -84,9 +112,17 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   };
   
   const checkInitialJobStatus = async (currentUserId: number) => {
-    if (!job || job.projects_task_id === undefined) return;
+    if (!job || job.projects_task_id === undefined) {
+      console.log('No job or projects_task_id undefined:', job);
+      setIsCheckingApplication(false);
+      return;
+    }
+    
+    console.log('Checking application status for job:', job.projects_task_id, 'user:', currentUserId);
     
     try {
+      setIsCheckingApplication(true);
+      
       // Check if job is saved
       const savedRes = await api.get(`api/v1/saved/my-saved-projects`);
       const savedProjects = savedRes.data?.data || [];
@@ -98,40 +134,77 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       // Check if already applied to this specific project
       const appliedRes = await api.get(`api/v1/applications/my-applications/project/${job.projects_task_id}`);
       
+      console.log('Applied response:', appliedRes.data); // Debug log
+      
       if (appliedRes.data?.success && appliedRes.data?.data) {
-        const application = appliedRes.data.data;
-        setIsApplied(true);
-        setApplicationId(application.applied_projects_id);
+        let application = null;
+        
+        // Handle both single object and array responses
+        if (Array.isArray(appliedRes.data.data)) {
+          console.log('API returned array, checking first item');
+          application = appliedRes.data.data.length > 0 ? appliedRes.data.data[0] : null;
+        } else {
+          console.log('API returned single object');
+          application = appliedRes.data.data;
+        }
+        
+        console.log('Application object:', application);
+        
+        if (application && application.applied_projects_id && application.projects_task_id === job.projects_task_id) {
+          setIsApplied(true);
+          setApplicationId(application.applied_projects_id);
+          console.log('User has applied to this project, application ID:', application.applied_projects_id);
+        } else {
+          console.log('No valid application found for this project');
+          setIsApplied(false);
+          setApplicationId(null);
+        }
       } else {
         setIsApplied(false);
         setApplicationId(null);
+        console.log('User has not applied or API returned no data');
       }
 
     } catch (error: any) {
+      console.log('Error response:', error.response); // Debug log
       // If 404 or no application found, user hasn't applied
       if (error.response?.status === 404) {
         setIsApplied(false);
         setApplicationId(null);
+        console.log('404 error - user has not applied');
       } else {
         console.error("Error checking initial job status:", error);
+        // For other errors, assume not applied to be safe
+        setIsApplied(false);
+        setApplicationId(null);
       }
+    } finally {
+      setIsCheckingApplication(false);
     }
   };
 
   const handleApplyClick = () => {
+    console.log('=== handleApplyClick called ===');
+    console.log('isApplied:', isApplied, 'applicationId:', applicationId);
+    console.log('isApplying:', isApplying, 'userRole:', userRole);
+    
     if (!isLoggedIn) {
+      console.log('User not logged in, showing modal');
       applyLoginModalRef.current?.show();
       return;
     }
 
     if (userRole === 'CLIENT') {
+      console.log('User is client, showing error');
       toast.error('Only freelancers can apply.');
       return;
     }
 
     if (isApplied && applicationId) {
+      console.log('User has applied, withdrawing application');
       handleWithdrawApplication();
     } else {
+      console.log('User has not applied, submitting application');
       handleApplySubmit();
     }
   };
@@ -142,6 +215,11 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         return;
     }
     
+    if (isApplying) {
+      console.log('Already applying, skipping duplicate call');
+      return;
+    }
+    
     setIsApplying(true);
     try {
         const response = await api.post('api/v1/applications/projects/apply', {
@@ -150,9 +228,15 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         });
 
         if (response.data?.success) {
-            toast.success('Application submitted successfully!');
-            setIsApplied(true);
-            setApplicationId(response.data.data?.applied_projects_id || null);
+            if (response.data.alreadyApplied) {
+                toast.success('You have already applied to this project.');
+                setIsApplied(true);
+                setApplicationId(response.data.data?.applied_projects_id || null);
+            } else {
+                toast.success('Application submitted successfully!');
+                setIsApplied(true);
+                setApplicationId(response.data.data?.applied_projects_id || null);
+            }
         } else {
             toast.error(response.data?.message || 'Failed to submit application.');
         }
@@ -168,6 +252,11 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const handleWithdrawApplication = async () => {
     if (!applicationId) {
       toast.error('Application ID not found.');
+      return;
+    }
+
+    if (isApplying) {
+      console.log('Already withdrawing, skipping duplicate call');
       return;
     }
 
@@ -341,9 +430,11 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   <button 
                     className="btn-one w-100 mt-25" 
                     onClick={handleApplyClick}
-                    disabled={isApplying || userRole === 'CLIENT'}
+                    disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
                   >
-                    {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
+                    {isCheckingApplication ? 'Checking...' : 
+                     isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : 
+                     isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
                   </button>
 
                   <button

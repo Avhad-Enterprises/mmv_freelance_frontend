@@ -5,7 +5,6 @@ import React from 'react';
 import JobType from './job-type';
 import FilterJobCategory from './filter-job-category'; // <-- IMPORT the new dropdown component
 import FilterJobSkills from './filter-job-skills'; // <-- IMPORT the new dropdown component
-import JobPrices from './job-prices';
 import { useAppDispatch } from '@/redux/hook';
 import { resetFilter } from '@/redux/features/filterSlice';
 
@@ -21,9 +20,6 @@ interface ISkill {
 
 // Update props to accept categories and skills lists and change handlers
 type IProps = {
-  priceValue: [number, number];
-  setPriceValue: React.Dispatch<React.SetStateAction<[number, number]>>;
-  maxPrice: number;
   all_categories: ICategory[]; // <-- ADDED
   all_skills: ISkill[];       // <-- ADDED
   onCategoryChange: (values: string[]) => void; // <-- UPDATED
@@ -33,9 +29,6 @@ type IProps = {
 };
 
 const FilterArea = ({
-  priceValue,
-  setPriceValue,
-  maxPrice,
   all_categories,
   all_skills,
   onCategoryChange,
@@ -47,7 +40,6 @@ const FilterArea = ({
 
   const handleReset = () => {
     dispatch(resetFilter());
-    setPriceValue([0, maxPrice]);
     onCategoryChange([]); // Reset categories
     onSkillChange([]);    // Reset skills
   };
@@ -63,14 +55,6 @@ const FilterArea = ({
           <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseJobType" role="button" aria-expanded="true">Job Type</a>
           <div className="collapse show" id="collapseJobType">
             <JobType />
-          </div>
-        </div>
-
-        {/* Budget */}
-        <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseSalary" role="button" aria-expanded="true">Budget</a>
-          <div className="collapse show" id="collapseSalary">
-            <JobPrices priceValue={priceValue} setPriceValue={setPriceValue} maxPrice={maxPrice} />
           </div>
         </div>
 
