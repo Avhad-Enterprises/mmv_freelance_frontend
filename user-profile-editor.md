@@ -1,18 +1,14 @@
-# User Profile Update APIs Documentation
-
-This document provides comprehensive information about all user profile update endpoints in the MMV Freelance API. The API follows a separation of concerns architecture where different endpoints update different database tables.
+# Video Editor API Documentation
 
 ## Overview
+Video editor-specific endpoints for managing video editor profiles, discovery, availability, and statistics. Includes public discovery routes and protected profile management routes.
 
-The API provides 4 distinct update endpoints, each responsible for updating specific aspects of user profiles:
-
-1. **User Basic Info** (`/users/me`) - Updates core user account information
-2. **Client Profile** (`/clients/profile`) - Updates client-specific business information
-3. **Videographer Profile** (`/videographers/profile`) - Updates videographer professional information
-4. **Video Editor Profile** (`/videoeditors/profile`) - Updates video editor professional information
+## Base URL
+```
+/api/v1
+```
 
 ## Authentication
-
 All endpoints require JWT authentication in the Authorization header:
 ```
 Authorization: Bearer <jwt_token>
@@ -20,159 +16,444 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-## 1. Update User Basic Information
+## Endpoints
 
-**Endpoint:** `PATCH /api/v1/users/me`
+### 1. Get All Video Editors
+**GET** `/videoeditors/getvideoeditors`
 
-**Required Roles:** Any authenticated user
+**Required Roles:** Authentication required
 
-**Description:** Updates basic user account information stored in the `users` table. This includes identity, contact details, and general profile information.
+**Description:** Retrieve a list of all video editors in the system for discovery purposes.
 
-### Request Body (All fields optional)
-```json
-{
-  // Identity
-  "first_name": "string",
-  "last_name": "string",
-  "username": "string",
-  "email": "string",
-
-  // Contact
-  "phone_number": "string",
-  "phone_verified": "boolean",
-  "email_verified": "boolean",
-
-  // Profile
-  "profile_picture": "string (URL)",
-  "bio": "string",
-  "timezone": "string",
-
-  // Address
-  "address_line_first": "string",
-  "address_line_second": "string",
-  "city": "string",
-  "state": "string",
-  "country": "string",
-  "pincode": "string",
-
-  // Notifications
-  "email_notifications": "boolean"
-}
-```
-
-### Response (200 OK)
+**Response (200):**
 ```json
 {
   "success": true,
-  "message": "Profile updated successfully",
-  "data": {
-    "user": {
-      "user_id": 1,
-      "first_name": "John",
-      "last_name": "Doe",
-      "username": "johndoe",
-      "email": "john@example.com",
-      "phone_number": "+1234567890",
-      "phone_verified": true,
-      "email_verified": true,
-      "profile_picture": "https://example.com/avatar.jpg",
-      "bio": "Professional user",
-      "timezone": "UTC",
-      "address_line_first": "123 Main St",
-      "address_line_second": "Apt 4B",
-      "city": "New York",
-      "state": "NY",
-      "country": "USA",
-      "pincode": "10001",
-      "email_notifications": true,
-      "updated_at": "2025-10-20T10:00:00Z"
+  "data": [
+    {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "email": "mike@example.com",
+      "company_name": "MJ Video Editing",
+      "specialization": ["wedding", "corporate", "music_video", "color_grading"],
+      "experience_years": 7,
+      "hourly_rate": 85.00,
+      "software_skills": ["Adobe Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro"],
+      "rating": 4.9,
+      "total_reviews": 38,
+      "location": "Los Angeles, CA",
+      "is_available": true,
+      "portfolio_url": "https://mj-editing.com",
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z"
     }
-  },
+  ],
   "meta": {
-    "timestamp": "2025-10-20T10:00:00Z",
+    "timestamp": "2025-10-18T10:00:00Z",
     "version": "v1"
   }
 }
 ```
-## 4. Update Video Editor Profile
 
-**Endpoint:** `PATCH /api/v1/videoeditors/profile`
+---
 
-**Required Roles:** VIDEO_EDITOR
+### 2. Get Top-Rated Video Editors
+**GET** `/videoeditors/top-rated`
 
-**Description:** Updates video editor-specific profile information stored in the `freelancer_profiles` table. This includes professional details, editing skills, pricing, and portfolio information.
+**Required Roles:** Authentication required
 
-### Request Body (All fields optional)
+**Description:** Retrieve a list of top-rated video editors sorted by rating and review count.
+
+**Response (200):**
 ```json
 {
-  // Professional Info
-  "profile_title": "string",
-  "role": "string",
-  "short_description": "string",
-  "experience_level": "entry | intermediate | expert | master",
-
-  // Skills & Expertise
-  "skills": "string[]",
-  "superpowers": "string[]",
-  "skill_tags": "string[]",
-  "base_skills": "string[]",
-  "languages": "string[]",
-
-  // Portfolio & Credentials
-  "portfolio_links": "string[]",
-  "certification": "object",
-  "education": "object",
-  "previous_works": "object",
-  "services": "object",
-
-  // Pricing & Availability
-  "rate_amount": "number (minimum: 0)",
-  "currency": "string",
-  "availability": "string",
-  "work_type": "string",
-  "hours_per_week": "string",
-
-  // Verification
-  "id_type": "string",
-  "id_document_url": "string",
-  "kyc_verified": "boolean",
-  "aadhaar_verification": "boolean",
-
-  // Payment
-  "payment_method": "object",
-  "bank_account_info": "object"
+  "success": true,
+  "data": [
+    {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "rating": 4.9,
+      "total_reviews": 38,
+      "specialization": ["wedding", "corporate", "music_video"],
+      "hourly_rate": 85.00,
+      "software_skills": ["Adobe Premiere Pro", "After Effects"],
+      "location": "Los Angeles, CA",
+      "is_available": true
+    }
+  ],
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
 }
 ```
 
-### Response (200 OK)
+---
+
+### 3. Get Available Editors with Task Counts
+**GET** `/videoeditors/available`
+
+**Required Roles:** Authentication required
+
+**Description:** Get video editors who are currently available, including their current task load for assignment planning.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "rating": 4.9,
+      "is_available": true,
+      "current_tasks": 2,
+      "max_concurrent_tasks": 5,
+      "specialization": ["wedding", "corporate"],
+      "hourly_rate": 85.00,
+      "estimated_completion_time": "3-5 days",
+      "location": "Los Angeles, CA"
+    }
+  ],
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+---
+
+### 4. Get Video Editor by Username
+**GET** `/videoeditors/username/:username`
+
+**Required Roles:** Authentication required
+
+**Description:** Get detailed information about a video editor by their username.
+
+**Path Parameters:**
+- `username` (string): The video editor's username
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "email": "mike@example.com",
+      "company_name": "MJ Video Editing",
+      "phone": "+1234567890",
+      "address": "456 Editing St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "USA",
+      "zip_code": "90210",
+      "website": "https://mj-editing.com",
+      "bio": "Professional video editor specializing in wedding films and corporate content",
+      "specialization": ["wedding", "corporate", "music_video", "color_grading"],
+      "experience_years": 7,
+      "hourly_rate": 85.00,
+      "software_skills": ["Adobe Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro"],
+      "hardware_specs": ["Mac Pro", "27-inch 5K Display", "External SSD Storage"],
+      "languages": ["English"],
+      "portfolio_url": "https://mj-editing.com/portfolio",
+      "social_links": {
+        "instagram": "@mjvideoediting",
+        "vimeo": "mjvideoediting",
+        "behance": "mj-editing"
+      },
+      "rating": 4.9,
+      "total_reviews": 38,
+      "is_available": true,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    "stats": {
+      "total_projects": 45,
+      "active_projects": 2,
+      "completed_projects": 43,
+      "total_earnings": 35000.00,
+      "avg_project_value": 777.78,
+      "total_reviews": 38,
+      "avg_rating": 4.9
+    }
+  },
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+---
+
+### 5. Get My Profile
+**GET** `/videoeditors/profile`
+
+**Required Roles:** VIDEO_EDITOR
+
+**Description:** Get the current authenticated video editor's profile information.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "email": "mike@example.com",
+      "phone": "+1234567890",
+      "address_line_first": "456 Editing St",
+      "address_line_second": null,
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "USA",
+      "pincode": "90210",
+      "website": "https://mj-editing.com",
+      "bio": "Professional video editor specializing in wedding films and corporate content",
+      "timezone": "America/Los_Angeles",
+      "latitude": 34.0522,
+      "longitude": -118.2437,
+      "is_active": true,
+      "is_banned": false,
+      "is_deleted": false,
+      "email_notifications": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    "profile": {
+      "freelancer_id": 1,
+      "user_id": 2,
+      "profile_title": "Senior Video Editor",
+      "role": "Lead Editor",
+      "short_description": "Award-winning video editor specializing in wedding films, corporate content, and music videos",
+      "experience_level": "expert",
+      "skills": ["video editing", "color grading", "motion graphics"],
+      "superpowers": ["creative editing", "technical expertise"],
+      "skill_tags": ["wedding", "corporate", "music_video"],
+      "base_skills": ["Adobe Premiere", "After Effects"],
+      "languages": ["English", "Spanish"],
+      "portfolio_links": ["https://portfolio.example.com"],
+      "rate_amount": 95.00,
+      "currency": "USD",
+      "availability": "full-time",
+      "work_type": "remote",
+      "hours_per_week": "30_40",
+      "hire_count": 15,
+      "total_earnings": 25000.00,
+      "time_spent": 1200,
+      "projects_applied": [1, 2, 3],
+      "projects_completed": [1, 2],
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z",
+      "videoeditor": null
+    },
+    "userType": "VIDEO_EDITOR"
+  },
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+---
+
+### 6. Update Profile
+**PATCH** `/videoeditors/profile`
+
+**Required Roles:** VIDEO_EDITOR
+
+**Description:** Update the current authenticated video editor's profile information. This endpoint only updates fields in the freelancer_profiles table.
+
+**Request Body:**
+```json
+{
+  "profile_title": "Senior Video Editor",
+  "role": "Lead Editor",
+  "short_description": "Award-winning video editor specializing in wedding films, corporate content, and music videos",
+  "experience_level": "expert",
+  "skills": ["video editing", "color grading", "motion graphics"],
+  "superpowers": ["creative editing", "technical expertise"],
+  "portfolio_links": ["https://portfolio.example.com"],
+  "rate_amount": 95.00,
+  "currency": "USD",
+  "availability": "full-time",
+  "work_type": "remote",
+  "hours_per_week": "30_40",
+  "languages": ["English", "Spanish"]
+}
+```
+
+**Validation:** All fields are optional. Uses VideoEditorUpdateDto validation.
+
+**Response (200):**
 ```json
 {
   "success": true,
   "message": "Profile updated successfully",
   "data": {
     "user": {
-      "user_id": 4,
-      "first_name": "Sarah",
-      "last_name": "Davis",
-      "username": "sarahdavis",
-      "email": "sarah@example.com",
-      "company_name": "SD Video Editing",
-      "profile_title": "Senior Video Editor",
-      "role": "Lead Editor",
-      "short_description": "Award-winning video editor specializing in corporate content",
-      "experience_level": "expert",
-      "skills": ["video_editing", "color_grading", "motion_graphics"],
-      "superpowers": ["creative editing", "technical expertise"],
-      "portfolio_links": ["https://behance.net/sarah-davis"],
-      "rate_amount": 95.00,
-      "currency": "USD",
-      "availability": "full-time",
-      "languages": ["English", "French"],
-      "updated_at": "2025-10-20T10:00:00Z"
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "email": "mike@example.com",
+      "company_name": "MJ Video Editing Studio",
+      "phone": "+1234567890",
+      "address": "456 Editing Street",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "USA",
+      "zip_code": "90210",
+      "website": "https://mj-editing-studio.com",
+      "bio": "Award-winning video editor specializing in wedding films, corporate content, and music videos",
+      "specialization": ["wedding", "corporate", "music_video", "color_grading", "motion_graphics"],
+      "experience_years": 8,
+      "hourly_rate": 95.00,
+      "software_skills": ["Adobe Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro", "Motion"],
+      "hardware_specs": ["Mac Pro M2", "27-inch 5K Display", "External SSD Storage", "Color Calibration Monitor"],
+      "languages": ["English", "Spanish"],
+      "portfolio_url": "https://mj-editing-studio.com/portfolio",
+      "social_links": {
+        "instagram": "@mjvideoediting",
+        "vimeo": "mjvideoediting",
+        "behance": "mj-editing",
+        "linkedin": "mike-johnson-video-editing"
+      },
+      "is_available": true,
+      "updated_at": "2025-10-18T10:00:00Z"
     }
   },
   "meta": {
-    "timestamp": "2025-10-20T10:00:00Z",
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+---
+
+### 7. Get Profile Statistics
+**GET** `/videoeditors/profile/stats`
+
+**Required Roles:** VIDEO_EDITOR
+
+**Description:** Get statistics and metrics for the current authenticated video editor.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "stats": {
+      "total_projects": 45,
+      "active_projects": 2,
+      "completed_projects": 43,
+      "total_earnings": 35000.00,
+      "avg_project_value": 777.78,
+      "monthly_earnings": 2916.67,
+      "total_reviews": 38,
+      "avg_rating": 4.9,
+      "avg_completion_time_days": 4.2,
+      "on_time_delivery_rate": 96.0,
+      "client_satisfaction": 4.8,
+      "revisions_avg_per_project": 1.3
+    }
+  },
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+---
+
+### 8. Get Video Editor by ID
+**GET** `/videoeditors/:id`
+
+**Required Roles:** Authentication required
+
+**Description:** Get detailed information about a specific video editor by their user ID.
+
+**Path Parameters:**
+- `id` (number): The video editor's user ID
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "user_id": 2,
+      "first_name": "Mike",
+      "last_name": "Johnson",
+      "username": "mikejohnson",
+      "email": "mike@example.com",
+      "company_name": "MJ Video Editing",
+      "phone": "+1234567890",
+      "address": "456 Editing St",
+      "city": "Los Angeles",
+      "state": "CA",
+      "country": "USA",
+      "zip_code": "90210",
+      "website": "https://mj-editing.com",
+      "bio": "Professional video editor specializing in wedding films and corporate content",
+      "specialization": ["wedding", "corporate", "music_video", "color_grading"],
+      "experience_years": 7,
+      "hourly_rate": 85.00,
+      "software_skills": ["Adobe Premiere Pro", "After Effects", "DaVinci Resolve", "Final Cut Pro"],
+      "hardware_specs": ["Mac Pro", "27-inch 5K Display", "External SSD Storage"],
+      "languages": ["English"],
+      "portfolio_url": "https://mj-editing.com/portfolio",
+      "social_links": {
+        "instagram": "@mjvideoediting",
+        "vimeo": "mjvideoediting",
+        "behance": "mj-editing"
+      },
+      "rating": 4.9,
+      "total_reviews": 38,
+      "is_available": true,
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-01-01T00:00:00Z"
+    },
+    "stats": {
+      "total_projects": 45,
+      "active_projects": 2,
+      "completed_projects": 43,
+      "total_earnings": 35000.00,
+      "avg_project_value": 777.78,
+      "total_reviews": 38,
+      "avg_rating": 4.9
+    },
+    "reviews": [
+      {
+        "review_id": 2,
+        "client_name": "Sarah Wilson",
+        "rating": 5,
+        "comment": "Outstanding editing work on our corporate video!",
+        "created_at": "2025-09-15T00:00:00Z"
+      }
+    ]
+  },
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
     "version": "v1"
   }
 }
@@ -182,49 +463,55 @@ Authorization: Bearer <jwt_token>
 
 ## Error Responses
 
-All endpoints return standardized error responses:
+**401 Unauthorized:**
+```json
+{
+  "success": false,
+  "message": "Authentication token missing",
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
 
-### 400 Bad Request (Validation Error)
+**403 Forbidden:**
+```json
+{
+  "success": false,
+  "message": "Insufficient permissions",
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "success": false,
+  "message": "Video editor not found",
+  "meta": {
+    "timestamp": "2025-10-18T10:00:00Z",
+    "version": "v1"
+  }
+}
+```
+
+**400 Bad Request:**
 ```json
 {
   "success": false,
   "message": "Validation failed",
   "errors": [
     {
-      "field": "email",
-      "message": "email must be a valid email address"
-    },
-    {
-      "field": "rate_amount",
-      "message": "rate_amount must be a positive number"
+      "field": "hourly_rate",
+      "message": "Hourly rate must be a positive number"
     }
   ],
   "meta": {
-    "timestamp": "2025-10-20T10:00:00Z",
-    "version": "v1"
-  }
-}
-```
-
-### 401 Unauthorized
-```json
-{
-  "success": false,
-  "message": "Authentication token missing",
-  "meta": {
-    "timestamp": "2025-10-20T10:00:00Z",
-    "version": "v1"
-  }
-}
-```
-
-### 403 Forbidden
-```json
-{
-  "success": false,
-  "message": "Insufficient permissions",
-  "meta": {
-    "timestamp": "2025-10-20T10:00:00Z",
+    "timestamp": "2025-10-18T10:00:00Z",
     "version": "v1"
   }
 }
@@ -232,23 +519,12 @@ All endpoints return standardized error responses:
 
 ---
 
-## Validation Rules
+## Notes for Frontend Integration
 
-### Common Validation Rules
-- **All fields are optional** - Only provided fields will be updated
-- **String fields** - Must be non-empty strings when provided
-- **Email fields** - Must be valid email format
-- **URL fields** - Must be valid URLs
-- **Number fields** - Must be valid numbers, with minimum constraints where specified
-- **Array fields** - Must be arrays or JSON-parseable strings
-- **Boolean fields** - Must be true/false values
-- **Enum fields** - Must match one of the allowed values
-
-### Field-Specific Validation
-- `rate_amount`: Must be ≥ 0
-- `budget_min`, `budget_max`: Must be ≥ 0
-- `email`: Must be valid email format
-- `profile_picture`, `website`: Must be valid URLs
-- `phone_number`: String format (no specific validation)
-
----
+1. **Authentication:** All requests must include the JWT token in the Authorization header
+2. **Role-based Access:** Profile management endpoints require VIDEO_EDITOR role, discovery endpoints require general authentication
+3. **Validation:** Profile update requests are validated using VideoEditorUpdateDto
+4. **Availability Tracking:** The `/available` endpoint is crucial for task assignment and shows current workload
+5. **Specialized Fields:** Video editor profiles include software skills, hardware specs, and editing-specific specializations
+6. **Task Management:** Statistics include completion rates, revisions, and delivery performance metrics
+7. **Response Structure:** All responses follow the standard API response format with `success`, `data`, and `meta` fields

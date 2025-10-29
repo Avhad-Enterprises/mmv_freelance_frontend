@@ -263,70 +263,61 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   const fetchUserProfile = useCallback(async () => {
     setLoading(true);
     try {
-      // First get user type from users/me endpoint
-      const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+      // For video editors, use the single videoeditors/profile endpoint that returns both user and profile data
+      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videoeditors/profile`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
       });
-      
-      if (!userRes.ok) {
-        const errorData = await userRes.json();
-        throw new Error(errorData.message || 'Failed to fetch user data');
-      }
-      
-      const userResponse = await userRes.json();
-      
-      if (!userResponse.success) {
-        throw new Error(userResponse.message || 'Failed to fetch user data');
-      }
-      
-      const { userType: type } = userResponse.data;
-      setUserType(type);
 
-      // Now use the appropriate profile endpoint based on user type
-      let profileEndpoint = '';
-      if (type === 'videographer') {
-        profileEndpoint = '/api/v1/videographers/profile';
-      } else if (type === 'video_editor') {
-        profileEndpoint = '/api/v1/videoeditors/profile';
-      } else {
-        // Fallback for other freelancer types
-        profileEndpoint = '/api/v1/freelancer-profiles/me';
-      }
-
-      const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' }
-      });
-      
       if (!profileRes.ok) {
         const errorData = await profileRes.json();
         throw new Error(errorData.message || 'Failed to fetch profile data');
       }
-      
+
       const profileResponse = await profileRes.json();
-      
+
       if (!profileResponse.success) {
         throw new Error(profileResponse.message || 'Failed to fetch profile data');
       }
 
-      const { user, profile } = profileResponse.data;
+      const { user, profile, userType: type } = profileResponse.data;
+      setUserType(type);
 
       // Get country and state objects for location dropdowns
-      const countryObj = Country.getCountryByCode(user.country);
-      const stateObj = countryObj ? State.getStatesOfCountry(countryObj.isoCode).find(s => s.name === user.state) : null;
-      
+      // Handle both name-based (unified API) and code-based country/state values
+      let countryObj;
+      if (user.country) {
+        // Try to find by name first (unified API returns names)
+        const allCountries = Country.getAllCountries();
+        countryObj = allCountries.find(c => c.name.toLowerCase() === user.country.toLowerCase());
+        // If not found by name, try by code
+        if (!countryObj) {
+          countryObj = Country.getCountryByCode(user.country);
+        }
+      }
+
+      let stateObj;
+      if (countryObj && user.state) {
+        // Try to find state by name first
+        const statesOfCountry = State.getStatesOfCountry(countryObj.isoCode);
+        stateObj = statesOfCountry.find(s => s.name.toLowerCase() === user.state.toLowerCase());
+        // If not found by name, try by code
+        if (!stateObj) {
+          stateObj = State.getStateByCodeAndCountry(user.state, countryObj.isoCode);
+        }
+      }
+
       const data: ProfileData = {
         full_name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
         email: user.email || "",
-        phone_number: user.phone || "", // API uses 'phone' field
+        phone_number: user.phone_number || user.phone || "", // Unified API uses 'phone_number', fallback to 'phone'
         bio: user.bio || profile?.short_description || "",
-        address_line_first: user.address_line_first || "",
+        address_line_first: user.address_line_first || user.address || "", // Unified API uses 'address_line_first', fallback to 'address'
         address_line_second: user.address_line_second || "",
         city: user.city || "",
         state: stateObj?.isoCode || "",
-        country: user.country || "",
-        pincode: user.pincode || "",
+        country: countryObj?.isoCode || "",
+        pincode: user.pincode || user.zip_code || "", // Unified API uses 'pincode', fallback to 'zip_code'
         skills: safeArray<string>(profile?.skills),
         superpowers: safeArray<string>(profile?.superpowers),
         languages: safeArray<string>(profile?.languages),
@@ -338,17 +329,17 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         currency: profile?.currency || "INR",
         short_description: profile?.short_description,
         // These are not directly used but part of the type
-        services: [], 
+        services: [],
         previous_works: [],
         skill_tags: [],
       };
-      
+
       setProfileData(data);
       setEditedData(JSON.parse(JSON.stringify(data))); // Deep copy to prevent mutation
 
       if (countryObj) setSelectedCountryCode(countryObj.isoCode);
       if (stateObj) setSelectedStateCode(stateObj.isoCode);
-      
+
     } catch (err: any) {
       console.error("Failed to fetch user profile", err);
       toast.error(err.message || "Failed to load profile data");
@@ -480,67 +471,39 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
             ...sectionChanges
         }), {});
 
-        // Split changes into user and profile payloads
-        const userFields: (keyof ProfileData)[] = ['full_name', 'email', 'phone_number', 'bio', 'address_line_first', 'address_line_second', 'city', 'state', 'country', 'pincode'];
-        const profileFields: (keyof ProfileData)[] = ['availability', 'experience_level', 'rate_amount', 'currency', 'skills', 'superpowers', 'languages', 'portfolio_links', 'short_description', 'role'];
+        // Combine all changes into a single unified payload for video editors
+        const unifiedPayload: { [key: string]: any } = {};
 
-        const userPayload: { [key: string]: any } = {};
-        const profilePayload: { [key: string]: any } = {};
-
-        // Populate payloads
+        // Populate unified payload with all changes
         for (const key in allChanges) {
             const typedKey = key as keyof ProfileData;
-            if (userFields.includes(typedKey)) {
-                userPayload[typedKey] = allChanges[typedKey];
-            }
-            if (profileFields.includes(typedKey)) {
-                profilePayload[typedKey] = allChanges[typedKey];
-            }
+            unifiedPayload[typedKey] = allChanges[typedKey];
         }
 
-        // Handle special fields
-        if (userPayload.full_name) {
-            const nameParts = userPayload.full_name.split(' ');
-            userPayload.first_name = nameParts[0] || "";
-            userPayload.last_name = nameParts.slice(1).join(' ') || "";
-            delete userPayload.full_name;
-        }
-        if (userPayload.country) {
-            userPayload.country = Country.getCountryByCode(userPayload.country)?.name || '';
-        }
-        if (userPayload.state) {
-            userPayload.state = State.getStateByCodeAndCountry(userPayload.state, profileData.country)?.name || '';
+        // Handle special field mappings
+        if (unifiedPayload.full_name) {
+            const nameParts = unifiedPayload.full_name.split(' ');
+            unifiedPayload.first_name = nameParts[0] || "";
+            unifiedPayload.last_name = nameParts.slice(1).join(' ') || "";
+            delete unifiedPayload.full_name;
         }
 
-        // Make API calls
-        if (Object.keys(userPayload).length > 0) {
-const userRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+        // Phone number field is already phone_number, no mapping needed
+        // The API expects phone_number field
+
+        if (unifiedPayload.country) {
+            unifiedPayload.country = Country.getCountryByCode(unifiedPayload.country)?.name || '';
+        }
+        if (unifiedPayload.state) {
+            unifiedPayload.state = State.getStateByCodeAndCountry(unifiedPayload.state, profileData.country)?.name || '';
+        }
+
+        // Make unified API call for video editors
+        if (userType === 'VIDEO_EDITOR' && Object.keys(unifiedPayload).length > 0) {
+            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/videoeditors/profile`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(userPayload)
-            });
-            if (!userRes.ok) {
-                const errorBody = await userRes.json();
-                throw new Error(errorBody.message || 'Failed to update user data');
-            }
-        }
-
-        const freelancerTypes = ["freelancer", "video_editor", "videographer"];
-        if (userType && freelancerTypes.includes(userType) && Object.keys(profilePayload).length > 0) {
-            let profileEndpoint = '';
-            if (userType === 'videographer') {
-                profileEndpoint = '/api/v1/videographers/profile';
-            } else if (userType === 'video_editor') {
-                profileEndpoint = '/api/v1/videoeditors/profile';
-            } else {
-                // Fallback for other freelancer types
-                profileEndpoint = '/api/v1/freelancer-profiles/me';
-            }
-
-            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${profileEndpoint}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(profilePayload)
+                body: JSON.stringify(unifiedPayload)
             });
             if (!profileRes.ok) {
                 const errorBody = await profileRes.json();
