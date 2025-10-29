@@ -6,8 +6,8 @@ import CandidateListItem from "@/app/components/candidate/candidate-list-item-si
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
-import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar"; // Import CandidateDetailsArea
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page"; // Import IFreelancer interface
+import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
+import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -16,7 +16,7 @@ interface ApiCandidate {
   last_name: string;
   username: string;
   profile_picture: string | null;
-  bio: string | null; // Added bio for mapping
+  bio: string | null;
   timezone: string | null;
   address_line_first: string | null;
   address_line_second: string | null;
@@ -42,11 +42,11 @@ interface ApiCandidate {
   skill_tags: string[];
   base_skills: string[];
   languages: string[];
-  portfolio_links: string[]; // Can contain YouTube links and others
-  certification: any; // Can be null
-  education: any; // Can be null
-  previous_works: any; // Can be null
-  services: any; // Can be null
+  portfolio_links: string[];
+  certification: any;
+  education: any;
+  previous_works: any;
+  services: any;
   rate_amount: string;
   currency: string;
   availability: string;
@@ -86,6 +86,7 @@ const CandidateV1Area = () => {
   // Filter and sort states
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedSuperpowers, setSelectedSuperpowers] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState("");
 
   // Pagination state
@@ -124,7 +125,7 @@ const CandidateV1Area = () => {
       languages: apiCandidate.languages || [],
       city: apiCandidate.city || null,
       country: apiCandidate.country || null,
-      email: `${apiCandidate.username || 'unknown'}@example.com`, // Assuming email derived from username
+      email: `${apiCandidate.username || 'unknown'}@example.com`,
       rate_amount: apiCandidate.rate_amount || "0.00",
       currency: apiCandidate.currency || "USD",
       availability: apiCandidate.availability || "not specified",
@@ -223,7 +224,6 @@ const CandidateV1Area = () => {
     
     try {
         if (isCurrentlySaved) {
-            // --- REMOVE from favorites ---
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
                 method: 'DELETE',
                 headers: {
@@ -235,7 +235,6 @@ const CandidateV1Area = () => {
 
             if (!response.ok) throw new Error("Failed to remove from favorites");
 
-            // Update state immutably
             setSavedCandidates(prev => prev.filter(id => id !== candidateId));
             setFavoriteIds(prev => {
                 const newFavs = { ...prev };
@@ -244,7 +243,6 @@ const CandidateV1Area = () => {
             });
             toast.success('Removed from favorites!');
         } else {
-            // --- ADD to favorites ---
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
                 method: 'POST',
                 headers: {
@@ -261,7 +259,6 @@ const CandidateV1Area = () => {
             
             const result = await response.json();
 
-            // Update state immutably
             setSavedCandidates(prev => [...prev, candidateId]);
             setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
             toast.success('Added to favorites!');
@@ -284,6 +281,12 @@ const CandidateV1Area = () => {
         selectedSkills.every(skill => c.skills?.includes(skill))
       );
     }
+
+    if (selectedSuperpowers.length > 0) {
+      filtered = filtered.filter(c => 
+        selectedSuperpowers.every(superpower => c.superpowers?.includes(superpower))
+      );
+    }
     
     if (selectedLocations.length > 0) {
       filtered = filtered.filter(c => 
@@ -298,6 +301,7 @@ const CandidateV1Area = () => {
   const clearFilters = () => {
     setSelectedSkills([]);
     setSelectedLocations([]);
+    setSelectedSuperpowers([]);
     setFilteredCandidates(candidates);
     setCurrentPage(1);
   };
@@ -313,8 +317,6 @@ const CandidateV1Area = () => {
         sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
         break;
       default:
-        // Revert to original filter order if a default/empty value is chosen
-        // This requires re-applying the filters to the original candidate list
         applyFilters(); 
         return;
     }
@@ -345,6 +347,7 @@ const CandidateV1Area = () => {
   const totalPages = Math.ceil(filteredCandidates.length / ITEMS_PER_PAGE);
 
   const allSkills = Array.from(new Set(candidates.flatMap(c => c.skills || [])));
+  const allSuperpowers = Array.from(new Set(candidates.flatMap(c => c.superpowers || [])));
   const allLocations = Array.from(new Set(candidates.filter(c => c.city && c.country).map(c => `${c.city}, ${c.country}`)));
 
   return (
@@ -355,20 +358,21 @@ const CandidateV1Area = () => {
         <h2 className="main-title">Candidates</h2>
         
         {selectedFreelancer ? (
-          // Render CandidateDetailsArea if a freelancer is selected
           <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} onBackToList={handleBackToList} />
         ) : (
-          // Otherwise, render the candidate list and filters
           <>
             <div className="bg-white card-box border-20 mb-40">
                 <CandidateV1FilterArea
                   onSkillChange={setSelectedSkills}
                   onLocationChange={setSelectedLocations}
+                  onSuperpowerChange={setSelectedSuperpowers}
                   onApplyFilter={applyFilters}
                   skills={allSkills}
                   locations={allLocations}
+                  superpowers={allSuperpowers}
                   selectedSkills={selectedSkills}
                   selectedLocations={selectedLocations}
+                  selectedSuperpowers={selectedSuperpowers}
                   onClearFilters={clearFilters}
                 />
             </div>
@@ -404,7 +408,7 @@ const CandidateV1Area = () => {
                             key={apiCandidate.user_id}
                             isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
-                            onViewProfile={handleViewProfile} // Pass the new handler
+                            onViewProfile={handleViewProfile}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,

@@ -69,7 +69,6 @@ const DashboardJobBrowseArea = () => {
   const [shortValue, setShortValue] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [userCurrency, setUserCurrency] = useState<string>('USD');
@@ -278,6 +277,18 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setSelectedSkills(prev => prev.filter(skill => skill !== skillToRemove));
+    setItemOffset(0);
+  };
+
+  const handleRemoveType = (typeToRemove: string) => {
+    setSelectedTypes(prev => prev.filter(type => type !== typeToRemove));
+    setItemOffset(0);
+  };
+
+  const hasSelections = selectedSkills.length > 0 || selectedTypes.length > 0;
+
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
@@ -445,135 +456,166 @@ const DashboardJobBrowseArea = () => {
           <DashboardHeader />
           <h2 className="main-title mb-30">Browse Projects</h2>
 
-          {/* Horizontal Filter Area */}
-          <div className="bg-white border-20 p-4 mb-30">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0 fw-500">Filters</h5>
-              <div className="d-flex gap-2">
-                <button
-                  className="btn btn-sm btn-outline-primary"
-                  onClick={() => setShowFilters(!showFilters)}
+          {/* Horizontal Filter Area - Clean Style */}
+          <div className="p-4 rounded-3 mb-30" style={{ backgroundColor: '#f8f9fa' }}>
+            <div className="row g-4 align-items-end">
+              {/* Skills Filter */}
+              <div className="col-lg-3 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Skills</label>
+                <select
+                  className="form-select py-2"
+                  style={{ 
+                    borderRadius: '8px',
+                    border: '1px solid #e0e0e0',
+                    fontSize: '14px'
+                  }}
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !selectedSkills.includes(e.target.value)) {
+                      toggleSkill(e.target.value);
+                    }
+                  }}
                 >
-                  <i className="bi bi-funnel me-1"></i>
-                  {showFilters ? 'Hide' : 'Show'} Filters
-                </button>
-                <button className="btn btn-sm btn-outline-secondary" onClick={handleReset}>
-                  <i className="bi bi-arrow-clockwise me-1"></i>
-                  Reset
+                  <option value="">Select Skills</option>
+                  {availableSkills.map((skill, idx) => (
+                    <option key={idx} value={skill}>{skill}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Project Type Filter */}
+              <div className="col-lg-3 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Project Type</label>
+                <select
+                  className="form-select py-2"
+                  style={{ 
+                    borderRadius: '8px',
+                    border: '1px solid #e0e0e0',
+                    fontSize: '14px'
+                  }}
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value && !selectedTypes.includes(e.target.value)) {
+                      toggleType(e.target.value);
+                    }
+                  }}
+                >
+                  <option value="">Select Type</option>
+                  {availableTypes.map((type, idx) => (
+                    <option key={idx} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Budget Range */}
+              <div className="col-lg-4 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Budget Range ({userCurrency})</label>
+                <input
+                  type="range"
+                  className="form-range mb-2"
+                  min="0"
+                  max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
+                  value={priceValue[1]}
+                  onChange={(e) => {
+                    setPriceValue([0, Number(e.target.value)]);
+                    setItemOffset(0);
+                  }}
+                />
+                <div className="d-flex justify-content-between align-items-center">
+                  <span style={{ fontSize: '13px', color: '#666' }}>{userCurrency} 0</span>
+                  <span style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* Clear Button */}
+              <div className="col-lg-2 col-md-6">
+                <button
+                  onClick={handleReset}
+                  className="btn btn-outline-secondary w-100 py-2 fw-500"
+                  style={{ 
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                >
+                  Clear
                 </button>
               </div>
             </div>
 
-            {showFilters && (
-              <div className="row g-3 mt-2">
-                {/* Skills */}
-                <div className="col-md-4">
-                  <label className="form-label fw-500">Skills</label>
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '10px' }}>
-                    {availableSkills.length === 0 ? (
-                      <p className="text-muted mb-0">No skills available</p>
-                    ) : (
-                      availableSkills.map((skill, idx) => (
-                        <div key={idx} className="form-check mb-2">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={selectedSkills.includes(skill)}
-                            onChange={() => toggleSkill(skill)}
-                            id={`skill-${idx}`}
-                          />
-                          <label className="form-check-label fw-500" htmlFor={`skill-${idx}`}>
-                            {skill}
-                          </label>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Project Types */}
-                <div className="col-md-4">
-                  <label className="form-label fw-500">Project Type</label>
-                  <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #e5e5e5', borderRadius: '8px', padding: '10px' }}>
-                    {availableTypes.length === 0 ? (
-                      <p className="text-muted mb-0">No types available</p>
-                    ) : (
-                      availableTypes.map((type, idx) => (
-                        <div key={idx} className="form-check mb-2">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={selectedTypes.includes(type)}
-                            onChange={() => toggleType(type)}
-                            id={`type-${idx}`}
-                          />
-                          <label className="form-check-label fw-500" htmlFor={`type-${idx}`}>
-                            {type}
-                          </label>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* Budget & Sort */}
-                <div className="col-md-4">
-                  <label className="form-label fw-500">Budget Range ({userCurrency})</label>
-                  <input
-                    type="range"
-                    className="form-range mb-2"
-                    min="0"
-                    max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
-                    value={priceValue[1]}
-                    onChange={(e) => {
-                      setPriceValue([0, Number(e.target.value)]);
-                      setItemOffset(0);
-                    }}
-                  />
-                  <div className="d-flex justify-content-between mb-3">
-                    <span className="fw-500">{userCurrency} 0</span>
-                    <span className="fw-500">{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
-                  </div>
-                  <label className="form-label fw-500">Sort By Price</label>
-                  <select
-                    className="form-select"
-                    value={shortValue}
-                    onChange={(e) => setShortValue(e.target.value)}
-                  >
-                    <option value="">Select Sort</option>
-                    <option value="price-low-to-high">Low to High</option>
-                    <option value="price-high-to-low">High to Low</option>
-                  </select>
-                </div>
+            {/* Sort By Price Row */}
+            <div className="row g-4 mt-1">
+              <div className="col-lg-3 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Sort By Price</label>
+                <select
+                  className="form-select py-2"
+                  style={{ 
+                    borderRadius: '8px',
+                    border: '1px solid #e0e0e0',
+                    fontSize: '14px'
+                  }}
+                  value={shortValue}
+                  onChange={(e) => setShortValue(e.target.value)}
+                >
+                  <option value="">Select Sort</option>
+                  <option value="price-low-to-high">Low to High</option>
+                  <option value="price-high-to-low">High to Low</option>
+                </select>
               </div>
-            )}
+            </div>
 
-            {/* Active Filters Display */}
-            {(selectedSkills.length > 0 || selectedTypes.length > 0) && (
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid #e5e5e5' }}>
-                <div className="d-flex flex-wrap gap-2 align-items-center">
-                  <span className="text-muted me-2">Active Filters:</span>
-                  {selectedTypes.map((type) => (
-                    <span key={type} className="badge bg-primary" style={{ fontSize: '13px', padding: '6px 12px' }}>
-                      {type}
-                      <button
-                        className="btn-close btn-close-white ms-2"
-                        style={{ fontSize: '10px' }}
-                        onClick={() => toggleType(type)}
-                      />
-                    </span>
-                  ))}
-                  {selectedSkills.map((skill) => (
-                    <span key={skill} className="badge bg-success" style={{ fontSize: '13px', padding: '6px 12px' }}>
-                      {skill}
-                      <button
-                        className="btn-close btn-close-white ms-2"
-                        style={{ fontSize: '10px' }}
-                        onClick={() => toggleSkill(skill)}
-                      />
-                    </span>
-                  ))}
-                </div>
+            {/* Selected Filters Display */}
+            {hasSelections && (
+              <div className="d-flex flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #e0e0e0' }}>
+                {selectedTypes.map(type => (
+                  <span 
+                    key={type} 
+                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
+                    style={{ 
+                      backgroundColor: '#00BF58', 
+                      color: 'white',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {type}
+                    <button 
+                      onClick={() => handleRemoveType(type)} 
+                      className="btn-close ms-2 opacity-100" 
+                      style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        filter: 'brightness(0) invert(1)',
+                        fontSize: '10px'
+                      }}
+                      aria-label="Remove filter"
+                    ></button>
+                  </span>
+                ))}
+                {selectedSkills.map(skill => (
+                  <span 
+                    key={skill} 
+                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
+                    style={{ 
+                      backgroundColor: '#00BF58', 
+                      color: 'white',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {skill}
+                    <button 
+                      onClick={() => handleRemoveSkill(skill)} 
+                      className="btn-close ms-2 opacity-100" 
+                      style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        filter: 'brightness(0) invert(1)',
+                        fontSize: '10px'
+                      }}
+                      aria-label="Remove filter"
+                    ></button>
+                  </span>
+                ))}
               </div>
             )}
           </div>

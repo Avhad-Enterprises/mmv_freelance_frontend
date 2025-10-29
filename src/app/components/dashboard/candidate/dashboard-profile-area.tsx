@@ -557,13 +557,13 @@ const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freela
         {!loading && profileData && editedData && displayData && (
           <>
             <InfoSection title="Basic Information" sectionKey="basicInfo" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              {!isEditModeFor("basicInfo") && userType && (
+              {/* {!isEditModeFor("basicInfo") && userType && (
                 <div className="mb-4">
                   <span className="badge bg-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
                     {userType.replace(/_/g, ' ')}
                   </span>
                 </div>
-              )}
+              )} */}
               
               <InfoRow label="Full Name" value={displayData.full_name} field="full_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
               <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
