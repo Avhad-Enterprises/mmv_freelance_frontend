@@ -1,6 +1,6 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
+import AuthenticatedImage from "@/app/components/common/AuthenticatedImage";
 
 type Candidate = {
   user_id: number;
@@ -49,13 +49,14 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
 
       <div className="cadidate-avatar online position-relative d-block m-auto">
         <Link href="/candidate-profile-v1" className="rounded-circle">
-          <Image
-            src={item.profile_picture || "/images/default-avatar.png"}
+          <AuthenticatedImage
+            src={item.profile_picture}
             alt="Candidate"
             width={80}
             height={80}
             className="lazy-img rounded-circle"
             unoptimized
+            fallbackSrc="/images/default-avatar.png"
           />
         </Link>
       </div>

@@ -1,8 +1,8 @@
 // app/components/candidate/candidate-list-item.tsx
 "use client";
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import AuthenticatedImage from '@/app/components/common/AuthenticatedImage';
 
 // Interface defining the props for this component
 interface MappedCandidate {
@@ -37,13 +37,14 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
           <Link href={`/candidate-profile-v1/${item.user_id}`} className="rounded-circle">
-            <Image
-              src={item.profile_picture || "/images/default-avatar.png"}
+            <AuthenticatedImage
+              src={item.profile_picture}
               alt="Candidate"
               width={80}
               height={80}
               className="lazy-img rounded-circle"
               style={{ objectFit: 'cover' }}
+              fallbackSrc="/images/default-avatar.png"
             />
           </Link>
         </div>
