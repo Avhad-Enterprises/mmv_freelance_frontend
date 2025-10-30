@@ -94,7 +94,7 @@ const HomeSix = () => {
             <div className="row justify-content-between">
               <div className="col-sm-8">
                 <div className="title-three">
-                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Most Demanding Categories.</h2>
+                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Find Your Perfect Video Production Services.</h2>
                 </div>
               </div>
               <div className="col-sm-4">

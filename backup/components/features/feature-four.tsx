@@ -28,7 +28,7 @@ const FeatureFour = () => {
 								<h2 className="fw-600">Hire top talents</h2>
 							</div>
 							<div className="accordion accordion-style-one mt-40" id="accordionOne">
-								<AccordionItem id='one' isShow={true} title='Seamless Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
+								<AccordionItem id='one' isShow={true} title='asdasdasd Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
 								<AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
 							</div>
 							<Link href="/coming-soon" className="btn-five border6 mt-70 lg-mt-40">Explorer All</Link>

@@ -19,7 +19,7 @@ const FeatureFive = () => {
               <h2 className="fw-600 color-blue">World of talent at your fingertips</h2>
             </div>
             <div className="accordion accordion-style-one color-two mt-40" id="accordionOne">
-            <AccordionItem id='one' isShow={true} title='Seamless Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
+            <AccordionItem id='one' isShow={true} title='asdad Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
             <AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
             <AccordionItem id='three' title='Protected payments, every time' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand.' parent='accordionOne' />
             </div>

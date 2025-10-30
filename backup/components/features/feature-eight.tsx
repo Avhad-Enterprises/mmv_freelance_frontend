@@ -14,7 +14,7 @@ const FeatureEight = () => {
                 <h2 className="main-font">Find top talents from jobi.</h2>
               </div>
               <div className="accordion accordion-style-one mt-25" id="accordionOne">
-                <AccordionItem id='one' isShow={true} title='Seamless Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
+                <AccordionItem id='one' isShow={true} title='asdsd Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
                 <AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
                 <AccordionItem id='three' title='Protected payments, every time' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
               </div>
