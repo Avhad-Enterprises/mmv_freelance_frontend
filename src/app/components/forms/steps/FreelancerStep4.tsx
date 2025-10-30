@@ -59,14 +59,17 @@ const FreelancerStep4: React.FC<Props> = ({ formData, setFormData, nextStep, pre
             />
             <div className="d-flex flex-wrap gap-2 mt-2">
               {(formData.languages || []).map((t: string) => (
-                <span key={t} className="badge bg-secondary">
+                <span key={t} className="badge bg-secondary d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
                   {t}
                   <button
                     type="button"
-                    className="btn btn-sm btn-link text-white"
+                    className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                    style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
                     onClick={() => setFormData((prev) => ({ ...prev, languages: prev.languages.filter((x: string) => x !== t) }))}
+                    aria-label={`Remove ${t}`}
+                    title={`Remove ${t}`}
                   >
-                    x
+                    ×
                   </button>
                 </span>
               ))}

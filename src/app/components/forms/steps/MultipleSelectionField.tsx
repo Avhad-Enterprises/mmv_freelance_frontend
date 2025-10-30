@@ -38,14 +38,18 @@ const MultipleSelectionField: React.FC<MultipleSelectionFieldProps> = ({
       {/* Selected Items */}
       <div className="selected-items mb-2">
         {selectedItems.map(item => (
-          <span key={item} className="badge bg-primary me-2 mb-2" style={{ fontSize: '0.9em' }}>
+          <span key={item} className="badge bg-primary me-2 mb-2 d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
             {item}
             <button
               type="button"
-              className="btn-close btn-close-white ms-2"
-              style={{ fontSize: '0.7em' }}
+              className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+              style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
               onClick={() => handleRemove(item)}
-            ></button>
+              aria-label={`Remove ${item}`}
+              title={`Remove ${item}`}
+            >
+              ×
+            </button>
           </span>
         ))}
       </div>

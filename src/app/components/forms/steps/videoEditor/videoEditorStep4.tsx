@@ -130,11 +130,14 @@ const VideoEditorStep4: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
                   {lang}
                   <button
                     type="button"
-                    className="btn-close btn-close-white p-0 m-0"
-                    style={{fontSize: '0.65em', marginLeft: '5px'}}
+                    className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                    style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
                     onClick={() => removeLanguage(lang)}
                     aria-label={`Remove ${lang}`}
-                  ></button>
+                    title={`Remove ${lang}`}
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
             </div>
