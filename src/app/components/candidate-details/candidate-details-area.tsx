@@ -7,6 +7,7 @@ import avatar from "@/assets/images/candidates/img_01.jpg";
 import VideoPopup from "../common/video-popup";
 import Skills from "./skills";
 import CandidateBio from "./bio";
+import AuthenticatedImage from "@/app/components/common/AuthenticatedImage";
 import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
 
 type CandidateDetailsAreaProps = {
@@ -166,7 +167,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
                       {profile_picture && profile_picture.trim() !== '' ? (
-                        <Image src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
+                        <AuthenticatedImage src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} unoptimized fallbackSrc={avatar.src} />
                       ) : (
                         <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
                       )}

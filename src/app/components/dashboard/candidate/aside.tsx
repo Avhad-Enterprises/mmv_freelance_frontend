@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
 import ProfilePictureModal from "../../common/ProfilePictureModal";
+import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
@@ -125,12 +126,14 @@ const CandidateAside = ({}: IProps) => {
                             cursor: 'pointer'
                         }} onClick={openProfilePicModal}>
                             {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
-                                <Image
+                                <AuthenticatedImage
                                     src={`${profilePictureUrl}?t=${profilePicKey}`}
                                     alt="Profile Picture"
                                     width={75}
                                     height={75}
                                     style={{ objectFit: 'cover' }}
+                                    unoptimized
+                                    fallbackSrc="/images/default-avatar.png"
                                 />
                             ) : (
                                 fullName.charAt(0).toUpperCase()

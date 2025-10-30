@@ -1,4 +1,5 @@
 import React from 'react';
+import AuthenticatedImage from '../common/AuthenticatedImage';
 
 // Define the structure of a candidate object for type safety
 interface Candidate {
@@ -42,12 +43,14 @@ const CandidateCard: React.FC<CandidateCardProps> = ({
   return (
     <div className={`candidate-card h-100 mb-4 p-3 border rounded ${viewType === 'list' ? 'w-100' : ''}`}>
       <div className="d-flex align-items-start h-100">
-        <img
+        <AuthenticatedImage
           src={candidate.profile_picture && candidate.profile_picture.trim() !== '' ? candidate.profile_picture : 'https://via.placeholder.com/150'}
           alt={`${candidate.first_name} ${candidate.last_name}`.trim()}
+          width={80}
+          height={80}
           className="rounded-circle me-3"
-          style={{ width: '80px', height: '80px', objectFit: 'cover' }}
-          onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/150'; }}
+          style={{ objectFit: 'cover' }}
+          unoptimized
         />
         
         <div className="flex-grow-1 d-flex flex-column h-100">

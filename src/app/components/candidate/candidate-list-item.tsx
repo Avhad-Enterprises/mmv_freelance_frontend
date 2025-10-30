@@ -44,6 +44,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
               height={80}
               className="lazy-img rounded-circle"
               style={{ objectFit: 'cover' }}
+              unoptimized
               fallbackSrc="/images/default-avatar.png"
             />
           </Link>

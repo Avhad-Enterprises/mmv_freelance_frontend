@@ -8,6 +8,7 @@ import DeleteAccountModal from "../../forms/DeleteAccountModal";
 import ProfilePictureModal from "../../common/ProfilePictureModal";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
+import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
 import { authCookies } from "@/utils/cookies";
 
@@ -128,12 +129,14 @@ const EmployAside = ({}: IProps) => {
                             cursor: 'pointer'
                         }} onClick={openProfilePicModal}>
                            {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
-                                <Image
+                                <AuthenticatedImage
                                     src={`${profilePictureUrl}?t=${profilePicKey}`}
                                     alt="Profile Picture"
                                     width={75}
                                     height={75}
                                     style={{ objectFit: 'cover' }}
+                                    unoptimized
+                                    fallbackSrc="/images/default-avatar.png"
                                 />
                             ) : (
                                 fullName.charAt(0).toUpperCase()

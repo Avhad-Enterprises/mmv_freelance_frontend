@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import AuthenticatedImage from '../../common/AuthenticatedImage';
 
 // Interface defining the props for this component
 interface Applicant {
@@ -111,13 +112,15 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
               <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25">
                 <div className="d-flex align-items-center">
                   <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
-                    <Image
+                    <AuthenticatedImage
                       src={applicant.profile_picture || "/images/default-avatar.png"}
                       alt="Candidate"
                       width={80}
                       height={80}
                       className="lazy-img rounded-circle"
                       style={{ objectFit: 'cover' }}
+                      unoptimized
+                      fallbackSrc="/images/default-avatar.png"
                     />
                   </div>
                   <div className="right-side">
