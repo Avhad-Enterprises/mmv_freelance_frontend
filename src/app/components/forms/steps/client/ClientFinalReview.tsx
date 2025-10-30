@@ -218,7 +218,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
           />
           <label htmlFor="terms-checkbox" style={{ cursor: "pointer" }}>
             I accept the{" "}
-            <a href="https://makemyvid.io/terms-condition" target="_blank" rel="noopener noreferrer">
+            <a href="https://makemyvid.io/terms-condition" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'underline' }}>
               Terms and Conditions
             </a>
             <span style={{ color: "#dc3545", marginLeft: "4px" }}>*</span>
@@ -235,7 +235,7 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
           />
           <label htmlFor="privacy-checkbox" style={{ cursor: "pointer" }}>
             I accept the{" "}
-            <a href="https://makemyvid.io/privacy-policy" target="_blank" rel="noopener noreferrer">
+            <a href="https://makemyvid.io/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'underline' }}>
               Privacy Policy
             </a>
             <span style={{ color: "#dc3545", marginLeft: "4px" }}>*</span>

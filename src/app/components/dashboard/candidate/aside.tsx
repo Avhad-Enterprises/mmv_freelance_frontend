@@ -138,7 +138,7 @@ const CandidateAside = ({}: IProps) => {
                             ) : (
                                 fullName.charAt(0).toUpperCase()
                             )}
-                            {/* Edit overlay */}
+                            {/* Edit overlay - Hidden for now */}
                             <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
                                  style={{
                                      width: '28px',
@@ -148,7 +148,8 @@ const CandidateAside = ({}: IProps) => {
                                      border: '3px solid white',
                                      zIndex: 20,
                                      fontSize: '14px',
-                                     boxShadow: '0 3px 10px rgba(0,0,0,0.2)'
+                                     boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                                     display: 'none' // Hidden as not properly implemented
                                  }}
                                  onClick={openProfilePicModal}>
                                 <i className="bi bi-pencil-fill" style={{ color: '#244034', fontSize: '12px', fontWeight: 'bold' }}></i>
