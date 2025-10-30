@@ -10,21 +10,67 @@ import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
 import { CategoryCardWrapper } from "./components/category/category-section-2";
-import { how_works_data } from "@/data/how-works-data";
 import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import FooterOne from "@/layouts/footers/footer-one";
 import { authCookies } from "@/utils/cookies";
+import TopCompany from "./components/top-company/top-company";
+import FeedbackOne from "./components/feedBacks/feedback-one";
 
 interface DecodedToken {
   exp: number;
 }
 
+// Data for How It Works section
+const howItWorksData = {
+  client: [
+    {
+      id: 1,
+      title: "Post Your Video Project",
+      description: "Quick, Easy, Effortless. Define video editing or videography needs. Our smart form makes job posting simple.",
+      icon: "/assets/images/assets/c1.png"
+    },
+    {
+      id: 2,
+      title: "Connect & Collaborate",
+      description: "Find Your Perfect Match. Receive proposals from vetted video professionals, review portfolios, and select the ideal talent.",
+      icon: "/assets/images/assets/c2.png"
+    },
+    {
+      id: 3,
+      title: "Hire & Deliver Brilliance",
+      description: "Seamless Execution. Hire securely, manage projects, and get exceptional video content delivered on time.",
+      icon: "/assets/images/assets/c3.png"
+    }
+  ],
+  freelancer: [
+    {
+      id: 1,
+      title: "Build Your Creator Profile",
+      description: "Showcase Your Best Work. Create a compelling profile, highlight video skills, and upload your stunning portfolio.",
+      icon: "/assets/images/assets/f1.png"
+    },
+    {
+      id: 2,
+      title: "Discover Global Opportunities",
+      description: "Bid on Exciting Projects. Explore a steady stream of video jobs, editing and videography gigs from clients worldwide.",
+      icon: "/assets/images/assets/f2.png"
+    },
+    {
+      id: 3,
+      title: "Deliver & Get Paid Securely",
+      description: "Focus on Your Craft. Complete projects, collaborate efficiently, and receive payment securely directly to your account.",
+      icon: "/assets/images/assets/f3.png"
+    }
+  ]
+};
+
 const HomeSix = () => {
   const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeRole, setActiveRole] = useState<'client' | 'freelancer'>('client');
 
   useEffect(() => {
     // Check authentication status from cookies
@@ -47,16 +93,15 @@ const HomeSix = () => {
   }, []);
 
   useEffect(() => {
-  if (searchParams.get('login') === 'true') {
-    setTimeout(() => {
-      if (typeof document !== 'undefined') {
-        const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
-        if (loginButton) loginButton.click();
-      }
-    }, 100);
-  }
-}, [searchParams]);
-
+    if (searchParams.get('login') === 'true') {
+      setTimeout(() => {
+        if (typeof document !== 'undefined') {
+          const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+          if (loginButton) loginButton.click();
+        }
+      }, 100);
+    }
+  }, [searchParams]);
 
   if (isLoading) {
     return (
@@ -117,31 +162,136 @@ const HomeSix = () => {
         {/* How It Works Two start*/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
-            <div className="title-one text-center mb-70 lg-mb-30">
+            <div className="title-one text-center mb-40 lg-mb-30">
               <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
+            </div>
+
+            {/* Modern Toggle Switch */}
+            <div className="d-flex justify-content-center mb-60 lg-mb-40">
+              <div className="role-toggle-container">
+                <button
+                  onClick={() => setActiveRole('client')}
+                  className={`role-toggle-btn ${activeRole === 'client' ? 'active' : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
+                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                  For Clients
+                </button>
+                <button
+                  onClick={() => setActiveRole('freelancer')}
+                  className={`role-toggle-btn ${activeRole === 'freelancer' ? 'active' : ''}`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                  For Freelancers
+                </button>
+              </div>
             </div>
 
             <div className="border-bottom">
               <div className="row justify-content-center">
-                {how_works_data.map((item) => (
+                {howItWorksData[activeRole].map((item, index) => (
                   <div key={item.id} className="col-lg-4 col-md-6">
-                    <div className="card-style-five text-center position-relative mt-25 pb-70 lg-pb-20 wow fadeInUp">
-                      <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
-                        <Image src={item.icon_white} alt="icon" className="lazy-img" /></div>
+                    <div 
+                      className="card-style-five text-center position-relative mt-25 pb-70 lg-pb-20 wow fadeInUp"
+                      data-wow-delay={`${index * 0.1}s`}
+                    >
+                      <div className="icon-image-wrapper m-auto">
+                        <Image 
+                          src={item.icon} 
+                          alt={item.title} 
+                          width={100} 
+                          height={100}
+                          className="lazy-img" 
+                        />
+                      </div>
                       <div className="title fw-500 text-lg text-dark mt-25 lg-mt-20 mb-10">{item.title}</div>
-                      <p>{item.sub_title}</p>
+                      <p>{item.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
+
+          <style jsx>{`
+            .role-toggle-container {
+              display: inline-flex;
+              background: #f0f0f0;
+              border-radius: 50px;
+              padding: 4px;
+              gap: 4px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+
+            .role-toggle-btn {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 12px 28px;
+              border: none;
+              background: transparent;
+              color: #666;
+              font-size: 15px;
+              font-weight: 500;
+              border-radius: 50px;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              white-space: nowrap;
+            }
+
+            .role-toggle-btn:hover {
+              color: #333;
+            }
+
+            .role-toggle-btn.active {
+              background: #00bf63;
+              color: white;
+              box-shadow: 0 4px 12px rgba(0, 191, 99, 0.3);
+            }
+
+            .icon-image-wrapper {
+              width: 100px;
+              height: 100px;
+            }
+
+            .icon-image-wrapper img {
+              max-width: 100%;
+              height: auto;
+            }
+
+            @media (max-width: 768px) {
+              .role-toggle-container {
+                width: 100%;
+                max-width: 400px;
+              }
+
+              .role-toggle-btn {
+                flex: 1;
+                padding: 10px 20px;
+                font-size: 14px;
+              }
+
+              .icon-image-wrapper {
+                width: 80px;
+                height: 80px;
+              }
+            }
+          `}</style>
         </section>
         {/* How It Works Two end*/}
 
         {/* text feature start */}
         <FeatureTen />
         {/* text feature end */}
+        <TopCompany />
+        <FeedbackOne/>
 
         {/* faq start */}
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">

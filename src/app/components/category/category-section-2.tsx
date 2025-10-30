@@ -74,62 +74,92 @@ export const category_data: ICategoryTwo[] = [
     icon: icon_8,
     title: <>13k+</>,
     sub_title: "Explore All video expertise",
-    bg: 'bg-color',
-    df: true,
+    df: true, // ✅ keep df flag
   },
 ]
+
 // CategoryCardWrapper
 export function CategoryCardWrapper() {
   return (
     <div className="card-wrapper row mt-80 lg-mt-40">
       {category_data.map(item => (
         <div key={item.id} className="col-lg-3 col-md-4 col-sm-6 d-flex">
-          <div className={`card-style-four ${item?.bg} tran3s w-100 mt-30 wow fadeInUp`}>
-            {!item.df && <Link href="/job-grid-v2" className="d-block">
-              <div className="icon tran3s d-flex align-items-center justify-content-center">
-                <Image src={item.icon} alt="icon" className="lazy-img" />
-              </div>
-              <div className="title tran3s fw-500 text-lg">{item.title}</div>
-              <div className="total-job">{item.vacancy} vacancy</div>
-            </Link>}
-            {item.df && <Link href="/job-grid-v2" className="d-block">
-              <div className="title text-white">{item.title}</div>
-              <div className="text-lg text-white">{item?.sub_title}</div>
-              <div className="d-flex align-items-center justify-content-end mt-50">
-                <Image src={shape_2} alt="shape" className="lazy-img" />
-                <div className="icon tran3s d-flex align-items-center justify-content-center ms-5">
+          <div
+            className={`card-style-four tran3s w-100 mt-30 wow fadeInUp ${item.df ? 'bg-white text-center p-4 shadow-sm rounded-4 border' : ''}`}
+          >
+            {/* Normal Cards */}
+            {!item.df && (
+              <Link href="/job-grid-v2" className="d-block">
+                <div className="icon tran3s d-flex align-items-center justify-content-center">
                   <Image src={item.icon} alt="icon" className="lazy-img" />
                 </div>
-              </div>
-            </Link>}
+                <div className="title tran3s fw-500 text-lg">{item.title}</div>
+                <div className="total-job">{item.vacancy} vacancy</div>
+              </Link>
+            )}
+
+         
+          
+          
+            {/* Explore All Card */}
+            {item.df && (
+              <>
+                <div className="title tran3s fw-600 text-start mb-2" style={{ fontSize: '26px', lineHeight: '1.3' }}>{item.sub_title}</div>
+                <p className="text-muted text-start mb-3" style={{ fontSize: '16px', lineHeight: '1.5' }}>
+                  Viel thest Foca post des am Expories
+                </p>
+                <Link href="/job-grid-v2">
+                  <button className="btn fw-500 rounded-pill text-white px-4 py-2" style={{ backgroundColor: '#00bf63', fontSize: '16px' }}>
+                    View All
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       ))}
-
     </div>
-  )
+  );
 }
 
+// CategorySectionTwo
 const CategorySectionTwo = () => {
   return (
     <section className="category-section-two position-relative pt-150 lg-pt-100 pb-140 lg-pb-80">
       <div className="container">
         <div className="row justify-content-between">
           <div className="col-md-6 col-sm-8">
-            <div className="title-one text-center text-sm-start wow fadeInUp" data-wow-delay="0.3s">
+            <div
+              className="title-one text-center text-sm-start wow fadeInUp"
+              data-wow-delay="0.3s"
+            >
               <h2 className="fw-600">Most demanding job categories.</h2>
             </div>
           </div>
           <div className="col-md-5 col-sm-4">
             <div className="d-none d-sm-flex justify-content-sm-end mt-25">
-              <Link href="/job-grid-v1" className="btn-six border-0">All Categories <Image src={shape_1} alt="shape" className="lazy-img shapes" /></Link>
+              <Link href="/job-grid-v1" className="btn-six border-0">
+                All Categories{" "}
+                <Image
+                  src={shape_1}
+                  alt="shape"
+                  className="lazy-img shapes"
+                />
+              </Link>
             </div>
           </div>
         </div>
+
         {/* CategoryCardWrapper */}
-        <CategoryCardWrapper/>
+        <CategoryCardWrapper />
         {/* CategoryCardWrapper */}
-        <div className="text-center d-sm-none mt-50"><Link href="/job-grid-v1" className="btn-six border-0">All Categories <Image src={shape_1} alt="shape" className="lazy-img shapes" /></Link></div>
+
+        <div className="text-center d-sm-none mt-50">
+          <Link href="/job-grid-v1" className="btn-six border-0">
+            All Categories{" "}
+            <Image src={shape_1} alt="shape" className="lazy-img shapes" />
+          </Link>
+        </div>
       </div>
       <Image src={shape_3} alt="shape" className="lazy-img shapes shape_01" />
     </section>
