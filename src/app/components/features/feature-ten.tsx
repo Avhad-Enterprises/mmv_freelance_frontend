@@ -15,9 +15,37 @@ const FeatureTen = () => {
                 <h2 className="main-font">World of talent at your fingertips</h2>
               </div>
               <div className="accordion accordion-style-one color-two mt-40" id="accordionOne">
-                <AccordionItem id='one' isShow={true} title='Seamless Search' desc='It only takes 5 minutes. Set-up is smooth and simple, with fully customisable page design to reflect your brand. It only takes 5 minutes.' parent='accordionOne' />
-                <AccordionItem id='two' title='Hire top talents' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
-                <AccordionItem id='three' title='Protected payments, every time' desc='Practice what you learned on realistic lorem quis test questions testing.' parent='accordionOne' />
+                <AccordionItem 
+                  id="one" 
+                  isShow={true} 
+                  title="Exclusively Video. Unmatched Expertise"
+                  desc="Unlike general marketplaces, we're 100% focused on video. Find specialist video editors, freelance videographers, motion graphic artists, and more, all rigorously vetted for top-tier production. Your video creation project deserves dedicated expertise."
+                  parent="accordionOne"
+                />
+                <AccordionItem 
+                  id="two"
+                  title="Pay for Results, Not Subscriptions"
+                  desc="Clients post video editing jobs and videography gigs for free. Your payment is kept in secured ESCROW Account and only transferred to the creators when approved by you. No hidden fees, no monthly subscriptions; just transparent and project-based pricing."
+                  parent="accordionOne"
+                />
+                <AccordionItem 
+                  id="three"
+                  title="Global Reach, Local Impact"
+                  desc="Access remote video editors worldwide for any genre, from YouTube video editing to corporate AVs. Plus, find on-ground videographers for local shoots and events. Get the best of both worlds, from outsourcing video editing to execute local video shoots."
+                  parent="accordionOne"
+                />
+                <AccordionItem 
+                  id="four"
+                  title="Smart Tools for Smarter Production"
+                  desc="Beyond talent, we empower your workflow. Utilize CompVid for video compression to handle large files with ease. Also get a dedicated dashboard and chat system to manage and execute on going video projects."
+                  parent="accordionOne"
+                />
+                <AccordionItem 
+                  id="five"
+                  title="Vetted Creators. Proven Portfolios"
+                  desc="Every video freelancer on MakeMyVid.io is carefully screened. Browse extensive portfolios, view past client reviews, and hire with confidence. We ensure you connect with reliable and high-quality video talent"
+                  parent="accordionOne"
+                />
               </div>
               <Link href="/coming-soon" className="btn-five mt-45 md-mt-30">Learn More</Link>
             </div>

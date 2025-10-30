@@ -19,12 +19,15 @@ const HeroBannerSeven = () => {
         <div className="position-relative">
           <div className="row">
             <div className="col-xl-7 col-lg-8 m-auto text-center">
-              <h1 className="wow fadeInUp" data-wow-delay="0.3s">
-                Find & Hire Experts for any Job
-              </h1>
+              <h1
+  className="wow fadeInUp text-4xl md:text-5xl lg:text-6xl"
+  data-wow-delay="0.3s"
+>
+  World’s First & Only Freelance Marketplace Exclusively for Videos
+</h1>
+
               <p className="text-md mt-25 mb-40 wow fadeInUp" data-wow-delay="0.4s">
-                Jobs & Job search. Find jobs in global. Executive jobs & work.
-              </p>
+ Hire aligned video editors and videographers anywhere across the globe              </p>
             </div>
           </div>
           <div className="position-relative">
@@ -76,19 +79,20 @@ const HeroBannerSeven = () => {
       
       {/* ✅ Set image sizes to 261x430 */}
       <Image
-        src={screen_1}
-        alt="screen-img"
-        width={261}
-        height={430}
-        className="lazy-img shapes screen01"
-      />
-      <Image
-        src={screen_2}
-        alt="screen-img"
-        width={261}
-        height={430}
-        className="lazy-img shapes screen02"
-      />
+  src={screen_2}
+  alt="screen-img"
+  width={500}     // was 261
+  height={660}    // was 430
+  className="lazy-img shapes screen01"
+/>
+<Image
+  src={screen_1}
+  alt="screen-img"
+  width={400}
+  height={660}
+  className="lazy-img shapes screen02"
+/>
+
     </div>
   );
 };
