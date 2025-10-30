@@ -58,7 +58,7 @@ const EmployAside = ({}: IProps) => {
         : "Loading...";
     
     const profilePictureUrl = userData?.profile_picture || null;
-    console.log('Current profile picture URL:', profilePictureUrl);
+    console.log('Current profile picture URL in employ aside:', profilePictureUrl);
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -75,12 +75,18 @@ const EmployAside = ({}: IProps) => {
     };
 
     const handleProfilePicUpdate = () => {
+        console.log('Profile picture update triggered');
+        console.log('Current profile picture URL before update:', profilePictureUrl);
         // Update the cache-busting key to force image refresh
         setProfilePicKey(Date.now());
+        console.log('New cache busting key:', Date.now());
         // Add a small delay to ensure the API has processed the upload
         setTimeout(() => {
-            refreshUserData();
-        }, 1000);
+            console.log('Refreshing user data after profile picture update');
+            refreshUserData().then(() => {
+                console.log('User data refreshed, new profile picture URL:', userData?.profile_picture);
+            });
+        }, 1500); // Increased delay
     };
 
     useEffect(() => {
@@ -115,33 +121,34 @@ const EmployAside = ({}: IProps) => {
 
                     {/* User Info */}
                     <div className="user-data">
-                        <div className="user-avatar online position-relative rounded-circle" style={{
-                            width: '75px',
-                            height: '75px',
-                            background: profilePictureUrl && profilePictureUrl.trim() !== '' ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '30px',
-                            fontWeight: 'bold',
-                            color: 'white',
-                            overflow: 'hidden',
-                            cursor: 'pointer'
-                        }} onClick={openProfilePicModal}>
-                           {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
-                                <AuthenticatedImage
-                                    src={`${profilePictureUrl}?t=${profilePicKey}`}
-                                    alt="Profile Picture"
-                                    width={75}
-                                    height={75}
-                                    style={{ objectFit: 'cover' }}
-                                    unoptimized
-                                    fallbackSrc="/images/default-avatar.png"
-                                />
-                            ) : (
-                                fullName.charAt(0).toUpperCase()
-                            )}
-                            {/* Edit overlay - Hidden for now */}
+                        <div className="user-avatar position-relative d-block text-center">
+                            <div className="online position-relative rounded-circle d-inline-block" style={{
+                                width: '75px',
+                                height: '75px',
+                                background: profilePictureUrl && profilePictureUrl.trim() !== '' ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '30px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                cursor: 'pointer'
+                            }} onClick={openProfilePicModal}>
+                               {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
+                                    <AuthenticatedImage
+                                        src={`${profilePictureUrl}?t=${profilePicKey}`}
+                                        alt="Profile Picture"
+                                        width={75}
+                                        height={75}
+                                        style={{ objectFit: 'cover', borderRadius: '50%' }}
+                                        unoptimized
+                                        fallbackSrc="/images/default-avatar.png"
+                                    />
+                                ) : (
+                                    fullName.charAt(0).toUpperCase()
+                                )}
+                            </div>
+                            {/* Edit overlay */}
                             <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
                                  style={{
                                      width: '28px',
@@ -149,10 +156,10 @@ const EmployAside = ({}: IProps) => {
                                      backgroundColor: '#D2F34C',
                                      cursor: 'pointer',
                                      border: '3px solid white',
-                                     zIndex: 20,
+                                     zIndex: 10,
                                      fontSize: '14px',
                                      boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                                     display: 'none' // Hidden as not properly implemented
+                                     transform: 'translate(25%, -25%)'
                                  }}
                                  onClick={openProfilePicModal}>
                                 <i className="bi bi-pencil-fill" style={{ color: '#244034', fontSize: '12px', fontWeight: 'bold' }}></i>

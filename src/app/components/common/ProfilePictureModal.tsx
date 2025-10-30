@@ -23,6 +23,20 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
     const [dragOver, setDragOver] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Helper function to convert file to base64
+    const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                // Remove the data:image/jpeg;base64, prefix
+                const base64 = (reader.result as string).split(',')[1];
+                resolve(base64);
+            };
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleFileSelect = (file: File) => {
         if (file && file.type.startsWith('image/')) {
             setSelectedFile(file);
@@ -76,37 +90,66 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
 
         setUpdating(true);
         try {
-            const formData = new FormData();
-            formData.append('profile_picture', selectedFile);
+            // Step 1: Convert file to base64
+            const base64String = await fileToBase64(selectedFile);
+            const filename = `profile_${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-                method: 'PATCH',
+            // Step 2: Upload to S3
+            const uploadResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/files/uploadtoaws`, {
+                method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${authCookies.getToken()}`
+                    'Authorization': `Bearer ${authCookies.getToken()}`,
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify({
+                    filename: filename,
+                    base64String: base64String
+                })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
+                throw new Error(errorData.message || 'Failed to upload image');
+            }
+
+            const uploadData = await uploadResponse.json();
+            const imageUrl = uploadData.fileUrl;
+
+            if (!imageUrl) {
+                throw new Error('No image URL returned from upload');
+            }
+
+            console.log('Uploaded image URL:', imageUrl);
+
+            // Step 3: Update profile with the image URL
+            const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${authCookies.getToken()}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    profile_picture: imageUrl
+                })
+            });
+
+            if (!updateResponse.ok) {
+                const errorData = await updateResponse.json();
                 throw new Error(errorData.message || 'Failed to update profile picture');
             }
 
-            const responseData = await response.json();
-            console.log('Profile picture update response:', responseData);
+            const updateData = await updateResponse.json();
+            console.log('Profile update response:', updateData);
 
-            // If the response contains the updated user data, we can use it directly
-            if (responseData.success && responseData.data?.user?.profile_picture) {
-                // Update the preview to show the new image URL from the API
-                setPreviewUrl(responseData.data.user.profile_picture);
-            }
+            // Update the preview to show the new image URL
+            setPreviewUrl(imageUrl);
 
-            toast.success("Profile picture updated successfully!");
+            toast.success("Profile picture updated successfully!", { position: "top-right" });
             onUpdate(); // Refresh user data
             onClose();
         } catch (error: any) {
             console.error('Profile picture update error:', error);
-            toast.error(error.message || "Failed to update profile picture");
+            toast.error(error.message || "Failed to update profile picture", { position: "top-right" });
         } finally {
             setUpdating(false);
         }

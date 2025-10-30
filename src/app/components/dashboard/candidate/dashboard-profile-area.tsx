@@ -726,11 +726,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                       </select>
                       <div className="d-flex flex-wrap gap-2 mt-2">
                         {editedData.skills.map((skill, idx) => (
-                          <span key={idx} className="badge bg-secondary" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                          <span key={idx} className="badge bg-secondary d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
                             {skill}
-                            <button type="button" className="btn-close btn-close-white ms-2" style={{ fontSize: '10px' }}
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                              style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
                               onClick={() => handleArrayChange('skills', editedData.skills.filter((_, i) => i !== idx))}
-                            />
+                              aria-label={`Remove ${skill}`}
+                              title={`Remove ${skill}`}
+                            >
+                              ×
+                            </button>
                           </span>
                         ))}
                       </div>
@@ -760,11 +767,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                         </select>
                         <div className="d-flex flex-wrap gap-2 mt-2">
                           {(editedData.superpowers || []).map((power, idx) => (
-                            <span key={idx} className="badge bg-success" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                            <span key={idx} className="badge bg-success d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
                               {power}
-                              <button type="button" className="btn-close btn-close-white ms-2" style={{ fontSize: '10px' }}
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
                                 onClick={() => handleArrayChange('superpowers', (editedData.superpowers || []).filter((_, i) => i !== idx))}
-                              />
+                                aria-label={`Remove ${power}`}
+                                title={`Remove ${power}`}
+                              >
+                                ×
+                              </button>
                             </span>
                           ))}
                         </div>
@@ -795,11 +809,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                                   </select>
                                   <div className="d-flex flex-wrap gap-2 mt-2">
                                       {(editedData.languages || []).map((lang, idx) => (
-                                          <span key={idx} className="badge bg-info text-dark" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                                          <span key={idx} className="badge bg-info text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
                                               {lang}
-                                              <button type="button" className="btn-close ms-2" style={{ fontSize: '10px' }}
-                                                  onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
-                                              />
+                                              <button
+                                                type="button"
+                                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                                onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
+                                                aria-label={`Remove ${lang}`}
+                                                title={`Remove ${lang}`}
+                                              >
+                                                ×
+                                              </button>
                                           </span>
                                       ))}
                                   </div>
@@ -827,11 +848,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                           }} />
                         <div className="d-flex flex-wrap gap-2 mt-2">
                           {(editedData.base_skills || []).map((skill, idx) => (
-                            <span key={idx} className="badge bg-warning text-dark" style={{ fontSize: '13px', padding: '6px 12px' }}>
+                            <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
                               {skill}
-                              <button type="button" className="btn-close ms-2" style={{ fontSize: '10px' }}
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
                                 onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
-                              />
+                                aria-label={`Remove ${skill}`}
+                                title={`Remove ${skill}`}
+                              >
+                                ×
+                              </button>
                             </span>
                           ))}
                         </div>
