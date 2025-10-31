@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import DashboardHeader from "../dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
@@ -355,7 +355,6 @@ const CandidateV1Area = () => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">

@@ -5,7 +5,7 @@ import { Country, State, City } from "country-state-city";
 import { geocodeAddress } from "@/lib/actions/latlongaction";
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 type Props = {
   formData: any;
@@ -118,7 +118,6 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
 
   return (
     <>
-      <Toaster position="top-center" />
 
       {/* Profile Photo Preview Modal */}
       {showProfilePreview && profilePhotoUrl && (

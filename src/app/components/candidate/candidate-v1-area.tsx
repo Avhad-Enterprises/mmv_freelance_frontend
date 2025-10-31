@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidate-login-modal";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item"; // Using your desired item component
 import CandidateGridItem from "@/app/components/candidate/candidate-grid-item";
@@ -265,7 +265,6 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
 
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
       <section className="candidates-profile pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
         <div className="container">
           <div className="row">

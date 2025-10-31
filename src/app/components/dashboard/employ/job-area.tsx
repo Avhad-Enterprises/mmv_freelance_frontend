@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
@@ -456,7 +456,6 @@ const EmployJobArea: FC = () => {
   return (
     <div className="dashboard-body">
       <div className="position-relative">
-        <Toaster position="top-right" reverseOrder={false} />
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">

@@ -9,7 +9,7 @@ import { set_wishlist, remove_from_wishlist, add_to_wishlist } from "@/redux/fea
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
-import { notifyError } from "@/utils/toast";
+import toast from "react-hot-toast";
 
 const SavedJobArea = () => {
   const dispatch = useAppDispatch();
@@ -49,7 +49,7 @@ const SavedJobArea = () => {
         dispatch(set_wishlist(userSavedJobs));
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        notifyError("Failed to load saved jobs.");
+        toast.error("Failed to load saved jobs.");
         dispatch(set_wishlist([])); // Clear list on error
       } finally {
         setLoading(false);
@@ -71,7 +71,7 @@ const SavedJobArea = () => {
       dispatch(remove_from_wishlist(job.projects_task_id));
     } catch (error) {
       console.error("Error toggling save status:", error);
-      notifyError("Could not remove the job.");
+      toast.error("Could not remove the job.");
     }
   };
 
