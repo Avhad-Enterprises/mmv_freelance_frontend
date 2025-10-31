@@ -5,6 +5,7 @@ import screen_1 from '@/assets/images/assets/screen_17.png';
 import screen_2 from '@/assets/images/assets/screen_18.png';
 import JobCategorySelect from '../select/job-category';
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
+import understroke from '@/assets/images/assets/picture 1.png';
 
 const HeroBannerSeven = () => {
   const { handleSubmit, setCategoryVal, setSearchText } = useSearchFormSubmit();
@@ -20,14 +21,32 @@ const HeroBannerSeven = () => {
           <div className="row">
             <div className="col-xl-7 col-lg-8 m-auto text-center">
               <h1
-  className="wow fadeInUp text-4xl md:text-5xl lg:text-6xl"
-  data-wow-delay="0.3s"
->
-  World’s First & Only Freelance Marketplace Exclusively for Videos
-</h1>
+                className="wow fadeInUp text-3xl md:text-4xl lg:text-5xl"
+                data-wow-delay="0.3s"
+                style={{ fontSize: '4em' }}
+              >
+                World's First & Only Freelance Marketplace Exclusively for{' '}
+                <span style={{ position: 'relative', display: 'inline-block' }}>
+                  <span style={{ color: '#6DB945', fontStyle: 'italic' }}>Videos</span>
+                  <Image
+                    src={understroke}
+                    alt=""
+                    className="lazy-img"
+                    style={{
+                      position: 'absolute',
+                      bottom: '-120px',
+                      left: '0',
+                      width: '100%',
+                      height: 'auto',
+                      pointerEvents: 'none'
+                    }}
+                  />
+                </span>
+              </h1>
 
               <p className="text-md mt-25 mb-40 wow fadeInUp" data-wow-delay="0.4s">
- Hire aligned video editors and videographers anywhere across the globe              </p>
+                Hire aligned video editors and videographers anywhere across the globe
+              </p>
             </div>
           </div>
           <div className="position-relative">
@@ -77,21 +96,23 @@ const HeroBannerSeven = () => {
         </div>
       </div>
       
-      {/* ✅ Set image sizes to 261x430 */}
+      {/* ✅ Larger images positioned in the middle */}
       <Image
-  src={screen_2}
-  alt="screen-img"
-  width={500}     // was 261
-  height={660}    // was 430
-  className="lazy-img shapes screen01"
-/>
-<Image
-  src={screen_1}
-  alt="screen-img"
-  width={400}
-  height={660}
-  className="lazy-img shapes screen02"
-/>
+        src={screen_2}
+        alt="screen-img"
+        width={800}
+        height={1000}
+        className="lazy-img shapes screen01"
+        style={{ transform: 'translateY(-50%)', top: '50%' }}
+      />
+      <Image
+        src={screen_1}
+        alt="screen-img"
+        width={800}
+        height={1000}
+        className="lazy-img shapes screen02"
+        style={{ transform: 'translateY(-50%)', top: '50%' }}
+      />
 
     </div>
   );
