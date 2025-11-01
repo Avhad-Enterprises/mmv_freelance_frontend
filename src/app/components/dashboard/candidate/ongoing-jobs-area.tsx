@@ -7,7 +7,7 @@ import DashboardJobDetailsArea from './dashboard-job-details-area';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
 
-// Job Interface
+// Job Interface with submission status
 interface IJob {
   projects_task_id: number;
   project_title: string;
@@ -26,6 +26,12 @@ interface IJob {
   reference_links?: string[];
   created_at?: string;
   additional_notes?: string;
+  // Submission tracking
+  submission_status?: number | null; // 0: Submitted, 1: Approved, 2: Rejected, null: Not submitted
+  submission_id?: number | null;
+  submitted_files?: string;
+  submission_notes?: string;
+  submitted_at?: string;
 }
 
 type IProps = {};
@@ -40,12 +46,13 @@ const OngoingJobsArea = ({}: IProps) => {
   
   // Submission Modal State
   const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [submittingJobId, setSubmittingJobId] = useState<number | null>(null);
+  const [submittingJob, setSubmittingJob] = useState<IJob | null>(null);
   const [submissionLinks, setSubmissionLinks] = useState<string[]>(['']);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  // Fetch jobs with submission status
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
@@ -56,6 +63,8 @@ const OngoingJobsArea = ({}: IProps) => {
           setError('Authentication token not found. Please log in.');
           return;
         }
+        
+        // Fetch applications
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
           {
@@ -81,27 +90,53 @@ const OngoingJobsArea = ({}: IProps) => {
           3: 'Rejected',
         };
         
-        const jobData: IJob[] = (resData.data || [])
-          .map((job: any) => ({
-            projects_task_id: job.projects_task_id,
-            project_title: job.project_title || 'Untitled Project',
-            budget: job.budget || 0,
-            deadline: job.deadline || '',
-            category: job.project_category || 'N/A',
-            projects_type: job.projects_type || 'N/A',
-            skills_required: job.skills_required || [],
-            status: statusMap[job.status] || 'Pending',
-            project_description: job.project_description || '',
-            project_format: job.project_format || '',
-            audio_voiceover: job.audio_voiceover || '',
-            video_length: job.video_length,
-            preferred_video_style: job.preferred_video_style || '',
-            audio_description: job.audio_description || '',
-            reference_links: job.reference_links || [],
-            created_at: job.created_at || '',
-            additional_notes: job.additional_notes || '',
-          }))
-          .filter((job: IJob) => job.status === 'Ongoing'); // Only show Ongoing projects
+        // Map jobs and enrich with submission data
+        const jobData: IJob[] = await Promise.all(
+          (resData.data || [])
+            .filter((job: any) => statusMap[job.status] === 'Ongoing')
+            .map(async (job: any) => {
+              // TODO: Replace with actual GET submissions API when available
+              // For now, we'll check if submission exists using dummy logic
+              // const submissionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${job.projects_task_id}/my-submission`, {...});
+              
+              // TEMPORARY: Store submission status in localStorage as workaround
+              const storedSubmission = localStorage.getItem(`submission_${job.projects_task_id}`);
+              let submissionData = null;
+              if (storedSubmission) {
+                try {
+                  submissionData = JSON.parse(storedSubmission);
+                } catch (e) {
+                  console.error('Failed to parse stored submission:', e);
+                }
+              }
+              
+              return {
+                projects_task_id: job.projects_task_id,
+                project_title: job.project_title || 'Untitled Project',
+                budget: job.budget || 0,
+                deadline: job.deadline || '',
+                category: job.project_category || 'N/A',
+                projects_type: job.projects_type || 'N/A',
+                skills_required: job.skills_required || [],
+                status: statusMap[job.status] || 'Pending',
+                project_description: job.project_description || '',
+                project_format: job.project_format || '',
+                audio_voiceover: job.audio_voiceover || '',
+                video_length: job.video_length,
+                preferred_video_style: job.preferred_video_style || '',
+                audio_description: job.audio_description || '',
+                reference_links: job.reference_links || [],
+                created_at: job.created_at || '',
+                additional_notes: job.additional_notes || '',
+                // Submission data
+                submission_status: submissionData?.submission_status ?? null,
+                submission_id: submissionData?.submission_id ?? null,
+                submitted_files: submissionData?.submitted_files ?? null,
+                submission_notes: submissionData?.additional_notes ?? null,
+                submitted_at: submissionData?.submitted_at ?? null,
+              };
+            })
+        );
         
         setJobs(jobData);
       } catch (error: any) {
@@ -119,17 +154,26 @@ const OngoingJobsArea = ({}: IProps) => {
     }
   }, [decoded]);
 
-  const handleOpenSubmitModal = (jobId: number) => {
-    setSubmittingJobId(jobId);
+  const handleOpenSubmitModal = (job: IJob) => {
+    setSubmittingJob(job);
     setShowSubmitModal(true);
-    setSubmissionLinks(['']);
-    setAdditionalNotes('');
+    
+    // If resubmitting a rejected submission, pre-fill with previous data
+    if (job.submission_status === 2 && job.submitted_files) {
+      const links = job.submitted_files.split(',').map(link => link.trim());
+      setSubmissionLinks(links);
+      setAdditionalNotes(job.submission_notes || '');
+    } else {
+      setSubmissionLinks(['']);
+      setAdditionalNotes('');
+    }
+    
     setSubmitError(null);
   };
 
   const handleCloseSubmitModal = () => {
     setShowSubmitModal(false);
-    setSubmittingJobId(null);
+    setSubmittingJob(null);
     setSubmissionLinks(['']);
     setAdditionalNotes('');
     setSubmitError(null);
@@ -152,7 +196,7 @@ const OngoingJobsArea = ({}: IProps) => {
   };
 
   const handleSubmitProject = async () => {
-    if (!submittingJobId || !decoded?.user_id) {
+    if (!submittingJob || !decoded?.user_id) {
       setSubmitError('Missing required information');
       return;
     }
@@ -173,11 +217,11 @@ const OngoingJobsArea = ({}: IProps) => {
         throw new Error('Authentication token not found');
       }
 
-      // Join multiple links with comma (or use JSON based on backend preference)
+      // Join multiple links with comma
       const submittedFiles = validLinks.join(',');
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${submittingJobId}/submit`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${submittingJob.projects_task_id}/submit`,
         {
           method: 'POST',
           headers: {
@@ -195,59 +239,33 @@ const OngoingJobsArea = ({}: IProps) => {
       const result = await response.json();
 
       if (!response.ok) {
+        // Handle "Already Submitted" error
+        if (result.message?.includes('Already Submitted')) {
+          throw new Error('You have already submitted this project. Please wait for client review.');
+        }
         throw new Error(result.message || 'Failed to submit project');
       }
 
       if (result.success) {
-        // Success! Close modal and refresh jobs
-        alert('Project submitted successfully! Your submission is now pending client review.');
+        // Store submission data locally (temporary workaround)
+        const submissionData = {
+          submission_status: 0, // Pending
+          submission_id: result.data.submission_id,
+          submitted_files: submittedFiles,
+          additional_notes: additionalNotes.trim(),
+          submitted_at: result.data.created_at || new Date().toISOString(),
+        };
+        localStorage.setItem(`submission_${submittingJob.projects_task_id}`, JSON.stringify(submissionData));
+        
+        // Update jobs list
+        setJobs(prev => prev.map(job => 
+          job.projects_task_id === submittingJob.projects_task_id
+            ? { ...job, ...submissionData }
+            : job
+        ));
+        
+        alert('✅ Project submitted successfully! Your submission is now pending client review.');
         handleCloseSubmitModal();
-        
-        // Refresh the jobs list
-        const jobsResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
-          {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-        
-        if (jobsResponse.ok) {
-          const resData = await jobsResponse.json();
-          const statusMap: Record<number, string> = {
-            0: 'Pending',
-            1: 'Ongoing',
-            2: 'Completed',
-            3: 'Rejected',
-          };
-          
-          const jobData: IJob[] = (resData.data || [])
-            .map((job: any) => ({
-              projects_task_id: job.projects_task_id,
-              project_title: job.project_title || 'Untitled Project',
-              budget: job.budget || 0,
-              deadline: job.deadline || '',
-              category: job.project_category || 'N/A',
-              projects_type: job.projects_type || 'N/A',
-              skills_required: job.skills_required || [],
-              status: statusMap[job.status] || 'Pending',
-              project_description: job.project_description || '',
-              project_format: job.project_format || '',
-              audio_voiceover: job.audio_voiceover || '',
-              video_length: job.video_length,
-              preferred_video_style: job.preferred_video_style || '',
-              audio_description: job.audio_description || '',
-              reference_links: job.reference_links || [],
-              created_at: job.created_at || '',
-              additional_notes: job.additional_notes || '',
-            }))
-            .filter((job: IJob) => job.status === 'Ongoing');
-          
-          setJobs(jobData);
-        }
       } else {
         throw new Error(result.message || 'Submission failed');
       }
@@ -257,6 +275,41 @@ const OngoingJobsArea = ({}: IProps) => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getSubmissionStatusBadge = (job: IJob) => {
+    if (job.submission_status === null || job.submission_status === undefined) {
+      return null; // Not submitted
+    }
+    
+    switch (job.submission_status) {
+      case 0:
+        return <span className="badge bg-warning text-dark ms-2">Pending Review</span>;
+      case 1:
+        return <span className="badge bg-success ms-2">Approved ✓</span>;
+      case 2:
+        return <span className="badge bg-danger ms-2">Rejected - Resubmit</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getSubmitButtonText = (job: IJob) => {
+    if (job.submission_status === 2) {
+      return 'Resubmit Job';
+    }
+    if (job.submission_status === 0) {
+      return 'Submitted';
+    }
+    if (job.submission_status === 1) {
+      return 'Approved';
+    }
+    return 'Submit Job';
+  };
+
+  const isSubmitButtonDisabled = (job: IJob) => {
+    // Disable if already submitted and pending (status 0) or approved (status 1)
+    return job.submission_status === 0 || job.submission_status === 1;
   };
 
   if (selectedJob) {
@@ -328,6 +381,7 @@ const OngoingJobsArea = ({}: IProps) => {
                             >
                               {job.project_title}
                             </a>
+                            {getSubmissionStatusBadge(job)}
                           </h4>
                           <ul className="cadidate-skills style-none d-flex align-items-center">
                             {job.skills_required &&
@@ -343,6 +397,11 @@ const OngoingJobsArea = ({}: IProps) => {
                                 </li>
                               )}
                           </ul>
+                          {job.submission_status === 2 && (
+                            <small className="text-danger fw-semibold">
+                              ⚠️ Your submission was rejected. Please review and resubmit.
+                            </small>
+                          )}
                         </div>
                       </div>
                       <div className="col-lg-2 col-md-4 col-sm-6">
@@ -376,11 +435,32 @@ const OngoingJobsArea = ({}: IProps) => {
                             View Details
                           </a>
                           <button
-                            onClick={() => handleOpenSubmitModal(job.projects_task_id)}
+                            onClick={() => handleOpenSubmitModal(job)}
                             className="btn-one"
-                            style={{ fontSize: '14px', padding: '8px 16px' }}
+                            style={{ 
+                              fontSize: '14px', 
+                              padding: '8px 16px',
+                              ...(job.submission_status === 2 && {
+                                backgroundColor: '#dc3545',
+                                borderColor: '#dc3545',
+                                color: '#ffffff'
+                              }),
+                              ...(job.submission_status === 0 && {
+                                backgroundColor: '#6c757d',
+                                borderColor: '#6c757d',
+                                opacity: 0.6,
+                                cursor: 'not-allowed'
+                              }),
+                              ...(job.submission_status === 1 && {
+                                backgroundColor: '#198754',
+                                borderColor: '#198754',
+                                opacity: 0.6,
+                                cursor: 'not-allowed'
+                              })
+                            }}
+                            disabled={isSubmitButtonDisabled(job)}
                           >
-                            Submit Job
+                            {getSubmitButtonText(job)}
                           </button>
                         </div>
                       </div>
@@ -393,13 +473,15 @@ const OngoingJobsArea = ({}: IProps) => {
         </div>
       </div>
 
-      {/* Submit Project Modal */}
-      {showSubmitModal && (
+      {/* Submit/Resubmit Project Modal */}
+      {showSubmitModal && submittingJob && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Submit Project</h5>
+                <h5 className="modal-title">
+                  {submittingJob.submission_status === 2 ? 'Resubmit Project' : 'Submit Project'}
+                </h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -414,12 +496,19 @@ const OngoingJobsArea = ({}: IProps) => {
                   </div>
                 )}
 
+                {submittingJob.submission_status === 2 && (
+                  <div className="alert alert-warning" role="alert">
+                    <strong>⚠️ Resubmission Required:</strong> Your previous submission was rejected by the client. 
+                    Please review their feedback and make necessary changes before resubmitting.
+                  </div>
+                )}
+
                 <div className="mb-4">
                   <label className="form-label fw-semibold">
                     Submission Links <span className="text-danger">*</span>
                   </label>
                   <p className="text-muted small mb-3">
-                    Provide links to your completed work (Dropbox, Google Drive, etc.)
+                    Provide links to your completed work (Dropbox, Google Drive, WeTransfer, etc.)
                   </p>
                   {submissionLinks.map((link, index) => (
                     <div key={index} className="d-flex gap-2 mb-2">
@@ -472,8 +561,8 @@ const OngoingJobsArea = ({}: IProps) => {
                 </div>
 
                 <div className="alert alert-info" role="alert">
-                  <strong>Note:</strong> Once submitted, your work will be reviewed by the client. 
-                  You'll be notified when they approve or request changes.
+                  <strong>Note:</strong> Once {submittingJob.submission_status === 2 ? 'resubmitted' : 'submitted'}, 
+                  your work will be reviewed by the client. You'll be notified when they approve or request changes.
                 </div>
               </div>
               <div className="modal-footer">
@@ -491,7 +580,7 @@ const OngoingJobsArea = ({}: IProps) => {
                   onClick={handleSubmitProject}
                   disabled={submitting}
                 >
-                  {submitting ? 'Submitting...' : 'Submit Project'}
+                  {submitting ? 'Submitting...' : (submittingJob.submission_status === 2 ? 'Resubmit Project' : 'Submit Project')}
                 </button>
               </div>
             </div>
