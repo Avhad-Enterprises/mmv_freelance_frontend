@@ -5,26 +5,22 @@ import icon_1 from "@/assets/dashboard/images/icon/icon_12.svg";
 import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
 import icon_3 from "@/assets/dashboard/images/icon/icon_14.svg";
 import icon_4 from "@/assets/dashboard/images/icon/icon_15.svg";
-import main_graph from "@/assets/dashboard/images/main-graph.png";
 import DashboardHeader from "./dashboard-header-minus";
-import {
-  makePostRequest,
-  makeGetRequest,
-  makeDeleteRequest,
-
-} from "@/utils/api";
+import { makeGetRequest } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
-import { useSidebar } from "@/context/SidebarContext";
+import { authCookies } from "@/utils/cookies";
+import Link from "next/link";
 
-type JobItem = {
+type ApplicationItem = {
   applied_projects_id: number;
   projects_task_id: number;
   project_title: string;
   projects_type: string;
-  Budget: number;
+  budget: number;
   project_category: string;
-  Deadline: string;
-  tags: string[];
+  deadline: string;
+  status: string;
+  applied_at: string;
 };
 
 // card item component
@@ -32,13 +28,15 @@ export function CardItem({
   img,
   value,
   title,
+  subtitle,
 }: {
   img: StaticImageData;
   value: string;
   title: string;
+  subtitle?: string;
 }) {
   return (
-    <div className="col-lg-3 col-6">
+    <div className="col-lg-4 col-sm-6">
       <div className="dash-card-one bg-white border-30 position-relative mb-15">
         <div className="d-sm-flex align-items-center justify-content-between">
           <div className="icon rounded-circle d-flex align-items-center justify-content-center order-sm-1">
@@ -47,6 +45,7 @@ export function CardItem({
           <div className="order-sm-0">
             <div className="value fw-500">{value}</div>
             <span>{title}</span>
+            {subtitle && <div className="fs-6 text-muted mt-1">{subtitle}</div>}
           </div>
         </div>
       </div>
@@ -61,61 +60,89 @@ type IProps = {
 
 const DashboardArea = ({}: IProps) => {
   const decoded = useDecodedToken();
-  const { setIsOpenSidebar } = useSidebar();
-  const [jobItems, setJobItems] = useState<JobItem[]>([]);
-  const [appliedCount, setAppliedCount] = useState<number>(0);
+  const [applications, setApplications] = useState<ApplicationItem[]>([]);
+  const [savedJobsCount, setSavedJobsCount] = useState<number>(0);
+  const [metrics, setMetrics] = useState({
+    totalApplied: 0,
+    pending: 0,
+    accepted: 0,
+    rejected: 0,
+  });
   const [loading, setLoading] = useState(true);
 
-  // Fetch job list
+  // Fetch applications and metrics
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchData = async () => {
       if (!decoded?.user_id) {
         setLoading(false);
         return;
       }
       try {
-        const res = await makePostRequest("api/v1/users/get_user_by_id", {
-          user_id: decoded.user_id,
-        });
-        setJobItems(res?.data?.data || []);
+        const token = authCookies.getToken();
+        
+        // Fetch applications
+        const applicationsRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-cache'
+          }
+        );
+        
+        if (applicationsRes.ok) {
+          const applicationsData = await applicationsRes.json();
+          const apps = applicationsData.data || [];
+          setApplications(apps);
+          
+          // Calculate metrics
+          const totalApplied = apps.length;
+          const pending = apps.filter((app: ApplicationItem) => 
+            String(app.status || '').toLowerCase() === 'pending' || String(app.status || '').toLowerCase() === 'applied'
+          ).length;
+          const accepted = apps.filter((app: ApplicationItem) => 
+            String(app.status || '').toLowerCase() === 'accepted' || String(app.status || '').toLowerCase() === 'approved'
+          ).length;
+          const rejected = apps.filter((app: ApplicationItem) => 
+            String(app.status || '').toLowerCase() === 'rejected'
+          ).length;
+          
+          setMetrics({ totalApplied, pending, accepted, rejected });
+        }
+
+        // Fetch saved jobs count
+        try {
+          const savedRes = await makeGetRequest("api/v1/saved/my-saved-projects");
+          setSavedJobsCount(savedRes?.data?.data?.length || 0);
+        } catch (error) {
+          console.error("Error fetching saved jobs:", error);
+        }
+
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchJobs();
+    fetchData();
   }, [decoded]);
 
-  // Fetch applied project count
-  useEffect(() => {
-    const fetchCount = async () => {
-      if (!decoded?.user_id) return;
-      try {
-        const res = await makePostRequest("api/v1/users/get_user_by_id", {
-          user_id: decoded.user_id,
-        });
-        setAppliedCount(res?.data?.data || 0);
-      } catch (error) {
-        console.error("Error fetching count:", error);
-      }
-    };
-    fetchCount();
-  }, [decoded]);
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
-  // Handle delete job
-  const handleDelete = async (applied_projects_id: number) => {
-    try {
-      await makeDeleteRequest("api/v1/applications/my-applications/withdraw", {
-        applied_projects_id,
-      });
-      // Remove the deleted job from UI
-      setJobItems((prev) =>
-        prev.filter((job) => job.applied_projects_id !== applied_projects_id)
-      );
-    } catch (error) {
-      console.error("Error deleting job:", error);
-    }
+  // Get status badge color
+  const getStatusColor = (status: string) => {
+    const statusLower = String(status || '').toLowerCase();
+    if (statusLower === 'accepted' || statusLower === 'approved') return 'success';
+    if (statusLower === 'rejected') return 'danger';
+    if (statusLower === 'pending' || statusLower === 'applied') return 'warning';
+    return 'secondary';
   };
 
   return (
@@ -124,100 +151,56 @@ const DashboardArea = ({}: IProps) => {
         <DashboardHeader />
         <h2 className="main-title">Freelancer Dashboard</h2>
 
-        {/* <div className="row">
-          <CardItem img={icon_1} title="Total Submitted" value="1.7k+" />
-          <CardItem img={icon_2} title="Shortlisted" value="03" />
-          <CardItem img={icon_4} title="Applied Project" value={`${appliedCount}`} />
-        </div> */}
-
-        <div className="row d-flex pt-50 lg-pt-10">
-          <div className="col-xl-7 col-lg-6 d-flex flex-column">
-            <div className="user-activity-chart bg-white border-20 mt-30 h-100">
-              <h4 className="dash-title-two">Profile Views</h4>
-              <div className="ps-5 pe-5 mt-50">
-                <Image
-                  src={main_graph}
-                  alt="main-graph"
-                  className="lazy-img m-auto"
-                />
-              </div>
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
+        ) : (
+          <>
+            <div className="row">
+              <CardItem 
+                img={icon_1} 
+                title="Total Applied" 
+                value={`${metrics.totalApplied}`}
+              />
+              <CardItem 
+                img={icon_2} 
+                title="Pending" 
+                value={`${metrics.pending}`}
+              />
+              <CardItem 
+                img={icon_4} 
+                title="Accepted" 
+                value={`${metrics.accepted}`}
+              />
+            </div>
 
-          <div className="col-xl-5 col-lg-6 d-flex">
-            <div className="recent-job-tab bg-white border-20 mt-30 w-100">
-              <h4 className="dash-title-two">Recent Applied Job</h4>
-              <div className="wrapper">
-                {loading ? (
-                  <p>Loading...</p>
-                ) : jobItems.length === 0 ? (
-                  <p>No recent jobs found.</p>
-                ) : (
-                  jobItems.slice(0, 5).map((j) => (
-                    <div
-                      key={j.applied_projects_id}
-                      className="job-item-list d-flex align-items-center"
-                    >
-                      <div>
-                        <Image
-                          src="/images/logo/default-logo.png"
-                          alt="logo"
-                          width={40}
-                          height={40}
-                          className="lazy-img logo"
-                        />
+            <div className="row d-flex pt-50 lg-pt-10">
+              <div className="col-12">
+                <div className="bg-white border-20 mt-30">
+                  <div className="card-box">
+                    <div className="row align-items-center">
+                      <div className="col-lg-8">
+                        <h4 className="dash-title-three">Complete Your Profile</h4>
+                        <p className="text-muted mb-0 mt-2">Enhance your profile to attract more clients and increase your chances of getting hired.</p>
                       </div>
-                      <div className="job-title">
-                        <h6 className="mb-5">
-                          <a href="#">{j.project_title}</a>
-                        </h6>
-                        <div className="meta">
-                          <span>{j.projects_type}</span> ·{" "}
-                          <span>{j.project_category}</span>
-                        </div>
-                      </div>
-                      <div className="job-action">
-                        <button
-                          className="action-btn dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
+                      <div className="col-lg-4 text-lg-end">
+                        <Link 
+                          href="/dashboard/candidate-dashboard/profile" 
+                          className="dash-btn-two"
                         >
-                          <span></span>
-                        </button>
-                        <ul className="dropdown-menu">
-                          <li>
-                            <a
-                              className="dropdown-item"
-                              href={`hhttp://13.235.113.131:8000/api/v1/${j.projects_task_id}`}
-                            >
-                              View Job
-                            </a>
-                          </li>
-                          <li>
-                            <a className="dropdown-item" href="#">
-                              Archive
-                            </a>
-                          </li>
-                          <li>
-                            <button
-                              className="dropdown-item text-danger"
-                              onClick={() =>
-                                handleDelete(j.applied_projects_id)
-                              }
-                            >
-                              Delete
-                            </button>
-                          </li>
-                        </ul>
+                          Go to My Profile
+                        </Link>
                       </div>
                     </div>
-                  ))
-                )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,16 +1,29 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image, { StaticImageData } from "next/image";
-import job_data from "@/data/job-data";
 import icon_1 from "@/assets/dashboard/images/icon/icon_12.svg";
 import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
 import icon_3 from "@/assets/dashboard/images/icon/icon_14.svg";
 import icon_4 from "@/assets/dashboard/images/icon/icon_15.svg";
-import main_graph from "@/assets/dashboard/images/main-graph.png";
 import DashboardHeader from "../candidate/dashboard-header";
 import { CardItem } from "../candidate/dashboard-area";
-import NiceSelect from "@/ui/nice-select";
-import { useSidebar } from "@/context/SidebarContext";
+import { makeGetRequest } from "@/utils/api";
+import useDecodedToken from "@/hooks/useDecodedToken";
+import { authCookies } from "@/utils/cookies";
+import Link from "next/link";
+
+type ProjectItem = {
+  project_id: number;
+  projects_task_id: number;
+  project_title: string;
+  projects_type: string;
+  budget: number;
+  project_category: string;
+  deadline: string;
+  project_status: string;
+  created_at: string;
+  applicants_count?: number;
+};
 
 // props type 
 type IProps = {
@@ -18,9 +31,92 @@ type IProps = {
 }
 
 const EmployDashboardArea = ({}: IProps) => {
-  const { setIsOpenSidebar } = useSidebar();
-  const job_items = [...job_data.reverse().slice(0, 6)];
-  const handleJobs = (item: { value: string; label: string }) => {};
+  const decoded = useDecodedToken();
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [metrics, setMetrics] = useState({
+    totalProjects: 0,
+    activeProjects: 0,
+    totalApplicants: 0,
+    completedProjects: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch projects and metrics
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!decoded?.client_id) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const token = authCookies.getToken();
+        
+        // Fetch projects for this client
+        const projectsRes = await makeGetRequest(`api/v1/projects-tasks/client/${decoded.client_id}`);
+        
+        if (projectsRes?.data?.data) {
+          const projectsData = projectsRes.data.data;
+          setProjects(projectsData);
+          
+          // Calculate metrics
+          const totalProjects = projectsData.length;
+          const activeProjects = projectsData.filter((p: ProjectItem) => 
+            String(p.project_status || '').toLowerCase() === 'active' || 
+            String(p.project_status || '').toLowerCase() === 'open' ||
+            String(p.project_status || '').toLowerCase() === 'in progress'
+          ).length;
+          const completedProjects = projectsData.filter((p: ProjectItem) => 
+            String(p.project_status || '').toLowerCase() === 'completed' || 
+            String(p.project_status || '').toLowerCase() === 'closed'
+          ).length;
+          
+          // Calculate total applicants across all projects
+          let totalApplicants = 0;
+          for (const project of projectsData) {
+            try {
+              const applicantsRes = await makeGetRequest(
+                `api/v1/applications/projects/${project.project_id}/applications`
+              );
+              const applicantCount = applicantsRes?.data?.data?.length || 0;
+              totalApplicants += applicantCount;
+              
+              // Update project with applicant count
+              project.applicants_count = applicantCount;
+            } catch (error) {
+              console.error(`Error fetching applicants for project ${project.project_id}:`, error);
+              project.applicants_count = 0;
+            }
+          }
+          
+          setMetrics({ totalProjects, activeProjects, totalApplicants, completedProjects });
+          setProjects([...projectsData]); // Re-render with applicant counts
+        }
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [decoded]);
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Get status badge color
+  const getStatusColor = (status: string) => {
+    const statusLower = String(status || '').toLowerCase();
+    if (statusLower === 'completed' || statusLower === 'closed') return 'success';
+    if (statusLower === 'active' || statusLower === 'open') return 'primary';
+    if (statusLower === 'in progress') return 'warning';
+    return 'secondary';
+  };
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
@@ -29,107 +125,57 @@ const EmployDashboardArea = ({}: IProps) => {
         {/* header end */}
 
         <h2 className="main-title">Client Dashboard</h2>
-        {/* <div className="row">
-          <CardItem img={icon_1} title="Total Visitor" value="1.7k+" />
-          <CardItem img={icon_2} title="Shortlisted" value="03" />
-          <CardItem img={icon_3} title="Views" value="2.1k" />
-          <CardItem img={icon_4} title="Applied Job" value="07" />
-        </div> */}
-
-        <div className="row d-flex pt-50 lg-pt-10">
-          <div className="col-xl-7 col-lg-6 d-flex flex-column">
-            <div className="user-activity-chart bg-white border-20 mt-30 h-100">
-              <h4 className="dash-title-two">Job Views</h4>
-              <div className="d-sm-flex align-items-center job-list">
-                <div className="fw-500 pe-3">Jobs:</div>
-                <div className="flex-fill xs-mt-10">
-                  <NiceSelect
-                    options={[
-                      {
-                        value: "Web-&-Mobile-Prototype-designer",
-                        label: "Web & Mobile Prototype designer....",
-                      },
-                      { value: "Document Writer", label: "Document Writer" },
-                      {
-                        value: "Outbound Call Service",
-                        label: "Outbound Call Service",
-                      },
-                      { value: "Product Designer", label: "Product Designer" },
-                    ]}
-                    defaultCurrent={0}
-                    onChange={(item) => handleJobs(item)}
-                    name="Search Jobs"
-                  />
-                </div>
-              </div>
-              <div className="ps-5 pe-5 mt-50">
-                <Image
-                  src={main_graph}
-                  alt="main-graph"
-                  className="lazy-img m-auto"
-                />
-              </div>
+        
+        {loading ? (
+          <div className="text-center py-5">
+            <div className="spinner-border" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
           </div>
-          <div className="col-xl-5 col-lg-6 d-flex">
-            <div className="recent-job-tab bg-white border-20 mt-30 w-100">
-              <h4 className="dash-title-two">Posted Job</h4>
-              <div className="wrapper">
-                {job_items.map((j) => (
-                  <div
-                    key={j.id}
-                    className="job-item-list d-flex align-items-center"
-                  >
-                    <div>
-                      <Image
-                        src={j.logo}
-                        alt="logo"
-                        width={40}
-                        height={40}
-                        className="lazy-img logo"
-                      />
-                    </div>
-                    <div className="job-title">
-                      <h6 className="mb-5">
-                        <a href="#">{j.duration}</a>
-                      </h6>
-                      <div className="meta">
-                        <span>Fulltime</span> . <span>{j.location}</span>
+        ) : (
+          <>
+            <div className="row">
+              <CardItem 
+                img={icon_1} 
+                title="Total Projects" 
+                value={`${metrics.totalProjects}`}
+              />
+              <CardItem 
+                img={icon_3} 
+                title="Active Projects" 
+                value={`${metrics.activeProjects}`}
+              />
+              <CardItem 
+                img={icon_2} 
+                title="Total Applicants" 
+                value={`${metrics.totalApplicants}`}
+              />
+            </div>
+
+            <div className="row d-flex pt-50 lg-pt-10">
+              <div className="col-12">
+                <div className="bg-white border-20 mt-30">
+                  <div className="card-box">
+                    <div className="row align-items-center">
+                      <div className="col-lg-8">
+                        <h4 className="dash-title-three">Complete Your Profile</h4>
+                        <p className="text-muted mb-0 mt-2">Enhance your profile to attract better freelancers and improve project success rates.</p>
+                      </div>
+                      <div className="col-lg-4 text-lg-end">
+                        <Link 
+                          href="/dashboard/employ-dashboard/profile" 
+                          className="dash-btn-two"
+                        >
+                          Go to My Profile
+                        </Link>
                       </div>
                     </div>
-                    <div className="job-action">
-                      <button
-                        className="action-btn dropdown-toggle"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                      >
-                        <span></span>
-                      </button>
-                      <ul className="dropdown-menu">
-                        <li>
-                          <a className="dropdown-item" href="#">
-                            View Job
-                          </a>
-                        </li>
-                        <li>
-                          <a className="dropdown-item" href="#">
-                            Archive
-                          </a>
-                        </li>
-                        <li>
-                          <a className="dropdown-item" href="#">
-                            Delete
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
