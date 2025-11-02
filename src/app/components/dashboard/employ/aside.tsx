@@ -34,11 +34,12 @@ import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
 const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/employ-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/employ-dashboard/profile", title: "My Profile" },
-    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/employ-dashboard/jobs", title: "My Jobs" },
-    { id: 5, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/employ-dashboard/submit-job", title: "Chat" },
-    { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/employ-dashboard/saved-candidate", title: "Saved Candidate" },
-    { id: 7,icons: nav_2, icon_active: nav_2_active ,link: "/dashboard/employ-dashboard/Candidates", title: "Candidates"},
-    {id: 9 , icons: nav_3 , icon_active: nav_3_active , link: "/dashboard/employ-dashboard/ongoing-projects" , title : "Ongoing Projects"},
+    // Temporarily hidden for live deployment
+    // { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/employ-dashboard/jobs", title: "My Jobs" },
+    // { id: 5, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/employ-dashboard/submit-job", title: "Chat" },
+    // { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/employ-dashboard/saved-candidate", title: "Saved Candidate" },
+    // { id: 7,icons: nav_2, icon_active: nav_2_active ,link: "/dashboard/employ-dashboard/Candidates", title: "Candidates"},
+    // {id: 9 , icons: nav_3 , icon_active: nav_3_active , link: "/dashboard/employ-dashboard/ongoing-projects" , title : "Ongoing Projects"},
     { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/employ-dashboard/setting", title: "Account Settings" },
 ];
 
