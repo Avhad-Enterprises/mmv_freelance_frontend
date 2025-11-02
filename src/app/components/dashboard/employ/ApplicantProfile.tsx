@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 
 interface ApplicantProfileProps {
   selectedApplicant: IFreelancer | null;

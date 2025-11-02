@@ -95,7 +95,7 @@ const TopCompany = () => {
 
         <div className="text-center mt-30 d-sm-none">
           {/* Replaced Next.js Link with standard <a> tag */}
-          <a href="/company-v1" className="btn-six">Explore More</a>
+          <a href="/company" className="btn-six">Explore More</a>
         </div>
       </div>
     </section>

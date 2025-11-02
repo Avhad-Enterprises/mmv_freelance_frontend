@@ -8,7 +8,7 @@ import VideoPopup from "../common/video-popup";
 import Skills from "./skills";
 import CandidateBio from "./bio";
 import AuthenticatedImage from "@/app/components/common/AuthenticatedImage";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 
 type CandidateDetailsAreaProps = {
   freelancer: IFreelancer | null;
@@ -74,7 +74,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
                 
                 {/* --- BACK BUTTON ADDED HERE --- */}
-                <Link href="/candidates-v1" className="btn-two mb-30">
+                <Link href="/freelancers" className="btn-two mb-30">
                   &larr; Back to Candidates
                 </Link>
 

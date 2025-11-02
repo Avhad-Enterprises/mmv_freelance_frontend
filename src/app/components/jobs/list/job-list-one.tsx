@@ -27,7 +27,7 @@ const JobListOne = () => {
             <div className="col-lg-5">
               <div className="d-flex justify-content-lg-end">
                 <Link
-                  href="/job-list-v1"
+                  href="/job-list"
                   className="btn-six d-none d-lg-inline-block"
                 >
                   Explore all jobs
@@ -41,7 +41,7 @@ const JobListOne = () => {
           </div>
 
           <div className="text-center mt-40 d-lg-none">
-            <Link href="/job-list-v1" className="btn-six">
+            <Link href="/job-list" className="btn-six">
               Explore all jobs
             </Link>
           </div>

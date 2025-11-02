@@ -163,7 +163,7 @@ const EmployDashboardArea = ({}: IProps) => {
                       </div>
                       <div className="col-lg-4 text-lg-end">
                         <Link 
-                          href="/dashboard/employ-dashboard/profile" 
+                          href="/dashboard/client-dashboard/profile" 
                           className="dash-btn-two"
                         >
                           Go to My Profile

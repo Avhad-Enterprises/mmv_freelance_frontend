@@ -339,7 +339,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
             <div className="col-xxl-9 col-xl-8">
               <div className="details-post-data me-xxl-5 pe-xxl-4">
                 
-                <Link href="/job-list-v1" className="btn-two mb-20">
+                <Link href="/job-list" className="btn-two mb-20">
                   &larr; Back to Jobs
                 </Link>
 

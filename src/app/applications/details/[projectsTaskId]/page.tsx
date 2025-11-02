@@ -103,7 +103,7 @@ export default function ApplicationDetailsPage({
 
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <div className="d-flex align-items-center gap-2">
-            <Link href="/dashboard/employ-dashboard/jobs">
+            <Link href="/dashboard/client-dashboard/jobs">
               <button
                 type="button"
                 className="btn btn-light p-2 d-flex align-items-center"

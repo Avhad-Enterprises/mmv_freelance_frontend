@@ -74,7 +74,7 @@ const BlogSidebar = ({
           {Object.entries(categories).map(([cat, count]) => (
             <li key={cat}>
               <Link
-                href={`/blog-v2?category=${encodeURIComponent(cat)}`}
+                href={`/blog?category=${encodeURIComponent(cat)}`}
                 className={selectedCategory === cat ? 'active' : ''}
               >
                 {cat} ({count})
@@ -125,7 +125,7 @@ const BlogSidebar = ({
         <ul className="style-none d-flex flex-wrap">
           {allTags.map((tag) => (
             <li key={tag}>
-              <Link href={`/blog-v2?tag=${encodeURIComponent(tag)}`}>{tag}</Link>
+              <Link href={`/blog?tag=${encodeURIComponent(tag)}`}>{tag}</Link>
             </li>
           ))}
         </ul>

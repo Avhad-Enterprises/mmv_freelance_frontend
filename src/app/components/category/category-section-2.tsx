@@ -138,7 +138,7 @@ const CategorySectionTwo = () => {
           </div>
           <div className="col-md-5 col-sm-4">
             <div className="d-none d-sm-flex justify-content-sm-end mt-25">
-              <Link href="/job-grid-v1" className="btn-six border-0">
+              <Link href="/job-grid" className="btn-six border-0">
                 All Categories{" "}
                 <Image
                   src={shape_1}
@@ -155,7 +155,7 @@ const CategorySectionTwo = () => {
         {/* CategoryCardWrapper */}
 
         <div className="text-center d-sm-none mt-50">
-          <Link href="/job-grid-v1" className="btn-six border-0">
+          <Link href="/job-grid" className="btn-six border-0">
             All Categories{" "}
             <Image src={shape_1} alt="shape" className="lazy-img shapes" />
           </Link>

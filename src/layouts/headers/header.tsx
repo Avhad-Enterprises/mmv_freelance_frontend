@@ -34,7 +34,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                 <ul className="d-flex align-items-center style-none">
                   <li>
                     {isAuthenticated ? (
-                      <Link href="/dashboard/candidate-dashboard" className="login-btn-one">
+                      <Link href="/dashboard/freelancer-dashboard" className="login-btn-one">
                         Dashboard
                       </Link>
                     ) : (
@@ -49,7 +49,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                     )}
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/candidates-v1" className="btn-one">
+                    <Link href="/freelancers" className="btn-one">
                       Hire Top Talents
                     </Link>
                   </li>
@@ -94,7 +94,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                     <Menus />
                     {/* menus end */}
                     <li className="d-md-none">
-                      <Link href="/candidates-v1" className="btn-one w-100">
+                      <Link href="/freelancers" className="btn-one w-100">
                         Hire Top Talents
                       </Link>
                     </li>

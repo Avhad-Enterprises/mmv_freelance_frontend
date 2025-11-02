@@ -188,7 +188,7 @@ const DashboardArea = ({}: IProps) => {
                       </div>
                       <div className="col-lg-4 text-lg-end">
                         <Link 
-                          href="/dashboard/candidate-dashboard/profile" 
+                          href="/dashboard/freelancer-dashboard/profile" 
                           className="dash-btn-two"
                         >
                           Go to My Profile

@@ -30,14 +30,14 @@ import nav_9 from "@/assets/dashboard/images/icon/icon_9.svg";
 import LogoutModal from "../../common/popup/logout-modal";
 
 const nav_data = [
-    { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/candidate-dashboard", title: "Dashboard" },
-    { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/candidate-dashboard/profile", title: "My Profile" },
+    { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/freelancer-dashboard", title: "Dashboard" },
+    { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/freelancer-dashboard/profile", title: "My Profile" },
     // Temporarily hidden for live deployment
-    // { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/candidate-dashboard/saved-job", title: "Saved Job" },
-    // { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/candidate-dashboard/browse-jobs", title: "Browse Projects" },
-    // { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/candidate-dashboard/applied-jobs", title: "Applied Projects" },
-    { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/candidate-dashboard/setting", title: "Account Settings" },
-    // { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/candidate-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
+    // { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Job" },
+    // { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
+    // { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
+    { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
+    // { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
 ];
 
 type IProps = {
@@ -62,9 +62,9 @@ const CandidateAside = ({}: IProps) => {
         setCurrentRole(role);
         // Redirect based on role
         if (role.toLowerCase().includes('client')) {
-            window.location.href = '/dashboard/employ-dashboard';
+            window.location.href = '/dashboard/client-dashboard';
         } else if (role.toLowerCase().includes('videographer') || role.toLowerCase().includes('video editor') || role.toLowerCase().includes('freelancer')) {
-            window.location.href = '/dashboard/candidate-dashboard';
+            window.location.href = '/dashboard/freelancer-dashboard';
         }
     };
 
@@ -169,13 +169,13 @@ const CandidateAside = ({}: IProps) => {
                             </button>
                             <ul className="dropdown-menu" aria-labelledby="profile-dropdown">
                                 <li>
-                                    <Link className="dropdown-item d-flex align-items-center" href="/dashboard/candidate-dashboard/profile">
+                                    <Link className="dropdown-item d-flex align-items-center" href="/dashboard/freelancer-dashboard/profile">
                                         <Image src={profile_icon_1} alt="icon" className="lazy-img" />
                                         <span className="ms-2 ps-1">Profile</span>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link className="dropdown-item d-flex align-items-center" href="/dashboard/candidate-dashboard/setting">
+                                    <Link className="dropdown-item d-flex align-items-center" href="/dashboard/freelancer-dashboard/setting">
                                         <Image src={profile_icon_2} alt="icon" className="lazy-img" />
                                         <span className="ms-2 ps-1">Account Settings</span>
                                     </Link>

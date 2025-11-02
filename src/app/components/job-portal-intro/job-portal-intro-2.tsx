@@ -14,7 +14,7 @@ const JobPortalIntroTwo = () => {
             <div className="col-lg-5">
               <ul className="btn-group style-none d-flex justify-content-center justify-content-lg-end">
                 <li className="me-2">
-                  <Link href="/job-list-v1" className="btn-seven border6">
+                  <Link href="/job-list" className="btn-seven border6">
                     Looking for job?
                   </Link>
                 </li>

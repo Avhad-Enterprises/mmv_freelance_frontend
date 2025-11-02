@@ -1,4 +1,4 @@
-// app/candidate-profile-v1/[id]/page.tsx
+// app/freelancer-profile/[id]/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';

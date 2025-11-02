@@ -10,7 +10,7 @@ const CategoryDropdown = () => {
         {category_dropdown.map((item) => (
         <div key={item.id} className="col-lg-6">
           {item.category_items.map(c => (
-          <Link key={c.id} href="/job-list-v1" className="item d-flex align-items-center">
+          <Link key={c.id} href="/job-list" className="item d-flex align-items-center">
             <div className="icon d-flex align-items-center justify-content-center rounded-circle tran3s">
               <Image
                 src={c.icon}
@@ -29,7 +29,7 @@ const CategoryDropdown = () => {
       </li>
       <li>
         <Link
-          href="/job-list-v1"
+          href="/job-list"
           className="explore-all-btn d-flex align-items-center justify-content-between tran3s"
         >
           <span className="fw-500">Explore all fields</span>

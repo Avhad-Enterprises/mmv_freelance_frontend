@@ -36,7 +36,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
     <div className="candidate-profile-card position-relative list-layout mb-25">
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
-          <Link href={`/candidate-profile-v1/${item.user_id}`} className="rounded-circle">
+          <Link href={`/freelancer-profile/${item.user_id}`} className="rounded-circle">
             <AuthenticatedImage
               src={item.profile_picture}
               alt="Candidate"
@@ -54,7 +54,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
             <div className="col-xl-3">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
-                  <Link href={`/candidate-profile-v1/${item.user_id}`} className="tran3s">
+                  <Link href={`/freelancer-profile/${item.user_id}`} className="tran3s">
                     {item.first_name} {item.last_name}
                   </Link>
                 </h4>
@@ -95,7 +95,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                   <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                 </button>
                 <Link
-                  href={`/candidate-profile-v1/${item.user_id}`} 
+                  href={`/freelancer-profile/${item.user_id}`} 
                   className="profile-btn tran3s ms-md-2"
                 >
                   View Profile

@@ -111,7 +111,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           {/* Browse Project Button - Temporarily hidden for live deployment */}
           {/* <div>
             <Link
-              href="/dashboard/candidate-dashboard/browse-jobs"
+              href="/dashboard/freelancer-dashboard/browse-jobs"
               className="job-post-btn tran3s"
             >
               Browse Project

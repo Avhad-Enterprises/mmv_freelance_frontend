@@ -6,7 +6,7 @@ import avatar from "@/assets/images/candidates/img_01.jpg";
 import VideoPopup from "../common/video-popup";
 import Skills from "./skills";
 import CandidateBio from "./bio";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 
 type CandidateDetailsAreaProps = {
   freelancer: IFreelancer | null;

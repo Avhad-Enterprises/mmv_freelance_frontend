@@ -1,4 +1,4 @@
-// app/dashboard/employ-dashboard/Candidates/page.tsx
+// app/dashboard/client-dashboard/Candidates/page.tsx
 
 import React from 'react';
 // This is the component you just fixed in Step 1

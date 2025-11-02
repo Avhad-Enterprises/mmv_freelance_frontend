@@ -60,11 +60,11 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
             
             // Redirect based on role
             if (normalizedUserRoles.includes('CLIENT')) {
-              router.push('/dashboard/employ-dashboard');
+              router.push('/dashboard/client-dashboard');
             } else if (normalizedUserRoles.includes('VIDEOGRAPHER') || 
                        normalizedUserRoles.includes('VIDEO_EDITOR') ||
                        normalizedUserRoles.includes('VIDEOEDITOR')) {
-              router.push('/dashboard/candidate-dashboard');
+              router.push('/dashboard/freelancer-dashboard');
             } else {
               router.push(redirectTo);
             }

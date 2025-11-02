@@ -316,7 +316,7 @@ const SubmitJobArea = ({ setIsOpenSidebar }: IProps) => {
           created_by: userId
         });
 
-        router.push("/dashboard/employ-dashboard/jobs");
+        router.push("/dashboard/client-dashboard/jobs");
 
       } else {
         toast.error(response.data?.message || "Failed to post Project. Invalid data.");

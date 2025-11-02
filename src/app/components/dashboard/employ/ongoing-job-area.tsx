@@ -10,7 +10,7 @@ import JobsList from "./JobsListOn";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
 import { authCookies } from "@/utils/cookies";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 
 export interface ProjectSummary {
   project_id: string;

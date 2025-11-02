@@ -172,7 +172,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
     const fetchProject = async () => {
       if (!projectId) {
         toast.error("Invalid project ID.");
-        router.push("/dashboard/employ-dashboard/jobs");
+        router.push("/dashboard/client-dashboard/jobs");
         return;
       }
 
@@ -206,12 +206,12 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
           });
         } else {
           toast.error("Project not found.");
-          router.push("/dashboard/employ-dashboard/jobs");
+          router.push("/dashboard/client-dashboard/jobs");
         }
       } catch (error: any) {
         console.error("Failed to fetch project:", error);
         toast.error("Error loading project data: " + (error.response?.data?.message || error.message));
-        router.push("/dashboard/employ-dashboard/jobs");
+        router.push("/dashboard/client-dashboard/jobs");
       }
     };
 
@@ -343,7 +343,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
 
       if (response.data.success) {
         toast.success("🎉 Project updated successfully!");
-        router.push("/dashboard/employ-dashboard/jobs");
+        router.push("/dashboard/client-dashboard/jobs");
       } else {
         toast.error(response.data?.message || "Failed to update Project. Invalid data.");
       }
@@ -612,7 +612,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
             >
               {loading ? "Updating..." : "Update"}
             </button>
-            <a href="/dashboard/employ-dashboard/jobs" className="dash-cancel-btn tran3s">
+            <a href="/dashboard/client-dashboard/jobs" className="dash-cancel-btn tran3s">
               Cancel
             </a>
           </div>

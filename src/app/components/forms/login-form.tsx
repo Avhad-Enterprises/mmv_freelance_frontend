@@ -83,11 +83,11 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         // 5. Redirect to appropriate dashboard based on role
         setTimeout(() => {
           if (normalizedRoles.includes('CLIENT')) {
-            window.location.href = '/dashboard/employ-dashboard';
+            window.location.href = '/dashboard/client-dashboard';
           } else if (normalizedRoles.includes('VIDEOGRAPHER') || 
                      normalizedRoles.includes('VIDEO_EDITOR') ||
                      normalizedRoles.includes('VIDEOEDITOR')) {
-            window.location.href = '/dashboard/candidate-dashboard';
+            window.location.href = '/dashboard/freelancer-dashboard';
           } else {
             // Fallback to home if no recognized role
             window.location.href = '/';

@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useSidebar } from "@/context/SidebarContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 import JobsList from "./JobsList";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";

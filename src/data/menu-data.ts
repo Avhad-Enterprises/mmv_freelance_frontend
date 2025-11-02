@@ -17,34 +17,34 @@ const menu_data:IMenuData[] = [
   },
   {
     id:2,
-    link:'/job-list-v1',
+    link:'/job-list',
     title:'Jobs',
     sub_menus:[
-      {link:'/job-list-v1',title:'Job List style -1'},
+      {link:'/job-list',title:'Job List style -1'},
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
-      // {link:'/job-grid-v1',title:'Job Grid style -1'},
+      // {link:'/job-grid',title:'Job Grid style -1'},
       // {link:'/job-grid-v2',title:'Job Grid style -2'},
       // {link:'/job-grid-v3',title:'Job Grid style -3'},
-      // {link:'/job-details-v1',title:'Job Details v-1'},
+      // {link:'/job-details',title:'Job Details v-1'},
       // {link:'/job-details-v2',title:'Job Details v-2'},
       // {link:'/job-wishlist',title:'Job Wishlist'},
     ]
   },
   {
     id: 3,
-    link: '/candidates-v1',
+    link: '/freelancers',
     title: 'Candidates',
     sub_menus: [
-      {link: '/candidates-v1', title: 'Candidates'}
+      {link: '/freelancers', title: 'Candidates'}
     ]
   },
   {
     id:4,
-    link:'/blog-v2',
+    link:'/blog',
     title:'Blog',
     sub_menus:[
-      {link:'/blog-v2',title:'Blog'},
+      {link:'/blog',title:'Blog'},
       // {link:'/coming-soon',title:'Blog Grid'},
       // {link:'/blog-v3',title:'Full width'},
       // {link:'/blog-details',title:'Blog Details'},
@@ -60,8 +60,8 @@ const menu_data:IMenuData[] = [
   //   link:'/dashboard/employer-dashboard',
   //   title:'Dashboard',
   //   sub_menus:[
-  //     {link:'/dashboard/candidate-dashboard',title:'Candidate Dashboard'},
-  //     {link:'/dashboard/employ-dashboard',title:'Employer Dashboard'},
+  //     {link:'/dashboard/freelancer-dashboard',title:'Candidate Dashboard'},
+  //     {link:'/dashboard/client-dashboard',title:'Employer Dashboard'},
   //   ]
   // }
 ]

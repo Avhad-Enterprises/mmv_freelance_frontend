@@ -72,7 +72,7 @@ const BlogSidebar = ({
             <li key={cat}>
               {/* **FIXED**: Changed to Link component for navigation */}
               <Link
-                href={`/blog-v2?category=${encodeURIComponent(cat)}`}
+                href={`/blog?category=${encodeURIComponent(cat)}`}
                 className={selectedCategory === cat ? 'active' : ''}
               >
                 {cat} ({count})
@@ -128,7 +128,7 @@ const BlogSidebar = ({
             <li key={kw}>
               {/* **FIXED**: Changed to Link component for navigation */}
               <Link
-                href={`/blog-v2?tag=${encodeURIComponent(kw)}`}
+                href={`/blog?tag=${encodeURIComponent(kw)}`}
                 className={selectedTags?.includes(kw) ? 'active' : ''}
               >
                 {kw}

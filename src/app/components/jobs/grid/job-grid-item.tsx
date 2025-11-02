@@ -41,7 +41,7 @@ const JobGridItem = ({
       )}
 
       <div className="cadidate-avatar online position-relative d-block m-auto">
-        <Link href={`/job-details-v1/${projects_task_id}`} className="rounded-circle">
+        <Link href={`/job-details/${projects_task_id}`} className="rounded-circle">
           <div
             className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
             style={{
@@ -59,7 +59,7 @@ const JobGridItem = ({
       </div>
 
       <h4 className="candidate-name mt-15 mb-0">
-        <Link href={`/job-details-v1/${projects_task_id}`} className="tran3s">
+        <Link href={`/job-details/${projects_task_id}`} className="tran3s">
           {project_title}
         </Link>
       </h4>
@@ -95,7 +95,7 @@ const JobGridItem = ({
       <div className="row gx-2 pt-25 sm-pt-10">
         <div className="col-12">
           <Link
-            href={`/job-details-v1/${projects_task_id}`}
+            href={`/job-details/${projects_task_id}`}
             className="profile-btn tran3s w-100 mt-5"
           >
             View Details

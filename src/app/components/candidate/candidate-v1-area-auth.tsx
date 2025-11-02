@@ -7,7 +7,7 @@ import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
-import { IFreelancer } from "@/app/candidate-profile-v1/[id]/page";
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 import { authCookies } from "@/utils/cookies";
 
 // This interface matches the raw data from your API

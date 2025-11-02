@@ -24,7 +24,7 @@ const ListItemTwo = ({
     <div className={`candidate-profile-card ${isActive ? "favourite" : ""} list-layout mb-25`}>
       <div className="d-flex">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
-          <Link href={`/job-details-v1/${item.projects_task_id}`} className="rounded-circle">
+          <Link href={`/job-details/${item.projects_task_id}`} className="rounded-circle">
             <div
               className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
               style={{
@@ -45,7 +45,7 @@ const ListItemTwo = ({
             <div className="col-xl-3">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
-                  <Link href={`/job-details-v1/${item.projects_task_id}`} className="tran3s">
+                  <Link href={`/job-details/${item.projects_task_id}`} className="tran3s">
                     {item.project_title
                       ? `${item.project_title.slice(0, 22)}${
                           item.project_title.length > 22 ? ".." : ""
@@ -93,7 +93,7 @@ const ListItemTwo = ({
                   </button>
                 )}
                 <Link
-                  href={`/job-details-v1/${item.projects_task_id}`}
+                  href={`/job-details/${item.projects_task_id}`}
                   className="profile-btn tran3s ms-md-2"
                 >
                   View Details
