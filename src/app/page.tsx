@@ -144,15 +144,13 @@ const HomeSix = () => {
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+                  <Link href="/coming-soon" className="btn-six">All Categories</Link>
                 </div>
               </div>
             </div>
-            {/* CategoryCardWrapper */}
             <CategoryCardWrapper />
-            {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+              <Link href="/coming-soon" className="btn-six">All Categories</Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
@@ -308,7 +306,7 @@ const HomeSix = () => {
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
               <div className="btn-eight fw-500">Don't find the answer? We can help.
-              <Link href="/faq">Click here</Link>
+              <Link href="/coming-soon">Click here</Link>
               </div>
             </div>
           </div>

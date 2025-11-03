@@ -89,7 +89,7 @@ export function CategoryCardWrapper() {
           >
             {/* Normal Cards */}
             {!item.df && (
-              <Link href="/job-grid-v2" className="d-block">
+              <Link href="/coming-soon" className="d-block">
                 <div className="icon tran3s d-flex align-items-center justify-content-center">
                   <Image src={item.icon} alt="icon" className="lazy-img" />
                 </div>
@@ -108,7 +108,7 @@ export function CategoryCardWrapper() {
                 <p className="text-muted text-start mb-3" style={{ fontSize: '16px', lineHeight: '1.5' }}>
                   Viel thest Foca post des am Expories
                 </p>
-                <Link href="/job-grid-v2">
+                <Link href="/coming-soon">
                   <button className="btn fw-500 rounded-pill text-white px-4 py-2" style={{ backgroundColor: '#00bf63', fontSize: '16px' }}>
                     View All
                   </button>
@@ -138,7 +138,7 @@ const CategorySectionTwo = () => {
           </div>
           <div className="col-md-5 col-sm-4">
             <div className="d-none d-sm-flex justify-content-sm-end mt-25">
-              <Link href="/job-grid" className="btn-six border-0">
+              <Link href="/coming-soon" className="btn-six border-0">
                 All Categories{" "}
                 <Image
                   src={shape_1}
@@ -155,7 +155,7 @@ const CategorySectionTwo = () => {
         {/* CategoryCardWrapper */}
 
         <div className="text-center d-sm-none mt-50">
-          <Link href="/job-grid" className="btn-six border-0">
+          <Link href="/coming-soon" className="btn-six border-0">
             All Categories{" "}
             <Image src={shape_1} alt="shape" className="lazy-img shapes" />
           </Link>
