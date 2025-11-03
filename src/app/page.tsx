@@ -1,4 +1,17 @@
 "use client";
+// Homepage temporarily showing Coming Soon page
+// Original homepage code commented out below - uncomment when ready to go live
+
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import icon from '@/assets/images/icon/icon_61.svg';
+import comingsoon_img from './coming-soon/coming_soon.png';
+import Header from "@/layouts/headers/header";
+import FooterOne from "@/layouts/footers/footer-one";
+import Wrapper from "@/layouts/wrapper";
+
+/* ========== ORIGINAL HOMEPAGE CODE - COMMENTED OUT ==========
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -120,20 +133,20 @@ const HomeSix = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {/* Conditional header rendering */}
+        {/* Conditional header rendering *\/}
         <Header isAuthenticated={isAuthenticated} />
 
-        {/* hero banner start */}
+        {/* hero banner start *\/}
         <HeroBannerSeven />
-        {/* hero banner end */}
+        {/* hero banner end *\/}
 
-        {/* partner slider start */}
+        {/* partner slider start *\/}
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <PartnersSlider />
         </div>
-        {/* partner slider end */}
+        {/* partner slider end *\/}
 
-        {/* category section start */}
+        {/* category section start *\/}
         <section className="category-section-two bg-color position-relative mt-45 md-mt-10 pt-150 xl-pt-130 lg-pt-80 pb-170 xl-pb-130 lg-pb-70">
           <div className="container">
             <div className="row justify-content-between">
@@ -155,16 +168,16 @@ const HomeSix = () => {
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
-        {/* category section end */}
+        {/* category section end *\/}
 
-        {/* How It Works Two start*/}
+        {/* How It Works Two start*\/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
             <div className="title-one text-center mb-40 lg-mb-30">
               <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
             </div>
 
-            {/* Modern Toggle Switch */}
+            {/* Modern Toggle Switch *\/}
             <div className="d-flex justify-content-center mb-60 lg-mb-40">
               <div className="role-toggle-container">
                 <button
@@ -283,15 +296,15 @@ const HomeSix = () => {
             }
           `}</style>
         </section>
-        {/* How It Works Two end*/}
+        {/* How It Works Two end*\/}
 
-        {/* text feature start */}
+        {/* text feature start *\/}
         <FeatureTen />
-        {/* text feature end */}
+        {/* text feature end *\/}
         <TopCompany />
         <FeedbackOne/>
 
-        {/* faq start */}
+        {/* faq start *\/}
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
             <div className="title-one text-center">
@@ -311,18 +324,64 @@ const HomeSix = () => {
             </div>
           </div>
         </section>
-        {/* faq end */}
+        {/* faq end *\/}
 
-        {/* fancy banner start */}
+        {/* fancy banner start *\/}
         <FancyBannerSeven/>
-        {/* fancy banner end */}
+        {/* fancy banner end *\/}
 
-        {/* footer start */}
+        {/* footer start *\/}
         <FooterOne />
-        {/* footer end */}
+        {/* footer end *\/}
       </div>
     </Wrapper>
   );
 };
 
 export default HomeSix;
+============ END OF COMMENTED CODE ========== */
+
+// Actual component - showing Coming Soon page
+const HomePage = () => {
+    return (
+        <Wrapper>
+            <div className="main-page-wrapper">
+                {/* header start */}
+                <Header />
+                {/* header end */}
+                
+                <div className="comingsoon-page d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
+                    {/* Image Section (Top) */}
+                    <Image
+                        src={comingsoon_img}
+                        alt="comingsoon-img"
+                        width={400}
+                        height={400}
+                        className="img-fluid mx-auto d-block mb-4"
+                    />
+
+                    {/* Text Section (Below Image) */}
+                    <h2>Coming Soon 🚀</h2>
+                    <p className="text-md mb-4">
+                        Your portal to abundance is coming soon
+                    </p>
+
+                    {/* Button - Disabled since we're on homepage */}
+                    <div
+                        className="btn-one d-flex align-items-center justify-content-between mt-3 opacity-50"
+                        style={{ maxWidth: "250px", width: "100%", cursor: "default" }}
+                    >
+                        <span>HOMEPAGE</span>
+                        <Image src={icon} alt="icon" />
+                    </div>
+                </div>
+
+                {/* footer start */}
+                <FooterOne />
+                {/* footer end */}
+            </div>
+        </Wrapper>
+    );
+};
+
+export default HomePage;
