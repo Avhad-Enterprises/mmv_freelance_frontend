@@ -12,6 +12,8 @@ import JobsList from "./JobsList";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
 import { authCookies } from "@/utils/cookies";
+import { useRouter } from 'next/navigation';
+import { MessageCircle } from 'lucide-react';
 // Bootstrap will be imported dynamically on the client side
 
 export interface ProjectSummary {
@@ -37,6 +39,7 @@ export interface Applicant {
 }
 
 const EmployJobArea: FC = () => {
+  const router = useRouter();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -453,6 +456,29 @@ const EmployJobArea: FC = () => {
     setSelectedApplicant(null);
   };
 
+  // Handler for opening chat with applicant
+  const handleOpenChat = (applicant: Applicant) => {
+    if (!applicant.user_id) {
+      toast.error('Unable to start chat: User information not available');
+      return;
+    }
+
+    // Store chat restriction info in sessionStorage for the chat component to access
+    const chatRestriction = {
+      targetUserId: applicant.user_id.toString(),
+      applicationStatus: applicant.status,
+      projectId: selectedProjectForApplicants?.project_id,
+      projectTitle: selectedProjectForApplicants?.title,
+      isPending: applicant.status === 0,
+      maxMessages: applicant.status === 0 ? 10 : -1, // -1 means unlimited
+    };
+    
+    sessionStorage.setItem('chatRestriction', JSON.stringify(chatRestriction));
+    
+    // Navigate to chat page
+    router.push('/dashboard/client-dashboard/submit-job');
+  };
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
@@ -497,6 +523,7 @@ const EmployJobArea: FC = () => {
             onToggleSave={handleToggleSave}
             onUpdateApplicantStatus={handleUpdateApplicantStatus}
             getStatusInfo={getStatusInfo}
+            onOpenChat={handleOpenChat}
           />
         ) : (
           // Jobs View

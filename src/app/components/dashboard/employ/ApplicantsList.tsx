@@ -27,6 +27,7 @@ interface ApplicantsListProps {
   onToggleSave: (applicantId: number) => void;
   onUpdateApplicantStatus: (projectId: string, applicationId: number, newStatus: Applicant['status']) => void;
   getStatusInfo: (status: Applicant['status'] | number) => { text: string; className: string };
+  onOpenChat: (applicant: Applicant) => void;
 }
 
 const ApplicantsList: React.FC<ApplicantsListProps> = ({
@@ -38,7 +39,8 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
   onViewProfile,
   onToggleSave,
   onUpdateApplicantStatus,
-  getStatusInfo
+  getStatusInfo,
+  onOpenChat
 }) => {
   // Modal state for approval confirmation
   const [showApproveModal, setShowApproveModal] = useState(false);
@@ -165,6 +167,25 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                             title={savedApplicants.includes(applicant.user_id) ? "Unsave" : "Save"}
                           >
                             <i className={`bi ${savedApplicants.includes(applicant.user_id) ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
+                          </button>
+                          
+                          <button
+                            onClick={() => onOpenChat(applicant)}
+                            className="btn mx-2"
+                            style={{ 
+                              fontSize: '13px', 
+                              padding: '6px 12px',
+                              backgroundColor: applicant.status === 0 ? '#FFA500' : '#244034',
+                              borderColor: applicant.status === 0 ? '#FFA500' : '#244034',
+                              color: '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                            title={applicant.status === 0 ? 'Chat with applicant (10 message limit)' : 'Chat with applicant'}
+                          >
+                            <i className="bi bi-chat-dots"></i>
+                            {applicant.status === 0 ? '10 msgs' : 'Chat'}
                           </button>
 
                           <div className="dropdown ms-2">
