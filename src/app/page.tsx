@@ -366,14 +366,15 @@ const HomePage = () => {
                         Your portal to abundance is coming soon
                     </p>
 
-                    {/* Button - Disabled since we're on homepage */}
-                    <div
-                        className="btn-one d-flex align-items-center justify-content-between mt-3 opacity-50"
-                        style={{ maxWidth: "250px", width: "100%", cursor: "default" }}
+                    {/* Register Button */}
+                    <Link
+                        href="/register"
+                        className="btn-one d-flex align-items-center justify-content-between mt-3"
+                        style={{ maxWidth: "250px", width: "100%" }}
                     >
-                        <span>HOMEPAGE</span>
+                        <span>REGISTER</span>
                         <Image src={icon} alt="icon" />
-                    </div>
+                    </Link>
                 </div>
 
                 {/* footer start */}
