@@ -1,4 +1,15 @@
 "use client";
+
+/* ========== COMING SOON PAGE CODE - COMMENTED OUT ==========
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import icon from '@/assets/images/icon/icon_61.svg';
+import comingsoon_img from './coming-soon/coming_soon.png';
+import Header from "@/layouts/headers/header";
+import FooterOne from "@/layouts/footers/footer-one";
+import Wrapper from "@/layouts/wrapper";
+============ END OF COMING SOON CODE ========== */
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -144,22 +155,20 @@ const HomeSix = () => {
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+                  <Link href="/coming-soon" className="btn-six">All Categories</Link>
                 </div>
               </div>
             </div>
-            {/* CategoryCardWrapper */}
             <CategoryCardWrapper />
-            {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+              <Link href="/coming-soon" className="btn-six">All Categories</Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
         {/* category section end */}
 
-        {/* How It Works Two start*/}
+        {/* How It Works Two start */}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
             <div className="title-one text-center mb-40 lg-mb-30">
@@ -285,7 +294,7 @@ const HomeSix = () => {
             }
           `}</style>
         </section>
-        {/* How It Works Two end*/}
+        {/* How It Works Two end */}
 
         {/* text feature start */}
         <FeatureTen />
@@ -308,7 +317,7 @@ const HomeSix = () => {
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
               <div className="btn-eight fw-500">Don't find the answer? We can help.
-              <Link href="/faq">Click here</Link>
+              <Link href="/coming-soon">Click here</Link>
               </div>
             </div>
           </div>
@@ -328,3 +337,4 @@ const HomeSix = () => {
 };
 
 export default HomeSix;
+// End of main component
