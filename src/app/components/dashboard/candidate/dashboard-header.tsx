@@ -108,15 +108,15 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
             </ul>
           </div> */}
 
-          {/* Post Job Button - Temporarily hidden for live deployment */}
-          {/* <div>
+          {/* Post Job Button */}
+          <div>
             <Link
               href="/dashboard/client-dashboard/jobs"
               className="job-post-btn tran3s"
             >
               Post a Job
             </Link>
-          </div> */}
+          </div>
         </div>
       </div>
     </header>

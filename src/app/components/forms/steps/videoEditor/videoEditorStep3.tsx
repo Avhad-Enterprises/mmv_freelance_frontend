@@ -63,13 +63,18 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     };
   }, [profilePhotoUrl, idDocumentUrl]);
 
-  // File validation functions with type checking
+  // --- MODIFIED: File validation functions with type checking ---
   const validateProfilePhoto = (file: File | null): boolean | string => {
     if (!file) return "Profile photo is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid image.";
-    if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB.";
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, or PNG.";
+    if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, or GIF.";
+    // Filename validation: alphanumeric, hyphens, underscores only, no "Unknown.pdf" or "blob"
+    const invalidFilenames = ['unknown.pdf', 'blob'];
+    if (invalidFilenames.includes(file.name.toLowerCase())) return "Invalid filename. Please rename your file.";
+    const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
+    if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
     return true;
   };
 
@@ -77,12 +82,16 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     if (!file) return "ID document is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid document.";
     if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB.";
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, or PDF.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.";
+    // Filename validation: alphanumeric, hyphens, underscores only
+    const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
+    if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
     return true;
-  };
-
-  const onSubmit = async (data: any) => {
+  };  const onSubmit = async (data: any) => {
+    // TEMPORARILY DISABLED: Google Maps geocoding due to API quota limits
+    // Uncomment when quota is restored
+    /*
     setIsGeocoding(true);
     clearErrors("full_address");
 
@@ -100,20 +109,21 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
       setIsGeocoding(false);
       return;
     }
+    */
 
     const submissionData = {
       ...data,
       profile_photo: selectedProfilePhoto,
       id_document: selectedIdDocument,
       coordinates: {
-        lat: geocodeResult.data?.lat,
-        lng: geocodeResult.data?.lng,
+        lat: 0, // TEMPORARY: Using null coordinates while geocoding is disabled
+        lng: 0,
       },
-      formatted_address: geocodeResult.data?.formatted_address
+      formatted_address: data.full_address // Use the original address instead of geocoded one
     };
 
     nextStep(submissionData);
-    setIsGeocoding(false);
+    // setIsGeocoding(false); // Commented out since geocoding is disabled
   };
 
   return (
@@ -258,7 +268,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
           <div className="input-group-meta position-relative uniform-height">
             <input
               type="file"
-              accept="image/png, image/jpeg, image/jpg"
+              accept="image/png, image/jpeg, image/jpg, image/gif" // --- MODIFIED: Specify accepted formats
               id="profile-photo-input"
               className="hidden-file-input"
               {...register("profile_photo", {
@@ -267,9 +277,9 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
               onChange={(e) => {
                 const file = e.target.files?.[0] || null;
                 if (file) {
-                  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                   if (!allowedTypes.includes(file.type)) {
-                    toast.error('Invalid file type. Please upload a JPG, JPEG, or PNG file.');
+                    toast.error('Invalid file type. Please upload a JPG, JPEG, PNG, or GIF file.');
                     e.target.value = '';
                     return;
                   }
@@ -385,7 +395,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
               <div className="input-group-meta position-relative uniform-height">
                 <input
                   type="file"
-                  accept="image/png, image/jpeg, image/jpg, application/pdf"
+                  accept="image/png, image/jpeg, image/jpg, image/gif, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, text/plain" // --- MODIFIED: Specify accepted formats
                   id="id-document-input"
                   className="hidden-file-input"
                   {...register("id_document", {
@@ -394,9 +404,9 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     if (file) {
-                      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+                      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
                       if (!allowedTypes.includes(file.type)) {
-                        toast.error('Invalid file type. Please upload a JPG, JPEG, PNG, or PDF file.');
+                        toast.error('Invalid file type. Please upload a JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT file.');
                         e.target.value = '';
                         return;
                       }
@@ -660,7 +670,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
         {/* Navigation Buttons */}
         <div className="row">
           <div className="col-6">
-            <button type="button" className="btn-one w-100 mt-30" onClick={prevStep} disabled={isGeocoding}>
+            <button type="button" className="btn-one w-100 mt-30" onClick={prevStep} /* disabled={isGeocoding} */>
               Previous
             </button>
           </div>
@@ -668,9 +678,10 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              disabled={isGeocoding}
+              /* disabled={isGeocoding} */
             >
-              {isGeocoding ? "Verifying Address..." : "Next"}
+              {/* {isGeocoding ? "Verifying Address..." : "Next"} */}
+              Next
             </button>
           </div>
         </div>
