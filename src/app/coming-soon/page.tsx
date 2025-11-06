@@ -4,6 +4,7 @@ import Link from 'next/link';
 import icon from '@/assets/images/icon/icon_61.svg';
 import comingsoon_img from './coming_soon.png';
 import Header from "@/layouts/headers/header";
+import FooterOne from "@/layouts/footers/footer-one";
 import Wrapper from "@/layouts/wrapper";
 
 const ComingSoonPage = () => {
@@ -31,14 +32,18 @@ const ComingSoonPage = () => {
 
                 {/* Button */}
                 <Link
-                    href="/"
+                    href="/register"
                     className="btn-one d-flex align-items-center justify-content-between mt-3"
                     style={{ maxWidth: "250px", width: "100%" }}
                 >
-                    <span>GO BACK</span>
+                    <span>REGISTER</span>
                     <Image src={icon} alt="icon" />
                 </Link>
             </div>
+
+            {/* footer start */}
+            <FooterOne />
+            {/* footer end */}
         </Wrapper>
     );
 };
