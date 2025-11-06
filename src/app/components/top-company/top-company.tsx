@@ -72,7 +72,7 @@ const TopCompany = () => {
           <div className="col-sm-5">
             <div className="d-flex justify-content-sm-end">
               {/* Replaced Next.js Link with standard <a> tag */}
-              <a href="/" className="btn-six d-none d-sm-inline-block">Explore All Creators</a>
+              <a href="/coming-soon" className="btn-six d-none d-sm-inline-block">Explore All Creators</a>
             </div>
           </div>
         </div>
@@ -87,7 +87,7 @@ const TopCompany = () => {
                 {/* Updated description to render HTML for the line break */}
                 <p className="mb-20" dangerouslySetInnerHTML={{ __html: item.desc }} />
                 {/* Updated link text and replaced Next.js Link with standard <a> tag */}
-                <a href="/company-v2" className="open-job-btn fw-500 tran3s">{item.linkText}</a>
+                <a href="/coming-soon" className="open-job-btn fw-500 tran3s">{item.linkText}</a>
               </div>
             </div>
           ))}
@@ -95,7 +95,7 @@ const TopCompany = () => {
 
         <div className="text-center mt-30 d-sm-none">
           {/* Replaced Next.js Link with standard <a> tag */}
-          <a href="/company" className="btn-six">Explore More</a>
+          <a href="/coming-soon" className="btn-six">Explore More</a>
         </div>
       </div>
     </section>

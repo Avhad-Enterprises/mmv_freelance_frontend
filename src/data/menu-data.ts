@@ -17,10 +17,10 @@ const menu_data:IMenuData[] = [
   },
   {
     id:2,
-    link:'/job-list',
+    link:'/coming-soon',
     title:'Jobs',
     sub_menus:[
-      {link:'/job-list',title:'Job List style -1'},
+      {link:'/coming-soon',title:'Job List style -1'},
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid',title:'Job Grid style -1'},
@@ -33,18 +33,18 @@ const menu_data:IMenuData[] = [
   },
   {
     id: 3,
-    link: '/freelancers',
+    link: '/coming-soon',
     title: 'Candidates',
     sub_menus: [
-      {link: '/freelancers', title: 'Candidates'}
+      {link: '/coming-soon', title: 'Candidates'}
     ]
   },
   {
     id:4,
-    link:'/blog',
+    link:'/coming-soon',
     title:'Blog',
     sub_menus:[
-      {link:'/blog',title:'Blog'},
+      {link:'/coming-soon',title:'Blog'},
       // {link:'/coming-soon',title:'Blog Grid'},
       // {link:'/blog-v3',title:'Full width'},
       // {link:'/blog-details',title:'Blog Details'},
@@ -52,7 +52,7 @@ const menu_data:IMenuData[] = [
   },
   {
     id:5,
-    link:'/contact',
+    link:'/coming-soon',
     title:'Contact'
   },
   // {

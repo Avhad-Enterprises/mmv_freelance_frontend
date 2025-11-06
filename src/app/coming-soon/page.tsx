@@ -26,8 +26,7 @@ const ComingSoonPage = () => {
                 {/* Text Section (Below Image) */}
                 <h2>Coming Soon 🚀</h2>
                 <p className="text-md mb-4">
-                    We're working hard to bring you something amazing.
-                    Stay tuned and check back later!
+                    Your portal to abundance is coming soon
                 </p>
 
                 {/* Button */}

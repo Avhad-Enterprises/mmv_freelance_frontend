@@ -24,18 +24,14 @@ Ready to launch you next video project?</h2>
                       Join world's leading marketplace for video creators today.
                     </p>
                     <div className="d-flex gap-3">
-                      <form
-                        action="#"
-                        className="upload-btn position-relative d-flex align-items-center justify-content-center"
-                      >
+                      <a href="/coming-soon" className="upload-btn position-relative d-flex align-items-center justify-content-center">
                         <span className="fw-500 ms-2 text-white">
                           Post a Job for Free
                         </span>
-                        <input type="file" id="uploadCV" name="uploadCV" />
-                      </form>
-                      <button className="upload-btn d-flex align-items-center justify-content-center">
+                      </a>
+                      <a href="/coming-soon" className="upload-btn d-flex align-items-center justify-content-center">
                         <span className="fw-500 text-white">Start Earning Now</span>
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>
