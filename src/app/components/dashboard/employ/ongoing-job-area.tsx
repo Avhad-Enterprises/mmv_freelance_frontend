@@ -580,6 +580,11 @@ const OngoingJobArea: FC = () => {
     setSelectedApplicant(null);
   };
 
+  const handleOpenChat = (applicant: Applicant) => {
+    // TODO: Implement chat functionality
+    toast(`Chat with ${applicant.first_name} ${applicant.last_name} - Coming soon!`);
+  };
+
   return (
     <>
       <div className="dashboard-body">
@@ -706,6 +711,7 @@ const OngoingJobArea: FC = () => {
               onToggleSave={handleToggleSave}
               onUpdateApplicantStatus={handleUpdateApplicantStatus}
               getStatusInfo={getStatusInfo}
+              onOpenChat={handleOpenChat}
             />
           ) : (
             <>
