@@ -1,14 +1,5 @@
 "use client";
 
-/* ========== COMING SOON PAGE CODE - COMMENTED OUT ==========
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import icon from '@/assets/images/icon/icon_61.svg';
-import comingsoon_img from './coming-soon/coming_soon.png';
-import Header from "@/layouts/headers/header";
-import FooterOne from "@/layouts/footers/footer-one";
-import Wrapper from "@/layouts/wrapper";
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -16,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
+import FooterOne from "@/layouts/footers/footer-one";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
@@ -23,7 +15,6 @@ import { CategoryCardWrapper } from "./components/category/category-section-2";
 import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
-import FooterOne from "@/layouts/footers/footer-one";
 import { authCookies } from "@/utils/cookies";
 import TopCompany from "./components/top-company/top-company";
 import FeedbackOne from "./components/feedBacks/feedback-one";
@@ -130,20 +121,20 @@ const HomeSix = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {/* Conditional header rendering *\/}
+        {/* Conditional header rendering */}
         <Header isAuthenticated={isAuthenticated} />
 
-        {/* hero banner start *\/}
+        {/* hero banner start */}
         <HeroBannerSeven />
-        {/* hero banner end *\/}
+        {/* hero banner end */}
 
-        {/* partner slider start *\/}
+        {/* partner slider start */}
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <PartnersSlider />
         </div>
-        {/* partner slider end *\/}
+        {/* partner slider end */}
 
-        {/* category section start *\/}
+        {/* category section start */}
         <section className="category-section-two bg-color position-relative mt-45 md-mt-10 pt-150 xl-pt-130 lg-pt-80 pb-170 xl-pb-130 lg-pb-70">
           <div className="container">
             <div className="row justify-content-between">
@@ -165,7 +156,7 @@ const HomeSix = () => {
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
-        {/* category section end *\/}
+        {/* category section end */}
 
         {/* How It Works Two start */}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
@@ -174,7 +165,7 @@ const HomeSix = () => {
               <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
             </div>
 
-            {/* Modern Toggle Switch *\/}
+            {/* Modern Toggle Switch */}
             <div className="d-flex justify-content-center mb-60 lg-mb-40">
               <div className="role-toggle-container">
                 <button
@@ -295,13 +286,19 @@ const HomeSix = () => {
         </section>
         {/* How It Works Two end */}
 
-        {/* text feature start *\/}
+        {/* text feature start */}
         <FeatureTen />
-        {/* text feature end *\/}
-        <TopCompany />
-        <FeedbackOne/>
+        {/* text feature end */}
 
-        {/* faq start *\/}
+        {/* top company start */}
+        <TopCompany />
+        {/* top company end */}
+
+        {/* feedback start */}
+        <FeedbackOne/>
+        {/* feedback end */}
+
+        {/* faq start */}
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
             <div className="title-one text-center">
@@ -321,15 +318,15 @@ const HomeSix = () => {
             </div>
           </div>
         </section>
-        {/* faq end *\/}
+        {/* faq end */}
 
-        {/* fancy banner start *\/}
+        {/* fancy banner start */}
         <FancyBannerSeven/>
-        {/* fancy banner end *\/}
+        {/* fancy banner end */}
 
-        {/* footer start *\/}
+        {/* footer start */}
         <FooterOne />
-        {/* footer end *\/}
+        {/* footer end */}
       </div>
     </Wrapper>
   );
