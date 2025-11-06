@@ -1,7 +1,6 @@
 "use client";
-// Homepage temporarily showing Coming Soon page
-// Original homepage code commented out below - uncomment when ready to go live
 
+/* ========== COMING SOON PAGE CODE - COMMENTED OUT ==========
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,8 +9,6 @@ import comingsoon_img from './coming-soon/coming_soon.png';
 import Header from "@/layouts/headers/header";
 import FooterOne from "@/layouts/footers/footer-one";
 import Wrapper from "@/layouts/wrapper";
-
-/* ========== ORIGINAL HOMEPAGE CODE - COMMENTED OUT ==========
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -170,7 +167,7 @@ const HomeSix = () => {
         </section>
         {/* category section end *\/}
 
-        {/* How It Works Two start*\/}
+        {/* How It Works Two start */}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
             <div className="title-one text-center mb-40 lg-mb-30">
@@ -296,7 +293,7 @@ const HomeSix = () => {
             }
           `}</style>
         </section>
-        {/* How It Works Two end*\/}
+        {/* How It Works Two end */}
 
         {/* text feature start *\/}
         <FeatureTen />
@@ -339,50 +336,4 @@ const HomeSix = () => {
 };
 
 export default HomeSix;
-============ END OF COMMENTED CODE ========== */
-
-// Actual component - showing Coming Soon page
-const HomePage = () => {
-    return (
-        <Wrapper>
-            <div className="main-page-wrapper">
-                {/* header start */}
-                <Header />
-                {/* header end */}
-                
-                <div className="comingsoon-page d-flex flex-column align-items-center justify-content-center min-vh-100 text-center">
-                    {/* Image Section (Top) */}
-                    <Image
-                        src={comingsoon_img}
-                        alt="comingsoon-img"
-                        width={400}
-                        height={400}
-                        className="img-fluid mx-auto d-block mb-4"
-                    />
-
-                    {/* Text Section (Below Image) */}
-                    <h2>Coming Soon 🚀</h2>
-                    <p className="text-md mb-4">
-                        Your portal to abundance is coming soon
-                    </p>
-
-                    {/* Register Button */}
-                    <Link
-                        href="/register"
-                        className="btn-one d-flex align-items-center justify-content-between mt-3"
-                        style={{ maxWidth: "250px", width: "100%" }}
-                    >
-                        <span>REGISTER</span>
-                        <Image src={icon} alt="icon" />
-                    </Link>
-                </div>
-
-                {/* footer start */}
-                <FooterOne />
-                {/* footer end */}
-            </div>
-        </Wrapper>
-    );
-};
-
-export default HomePage;
+// End of main component
