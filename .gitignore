@@ -38,5 +38,9 @@ npm-error.log
 yarn-error.log
 *.tgz
 
+# TypeScript build info
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
 # Local development
 *.local
