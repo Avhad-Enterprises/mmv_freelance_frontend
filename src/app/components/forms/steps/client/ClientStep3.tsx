@@ -28,7 +28,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   });
 
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(formData?.profile_photo || null);
-  const [selectedBusinessDocument, setSelectedBusinessDocument] = useState<File | null>(formData?.business_document || null);
+  const [selectedBusinessDocuments, setSelectedBusinessDocuments] = useState<FileList | null>(formData?.business_document || null);
   const [selectedCountry, setSelectedCountry] = useState(formData?.countryCodeForPhone || "in");
   const [countryCode, setCountryCode] = useState(formData?.countryDialCode || "+91");
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -44,8 +44,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
     if (selectedProfilePhoto) {
       setProfilePhotoUrl(URL.createObjectURL(selectedProfilePhoto));
     }
-    if (selectedBusinessDocument) {
-      setBusinessDocUrl(URL.createObjectURL(selectedBusinessDocument));
+    if (selectedBusinessDocuments && selectedBusinessDocuments.length > 0) {
+      // For multiple files, we'll show preview for the first one
+      setBusinessDocUrl(URL.createObjectURL(selectedBusinessDocuments[0]));
     }
   }, []);
 
@@ -58,25 +59,55 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   }, [profilePhotoUrl, businessDocUrl]);
 
   // File validation functions
+  // --- MODIFIED: File validation functions with type checking ---
   const validateProfilePhoto = (file: File | null): boolean | string => {
     if (!file) return "Profile photo is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid image.";
-    if (file.size > 5 * 1024 * 1024) return "File size must be less than 5MB.";
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, or PNG.";
+    if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, or GIF.";
+    // Filename validation: alphanumeric, hyphens, underscores only, no "Unknown.pdf" or "blob"
+    const invalidFilenames = ['unknown.pdf', 'blob'];
+    if (invalidFilenames.includes(file.name.toLowerCase())) return "Invalid filename. Please rename your file.";
+    const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
+    if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
     return true;
   };
 
-  const validateBusinessDocument = (file: File | null): boolean | string => {
-    if (!file) return true; // Optional field
+  const validateIdDocument = (file: File | null): boolean | string => {
+    if (!file) return "ID document is required";
     if (file.size === 0) return "Selected file is empty. Please choose a valid document.";
     if (file.size > 10 * 1024 * 1024) return "File size must be less than 10MB.";
-    const allowedTypes = ['application/pdf'];
-    if (!allowedTypes.includes(file.type)) return "Invalid file type. Only PDF files are supported.";
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    if (!allowedTypes.includes(file.type)) return "Invalid file type. Please use JPG, JPEG, PNG, GIF, PDF, DOC, DOCX, or TXT.";
+    // Filename validation: alphanumeric, hyphens, underscores only
+    const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
+    if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
+    return true;
+  };
+
+  const validateBusinessDocument = (files: FileList | null): boolean | string => {
+    if (!files || files.length === 0) return true; // Optional field
+    if (files.length > 5) return "Maximum 5 files allowed.";
+    
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.size === 0) return `File "${file.name}" is empty. Please choose a valid document.`;
+      if (file.size > 10 * 1024 * 1024) return `File "${file.name}" must be less than 10MB.`;
+      if (!allowedTypes.includes(file.type)) return `Invalid file type for "${file.name}". Please use PDF, DOC, DOCX, or TXT.`;
+      // Filename validation: alphanumeric, hyphens, underscores only
+      const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
+      if (!filenameRegex.test(file.name)) return `Filename "${file.name}" can only contain letters, numbers, hyphens, and underscores.`;
+    }
     return true;
   };
 
   const onSubmit = async (data: any) => {
+    // TEMPORARILY DISABLED: Google Maps geocoding due to API quota limits
+    // Uncomment when quota is restored
+    /*
     setIsGeocoding(true);
     clearErrors("address");
 
@@ -94,22 +125,23 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
       setIsGeocoding(false);
       return;
     }
+    */
 
     const submissionData = {
       ...data,
       profile_photo: selectedProfilePhoto,
-      business_document: selectedBusinessDocument,
+      business_document: selectedBusinessDocuments,
       countryCodeForPhone: selectedCountry,
       countryDialCode: countryCode,
       coordinates: {
-        lat: geocodeResult.data?.lat,
-        lng: geocodeResult.data?.lng,
+        lat: 0, // TEMPORARY: Using null coordinates while geocoding is disabled
+        lng: 0,
       },
-      formatted_address: geocodeResult.data?.formatted_address
+      formatted_address: data.address // Use the original address instead of geocoded one
     };
 
     nextStep(submissionData);
-    setIsGeocoding(false);
+    // setIsGeocoding(false); // Commented out since geocoding is disabled
   };
 
   return (
@@ -150,11 +182,11 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
       )}
 
       {/* Business Document Preview Modal */}
-      {showBusinessDocPreview && businessDocUrl && (
+      {showBusinessDocPreview && businessDocUrl && selectedBusinessDocuments && selectedBusinessDocuments.length > 0 && (
         <div style={modalOverlayStyle} onClick={() => setShowBusinessDocPreview(false)}>
           <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-              <h5 style={{ margin: 0 }}>Business Document Preview</h5>
+              <h5 style={{ margin: 0 }}>Business Document Preview (File 1 of {selectedBusinessDocuments.length})</h5>
               <button
                 type="button"
                 style={{
@@ -169,15 +201,23 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                 ×
               </button>
             </div>
-            <embed
-              src={businessDocUrl}
-              type="application/pdf"
-              style={{
-                width: '100%',
-                height: '500px',
-                borderRadius: '8px'
-              }}
-            />
+            {selectedBusinessDocuments[0].type === 'application/pdf' ? (
+              <embed
+                src={businessDocUrl}
+                type="application/pdf"
+                style={{
+                  width: '100%',
+                  height: '500px',
+                  borderRadius: '8px'
+                }}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>This document type cannot be previewed in the browser.</p>
+                <p>File: {selectedBusinessDocuments[0].name}</p>
+                <p>Type: {selectedBusinessDocuments[0].type}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -245,7 +285,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               <div className="input-group-meta position-relative uniform-height">
                 <input
                   type="file"
-                  accept="image/png, image/jpeg, image/jpg"
+                  accept="image/png, image/jpeg, image/jpg, image/gif"
                   id="profile-photo-input"
                   className="hidden-file-input"
                   {...register("profile_photo", {
@@ -254,9 +294,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   onChange={(e) => {
                     const file = e.target.files?.[0] || null;
                     if (file) {
-                      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
                       if (!allowedTypes.includes(file.type)) {
-                        toast.error('Invalid file type. Please upload a JPG, JPEG, or PNG file.');
+                        toast.error('Invalid file type. Please upload a JPG, JPEG, PNG, or GIF file.');
                         e.target.value = '';
                         return;
                       }
@@ -349,42 +389,37 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
           <div className="col-12">
             <div className="input-group-meta position-relative mb-25">
               <label>Business Registration Documents (Optional)</label>
-              <small className="d-block mb-2 text-primary">Accepted format: PDF (Max 10MB)</small>
+              <small className="d-block mb-2 text-primary">Accepted formats: PDF, DOC, DOCX, TXT (Max 5 files, 10MB each)</small>
               <div className="input-group-meta position-relative uniform-height">
                 <input
                   type="file"
-                  accept="application/pdf"
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt"
                   id="business-document-input"
                   className="hidden-file-input"
                   {...register("business_document", {
-                    validate: (value) => validateBusinessDocument(value?.[0] || selectedBusinessDocument)
+                    validate: (value) => validateBusinessDocument(value || selectedBusinessDocuments)
                   })}
                   onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    if (file) {
-                      const allowedTypes = ['application/pdf'];
-                      if (!allowedTypes.includes(file.type)) {
-                        toast.error('Invalid file type. Only PDF files are supported.');
-                        e.target.value = '';
-                        return;
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+                      for (let i = 0; i < files.length; i++) {
+                        if (!allowedTypes.includes(files[i].type)) {
+                          toast.error('Invalid file type. Please upload PDF, DOC, DOCX, or TXT files.');
+                          e.target.value = '';
+                          return;
+                        }
                       }
                     }
-                    setSelectedBusinessDocument(file);
-                    setValue("business_document", e.target.files);
+                    setSelectedBusinessDocuments(files);
+                    setValue("business_document", files);
                     clearErrors("business_document");
-                    if (businessDocUrl) {
-                      URL.revokeObjectURL(businessDocUrl);
-                    }
-                    if (file) {
-                      setBusinessDocUrl(URL.createObjectURL(file));
-                    } else {
-                      setBusinessDocUrl(null);
-                    }
                   }}
                 />
                 <label
                   htmlFor="business-document-input"
-                  className={`file-upload-label ${selectedBusinessDocument ? 'file-selected' : ''}`}
+                  className={`file-upload-label ${selectedBusinessDocuments && selectedBusinessDocuments.length > 0 ? 'file-selected' : ''}`}
                   style={{
                     height: '60px',
                     minHeight: '60px',
@@ -395,11 +430,13 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   }}
                 >
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {selectedBusinessDocument
-                      ? `${selectedBusinessDocument.name} (${(selectedBusinessDocument.size / 1024).toFixed(1)} KB)`
-                      : "Choose Business Document"}
+                    {selectedBusinessDocuments && selectedBusinessDocuments.length > 0
+                      ? `${selectedBusinessDocuments.length} file${selectedBusinessDocuments.length > 1 ? 's' : ''} selected (${Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / 1024 < 1024 
+                          ? `${(Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB`
+                          : `${(Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / (1024 * 1024)).toFixed(1)} MB`})`
+                      : "Choose Business Documents"}
                   </span>
-                  {selectedBusinessDocument && (
+                  {selectedBusinessDocuments && selectedBusinessDocuments.length > 0 && (
                     <div style={{ display: 'flex', gap: '10px', marginLeft: '10px' }}>
                       <button
                         type="button"
@@ -416,7 +453,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                           fontSize: '16px',
                           color: '#666'
                         }}
-                        title="Preview document"
+                        title="Preview first document"
                       >
                         <i className="fa fa-eye"></i>
                       </button>
@@ -425,7 +462,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setSelectedBusinessDocument(null);
+                          setSelectedBusinessDocuments(null);
                           setBusinessDocUrl(null);
                           setValue("business_document", null);
                           const input = document.getElementById('business-document-input') as HTMLInputElement;
@@ -439,7 +476,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                           fontSize: '16px',
                           color: '#dc3545'
                         }}
-                        title="Remove file"
+                        title="Remove all files"
                       >
                         <i className="fa fa-trash"></i>
                       </button>
@@ -638,7 +675,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               type="button"
               className="btn-one w-100 mt-30"
               onClick={prevStep}
-              disabled={isGeocoding}
+              // disabled={isGeocoding} // Commented out since geocoding is disabled
             >
               Previous
             </button>
@@ -647,9 +684,10 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              disabled={isGeocoding}
+              // disabled={isGeocoding} // Commented out since geocoding is disabled
             >
-              {isGeocoding ? "Verifying Address..." : "Next"}
+              {/* {isGeocoding ? "Verifying Address..." : "Next"} // Commented out since geocoding is disabled */}
+              Next
             </button>
           </div>
         </div>

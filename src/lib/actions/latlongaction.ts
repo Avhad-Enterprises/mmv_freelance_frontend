@@ -23,16 +23,11 @@ interface ServerActionResponse {
     error?: string;
 }
 
-/**
- * Retrieves the latitude and longitude for a given address using the
- * Google Maps Geocoding API.
- * This is implemented as a Next.js Server Action and runs exclusively on the server.
- *
- * @param address The address string to geocode (e.g., "1600 Amphitheatre Parkway, Mountain View, CA").
- * @returns A promise resolving to an object containing either the coordinates or an error message.
- */
+// TEMPORARILY DISABLED: Google Maps API geocoding due to quota limits
+// Uncomment when quota is restored
+/*
 export async function geocodeAddress(address: string): Promise<ServerActionResponse> {
-    
+
     // Check if the API key is configured on the server
     if (!API_KEY) {
         console.error("[Server Action] Google Maps API key is not configured.");
@@ -57,7 +52,7 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
         const response = await fetch(url.toString(), {
             method: 'GET',
             // It's often beneficial to set cache: 'no-store' for external API calls
-            cache: 'no-store' 
+            cache: 'no-store'
         });
 
         // 4. Handle HTTP errors (e.g., 400, 403, 500)
@@ -74,7 +69,7 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
         if (data.status === 'OK' && data.results && data.results.length > 0) {
             const result = data.results[0];
             const location = result.geometry.location;
-            
+
             const coordinates: GeocodingResult = {
                 lat: location.lat,
                 lng: location.lng,
@@ -84,12 +79,12 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
 
             console.log("[Server Action] Successfully retrieved coordinates.");
             return { data: coordinates };
-        
+
         } else if (data.status === 'ZERO_RESULTS') {
             // Address could not be geocoded
             console.warn(`[Server Action] ZERO_RESULTS for address: '${sanitizedAddress}'`);
             return { error: `Address not found: '${sanitizedAddress}'. Please refine your search.` };
-        
+
         } else {
             // Handle other API-specific errors (e.g., INVALID_REQUEST, OVER_QUERY_LIMIT)
             const errorMessage = data.error_message || `API Error (${data.status}): Unknown geocoding issue.`;
@@ -103,4 +98,17 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
         console.error(`[Server Action] Catch Error: ${errorMessage}`, e);
         return { error: `An internal server error occurred: ${errorMessage}` };
     }
+}
+*/
+
+// TEMPORARY FALLBACK: Return null coordinates when geocoding is disabled
+export async function geocodeAddress(address: string): Promise<ServerActionResponse> {
+    console.log(`[Server Action] Geocoding temporarily disabled for address: '${address}'`);
+    return {
+        data: {
+            lat: 0,
+            lng: 0,
+            formatted_address: address // Keep the original address
+        }
+    };
 }
