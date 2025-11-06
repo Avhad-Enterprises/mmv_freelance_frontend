@@ -6,6 +6,8 @@ import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
+import { makePostRequest } from '@/utils/api';
+import toast from 'react-hot-toast';
 
 // Job Interface with submission status
 interface IJob {
@@ -212,41 +214,21 @@ const OngoingJobsArea = ({}: IProps) => {
     setSubmitError(null);
 
     try {
-      const token = authCookies.getToken();
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
       // Join multiple links with comma
       const submittedFiles = validLinks.join(',');
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${submittingJob.projects_task_id}/submit`,
+      const response = await makePostRequest(
+        `api/v1/projects-tasks/${submittingJob.projects_task_id}/submit`,
         {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: decoded.user_id,
-            submitted_files: submittedFiles,
-            additional_notes: additionalNotes.trim() || undefined,
-          }),
+          user_id: decoded.user_id,
+          submitted_files: submittedFiles,
+          additional_notes: additionalNotes.trim() || undefined,
         }
       );
 
-      const result = await response.json();
+      const result = response.data;
 
-      if (!response.ok) {
-        // Handle "Already Submitted" error
-        if (result.message?.includes('Already Submitted')) {
-          throw new Error('You have already submitted this project. Please wait for client review.');
-        }
-        throw new Error(result.message || 'Failed to submit project');
-      }
-
-      if (result.success) {
+      if (result?.success) {
         // Store submission data locally (temporary workaround)
         const submissionData = {
           submission_status: 0, // Pending
@@ -264,14 +246,22 @@ const OngoingJobsArea = ({}: IProps) => {
             : job
         ));
         
-        alert('✅ Project submitted successfully! Your submission is now pending client review.');
+        toast.success('✅ Project submitted successfully! Your submission is now pending client review.');
         handleCloseSubmitModal();
       } else {
-        throw new Error(result.message || 'Submission failed');
+        throw new Error(result?.message || 'Submission failed');
       }
     } catch (error: any) {
       console.error('Error submitting project:', error);
-      setSubmitError(error.message || 'An error occurred while submitting the project');
+      
+      // Handle specific error cases
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred while submitting the project';
+      
+      if (errorMessage.includes('Already Submitted') || errorMessage.includes('already submitted')) {
+        setSubmitError('You have already submitted this project. Please wait for client review.');
+      } else {
+        setSubmitError(errorMessage);
+      }
     } finally {
       setSubmitting(false);
     }

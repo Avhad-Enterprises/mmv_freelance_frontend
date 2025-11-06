@@ -43,10 +43,21 @@ interface Submission {
   additional_notes?: string;
   status: 0 | 1 | 2; // 0: Submitted, 1: Approved, 2: Rejected
   created_at: string;
-  freelancer_name?: string;
+  updated_at?: string;
+  // Joined data from related tables
+  freelancer_first_name?: string;
+  freelancer_last_name?: string;
   freelancer_email?: string;
+  freelancer_profile_title?: string;
   freelancer_profile_picture?: string;
+  project_title?: string;
+  budget?: number;
 }
+
+// Helper function to get full freelancer name
+const getFreelancerName = (submission: Submission): string => {
+  return `${submission.freelancer_first_name || ''} ${submission.freelancer_last_name || ''}`.trim() || 'Unknown Freelancer';
+};
 
 const OngoingJobArea: FC = () => {
   const { setIsOpenSidebar } = useSidebar();
@@ -171,44 +182,15 @@ const OngoingJobArea: FC = () => {
     setSubmissionsError(null);
 
     try {
-      // TODO: Replace with actual API endpoint when available
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`, {
-      //   headers: { 'Authorization': `Bearer ${authCookies.getToken()}` }
-      // });
+      const response = await makeGetRequest(`api/v1/projects-tasks/${project.project_id}/submissions`);
       
-      // TEMPORARY: Using dummy data until backend implements GET submissions endpoint
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-      
-      const dummySubmissions: Submission[] = [
-        {
-          submission_id: 1,
-          projects_task_id: parseInt(project.project_id),
-          user_id: 101,
-          submitted_files: "https://dropbox.com/project-final-v1.mp4,https://drive.google.com/raw-footage.zip",
-          additional_notes: "Completed as per requirements. Applied color grading, transitions, and sound design. Final render in 4K resolution.",
-          status: 0,
-          created_at: "2025-11-01T10:30:00Z",
-          freelancer_name: "Rajesh Kumar",
-          freelancer_email: "rajesh.k@example.com",
-          freelancer_profile_picture: "https://i.pravatar.cc/150?img=12"
-        },
-        {
-          submission_id: 2,
-          projects_task_id: parseInt(project.project_id),
-          user_id: 102,
-          submitted_files: "https://wetransfer.com/final-edit-master.mp4",
-          additional_notes: "Added cinematic effects and background music as discussed. Please review and let me know if any changes needed.",
-          status: 0,
-          created_at: "2025-11-01T14:15:00Z",
-          freelancer_name: "Priya Sharma",
-          freelancer_email: "priya.sharma@example.com",
-          freelancer_profile_picture: "https://i.pravatar.cc/150?img=5"
-        }
-      ];
-      
-      setSubmissions(dummySubmissions);
+      if (response.data?.success && response.data?.data) {
+        setSubmissions(response.data.data);
+      } else {
+        setSubmissions([]);
+      }
     } catch (err: any) {
-      const message = err.message || "Failed to load submissions.";
+      const message = err.response?.data?.message || err.message || "Failed to load submissions.";
       setSubmissionsError(message);
       setSubmissions([]);
     } finally {
@@ -404,28 +386,12 @@ const OngoingJobArea: FC = () => {
     setReviewingSubmission(true);
     
     try {
-      const token = authCookies.getToken();
-      if (!token) throw new Error('Authentication required');
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/submissions/${submissionId}/approve`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status }),
-        }
+      const response = await makePatchRequest(
+        `api/v1/projects-tasks/submissions/${submissionId}/approve`,
+        { status }
       );
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to update submission status');
-      }
-
-      if (result.success) {
+      if (response.data?.success) {
         // Update local state
         setSubmissions(prev => prev.map(sub =>
           sub.submission_id === submissionId
@@ -443,7 +409,8 @@ const OngoingJobArea: FC = () => {
       }
     } catch (error: any) {
       console.error('Error reviewing submission:', error);
-      toast.error(error.message || 'Failed to review submission');
+      const message = error.response?.data?.message || error.message || 'Failed to review submission';
+      toast.error(message);
     } finally {
       setReviewingSubmission(false);
     }
@@ -461,7 +428,7 @@ const OngoingJobArea: FC = () => {
 
   const getSubmissionStatusInfo = (status: 0 | 1 | 2) => {
     switch (status) {
-      case 0: return { text: "Pending Review", className: "bg-warning" };
+      case 0: return { text: "Pending Review", className: "bg-warning text-dark" };
       case 1: return { text: "Approved", className: "bg-success" };
       case 2: return { text: "Rejected", className: "bg-danger" };
       default: return { text: "Unknown", className: "bg-secondary" };
@@ -661,12 +628,12 @@ const OngoingJobArea: FC = () => {
                                 <div className="d-flex align-items-center">
                                   <img 
                                     src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
-                                    alt={submission.freelancer_name}
+                                    alt={getFreelancerName(submission)}
                                     className="rounded-circle me-2"
                                     style={{ width: 40, height: 40, objectFit: 'cover' }}
                                   />
                                   <div>
-                                    <div className="fw-semibold">{submission.freelancer_name}</div>
+                                    <div className="fw-semibold">{getFreelancerName(submission)}</div>
                                     <small className="text-muted">{submission.freelancer_email}</small>
                                   </div>
                                 </div>
@@ -751,12 +718,12 @@ const OngoingJobArea: FC = () => {
                 <div className="d-flex align-items-center mb-4 pb-3 border-bottom">
                   <img 
                     src={selectedSubmission.freelancer_profile_picture || 'https://via.placeholder.com/80'} 
-                    alt={selectedSubmission.freelancer_name}
+                    alt={getFreelancerName(selectedSubmission)}
                     className="rounded-circle me-3"
                     style={{ width: 60, height: 60, objectFit: 'cover' }}
                   />
                   <div>
-                    <h6 className="mb-1">{selectedSubmission.freelancer_name}</h6>
+                    <h6 className="mb-1">{getFreelancerName(selectedSubmission)}</h6>
                     <p className="text-muted mb-0">{selectedSubmission.freelancer_email}</p>
                   </div>
                 </div>
