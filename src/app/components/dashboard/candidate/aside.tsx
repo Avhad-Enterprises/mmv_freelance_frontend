@@ -38,6 +38,7 @@ const nav_data = [
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
     { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
     { id: 10 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/chat" , title : "Chat" },
+    { id: 11 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/credits" , title : "Credits" },
 ];
 
 type IProps = {
