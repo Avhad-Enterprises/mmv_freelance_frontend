@@ -54,6 +54,11 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   const [referenceLinks, setReferenceLinks] = useState<string[]>(['']);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
+  
+  // Bidding modal states
+  const [showBiddingModal, setShowBiddingModal] = useState(false);
+  const [biddingEnabled, setBiddingEnabled] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -79,24 +84,35 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       setError("User data is not available. Cannot post job.");
       return;
     }
+
+    // Store form data and show bidding modal
+    setPendingFormData(data);
+    setShowBiddingModal(true);
+  };
+
+  const handleConfirmPost = async () => {
+    if (!pendingFormData || !currentUser) return;
+
     setLoading(true);
     setError(null);
+    setShowBiddingModal(false);
 
-    const finalUrl = data.url && data.url.trim()
-      ? data.url.trim()
-      : `${generateSlug(data.project_title)}-${Date.now()}`;
+    const finalUrl = pendingFormData.url && pendingFormData.url.trim()
+      ? pendingFormData.url.trim()
+      : `${generateSlug(pendingFormData.project_title)}-${Date.now()}`;
 
     const validReferenceLinks = referenceLinks.filter(link => link.trim() !== '');
 
     const payload = {
-      ...data,
+      ...pendingFormData,
       url: finalUrl,
       skills_required: selectedSkills,
       reference_links: validReferenceLinks,
-      tags: JSON.stringify(tags), // Use the state array for tags
+      tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
       is_active: 1,
+      bidding_enabled: biddingEnabled, // Add bidding status to payload
     };
 
     try {
@@ -116,7 +132,15 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       console.error("Failed to post job:", err);
     } finally {
       setLoading(false);
+      setPendingFormData(null);
+      setBiddingEnabled(false); // Reset for next time
     }
+  };
+
+  const handleCancelModal = () => {
+    setShowBiddingModal(false);
+    setPendingFormData(null);
+    setBiddingEnabled(false);
   };
 
   // Handlers for Reference Links
@@ -151,212 +175,259 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   };
 
   return (
-    <div className="bg-white card-box border-20">
-      <h2 className="main-title mb-30">Post a New Job</h2>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="row">
-          {/* Project Title */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Project Title*</label>
-              <input type="text" placeholder="Enter project title" className="form-control"
-                {...register("project_title", { required: "Project title is required" })}
+    <>
+      <div className="bg-white card-box border-20">
+        <h2 className="main-title mb-30">Post a New Job</h2>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="row">
+            {/* Project Title */}
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Project Title*</label>
+                <input type="text" placeholder="Enter project title" className="form-control"
+                  {...register("project_title", { required: "Project title is required" })}
+                />
+                {errors.project_title && <div className="error">{String(errors.project_title.message)}</div>}
+              </div>
+            </div>
+
+            {/* Project Category & Type */}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Project Category*</label>
+                <select className="form-control" {...register("project_category", { required: "Category is required" })}>
+                  <option value="Video Editing">Video Editing</option>
+                  <option value="Animation">Animation</option>
+                  <option value="Motion Graphics">Motion Graphics</option>
+                </select>
+                {errors.project_category && <div className="error">{String(errors.project_category.message)}</div>}
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Project Type*</label>
+                <select className="form-control" {...register("projects_type", { required: "Project type is required" })}>
+                  <option value="Video Editing">Video Editing</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Social Media">Social Media</option>
+                </select>
+                {errors.projects_type && <div className="error">{String(errors.projects_type.message)}</div>}
+              </div>
+            </div>
+
+            {/* Budget & Deadline */}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Budget ($)*</label>
+                <input type="number" placeholder="Enter budget amount" className="form-control"
+                  {...register("budget", {
+                    required: "Budget is required",
+                    min: { value: 1, message: "Budget must be greater than 0" }
+                  })}
+                />
+                {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Deadline*</label>
+                <input type="date" className="form-control" {...register("deadline", { required: "Deadline is required" })} />
+                {errors.deadline && <div className="error">{String(errors.deadline.message)}</div>}
+              </div>
+            </div>
+
+            {/* Project Description */}
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Project Description*</label>
+                <textarea placeholder="Describe your project requirements in detail" className="form-control" rows={4}
+                  {...register("project_description", { required: "Description is required" })}
+                />
+                {errors.project_description && <div className="error">{String(errors.project_description.message)}</div>}
+              </div>
+            </div>
+
+            {/* Dynamic Tags Input */}
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Tags</label>
+                <div className="tags-input-container p-2 border rounded">
+                  {tags.map((tag, index) => (
+                    <span key={index} className="tag-chip badge bg-light text-dark me-2 mb-2">
+                      {tag}
+                      <button type="button" className="btn-close ms-2" style={{ fontSize: '0.65em' }} onClick={() => handleRemoveTag(index)}></button>
+                    </span>
+                  ))}
+                  <div className="d-flex">
+                    <input type="text" className="form-control" placeholder="Add a tag..." value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} />
+                    <button type="button" className="btn btn-primary ms-2" onClick={handleAddTag}>+</button>
+                  </div>
+                </div>
+                <small style={{ color: "blue", display: 'block', marginTop: '5px' }}>Press Enter or click '+' to add a tag.</small>
+              </div>
+            </div>
+
+            {/* Skills Required */}
+            <div className="col-12">
+              <MultipleSelectionField
+                label="Skills Required*"
+                options={["Video Editing", "Color Grading", "Sound Design", "Motion Graphics", "Animation", "VFX", "Adobe Premiere Pro", "Adobe After Effects", "Final Cut Pro", "DaVinci Resolve", "Avid Media Composer", "Cinema 4D", "Blender", "Adobe Audition"]}
+                selectedItems={selectedSkills}
+                onChange={(skills) => { setSelectedSkills(skills); setValue('skills_required', skills, { shouldValidate: true }); }}
+                required={true}
+                error={errors.skills_required?.message as string}
               />
-              {errors.project_title && <div className="error">{String(errors.project_title.message)}</div>}
             </div>
-          </div>
 
-          {/* Project Category & Type */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Project Category*</label>
-              <select className="form-control" {...register("project_category", { required: "Category is required" })}>
-                <option value="Video Editing">Video Editing</option>
-                <option value="Animation">Animation</option>
-                <option value="Motion Graphics">Motion Graphics</option>
-              </select>
-              {errors.project_category && <div className="error">{String(errors.project_category.message)}</div>}
+            {/* Video Length & Format */}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Video Length (seconds)*</label>
+                <input type="number" placeholder="e.g., 300 for 5 minutes" className="form-control"
+                  {...register("video_length", { required: "Video length is required", min: { value: 1, message: "Length must be > 0" } })}
+                />
+                {errors.video_length && <div className="error">{String(errors.video_length.message)}</div>}
+              </div>
             </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Project Type*</label>
-              <select className="form-control" {...register("projects_type", { required: "Project type is required" })}>
-                <option value="Video Editing">Video Editing</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Social Media">Social Media</option>
-              </select>
-              {errors.projects_type && <div className="error">{String(errors.projects_type.message)}</div>}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Final Format*</label>
+                <select className="form-control" {...register("project_format", { required: "Format is required" })}>
+                  <option value="MP4">MP4</option>
+                  <option value="MOV">MOV</option>
+                  <option value="ProRes">ProRes</option>
+                </select>
+                {errors.project_format && <div className="error">{String(errors.project_format.message)}</div>}
+              </div>
             </div>
-          </div>
 
-          {/* Budget & Deadline */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Budget ($)*</label>
-              <input type="number" placeholder="Enter budget amount" className="form-control"
-                {...register("budget", {
-                  required: "Budget is required",
-                  min: { value: 1, message: "Budget must be greater than 0" }
-                })}
-              />
-              {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+            {/* Preferred Style & Voiceover */}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Preferred Video Style*</label>
+                <select className="form-control" {...register("preferred_video_style", { required: "Video style is required" })}>
+                  <option value="Professional">Professional</option>
+                  <option value="Cinematic">Cinematic</option>
+                  <option value="Vlog / Lifestyle">Vlog / Lifestyle</option>
+                </select>
+                {errors.preferred_video_style && <div className="error">{String(errors.preferred_video_style.message)}</div>}
+              </div>
             </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Deadline*</label>
-              <input type="date" className="form-control" {...register("deadline", { required: "Deadline is required" })} />
-              {errors.deadline && <div className="error">{String(errors.deadline.message)}</div>}
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Voiceover Language*</label>
+                <input type="text" placeholder="e.g., English, Spanish, or None" className="form-control"
+                  {...register("audio_voiceover", { required: "Voiceover info is required" })}
+                />
+                {errors.audio_voiceover && <div className="error">{String(errors.audio_voiceover.message)}</div>}
+              </div>
             </div>
-          </div>
 
-          {/* Project Description */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Project Description*</label>
-              <textarea placeholder="Describe your project requirements in detail" className="form-control" rows={4}
-                {...register("project_description", { required: "Description is required" })}
-              />
-              {errors.project_description && <div className="error">{String(errors.project_description.message)}</div>}
+            {/* Audio & Reference Links */}
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Audio Requirements*</label>
+                <textarea placeholder="Narration needed, background music, etc." className="form-control" rows={3}
+                  {...register("audio_description", { required: "Audio description is required" })}
+                />
+                {errors.audio_description && <div className="error">{String(errors.audio_description.message)}</div>}
+              </div>
             </div>
-          </div>
-
-          {/* Dynamic Tags Input */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Tags</label>
-              <div className="tags-input-container p-2 border rounded">
-                {tags.map((tag, index) => (
-                  <span key={index} className="tag-chip badge bg-light text-dark me-2 mb-2">
-                    {tag}
-                    <button type="button" className="btn-close ms-2" style={{ fontSize: '0.65em' }} onClick={() => handleRemoveTag(index)}></button>
-                  </span>
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Reference Links</label>
+                {referenceLinks.map((link, index) => (
+                  <div key={index} className="d-flex align-items-center mb-10">
+                    <input type="url" placeholder="https://example.com/reference1" className="form-control" value={link} onChange={(e) => updateReferenceLink(index, e.target.value)} />
+                    {referenceLinks.length > 1 && <button type="button" className="btn btn-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                  </div>
                 ))}
-                <div className="d-flex">
-                  <input type="text" className="form-control" placeholder="Add a tag..." value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} />
-                  <button type="button" className="btn btn-primary ms-2" onClick={handleAddTag}>+</button>
+                <button type="button" className="btn btn-outline-primary btn-sm mt-2" onClick={addReferenceLink}>+ Add Another Link</button>
+              </div>
+            </div>
+
+            {/* Additional Notes & Meta Info */}
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Additional Notes</label>
+                <textarea placeholder="Please deliver high quality work" className="form-control" rows={3} {...register("additional_notes")} />
+              </div>
+            </div>
+            <div className="col-12"><h4 className="dash-title-three pt-30 mb-20">Meta Information (Optional)</h4></div>
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>URL Slug</label>
+                <input type="text" placeholder="auto-generated if empty" className="form-control" {...register("url")} />
+              </div>
+            </div>
+            <div className="col-md-6">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Meta Title</label>
+                <input type="text" placeholder="SEO-friendly title" className="form-control" {...register("meta_title")} />
+              </div>
+            </div>
+            <div className="col-12">
+              <div className="input-group-meta position-relative mb-25">
+                <label>Meta Description</label>
+                <textarea placeholder="Brief description for search engines" className="form-control" rows={2} {...register("meta_description")} />
+              </div>
+            </div>
+
+            {/* Error & Action Buttons */}
+            {error && <div className="col-12"><div className="alert alert-danger my-3">{error}</div></div>}
+            <div className="col-12 d-flex justify-content-between mt-30">
+              <button type="button" className="btn-one" onClick={onBackToList} disabled={loading}>Cancel</button>
+              <button type="submit" className="btn-one" disabled={loading}>{loading ? "Submitting..." : "Post Job"}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* Bidding Confirmation Modal */}
+      {showBiddingModal && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Enable Bidding</h5>
+                <button type="button" className="btn-close" onClick={handleCancelModal}></button>
+              </div>
+              <div className="modal-body">
+                <p className="mb-3">Would you like to enable bidding for this job? This allows freelancers to submit proposals with their own pricing.</p>
+                <div className="d-flex align-items-center justify-content-between p-3 border rounded">
+                  <div>
+                    <strong>Bidding Status</strong>
+                    <div className="text-muted small">
+                      {biddingEnabled ? 'Freelancers can submit custom bids' : 'Fixed price project'}
+                    </div>
+                  </div>
+                  <div className="form-check form-switch">
+                    <input 
+                      className="form-check-input" 
+                      type="checkbox" 
+                      role="switch" 
+                      id="biddingToggle"
+                      checked={biddingEnabled}
+                      onChange={(e) => setBiddingEnabled(e.target.checked)}
+                      style={{ width: '3rem', height: '1.5rem', cursor: 'pointer' }}
+                    />
+                    <label className="form-check-label" htmlFor="biddingToggle"></label>
+                  </div>
                 </div>
               </div>
-              <small style={{ color: "blue", display: 'block', marginTop: '5px' }}>Press Enter or click '+' to add a tag.</small>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCancelModal}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handleConfirmPost} disabled={loading}>
+                  {loading ? 'Posting...' : 'Confirm & Post Job'}
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Skills Required */}
-          <div className="col-12">
-            <MultipleSelectionField
-              label="Skills Required*"
-              options={["Video Editing", "Color Grading", "Sound Design", "Motion Graphics", "Animation", "VFX", "Adobe Premiere Pro", "Adobe After Effects", "Final Cut Pro", "DaVinci Resolve", "Avid Media Composer", "Cinema 4D", "Blender", "Adobe Audition"]}
-              selectedItems={selectedSkills}
-              onChange={(skills) => { setSelectedSkills(skills); setValue('skills_required', skills, { shouldValidate: true }); }}
-              required={true}
-              error={errors.skills_required?.message as string}
-            />
-          </div>
-
-          {/* Video Length & Format */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Video Length (seconds)*</label>
-              <input type="number" placeholder="e.g., 300 for 5 minutes" className="form-control"
-                {...register("video_length", { required: "Video length is required", min: { value: 1, message: "Length must be > 0" } })}
-              />
-              {errors.video_length && <div className="error">{String(errors.video_length.message)}</div>}
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Final Format*</label>
-              <select className="form-control" {...register("project_format", { required: "Format is required" })}>
-                <option value="MP4">MP4</option>
-                <option value="MOV">MOV</option>
-                <option value="ProRes">ProRes</option>
-              </select>
-              {errors.project_format && <div className="error">{String(errors.project_format.message)}</div>}
-            </div>
-          </div>
-
-          {/* Preferred Style & Voiceover */}
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Preferred Video Style*</label>
-              <select className="form-control" {...register("preferred_video_style", { required: "Video style is required" })}>
-                <option value="Professional">Professional</option>
-                <option value="Cinematic">Cinematic</option>
-                <option value="Vlog / Lifestyle">Vlog / Lifestyle</option>
-              </select>
-              {errors.preferred_video_style && <div className="error">{String(errors.preferred_video_style.message)}</div>}
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Voiceover Language*</label>
-              <input type="text" placeholder="e.g., English, Spanish, or None" className="form-control"
-                {...register("audio_voiceover", { required: "Voiceover info is required" })}
-              />
-              {errors.audio_voiceover && <div className="error">{String(errors.audio_voiceover.message)}</div>}
-            </div>
-          </div>
-
-          {/* Audio & Reference Links */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Audio Requirements*</label>
-              <textarea placeholder="Narration needed, background music, etc." className="form-control" rows={3}
-                {...register("audio_description", { required: "Audio description is required" })}
-              />
-              {errors.audio_description && <div className="error">{String(errors.audio_description.message)}</div>}
-            </div>
-          </div>
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Reference Links</label>
-              {referenceLinks.map((link, index) => (
-                <div key={index} className="d-flex align-items-center mb-10">
-                  <input type="url" placeholder="https://example.com/reference1" className="form-control" value={link} onChange={(e) => updateReferenceLink(index, e.target.value)} />
-                  {referenceLinks.length > 1 && <button type="button" className="btn btn-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
-                </div>
-              ))}
-              <button type="button" className="btn btn-outline-primary btn-sm mt-2" onClick={addReferenceLink}>+ Add Another Link</button>
-            </div>
-          </div>
-
-          {/* Additional Notes & Meta Info */}
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Additional Notes</label>
-              <textarea placeholder="Please deliver high quality work" className="form-control" rows={3} {...register("additional_notes")} />
-            </div>
-          </div>
-          <div className="col-12"><h4 className="dash-title-three pt-30 mb-20">Meta Information (Optional)</h4></div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>URL Slug</label>
-              <input type="text" placeholder="auto-generated if empty" className="form-control" {...register("url")} />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Meta Title</label>
-              <input type="text" placeholder="SEO-friendly title" className="form-control" {...register("meta_title")} />
-            </div>
-          </div>
-          <div className="col-12">
-            <div className="input-group-meta position-relative mb-25">
-              <label>Meta Description</label>
-              <textarea placeholder="Brief description for search engines" className="form-control" rows={2} {...register("meta_description")} />
-            </div>
-          </div>
-
-          {/* Error & Action Buttons */}
-          {error && <div className="col-12"><div className="alert alert-danger my-3">{error}</div></div>}
-          <div className="col-12 d-flex justify-content-between mt-30">
-            <button type="button" className="btn-one" onClick={onBackToList} disabled={loading}>Cancel</button>
-            <button type="submit" className="btn-one" disabled={loading}>{loading ? "Submitting..." : "Post Job"}</button>
           </div>
         </div>
-      </form>
-    </div>
+      )}
+    </>
   );
 };
 
