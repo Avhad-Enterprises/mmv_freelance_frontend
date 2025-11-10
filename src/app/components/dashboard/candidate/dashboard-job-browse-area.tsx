@@ -69,6 +69,7 @@ const DashboardJobBrowseArea = () => {
   const [shortValue, setShortValue] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [biddingFilter, setBiddingFilter] = useState<string>("all"); // "all", "bidding", "fixed"
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [userCurrency, setUserCurrency] = useState<string>('USD');
@@ -172,6 +173,13 @@ const DashboardJobBrowseArea = () => {
       );
     }
 
+    // Filter by bidding status
+    if (biddingFilter === "bidding") {
+      filteredData = filteredData.filter((item) => item.bidding_enabled === true);
+    } else if (biddingFilter === "fixed") {
+      filteredData = filteredData.filter((item) => item.bidding_enabled === false);
+    }
+
     if (projects_type) {
       filteredData = filteredData.filter(
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
@@ -203,7 +211,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, selectedTypes, projects_type,
-    all_jobs, priceValue, shortValue, search_key, userCurrency,
+    all_jobs, priceValue, shortValue, search_key, userCurrency, biddingFilter,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -258,6 +266,7 @@ const DashboardJobBrowseArea = () => {
     setPriceValue([0, Math.ceil(maxBudgetUserCurrency)]);
     setSelectedSkills([]);
     setSelectedTypes([]);
+    setBiddingFilter("all");
     setShortValue("");
     setItemOffset(0);
     toast.success("Filters reset successfully");
@@ -287,7 +296,7 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || selectedTypes.length > 0;
+  const hasSelections = selectedSkills.length > 0 || selectedTypes.length > 0 || biddingFilter !== "all";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
@@ -334,6 +343,31 @@ const DashboardJobBrowseArea = () => {
                       <li className="more">+{item.skills_required.length - 3}</li>
                     )}
                   </ul>
+                  
+                  {/* Bidding Badge */}
+                  <div className="mt-2">
+                    {item.bidding_enabled ? (
+                      <span className="badge" style={{ 
+                        backgroundColor: '#00BF58', 
+                        color: 'white',
+                        fontSize: '11px',
+                        padding: '4px 10px',
+                        fontWeight: '500'
+                      }}>
+                        <i className="bi bi-gavel me-1"></i>Bidding Enabled
+                      </span>
+                    ) : (
+                      <span className="badge" style={{ 
+                        backgroundColor: '#6c757d', 
+                        color: 'white',
+                        fontSize: '11px',
+                        padding: '4px 10px',
+                        fontWeight: '500'
+                      }}>
+                        <i className="bi bi-cash-stack me-1"></i>Fixed Price
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -420,6 +454,31 @@ const DashboardJobBrowseArea = () => {
               <li key={i} className="text-nowrap">{s}</li>
             ))}
           </ul>
+          
+          {/* Bidding Badge */}
+          <div className="mb-3">
+            {item.bidding_enabled ? (
+              <span className="badge" style={{ 
+                backgroundColor: '#00BF58', 
+                color: 'white',
+                fontSize: '11px',
+                padding: '4px 10px',
+                fontWeight: '500'
+              }}>
+                <i className="bi bi-gavel me-1"></i>Bidding Enabled
+              </span>
+            ) : (
+              <span className="badge" style={{ 
+                backgroundColor: '#6c757d', 
+                color: 'white',
+                fontSize: '11px',
+                padding: '4px 10px',
+                fontWeight: '500'
+              }}>
+                <i className="bi bi-cash-stack me-1"></i>Fixed Price
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="candidate-info text-center mb-3">
@@ -507,28 +566,30 @@ const DashboardJobBrowseArea = () => {
                 </select>
               </div>
 
-              {/* Budget Range */}
-              <div className="col-lg-4 col-md-6">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Budget Range ({userCurrency})</label>
-                <input
-                  type="range"
-                  className="form-range mb-2"
-                  min="0"
-                  max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
-                  value={priceValue[1]}
+              {/* Bidding Filter */}
+              <div className="col-lg-3 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Pricing Type</label>
+                <select
+                  className="form-select py-2"
+                  style={{ 
+                    borderRadius: '8px',
+                    border: '1px solid #e0e0e0',
+                    fontSize: '14px'
+                  }}
+                  value={biddingFilter}
                   onChange={(e) => {
-                    setPriceValue([0, Number(e.target.value)]);
+                    setBiddingFilter(e.target.value);
                     setItemOffset(0);
                   }}
-                />
-                <div className="d-flex justify-content-between align-items-center">
-                  <span style={{ fontSize: '13px', color: '#666' }}>{userCurrency} 0</span>
-                  <span style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
-                </div>
+                >
+                  <option value="all">All Projects</option>
+                  <option value="bidding">Bidding Only</option>
+                  <option value="fixed">Fixed Price Only</option>
+                </select>
               </div>
 
               {/* Clear Button */}
-              <div className="col-lg-2 col-md-6">
+              <div className="col-lg-3 col-md-6">
                 <button
                   onClick={handleReset}
                   className="btn btn-outline-secondary w-100 py-2 fw-500"
@@ -542,7 +603,7 @@ const DashboardJobBrowseArea = () => {
               </div>
             </div>
 
-            {/* Sort By Price Row */}
+            {/* Sort By Price and Budget Range Row */}
             <div className="row g-4 mt-1">
               <div className="col-lg-3 col-md-6">
                 <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Sort By Price</label>
@@ -561,11 +622,55 @@ const DashboardJobBrowseArea = () => {
                   <option value="price-high-to-low">High to Low</option>
                 </select>
               </div>
+
+              {/* Budget Range */}
+              <div className="col-lg-9 col-md-6">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Budget Range ({userCurrency})</label>
+                <input
+                  type="range"
+                  className="form-range mb-2"
+                  min="0"
+                  max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
+                  value={priceValue[1]}
+                  onChange={(e) => {
+                    setPriceValue([0, Number(e.target.value)]);
+                    setItemOffset(0);
+                  }}
+                />
+                <div className="d-flex justify-content-between align-items-center">
+                  <span style={{ fontSize: '13px', color: '#666' }}>{userCurrency} 0</span>
+                  <span style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
+                </div>
+              </div>
             </div>
 
             {/* Selected Filters Display */}
             {hasSelections && (
               <div className="d-flex flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #e0e0e0' }}>
+                {biddingFilter !== "all" && (
+                  <span 
+                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
+                    style={{ 
+                      backgroundColor: '#00BF58', 
+                      color: 'white',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}
+                    <button 
+                      onClick={() => setBiddingFilter("all")} 
+                      className="btn-close ms-2 opacity-100" 
+                      style={{ 
+                        width: '8px', 
+                        height: '8px', 
+                        filter: 'brightness(0) invert(1)',
+                        fontSize: '10px'
+                      }}
+                      aria-label="Remove filter"
+                    ></button>
+                  </span>
+                )}
                 {selectedTypes.map(type => (
                   <span 
                     key={type} 

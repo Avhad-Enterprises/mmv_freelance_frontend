@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
@@ -7,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
-import FooterOne from "@/layouts/footers/footer-one";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
@@ -15,6 +13,7 @@ import { CategoryCardWrapper } from "./components/category/category-section-2";
 import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
+import FooterOne from "@/layouts/footers/footer-one";
 import { authCookies } from "@/utils/cookies";
 import TopCompany from "./components/top-company/top-company";
 import FeedbackOne from "./components/feedBacks/feedback-one";
@@ -139,18 +138,21 @@ const HomeSix = () => {
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/coming-soon" className="btn-six">All Categories</Link>
+                  <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
                 </div>
               </div>
             </div>
+            {/* CategoryCardWrapper */}
             <CategoryCardWrapper />
+            {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/coming-soon" className="btn-six">All Categories</Link>
+              <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
 
+        {/* How It Works Two start*/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
             <div className="title-one text-center mb-40 lg-mb-30">
@@ -275,8 +277,12 @@ const HomeSix = () => {
             }
           `}</style>
         </section>
+        {/* How It Works Two end */}
 
         <FeatureTen />
+        {/* text feature end */}
+
+        {/* top company start */}
         <TopCompany />
         <FeedbackOne/>
 
@@ -294,7 +300,7 @@ const HomeSix = () => {
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
               <div className="btn-eight fw-500">Don't find the answer? We can help.
-              <Link href="/coming-soon">Click here</Link>
+              <Link href="/faq">Click here</Link>
               </div>
             </div>
           </div>
