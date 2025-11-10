@@ -36,8 +36,9 @@ export interface Applicant {
   bio: string | null;
   skills?: string[]; // Add skills field
   applied_date?: string; // Add applied date field
+  bid_amount?: number; // Bidded amount
+  bid_message?: string; // Bid proposal/message
 }
-
 const EmployJobArea: FC = () => {
   const router = useRouter();
   const { setIsOpenSidebar } = useSidebar();
@@ -171,20 +172,23 @@ const EmployJobArea: FC = () => {
       
       // Map API response to match Applicant interface, enriched with freelancer data
       const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
-        const freelancer = freelancerMap.get(app.user_id);
-        return {
-          applied_projects_id: app.applied_projects_id,
-          user_id: app.user_id,
-          first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
-          last_name: app.applicant?.last_name || freelancer?.last_name || '',
-          email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
-          profile_picture: freelancer?.profile_picture || '',
-          status: app.status,
-          bio: freelancer?.bio || freelancer?.short_description || null,
-          skills: freelancer?.skills || [],
-          applied_date: app.created_at,
-        };
-      });
+  const freelancer = freelancerMap.get(app.user_id);
+  return {
+    applied_projects_id: app.applied_projects_id,
+    user_id: app.user_id,
+    first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
+    last_name: app.applicant?.last_name || freelancer?.last_name || '',
+    email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
+    profile_picture: freelancer?.profile_picture || '',
+    status: app.status,
+    bio: freelancer?.bio || freelancer?.short_description || null,
+    skills: freelancer?.skills || [],
+    applied_date: app.created_at,
+    bid_amount: parseFloat(app.bid_amount) || 0,
+    bid_message: app.bid_message || '',
+  };
+});
+
       
       setApplicants(applicantsData);
     } catch (err: any) {
