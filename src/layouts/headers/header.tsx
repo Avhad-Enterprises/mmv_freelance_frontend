@@ -3,7 +3,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Menus from "./component/menus";
-import logo from "@/assets/images/logo/logo_new.png";
+import logo from "@/assets/images/logo/white-mmv.png";
 import CategoryDropdown from "./component/category-dropdown";
 import LoginModal from "@/app/components/common/popup/login-modal";
 
