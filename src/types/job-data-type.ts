@@ -29,7 +29,7 @@ export interface IJobType {
   is_deleted?: boolean;
   deleted_by?: number | null;
   deleted_at?: string | null;
-  bidding_enabled:boolean;
+  bidding_enabled?:boolean;
 
 
 

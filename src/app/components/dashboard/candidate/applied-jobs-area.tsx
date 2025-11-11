@@ -6,6 +6,7 @@ import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
+import { IJobType } from '@/types/job-data-type';
 
 // Status Mapping
 const statusMap: Record<number, { text: string; className: string }> = {
@@ -16,24 +17,8 @@ const statusMap: Record<number, { text: string; className: string }> = {
 };
 
 // Job Interface - Aligned with IJobType
-interface IJob {
-  projects_task_id: number;
-  project_title: string;
-  budget: number;
-  deadline: string;
-  category: string;
-  projects_type: string;
+interface IJob extends IJobType {
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
-  skills_required?: string[];
-  project_description?: string;
-  project_format?: string;
-  audio_voiceover?: string;
-  video_length?: number;
-  preferred_video_style?: string;
-  audio_description?: string;
-  reference_links?: string[];
-  created_at?: string;
-  additional_notes?: string;
 }
 
 type IProps = {};
@@ -95,6 +80,7 @@ const AppliedJobsArea = ({}: IProps) => {
           reference_links: job.reference_links || [],
           created_at: job.created_at || '',
           additional_notes: job.additional_notes || '',
+          bidding_enabled: job.bidding_enabled || false,
         }));
         setJobs(jobData);
         setFilteredJobs(jobData);
