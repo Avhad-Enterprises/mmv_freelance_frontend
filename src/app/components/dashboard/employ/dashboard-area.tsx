@@ -25,6 +25,14 @@ type ProjectItem = {
   applicants_count?: number;
 };
 
+type ProfileCompletion = {
+  completed: number;
+  total: number;
+  percentage: number;
+  completedFields: string[];
+  missingFields: string[];
+};
+
 // props type 
 type IProps = {
     // No props needed, using context
@@ -39,15 +47,28 @@ const EmployDashboardArea = ({}: IProps) => {
     totalApplicants: 0,
     completedProjects: 0,
   });
+  const [profileCompletion, setProfileCompletion] = useState<ProfileCompletion | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch projects and metrics
   useEffect(() => {
     const fetchData = async () => {
+      // Always fetch profile completion for authenticated users
+      try {
+        const profileRes = await makeGetRequest("api/v1/users/me/profile-completion");
+        if (profileRes?.data?.success) {
+          setProfileCompletion(profileRes.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching profile completion:", error);
+      }
+
+      // Only fetch client-specific data if user has client_id
       if (!decoded?.client_id) {
         setLoading(false);
         return;
       }
+
       try {
         const token = authCookies.getToken();
         
@@ -93,7 +114,7 @@ const EmployDashboardArea = ({}: IProps) => {
         }
 
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching client data:", error);
       } finally {
         setLoading(false);
       }
@@ -159,7 +180,30 @@ const EmployDashboardArea = ({}: IProps) => {
                     <div className="row align-items-center">
                       <div className="col-lg-8">
                         <h4 className="dash-title-three">Complete Your Profile</h4>
-                        <p className="text-muted mb-0 mt-2">Enhance your profile to attract better freelancers and improve project success rates.</p>
+                        {profileCompletion ? (
+                          <>
+                            <p className="text-muted mb-2">
+                              Enhance your profile to attract better freelancers and improve project success rates.
+                            </p>
+                            <div className="progress mb-2" style={{ height: '8px' }}>
+                              <div
+                                className="progress-bar bg-success"
+                                role="progressbar"
+                                style={{ width: `${profileCompletion.percentage}%` }}
+                                aria-valuenow={profileCompletion.percentage}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                              ></div>
+                            </div>
+                            <small className="text-muted">
+                              {profileCompletion.completed} of {profileCompletion.total} fields completed ({profileCompletion.percentage}%)
+                            </small>
+                          </>
+                        ) : (
+                          <p className="text-muted mb-0 mt-2">
+                            Enhance your profile to attract better freelancers and improve project success rates.
+                          </p>
+                        )}
                       </div>
                       <div className="col-lg-4 text-lg-end">
                         <Link 
