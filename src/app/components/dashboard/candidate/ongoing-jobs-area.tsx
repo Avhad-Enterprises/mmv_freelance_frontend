@@ -26,6 +26,7 @@ interface IJob {
   reference_links?: string[];
   created_at?: string;
   additional_notes?: string;
+  bidding_enabled: boolean;
   // Submission tracking
   submission_status?: number | null; // 0: Submitted, 1: Approved, 2: Rejected, null: Not submitted
   submission_id?: number | null;
@@ -128,6 +129,7 @@ const OngoingJobsArea = ({}: IProps) => {
                 reference_links: job.reference_links || [],
                 created_at: job.created_at || '',
                 additional_notes: job.additional_notes || '',
+                bidding_enabled: job.bidding_enabled || false,
                 // Submission data
                 submission_status: submissionData?.submission_status ?? null,
                 submission_id: submissionData?.submission_id ?? null,
