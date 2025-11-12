@@ -21,7 +21,12 @@ apiClient.interceptors.request.use(
       'api/v1/projects-tasks/listings',
       'api/v1/categories',
       'api/v1/skills',
-      'api/v1/contact/submit'
+      'api/v1/contact/submit',
+      'api/v1/auth/register',
+      'api/v1/auth/login',
+      'api/v1/auth/forgot-password',
+      'api/v1/auth/reset-password',
+      'api/v1/freelancers/getfreelancers-public'
     ];
     
     // Check if this is a request to a public endpoint
@@ -29,19 +34,16 @@ apiClient.interceptors.request.use(
       config.url?.includes(endpoint)
     );
     
-        const token = authCookies.getToken();
-    console.log("API Request - Token from cookies:", token);
+    const token = authCookies.getToken();
     
     // Only add Authorization header if:
     // 1. Token exists and is valid
-    // 2. OR if this is NOT a public endpoint (even if token is invalid, let backend handle it)
-    if (token && token !== 'null' && token !== 'undefined') {
+    // 2. AND this is NOT a public endpoint
+    if (token && token !== 'null' && token !== 'undefined' && !isPublicEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("API Request - Authorization header set:", config.headers.Authorization);
-    } else if (!isPublicEndpoint) {
-      console.warn("API Request - No valid token found for protected endpoint");
-    } else {
-      console.log("API Request - Public endpoint, no auth required");
+      console.log("API Request - Authorization header set for:", config.url);
+    } else if (!isPublicEndpoint && !token) {
+      console.warn("API Request - No valid token found for protected endpoint:", config.url);
     }
     
     return config;
