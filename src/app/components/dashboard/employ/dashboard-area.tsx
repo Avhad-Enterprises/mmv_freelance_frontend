@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Image, { StaticImageData } from "next/image";
 import icon_1 from "@/assets/dashboard/images/icon/icon_12.svg";
 import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
@@ -49,18 +49,23 @@ const EmployDashboardArea = ({}: IProps) => {
   });
   const [profileCompletion, setProfileCompletion] = useState<ProfileCompletion | null>(null);
   const [loading, setLoading] = useState(true);
+  const profileFetchedRef = useRef(false);
 
   // Fetch projects and metrics
   useEffect(() => {
     const fetchData = async () => {
-      // Always fetch profile completion for authenticated users
-      try {
-        const profileRes = await makeGetRequest("api/v1/users/me/profile-completion");
-        if (profileRes?.data?.success) {
-          setProfileCompletion(profileRes.data.data);
+      // Fetch profile completion only once for authenticated users
+      if (!profileFetchedRef.current && decoded) {
+        try {
+          const profileRes = await makeGetRequest("api/v1/users/me/profile-completion");
+          if (profileRes?.data?.success) {
+            setProfileCompletion(profileRes.data.data);
+          }
+          profileFetchedRef.current = true;
+        } catch (error) {
+          console.error("Error fetching profile completion:", error);
+          profileFetchedRef.current = true; // Mark as fetched even on error to prevent retries
         }
-      } catch (error) {
-        console.error("Error fetching profile completion:", error);
       }
 
       // Only fetch client-specific data if user has client_id
