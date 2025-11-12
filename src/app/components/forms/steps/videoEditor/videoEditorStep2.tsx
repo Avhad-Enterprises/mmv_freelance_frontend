@@ -110,7 +110,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     last_name = "",
     superpowers = [],
     portfolio_links = ["", ""],
-    rate_amount = "",
+    rate_amount = "100",
     rate_currency = "INR",
     skill_tags = []
   } = watch() || formData;
