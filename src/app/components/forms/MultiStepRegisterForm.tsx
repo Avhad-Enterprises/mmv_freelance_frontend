@@ -195,7 +195,7 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
       superpowers: [],
       skill_tags: [],
       portfolio_links: ["", "", ""],
-      rate_amount: 0,
+      rate_amount: 100,
       rate_currency: "INR",
       availability: "",
       languages: [],
