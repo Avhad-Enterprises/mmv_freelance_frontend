@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import Image, { StaticImageData } from "next/image";
 import icon_1 from "@/assets/dashboard/images/icon/icon_12.svg";
 import icon_2 from "@/assets/dashboard/images/icon/icon_13.svg";
@@ -21,6 +21,14 @@ type ApplicationItem = {
   deadline: string;
   status: string;
   applied_at: string;
+};
+
+type ProfileCompletion = {
+  completed: number;
+  total: number;
+  percentage: number;
+  completedFields: string[];
+  missingFields: string[];
 };
 
 // card item component
@@ -68,7 +76,9 @@ const DashboardArea = ({}: IProps) => {
     accepted: 0,
     rejected: 0,
   });
+  const [profileCompletion, setProfileCompletion] = useState<ProfileCompletion | null>(null);
   const [loading, setLoading] = useState(true);
+  const profileFetchedRef = useRef(false);
 
   // Fetch applications and metrics
   useEffect(() => {
@@ -77,6 +87,21 @@ const DashboardArea = ({}: IProps) => {
         setLoading(false);
         return;
       }
+      
+      // Fetch profile completion only once
+      if (!profileFetchedRef.current) {
+        try {
+          const profileRes = await makeGetRequest("api/v1/users/me/profile-completion");
+          if (profileRes?.data?.success) {
+            setProfileCompletion(profileRes.data.data);
+          }
+          profileFetchedRef.current = true;
+        } catch (error) {
+          console.error("Error fetching profile completion:", error);
+          profileFetchedRef.current = true; // Mark as fetched even on error to prevent retries
+        }
+      }
+      
       try {
         const token = authCookies.getToken();
         
@@ -118,6 +143,16 @@ const DashboardArea = ({}: IProps) => {
           setSavedJobsCount(savedRes?.data?.data?.length || 0);
         } catch (error) {
           console.error("Error fetching saved jobs:", error);
+        }
+
+        // Fetch profile completion
+        try {
+          const profileRes = await makeGetRequest("api/v1/users/me/profile-completion");
+          if (profileRes?.data?.success) {
+            setProfileCompletion(profileRes.data.data);
+          }
+        } catch (error) {
+          console.error("Error fetching profile completion:", error);
         }
 
       } catch (error) {
@@ -184,7 +219,30 @@ const DashboardArea = ({}: IProps) => {
                     <div className="row align-items-center">
                       <div className="col-lg-8">
                         <h4 className="dash-title-three">Complete Your Profile</h4>
-                        <p className="text-muted mb-0 mt-2">Enhance your profile to attract more clients and increase your chances of getting hired.</p>
+                        {profileCompletion ? (
+                          <>
+                            <p className="text-muted mb-2">
+                              Enhance your profile to attract more clients and increase your chances of getting hired.
+                            </p>
+                            <div className="progress mb-2" style={{ height: '8px' }}>
+                              <div
+                                className="progress-bar bg-success"
+                                role="progressbar"
+                                style={{ width: `${profileCompletion.percentage}%` }}
+                                aria-valuenow={profileCompletion.percentage}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                              ></div>
+                            </div>
+                            <small className="text-muted">
+                              {profileCompletion.completed} of {profileCompletion.total} fields completed ({profileCompletion.percentage}%)
+                            </small>
+                          </>
+                        ) : (
+                          <p className="text-muted mb-0 mt-2">
+                            Enhance your profile to attract more clients and increase your chances of getting hired.
+                          </p>
+                        )}
                       </div>
                       <div className="col-lg-4 text-lg-end">
                         <Link 

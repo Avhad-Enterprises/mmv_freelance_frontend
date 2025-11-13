@@ -94,7 +94,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                     <Menus />
                     {/* menus end */}
                     <li className="d-md-none">
-                      <Link href="/coming-soon" className="btn-one w-100">
+                      <Link href="/job-list" className="btn-one w-100">
                         Hire Top Talents
                       </Link>
                     </li>

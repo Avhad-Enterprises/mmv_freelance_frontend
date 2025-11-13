@@ -51,8 +51,13 @@ const menu_data:IMenuData[] = [
     ]
   },
   {
+    id:6,
+    link:'/about-us',
+    title:'About'
+  },
+  {
     id:5,
-    link:'/coming-soon',
+    link:'/contact',
     title:'Contact'
   },
   // {

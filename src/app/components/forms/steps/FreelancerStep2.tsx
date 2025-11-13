@@ -69,7 +69,7 @@ const isYouTubeUrl = (url: string) => {
 };
 
 const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, prevStep }) => {
-  const { role = "videographer", full_name = "", superpowers = [], portfolio_links = ["", "", ""], rate_amount = "", rate_currency = "INR" } = formData || {};
+  const { role = "videographer", full_name = "", superpowers = [], portfolio_links = ["", "", ""], rate_amount = "100", rate_currency = "INR" } = formData || {};
   const list: string[] = role === "videographer" ? videographerSuperpowers : editorSuperpowers;
 
   // Dropdown-like selector state for superpowers (max 3)

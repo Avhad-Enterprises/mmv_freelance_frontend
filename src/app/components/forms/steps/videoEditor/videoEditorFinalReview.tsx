@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import toast from "react-hot-toast";
+import axios from "axios";
 import { Country } from "country-state-city";
 import { VideoEditorFormData } from "../../MultiStepRegisterForm";
 
@@ -124,18 +125,21 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       }
       console.log('=========================================');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`, {
-        method: 'POST',
-        headers: {
-          'x-test-mode': 'true',
-        },
-        body: fd,
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videoeditor`,
+        fd,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "x-test-mode": "true",
+          },
+        }
+      );
 
-      const respData = await response.json();
+      const respData = response.data;
       console.log('API Response:', respData);
       
-      if (!response.ok) {
+      if (response.status !== 200 && response.status !== 201) {
         console.error('Registration failed with status:', response.status);
         console.error('Error details:', respData);
         throw new Error(respData.message || 'Registration failed');

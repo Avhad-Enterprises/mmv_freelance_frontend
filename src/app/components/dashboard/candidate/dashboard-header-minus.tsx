@@ -109,14 +109,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           </div> */}
 
           {/* Browse Project Button */}
-          <div>
+          {/* <div>
             <Link
               href="/dashboard/freelancer-dashboard/browse-jobs"
               className="job-post-btn tran3s"
             >
               Browse Project
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </header>

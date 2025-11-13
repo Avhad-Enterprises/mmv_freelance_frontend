@@ -120,20 +120,14 @@ const HomeSix = () => {
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        {/* Conditional header rendering */}
         <Header isAuthenticated={isAuthenticated} />
 
-        {/* hero banner start */}
         <HeroBannerSeven />
-        {/* hero banner end */}
 
-        {/* partner slider start */}
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <PartnersSlider />
         </div>
-        {/* partner slider end */}
 
-        {/* category section start */}
         <section className="category-section-two bg-color position-relative mt-45 md-mt-10 pt-150 xl-pt-130 lg-pt-80 pb-170 xl-pb-130 lg-pb-70">
           <div className="container">
             <div className="row justify-content-between">
@@ -157,7 +151,6 @@ const HomeSix = () => {
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
-        {/* category section end */}
 
         {/* How It Works Two start*/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
@@ -166,7 +159,6 @@ const HomeSix = () => {
               <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
             </div>
 
-            {/* Modern Toggle Switch */}
             <div className="d-flex justify-content-center mb-60 lg-mb-40">
               <div className="role-toggle-container">
                 <button
@@ -198,17 +190,17 @@ const HomeSix = () => {
               <div className="row justify-content-center">
                 {howItWorksData[activeRole].map((item, index) => (
                   <div key={item.id} className="col-lg-4 col-md-6">
-                    <div 
+                    <div
                       className="card-style-five text-center position-relative mt-25 pb-70 lg-pb-20 wow fadeInUp"
                       data-wow-delay={`${index * 0.1}s`}
                     >
                       <div className="icon-image-wrapper m-auto">
-                        <Image 
-                          src={item.icon} 
-                          alt={item.title} 
-                          width={100} 
+                        <Image
+                          src={item.icon}
+                          alt={item.title}
+                          width={100}
                           height={100}
-                          className="lazy-img" 
+                          className="lazy-img"
                         />
                       </div>
                       <div className="title fw-500 text-lg text-dark mt-25 lg-mt-20 mb-10">{item.title}</div>
@@ -285,15 +277,15 @@ const HomeSix = () => {
             }
           `}</style>
         </section>
-        {/* How It Works Two end*/}
+        {/* How It Works Two end */}
 
-        {/* text feature start */}
         <FeatureTen />
         {/* text feature end */}
+
+        {/* top company start */}
         <TopCompany />
         <FeedbackOne/>
 
-        {/* faq start */}
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
             <div className="title-one text-center">
@@ -313,15 +305,9 @@ const HomeSix = () => {
             </div>
           </div>
         </section>
-        {/* faq end */}
 
-        {/* fancy banner start */}
         <FancyBannerSeven/>
-        {/* fancy banner end */}
-
-        {/* footer start */}
         <FooterOne />
-        {/* footer end */}
       </div>
     </Wrapper>
   );
