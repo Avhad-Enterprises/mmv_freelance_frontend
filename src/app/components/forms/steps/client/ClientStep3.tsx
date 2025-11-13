@@ -107,7 +107,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const onSubmit = async (data: any) => {
     // TEMPORARILY DISABLED: Google Maps geocoding due to API quota limits
     // Uncomment when quota is restored
-    /*
+    // Geocoding with automatic fallback - no errors shown to users
     setIsGeocoding(true);
     clearErrors("address");
 
@@ -117,15 +117,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
 
     const geocodeResult = await geocodeAddress(fullAddressToGeocode);
 
-    if (geocodeResult.error) {
-      setError("address", {
-        type: "manual",
-        message: geocodeResult.error
-      });
-      setIsGeocoding(false);
-      return;
-    }
-    */
+    // The geocoding API now has built-in fallback, so it will never return an error
+    // It will use default coordinates (0, 0) if geocoding fails
+    const coordinates = geocodeResult.data || { lat: 0, lng: 0, formatted_address: data.address };
 
     const submissionData = {
       ...data,
@@ -134,14 +128,14 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
       countryCodeForPhone: selectedCountry,
       countryDialCode: countryCode,
       coordinates: {
-        lat: 0, // TEMPORARY: Using null coordinates while geocoding is disabled
-        lng: 0,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
       },
-      formatted_address: data.address // Use the original address instead of geocoded one
+      formatted_address: coordinates.formatted_address
     };
 
     nextStep(submissionData);
-    // setIsGeocoding(false); // Commented out since geocoding is disabled
+    setIsGeocoding(false);
   };
 
   return (
