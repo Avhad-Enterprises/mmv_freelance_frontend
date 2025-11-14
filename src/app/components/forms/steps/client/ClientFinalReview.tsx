@@ -65,8 +65,8 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       if (formData.pincode) formDataToSend.append("pincode", formData.pincode);
       if (formData.tax_id) formDataToSend.append("tax_id", formData.tax_id);
 
-      // Latitude and Longitude
-      if (formData.coordinates && formData.coordinates.lat && formData.coordinates.lng) {
+      // Latitude and Longitude (only if valid)
+      if (formData.coordinates && formData.coordinates.lat !== null && formData.coordinates.lng !== null) {
         formDataToSend.append("latitude", String(formData.coordinates.lat));
         formDataToSend.append("longitude", String(formData.coordinates.lng));
       }

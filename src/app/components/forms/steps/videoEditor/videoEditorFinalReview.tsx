@@ -86,7 +86,8 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (formData.country) fd.append('country', formData.country);
       if (formData.pincode) fd.append('pincode', formData.pincode);
 
-      if (formData.coordinates && formData.coordinates.lat && formData.coordinates.lng) {
+      // *** FIX: Append latitude and longitude from Step 3 (only if valid) ***
+      if (formData.coordinates && formData.coordinates.lat !== null && formData.coordinates.lng !== null) {
         fd.append('latitude', String(formData.coordinates.lat));
         fd.append('longitude', String(formData.coordinates.lng));
       }
