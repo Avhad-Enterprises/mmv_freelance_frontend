@@ -106,7 +106,9 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
     const coordinates = geocodeResult.data || { lat: null, lng: null, formatted_address: data.full_address };
 
     const submissionData = {
+      ...formData,
       ...data,
+      phone_number: `${countryCode}${data.phone_number}`, // Combine country code with phone number
       profile_photo: selectedProfilePhoto,
       id_document: selectedIdDocument,
       coordinates: {

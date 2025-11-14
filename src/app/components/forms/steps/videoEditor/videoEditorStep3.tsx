@@ -105,6 +105,8 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
 
     const submissionData = {
       ...formData,
+      ...data, // Include current form data (phone_number, id_type, address, city, country, pincode, etc.)
+      phone_number: `${countryCode}${data.phone_number}`, // Combine country code with phone number
       profile_photo: selectedProfilePhoto,
       id_document: selectedIdDocument,
       coordinates: {

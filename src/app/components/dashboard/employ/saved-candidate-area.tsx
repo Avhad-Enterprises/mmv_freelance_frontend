@@ -18,9 +18,7 @@ interface ApiCandidate {
   username: string;
   profile_picture: string | null;
   bio: string | null; // Added bio for mapping
-  timezone: string | null;
-  address_line_first: string | null;
-  address_line_second: string | null;
+  address: string | null;
   city: string | null;
   state: string | null;
   country: string | null;

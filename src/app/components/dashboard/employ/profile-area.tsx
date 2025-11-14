@@ -18,8 +18,7 @@ type ProfileData = {
   phone_verified: boolean;
   email_verified: boolean;
   bio: string;
-  address_line_first: string;
-  address_line_second: string;
+  address: string;
   city: string;
   state: string;
   country: string;
@@ -257,8 +256,7 @@ const DashboardProfileArea = ({}: IProps) => {
           payment_method: profile?.payment_method,
 
           // Address
-          address_line_first: user.address_line_first || "",
-          address_line_second: user.address_line_second || "",
+          address: user.address || "",
           city: user.city || "",
           state: stateObj?.isoCode || "",
           country: countryObj?.isoCode || "",
@@ -634,7 +632,7 @@ const DashboardProfileArea = ({}: IProps) => {
               </InfoSection>
 
               <InfoSection title="Contact & Billing" sectionKey="address" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                <InfoRow label="Address" value={displayData.address_line_first} field="address_line_first" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+                <InfoRow label="Address" value={displayData.address} field="address" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
                 <div className="row mb-3">
                   <div className="col-md-4"><strong>Country:</strong></div>
                   <div className="col-md-8">

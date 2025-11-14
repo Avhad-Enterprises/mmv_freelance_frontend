@@ -28,7 +28,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   });
 
   const [selectedProfilePhoto, setSelectedProfilePhoto] = useState<File | null>(formData?.profile_photo || null);
-  const [selectedBusinessDocuments, setSelectedBusinessDocuments] = useState<FileList | null>(formData?.business_document || null);
+  const [selectedBusinessDocuments, setSelectedBusinessDocuments] = useState<File[]>(formData?.business_document ? (formData.business_document instanceof FileList ? Array.from(formData.business_document) : Array.isArray(formData.business_document) ? formData.business_document : [formData.business_document]) : []);
   const [selectedCountry, setSelectedCountry] = useState(formData?.countryCodeForPhone || "in");
   const [countryCode, setCountryCode] = useState(formData?.countryDialCode || "+91");
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -122,7 +122,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
     const coordinates = geocodeResult.data || { lat: null, lng: null, formatted_address: data.address };
 
     const submissionData = {
+      ...formData,
       ...data,
+      phone_number: `${countryCode}${data.phone_number}`, // Combine country code with phone number
       profile_photo: selectedProfilePhoto,
       business_document: selectedBusinessDocuments,
       countryCodeForPhone: selectedCountry,
@@ -176,7 +178,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
       )}
 
       {/* Business Document Preview Modal */}
-      {showBusinessDocPreview && businessDocUrl && selectedBusinessDocuments && selectedBusinessDocuments.length > 0 && (
+      {showBusinessDocPreview && businessDocUrl && selectedBusinessDocuments.length > 0 && (
         <div style={modalOverlayStyle} onClick={() => setShowBusinessDocPreview(false)}>
           <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
@@ -405,10 +407,18 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                           return;
                         }
                       }
+                      const fileArray = Array.from(files);
+                      console.log(`📄 Business documents selected: ${fileArray.length} file(s)`, fileArray.map(f => f.name));
+                      toast.success(`${fileArray.length} business document${fileArray.length > 1 ? 's' : ''} selected successfully`);
+                      console.log('🔄 About to set state. Files array:', fileArray, 'Length:', fileArray.length);
+                      setSelectedBusinessDocuments(fileArray);
+                      setValue("business_document", files);
+                      clearErrors("business_document");
+                    } else {
+                      console.log('⚠️ No files selected');
+                      setSelectedBusinessDocuments([]);
+                      setValue("business_document", null);
                     }
-                    setSelectedBusinessDocuments(files);
-                    setValue("business_document", files);
-                    clearErrors("business_document");
                   }}
                 />
                 <label
@@ -424,13 +434,13 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   }}
                 >
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {selectedBusinessDocuments && selectedBusinessDocuments.length > 0
-                      ? `${selectedBusinessDocuments.length} file${selectedBusinessDocuments.length > 1 ? 's' : ''} selected (${Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / 1024 < 1024 
-                          ? `${(Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB`
-                          : `${(Array.from(selectedBusinessDocuments).reduce((total, file) => total + file.size, 0) / (1024 * 1024)).toFixed(1)} MB`})`
+                    {selectedBusinessDocuments.length > 0
+                      ? `${selectedBusinessDocuments.length} file${selectedBusinessDocuments.length > 1 ? 's' : ''} selected (${selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024 < 1024 
+                          ? `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB`
+                          : `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / (1024 * 1024)).toFixed(1)} MB`})`
                       : "Choose Business Documents"}
                   </span>
-                  {selectedBusinessDocuments && selectedBusinessDocuments.length > 0 && (
+                  {selectedBusinessDocuments.length > 0 && (
                     <div style={{ display: 'flex', gap: '10px', marginLeft: '10px' }}>
                       <button
                         type="button"
@@ -456,11 +466,12 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setSelectedBusinessDocuments(null);
+                          setSelectedBusinessDocuments([]);
                           setBusinessDocUrl(null);
                           setValue("business_document", null);
                           const input = document.getElementById('business-document-input') as HTMLInputElement;
                           if (input) input.value = '';
+                          toast.success('All business documents removed');
                         }}
                         style={{
                           border: 'none',
@@ -481,6 +492,79 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               {errors.business_document && (
                 <div className="text-danger mt-1">{String(errors.business_document.message)}</div>
               )}
+              
+              {/* Display list of selected files */}
+              {(() => {
+                console.log('🖼️ Rendering file list. selectedBusinessDocuments:', selectedBusinessDocuments, 'Length:', selectedBusinessDocuments.length, 'Should show:', selectedBusinessDocuments.length > 0);
+                return null;
+              })()}
+              {selectedBusinessDocuments.length > 0 ? (
+                <div style={{ marginTop: '15px' }}>
+                  <div style={{ fontWeight: '500', color: '#555', marginBottom: '10px' }}>
+                    Selected Files ({selectedBusinessDocuments.length}):
+                  </div>
+                  <div style={{ border: '1px solid #dee2e6', borderRadius: '4px', padding: '15px', backgroundColor: '#f8f9fa' }}>
+                    {selectedBusinessDocuments.map((file, index) => (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginBottom: index < selectedBusinessDocuments.length - 1 ? '10px' : '0',
+                          paddingBottom: index < selectedBusinessDocuments.length - 1 ? '10px' : '0',
+                          borderBottom: index < selectedBusinessDocuments.length - 1 ? '1px solid #dee2e6' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                          <i className="fa fa-file-text" style={{ color: '#6c757d', marginRight: '10px' }}></i>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '500', color: '#333' }}>{file.name}</div>
+                            <small style={{ color: '#6c757d' }}>
+                              {file.size / 1024 < 1024 
+                                ? `${(file.size / 1024).toFixed(1)} KB` 
+                                : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
+                              {' • '}
+                              {file.type ? file.type.split('/')[1]?.toUpperCase() || 'FILE' : 'FILE'}
+                            </small>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // Remove individual file
+                            const newFiles = selectedBusinessDocuments.filter((_, i) => i !== index);
+                            setSelectedBusinessDocuments(newFiles);
+                            
+                            // Update the file input
+                            const dt = new DataTransfer();
+                            newFiles.forEach(f => dt.items.add(f));
+                            setValue("business_document", dt.files.length > 0 ? dt.files : null);
+                            
+                            if (newFiles.length === 0) {
+                              const input = document.getElementById('business-document-input') as HTMLInputElement;
+                              if (input) input.value = '';
+                            }
+                            toast.success(`Removed ${file.name}`);
+                          }}
+                          style={{
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            color: '#dc3545',
+                            padding: '4px 8px',
+                            fontSize: '16px'
+                          }}
+                          title={`Remove ${file.name}`}
+                        >
+                          <i className="fa fa-times"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 

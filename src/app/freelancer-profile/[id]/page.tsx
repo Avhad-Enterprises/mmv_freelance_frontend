@@ -16,9 +16,7 @@ interface RawApiFreelancer {
   username: string;
   profile_picture: string | null;
   bio: string | null;
-  timezone: string | null;
-  address_line_first: string | null;
-  address_line_second: string | null;
+  address: string | null;
   city: string | null;
   state: string | null;
   country: string | null;
