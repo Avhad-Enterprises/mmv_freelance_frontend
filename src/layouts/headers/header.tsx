@@ -9,8 +9,17 @@ import LoginModal from "@/app/components/common/popup/login-modal";
 import { useUser } from "@/context/UserContext";
 
 const Header = () => {
-  const { userData, isLoading } = useUser();
+  const { userData, userRoles, isLoading } = useUser();
   const isAuthenticated = !!userData && !isLoading;
+  
+  // Determine dashboard route based on user role
+  const getDashboardRoute = () => {
+    if (!userData || !userRoles.length) return '/dashboard/freelancer-dashboard';
+    const normalizedRoles = userRoles.map(r => r.toUpperCase());
+    if (normalizedRoles.includes('CLIENT')) return '/dashboard/client-dashboard';
+    return '/dashboard/freelancer-dashboard';
+  };
+
   return (
     <>
       <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
@@ -33,7 +42,7 @@ const Header = () => {
                 <ul className="d-flex align-items-center style-none">
                   <li>
                     {isAuthenticated ? (
-                      <Link href="/dashboard/freelancer-dashboard" className="login-btn-one">
+                      <Link href={getDashboardRoute()} className="login-btn-one">
                         Dashboard
                       </Link>
                     ) : (

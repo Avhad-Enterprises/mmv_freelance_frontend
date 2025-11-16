@@ -8,6 +8,7 @@ import icon from '@/assets/images/icon/icon_21.svg';
 import NiceSelect from '@/ui/nice-select';
 import useSticky from '@/hooks/use-sticky';
 import LoginModal from '@/app/components/common/popup/login-modal';
+import { useUser } from "@/context/UserContext";
 
 // search select
 function SearchSelect() {
@@ -29,7 +30,18 @@ function SearchSelect() {
 }
 
 const HeaderThree = () => {
-  const {sticky} = useSticky()
+  const {sticky} = useSticky();
+  const { userData, userRoles, isLoading } = useUser();
+  const isAuthenticated = !!userData && !isLoading;
+  
+  // Determine dashboard route based on user role
+  const getDashboardRoute = () => {
+    if (!userData || !userRoles.length) return '/dashboard/freelancer-dashboard';
+    const normalizedRoles = userRoles.map(r => r.toUpperCase());
+    if (normalizedRoles.includes('CLIENT')) return '/dashboard/client-dashboard';
+    return '/dashboard/freelancer-dashboard';
+  };
+
   return (
     <>
       <header className={`theme-main-menu sticky-menu ${sticky?'fixed':''}`}>
@@ -48,8 +60,22 @@ const HeaderThree = () => {
               </form>
               <div className="right-widget ms-auto ms-xl-5 order-lg-3">
                 <ul className="d-flex align-items-center style-none">
-                  <li><a href="#" className="fw-500 login-btn-two" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a></li>
-                  <li className="d-none d-lg-block ms-4"><Link href='/register' className="btn-five">Register</Link></li>
+                  <li>
+                    {isAuthenticated ? (
+                      <Link href={getDashboardRoute()} className="fw-500 login-btn-two">
+                        Dashboard
+                      </Link>
+                    ) : (
+                      <a href="#" className="fw-500 login-btn-two" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Login
+                      </a>
+                    )}
+                  </li>
+                  {!isAuthenticated && (
+                    <li className="d-none d-lg-block ms-4">
+                      <Link href='/register' className="btn-five">Register</Link>
+                    </li>
+                  )}
                 </ul>
               </div>
               <nav className="navbar navbar-expand-lg p0  ms-3 ms-lg-auto order-lg-2">
@@ -106,9 +132,11 @@ const HeaderThree = () => {
                         <li><Link href="/notfound" className="dropdown-item"><span>404 Error</span></Link></li>
                       </ul>
                     </li>
-                    <li className="d-lg-none mt-5">
-                      <Link href="/register" className="btn-five w-100">Register</Link>
-                    </li>
+                    {!isAuthenticated && (
+                      <li className="d-lg-none mt-5">
+                        <Link href="/register" className="btn-five w-100">Register</Link>
+                      </li>
+                    )}
                   </ul>
                 </div>
               </nav>

@@ -34,53 +34,40 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<IFormData>({ resolver: yupResolver(schema) });
 
-  // ✅ This is the only part that needs to be changed
   const onSubmit = async (data: IFormData) => {
-    if (isSubmitting) return; // Prevent double submission
+    if (isSubmitting) return;
     
     setIsSubmitting(true);
     try {
       const res = await makePostRequest("api/v1/auth/login", {
         email: data.email,
         password: data.password,
-        rememberMe: data.rememberMe // Send remember me preference to backend
+        rememberMe: data.rememberMe
       });
       const result = res.data;
       const token = result?.data?.token;
 
       if (token) {
-        // Clear any existing tokens from all storage locations
-        if (typeof window !== 'undefined') {
-          authCookies.removeToken();
-        }
-        
         // Store token using cookies
         authCookies.setToken(token, data.rememberMe);
 
-        console.log(`Token stored in cookies (${data.rememberMe ? 'persistent' : 'session'})`);
-
         reset();
 
-        // 2. Decode token to get user role
+        // Decode token to get user role
         const base64Payload = token.split(".")[1];
         const decodedPayload = JSON.parse(atob(base64Payload));
         const userRoles = decodedPayload.roles || decodedPayload.role || [];
 
-        // Handle case where roles might be a single string instead of array
         const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-        
-        // Normalize roles to uppercase for consistent comparison
         const normalizedRoles = rolesArray.map((role: string) => role.toUpperCase());
 
-        // 3. Show a success message
         toast.success("Login successful! Redirecting to dashboard...");
 
-        // 4. Call the onLoginSuccess callback if provided
         if (onLoginSuccess) {
           onLoginSuccess();
         }
 
-        // 5. Redirect to appropriate dashboard based on role
+        // Redirect to appropriate dashboard based on role
         setTimeout(() => {
           if (normalizedRoles.includes('CLIENT')) {
             window.location.href = '/dashboard/client-dashboard';
@@ -89,16 +76,14 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
                      normalizedRoles.includes('VIDEOEDITOR')) {
             window.location.href = '/dashboard/freelancer-dashboard';
           } else {
-            // Fallback to home if no recognized role
             window.location.href = '/';
           }
-        }, 500); // 500ms delay
+        }, 500);
 
       } else {
         toast.error(result?.message || "Login failed: No token received.");
       }
     } catch (error: any) {
-      // Handle login-specific errors without triggering global redirect
       if (error.response?.status === 401) {
         toast.error(error.response?.data?.message || "Invalid email or password");
       } else {

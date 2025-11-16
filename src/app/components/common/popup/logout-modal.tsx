@@ -7,16 +7,16 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hook";
 import { clear_wishlist } from "@/redux/features/wishlist";
 import { authCookies } from "@/utils/cookies";
+import { useUser } from "@/context/UserContext";
 
 const LogoutModal = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { refreshUserData } = useUser();
 
-  const handleLogout = () => {
-    // Clear token from all storage methods
-    authCookies.removeToken(); // Clear cookie token
-    localStorage.removeItem("token"); // Clear localStorage fallback
-    sessionStorage.removeItem("token"); // Clear sessionStorage
+  const handleLogout = async () => {
+    // Clear token from cookies
+    authCookies.removeToken();
 
     // Stop automatic token refresh monitoring
     const tokenRefreshService = TokenRefreshService.getInstance();
@@ -25,8 +25,11 @@ const LogoutModal = () => {
     // Clear wishlist on logout
     dispatch(clear_wishlist());
 
-    // Redirect to login or homepage
-    router.push("/");
+    // Refresh user context to clear auth state
+    await refreshUserData();
+
+    // Force full page reload to homepage to ensure clean state
+    window.location.href = "/";
   };
 
   return (

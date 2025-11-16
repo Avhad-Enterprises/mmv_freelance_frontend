@@ -13,7 +13,6 @@ interface DecodedToken {
 export const isAuthenticated = (): boolean => {
   if (typeof window === 'undefined') return false;
   
-  // Check for token using cookie-based authentication
   const token = authCookies.getToken();
   if (!token || token === 'null' || token === 'undefined') return false;
 
@@ -23,14 +22,12 @@ export const isAuthenticated = (): boolean => {
     // Check if token is expired
     const currentTime = Date.now() / 1000;
     if (decoded.exp < currentTime) {
-      // Clear from both storages
       authCookies.removeToken();
       return false;
     }
     
     return true;
   } catch (error) {
-    // Clear from both storages on decode error
     authCookies.removeToken();
     return false;
   }
@@ -73,5 +70,3 @@ export const clearAuth = (): void => {
     tokenRefreshService.clearTokens();
   }
 };
-
-
