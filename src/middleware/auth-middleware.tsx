@@ -25,7 +25,6 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
         const token = authCookies.getToken();
 
         if (!token || token === 'null' || token === 'undefined') {
-          console.log('No valid token found, redirecting to login');
           router.push(redirectTo);
           setIsLoading(false);
           return;
@@ -33,12 +32,15 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
 
         // Decode token directly (don't wait for useDecodedToken hook)
         try {
-          const base64Payload = token.split(".")[1];
+          const tokenParts = token.split(".");
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid JWT token format');
+          }
+          const base64Payload = tokenParts[1];
           const decodedPayload = JSON.parse(atob(base64Payload));
           
           // Check token expiration
           if (decodedPayload.exp && decodedPayload.exp * 1000 < Date.now()) {
-            console.log('Token expired, redirecting to login');
             authCookies.removeToken();
             router.push(redirectTo);
             setIsLoading(false);
@@ -56,8 +58,6 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
           const hasAllowedRole = normalizedAllowedRoles.some(role => normalizedUserRoles.includes(role));
           
           if (allowedRoles.length > 0 && !hasAllowedRole) {
-            console.log(`User roles '${rolesArray.join(', ')}' not allowed. Allowed roles:`, allowedRoles);
-            
             // Redirect based on role
             if (normalizedUserRoles.includes('CLIENT')) {
               router.push('/dashboard/client-dashboard');
@@ -73,17 +73,14 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
           }
 
           // All checks passed
-          console.log('Auth check passed - user authorized with roles:', rolesArray);
           setIsAuthorized(true);
           setIsLoading(false);
         } catch (decodeError) {
-          console.error('Token decode error:', decodeError);
           authCookies.removeToken();
           router.push(redirectTo);
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Auth check error:', error);
         router.push(redirectTo);
         setIsLoading(false);
       }

@@ -41,9 +41,8 @@ apiClient.interceptors.request.use(
     // 2. AND this is NOT a public endpoint
     if (token && token !== 'null' && token !== 'undefined' && !isPublicEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("API Request - Authorization header set for:", config.url);
     } else if (!isPublicEndpoint && !token) {
-      console.warn("API Request - No valid token found for protected endpoint:", config.url);
+      // No valid token found for protected endpoint
     }
     
     return config;
@@ -59,8 +58,6 @@ apiClient.interceptors.response.use(
 
     // Handle 401 errors by clearing tokens and redirecting
     if (error.response?.status === 401) {
-      console.error("Authentication failed - clearing tokens and redirecting");
-
       const tokenRefreshService = TokenRefreshService.getInstance();
       tokenRefreshService.clearTokens();
 

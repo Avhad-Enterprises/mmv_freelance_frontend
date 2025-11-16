@@ -12,7 +12,7 @@ interface CookieOptions {
 const defaultOptions: CookieOptions = {
   path: '/',
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict'
+  sameSite: 'lax'
 };
 
 // Simplified auth token utilities

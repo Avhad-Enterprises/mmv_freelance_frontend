@@ -54,7 +54,11 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         reset();
 
         // Decode token to get user role
-        const base64Payload = token.split(".")[1];
+        const tokenParts = token.split(".");
+        if (tokenParts.length !== 3) {
+          throw new Error('Invalid JWT token format');
+        }
+        const base64Payload = tokenParts[1];
         const decodedPayload = JSON.parse(atob(base64Payload));
         const userRoles = decodedPayload.roles || decodedPayload.role || [];
 
@@ -67,18 +71,16 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
           onLoginSuccess();
         }
 
-        // Redirect to appropriate dashboard based on role
-        setTimeout(() => {
-          if (normalizedRoles.includes('CLIENT')) {
-            window.location.href = '/dashboard/client-dashboard';
-          } else if (normalizedRoles.includes('VIDEOGRAPHER') || 
-                     normalizedRoles.includes('VIDEO_EDITOR') ||
-                     normalizedRoles.includes('VIDEOEDITOR')) {
-            window.location.href = '/dashboard/freelancer-dashboard';
-          } else {
-            window.location.href = '/';
-          }
-        }, 500);
+        // Redirect to appropriate dashboard based on role (immediate redirect since full page reload handles context update)
+        if (normalizedRoles.includes('CLIENT')) {
+          window.location.href = '/dashboard/client-dashboard';
+        } else if (normalizedRoles.includes('VIDEOGRAPHER') || 
+                   normalizedRoles.includes('VIDEO_EDITOR') ||
+                   normalizedRoles.includes('VIDEOEDITOR')) {
+          window.location.href = '/dashboard/freelancer-dashboard';
+        } else {
+          window.location.href = '/';
+        }
 
       } else {
         toast.error(result?.message || "Login failed: No token received.");

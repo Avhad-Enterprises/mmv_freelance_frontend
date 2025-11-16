@@ -49,8 +49,6 @@ class TokenRefreshService {
 
   private async performTokenRefresh(): Promise<string> {
     try {
-      console.log('Attempting to refresh token...');
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: {
@@ -65,7 +63,6 @@ class TokenRefreshService {
 
         if (newToken) {
           this.storeToken(newToken);
-          console.log('Token refreshed successfully');
           return newToken;
         }
       }
@@ -73,7 +70,6 @@ class TokenRefreshService {
       throw new Error('Token refresh not available');
 
     } catch (error) {
-      console.warn('Token refresh failed:', error);
       throw error;
     }
   }

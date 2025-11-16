@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { authCookies } from "@/utils/cookies";
+import { normalizeRoles } from "@/utils/role-utils";
 
 interface UserData {
   user_id?: number;
@@ -45,10 +46,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Decode token to get roles (do this early for fallback)
-      const base64Payload = token.split(".")[1];
-      const decodedPayload = JSON.parse(atob(base64Payload));
-      const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
-      const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
+      let decodedPayload: any = null;
+      let rolesArray: string[] = [];
+      
+      try {
+        const tokenParts = token.split(".");
+        if (tokenParts.length !== 3) {
+          throw new Error('Invalid JWT token format');
+        }
+        const base64Payload = tokenParts[1];
+        decodedPayload = JSON.parse(atob(base64Payload));
+        const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
+        rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
+      } catch (decodeError) {
+        // Token decode failed, clear invalid token and set unauthenticated state
+        authCookies.removeToken();
+        setUserData(null);
+        setUserRoles([]);
+        setCurrentRole('Not Authenticated');
+        setIsLoading(false);
+        return;
+      }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
@@ -72,15 +90,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
         setUserData(data);
 
-        const roleMap: { [key: string]: string } = {
-          'freelancer': 'Freelancer',
-          'videographer': 'Videographer',
-          'videoeditor': 'Video Editor',
-          'video_editor': 'Video Editor',
-          'client': 'Client'
-        };
-
-        const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
+        const displayRoles = normalizeRoles(rolesArray);
         setUserRoles(displayRoles);
         setCurrentRole(displayRoles[0] || 'User');
         setIsLoading(false);
@@ -101,19 +111,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           account_type: userType || user?.account_type || 'user'
         };
 
-        setUserData(data);
+          setUserData(data);
 
-        const roleMap: { [key: string]: string } = {
-          'freelancer': 'Freelancer',
-          'videographer': 'Videographer',
-          'videoeditor': 'Video Editor',
-          'video_editor': 'Video Editor',
-          'client': 'Client'
-        };
-
-        const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
-        setUserRoles(displayRoles);
-        setCurrentRole(displayRoles[0] || 'User');
+          const displayRoles = normalizeRoles(rolesArray);
+          setUserRoles(displayRoles);
+          setCurrentRole(displayRoles[0] || 'User');
       } else {
         throw new Error('Invalid API response structure');
       }
@@ -121,7 +123,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       // If API fails and we have a token, try to use token data as fallback
       if (token) {
         try {
-          const base64Payload = token.split(".")[1];
+          const tokenParts = token.split(".");
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid JWT token format');
+          }
+          const base64Payload = tokenParts[1];
           const decodedPayload = JSON.parse(atob(base64Payload));
           const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
           const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
@@ -137,15 +143,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
           setUserData(data);
 
-          const roleMap: { [key: string]: string } = {
-            'freelancer': 'Freelancer',
-            'videographer': 'Videographer',
-            'videoeditor': 'Video Editor',
-            'video_editor': 'Video Editor',
-            'client': 'Client'
-          };
-
-          const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
+          const displayRoles = normalizeRoles(rolesArray);
           setUserRoles(displayRoles);
           setCurrentRole(displayRoles[0] || 'User');
         } catch (tokenError) {
