@@ -77,13 +77,13 @@ const PartnersSlider = () => {
     <Slider {...slider_setting} className="partner-slider">
       {logos.map((logo, i) => (
         <div key={i} className="item">
-          <div className="logo d-flex align-items-center justify-content-center" style={{ height: '80px', padding: '10px' }}>
+          <div className="logo d-flex align-items-center justify-content-center" style={{ height: '100px', padding: '8px' }}>
             <Image
               src={logo}
               alt={`carousal logo ${i + 1}`}
               style={{ 
-                width: '120px',
-                height: '60px',
+                width: '160px',
+                height: '80px',
                 objectFit: 'contain',
               }}
             />
