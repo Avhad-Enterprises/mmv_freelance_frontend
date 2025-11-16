@@ -91,10 +91,10 @@ export function CategoryCardWrapper() {
             {!item.df && (
               <Link href="/coming-soon" className="d-block">
                 <div className="icon tran3s d-flex align-items-center justify-content-center">
-                  <Image src={item.icon} alt="icon" className="lazy-img" />
+                  <Image src={item.icon} alt="icon" className="lazy-img" style={{ filter: 'brightness(0) saturate(100%) invert(47%) sepia(95%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%)' }} />
                 </div>
                 <div className="title tran3s fw-500 text-lg">{item.title}</div>
-                <div className="total-job">{item.vacancy} vacancy</div>
+                <div className="total-job">{item.vacancy} talents</div>
               </Link>
             )}
 

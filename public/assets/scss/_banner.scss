@@ -239,7 +239,7 @@
 }
 // Hero Banner Seven
 .hero-banner-seven {
-    background: $light-bg; // Changed from #fff to light green background
+    background: #fff; // Changed from light green to white background
     z-index: 1;
     h1 {
         font-family: var(--gorditas-font);
@@ -499,20 +499,10 @@
 }
 // Fancy Banner Six
 .fancy-banner-six .bg-wrapper {
-    background: $light-bg;
+    background: #fff; // Changed from light green to white background
     z-index: 1;
-    border-radius: 30px;
-    overflow: hidden;
-    &:before {
-        content: '';
-        width: 155px;
-        height: 155px;
-        border-radius: 50%;
-        background: rgba($color: #249F46, $alpha: 0.1);
-        position: absolute;
-        top:-65px;
-        left: -75px;
-    }
+    // Removed border-radius and overflow to eliminate dark green lines
+    // Removed the circle :before pseudo-element
     &:after {
         content: url(../images/shape/shape_33.svg);
         position: absolute;
@@ -522,12 +512,20 @@
     p {
         color: #81B197;
     }
+    .img-meta {
+        .lazy-img {
+            width: 100%; // Fill the column width
+            max-width: 700px; // Increased max size for bigger icon
+            height: auto;
+            display: block;
+        }
+    }
     .upload-btn {
         width: 215px;
         height: 55px;
         border-radius: 6px;
         overflow: hidden;
-        background: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
+        background: #00bf63; // Changed to match the green theme color
         cursor: pointer;
         @include transition(0.2s);
         #uploadCV {

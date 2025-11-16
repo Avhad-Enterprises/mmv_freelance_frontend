@@ -1,70 +1,19 @@
 // CandidateClientView.tsx
 'use client';
-import React, { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import React from 'react';
 import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
 import CandidateV1Area from '../components/candidate/candidate-v1-area';
 import FooterOne from '@/layouts/footers/footer-one';
-import { authCookies } from '@/utils/cookies';
-
-interface DecodedToken {
-  exp: number;
-}
 
 const CandidateClientView = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // This effect runs only on initial component mount
-    const token = authCookies.getToken();
-    if (token) {
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        if (decodedToken.exp * 1000 > Date.now()) {
-          setIsAuthenticated(true);
-        } else {
-          authCookies.removeToken();
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        authCookies.removeToken();
-        setIsAuthenticated(false);
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  // ✅ 1. Create a function to handle login state change
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  if (isLoading) {
-    return (
-      <Wrapper>
-        <div className="main-page-wrapper">
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
-      </Wrapper>
-    );
-  }
-
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
 
         {/* ✅ 2. Pass down the state and the handler function as props */}
-        <CandidateV1Area 
-          isAuthenticated={isAuthenticated} 
-          onLoginSuccess={handleLogin} 
-        />
+        <CandidateV1Area />
 
         <FooterOne />
       </div>

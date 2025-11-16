@@ -70,7 +70,7 @@ const FooterOne = ({
             {/* Copyright */}
             <div className="col-lg-4 order-lg-2">
               <p className={`text-center mb-15 ${style_2 ? "text-white" : ""}`}>
-                © {new Date().getFullYear()} Jobi Inc. All rights reserved.
+                © {new Date().getFullYear()} Make My Vid. All rights reserved.
               </p>
             </div>
           </div>

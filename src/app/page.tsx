@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
@@ -15,13 +14,8 @@ import { CategoryCardWrapper } from "./components/category/category-section-2";
 import FeatureTen from "./components/features/feature-ten";
 import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
-import { authCookies } from "@/utils/cookies";
 import TopCompany from "./components/top-company/top-company";
 import FeedbackOne from "./components/feedBacks/feedback-one";
-
-interface DecodedToken {
-  exp: number;
-}
 
 // Data for How It Works section
 const howItWorksData = {
@@ -69,29 +63,7 @@ const howItWorksData = {
 
 const HomeSix = () => {
   const searchParams = useSearchParams();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeRole, setActiveRole] = useState<'client' | 'freelancer'>('client');
-
-  useEffect(() => {
-    // Check authentication status from cookies
-    const token = authCookies.getToken();
-    if (token) {
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        if (decodedToken.exp * 1000 > Date.now()) {
-          setIsAuthenticated(true);
-        } else {
-          authCookies.removeToken();
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        authCookies.removeToken();
-        setIsAuthenticated(false);
-      }
-    }
-    setIsLoading(false);
-  }, []);
 
   useEffect(() => {
     if (searchParams.get('login') === 'true') {
@@ -104,28 +76,17 @@ const HomeSix = () => {
     }
   }, [searchParams]);
 
-  if (isLoading) {
-    return (
-      <Wrapper>
-        <div className="main-page-wrapper">
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
-      </Wrapper>
-    );
-  }
-
   return (
     <Wrapper>
       <div className="main-page-wrapper">
-        <Header isAuthenticated={isAuthenticated} />
+        <Header />
 
         <HeroBannerSeven />
 
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
+          <div className="container">
+            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30">Trusted by</div>
+          </div>
           <PartnersSlider />
         </div>
 

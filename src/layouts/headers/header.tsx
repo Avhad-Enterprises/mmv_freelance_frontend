@@ -6,12 +6,11 @@ import Menus from "./component/menus";
 import logo from "@/assets/images/logo/white-mmv.png";
 import CategoryDropdown from "./component/category-dropdown";
 import LoginModal from "@/app/components/common/popup/login-modal";
+import { useUser } from "@/context/UserContext";
 
-type HeaderProps = {
-  isAuthenticated?: boolean;
-};
-
-const Header = ({ isAuthenticated = false }: HeaderProps) => {
+const Header = () => {
+  const { userData, isLoading } = useUser();
+  const isAuthenticated = !!userData && !isLoading;
   return (
     <>
       <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
