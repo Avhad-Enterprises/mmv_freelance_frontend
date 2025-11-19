@@ -6,12 +6,20 @@ import Menus from "./component/menus";
 import logo from "@/assets/images/logo/white-mmv.png";
 import CategoryDropdown from "./component/category-dropdown";
 import LoginModal from "@/app/components/common/popup/login-modal";
+import { useUser } from "@/context/UserContext";
 
-type HeaderProps = {
-  isAuthenticated?: boolean;
-};
+const Header = () => {
+  const { userData, userRoles, isLoading } = useUser();
+  const isAuthenticated = !!userData && !isLoading;
+  
+  // Determine dashboard route based on user role
+  const getDashboardRoute = () => {
+    if (!userData || !userRoles.length) return '/dashboard/freelancer-dashboard';
+    const normalizedRoles = userRoles.map(r => r.toUpperCase());
+    if (normalizedRoles.includes('CLIENT')) return '/dashboard/client-dashboard';
+    return '/dashboard/freelancer-dashboard';
+  };
 
-const Header = ({ isAuthenticated = false }: HeaderProps) => {
   return (
     <>
       <header className={`theme-main-menu menu-overlay menu-style-one sticky-menu fixed`}>
@@ -34,7 +42,7 @@ const Header = ({ isAuthenticated = false }: HeaderProps) => {
                 <ul className="d-flex align-items-center style-none">
                   <li>
                     {isAuthenticated ? (
-                      <Link href="/dashboard/freelancer-dashboard" className="login-btn-one">
+                      <Link href={getDashboardRoute()} className="login-btn-one">
                         Dashboard
                       </Link>
                     ) : (

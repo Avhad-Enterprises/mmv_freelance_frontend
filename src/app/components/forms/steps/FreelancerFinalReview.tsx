@@ -51,7 +51,7 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       if (data.rate_amount) fd.append('hourly_rate', String(data.rate_amount));
 
       // Contact & Location (from Step 3, Step 2 videographer location)
-      if (data.phone_number) fd.append('phone_number', data.phone_number);
+      fd.append('phone_number', data.phone_number || '');
       if (data.city) fd.append('city', data.city);
       if (data.country) fd.append('country', data.country);
       if (data.coordinates?.lat || data.coordinates?.lng) {
@@ -60,7 +60,7 @@ const FreelancerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegi
       }
 
       // ID Verification
-      if (data.id_type) fd.append('id_type', data.id_type);
+      fd.append('id_type', data.id_type || '');
       if (data.id_document) {
         // accept File or array
         const file = Array.isArray(data.id_document) ? data.id_document[0] : data.id_document;
@@ -211,7 +211,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
             onClick={handleSubmit}
             disabled={!termsAccepted || !privacyAccepted}
           >
-            Confirm & Submit
+            Submit
           </button>
         </div>
       </div>

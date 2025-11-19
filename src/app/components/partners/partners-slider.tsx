@@ -36,7 +36,10 @@ const slider_setting = {
   slidesToShow: 6,
   slidesToScroll: 1,
   autoplay: true,
-  autoplaySpeed: 3500,
+  autoplaySpeed: 2000,
+  speed: 2000,
+  cssEase: "linear",
+  pauseOnHover: false,
   responsive: [
     { breakpoint: 1400, settings: { slidesToShow: 5 } },
     { breakpoint: 768, settings: { slidesToShow: 4 } },
@@ -74,15 +77,13 @@ const PartnersSlider = () => {
     <Slider {...slider_setting} className="partner-slider">
       {logos.map((logo, i) => (
         <div key={i} className="item">
-          <div className="logo d-flex align-items-center justify-content-center" style={{ height: '70px', padding: '5px' }}>
+          <div className="logo d-flex align-items-center justify-content-center" style={{ height: '100px', padding: '8px' }}>
             <Image
               src={logo}
               alt={`carousal logo ${i + 1}`}
               style={{ 
-                maxWidth: '100%',
-                maxHeight: '100%',
-                width: 'auto',
-                height: 'auto',
+                width: '160px',
+                height: '80px',
                 objectFit: 'contain',
               }}
             />

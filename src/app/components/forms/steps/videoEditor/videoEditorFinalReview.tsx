@@ -80,18 +80,22 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       
       if (formData.rate_amount) fd.append('rate_amount', String(formData.rate_amount));
 
-      if (formData.phone_number) fd.append('phone_number', formData.phone_number);
-      if (formData.address) fd.append('street_address', formData.address);
+      // Required fields
+      fd.append('phone_number', formData.phone_number || '');
+      fd.append('id_type', formData.id_type || '');
+      
+      // Optional address fields
+      if (formData.full_address) fd.append('address', formData.full_address);
       if (formData.city) fd.append('city', formData.city);
+      if (formData.state) fd.append('state', formData.state);
       if (formData.country) fd.append('country', formData.country);
       if (formData.pincode) fd.append('pincode', formData.pincode);
 
-      if (formData.coordinates && formData.coordinates.lat && formData.coordinates.lng) {
+      // *** FIX: Append latitude and longitude from Step 3 (only if valid) ***
+      if (formData.coordinates && formData.coordinates.lat !== null && formData.coordinates.lng !== null) {
         fd.append('latitude', String(formData.coordinates.lat));
         fd.append('longitude', String(formData.coordinates.lng));
       }
-
-      if (formData.id_type) fd.append('id_type', formData.id_type);
       if (formData.id_document) {
         const file = Array.isArray(formData.id_document) ? formData.id_document[0] : formData.id_document;
         if (file) fd.append('id_document', file);
@@ -105,7 +109,10 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       if (Array.isArray(formData.languages) && formData.languages.length > 0) {
         fd.append('languages', JSON.stringify(formData.languages));
       }
-      if (formData.short_description) fd.append('short_description', formData.short_description);
+      if (formData.short_description) {
+        fd.append('short_description', formData.short_description);
+        fd.append('bio', formData.short_description); // Map short_description to bio for backend
+      }
 
       if (formData.role) fd.append('role', formData.role);
       if (Array.isArray(formData.superpowers)) fd.append('superpowers', JSON.stringify(formData.superpowers));
@@ -260,7 +267,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
             onClick={handleSubmit}
             disabled={!termsAccepted || !privacyAccepted}
           >
-            Confirm & Submit
+            Submit
           </button>
         </div>
       </div>

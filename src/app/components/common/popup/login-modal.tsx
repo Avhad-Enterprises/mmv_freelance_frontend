@@ -6,13 +6,22 @@ import Image from 'next/image';
 import LoginForm from '@/app/components/forms/login-form';
 import google from '@/assets/images/icon/google.png';
 import facebook from '@/assets/images/icon/facebook.png';
-import apple from '@/assets/images/icon/apple.png'; 
+import apple from '@/assets/images/icon/apple.png';
+import { useUser } from '@/context/UserContext';
 
 interface LoginModalProps {
   onLoginSuccess?: () => void;
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) => {
+  const { refreshUserData } = useUser();
+
+  const handleLoginSuccess = async () => {
+    // Refresh user context after successful login
+    await refreshUserData();
+    onLoginSuccess();
+  };
+
   return (
     <div
       className="modal fade"
@@ -40,7 +49,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
   className="text-primary"
   onClick={() => {
     if (window.location.pathname === '/register') {
-      window.location.reload(); // refresh if already there
+      window.location.reload();
     }
   }}
 >
@@ -50,8 +59,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
             </div>
 
             <div className="form-wrapper m-auto">
-              {/* ✅ Pass both callback AND isModal flag */}
-              <LoginForm onLoginSuccess={onLoginSuccess} isModal={true} />
+              <LoginForm onLoginSuccess={handleLoginSuccess} isModal={true} />
 
               <div className="d-flex align-items-center mt-30 mb-10">
                 <div className="line flex-grow-1"></div>
@@ -59,7 +67,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
                 <div className="line flex-grow-1"></div>
               </div>
 
-              {/* ✅ Social buttons in a single line */}
               <div className="row text-center justify-content-center">
                 <div className="col-md-4 col-12 mb-2 mb-md-0">
                   <a
@@ -89,7 +96,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => {} }) =>
                   </a>
                 </div>
               </div>
-              {/* ✅ End of social buttons */}
             </div>
           </div>
         </div>

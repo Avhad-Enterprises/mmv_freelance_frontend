@@ -9,8 +9,8 @@ const GEOCODE_API_URL = "https://maps.googleapis.com/maps/api/geocode/json";
  * Defines the structure for the geolocation data returned on success.
  */
 interface GeocodingResult {
-    lat: number;
-    lng: number;
+    lat: number | null;
+    lng: number | null;
     formatted_address: string;
 }
 
@@ -32,8 +32,8 @@ function getFallbackCoordinates(address: string): ServerActionResponse {
     console.warn(`[Server Action] Using fallback coordinates for address: '${address}'`);
     return {
         data: {
-            lat: 0,
-            lng: 0,
+            lat: null, // Use null instead of 0 to indicate geocoding failed
+            lng: null,
             formatted_address: address // Keep the original address
         },
         usedFallback: true
@@ -110,6 +110,10 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
 
         } else if (data.status === 'OVER_QUERY_LIMIT') {
             console.warn(`[Server Action] Quota exceeded for geocoding API. Using fallback.`);
+            return getFallbackCoordinates(sanitizedAddress);
+
+        } else if (data.status === 'REQUEST_DENIED') {
+            console.warn(`[Server Action] This API project is not authorized to use this API. Using fallback.`);
             return getFallbackCoordinates(sanitizedAddress);
 
         } else {

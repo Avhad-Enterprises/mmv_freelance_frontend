@@ -60,21 +60,21 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (data.rate_currency) fd.append('rate_currency', data.rate_currency);
 
       // Contact & Location
-      if (data.phone_number) fd.append('phone_number', data.phone_number);
+      fd.append('phone_number', data.phone_number || '');
+      if (data.full_address) fd.append('address', data.full_address);
       if (data.city) fd.append('city', data.city);
+      if (data.state) fd.append('state', data.state);
       if (data.country) fd.append('country', data.country);
-      if (data.full_address) {
-        fd.append('full_address', data.full_address);
-      }
+      if (data.pincode) fd.append('pincode', data.pincode);
       
-      // *** FIX: Append latitude and longitude from Step 3 ***
-      if (data.coordinates && data.coordinates.lat && data.coordinates.lng) {
+      // *** FIX: Append latitude and longitude from Step 3 (only if valid) ***
+      if (data.coordinates && data.coordinates.lat !== null && data.coordinates.lng !== null) {
         fd.append('latitude', String(data.coordinates.lat));
         fd.append('longitude', String(data.coordinates.lng));
       }
 
       // ID Verification
-      if (data.id_type) fd.append('id_type', data.id_type);
+      fd.append('id_type', data.id_type || '');
       if (data.id_document) {
         const file = Array.isArray(data.id_document) ? data.id_document[0] : data.id_document;
         if (file) fd.append('id_document', file as File);
@@ -90,7 +90,10 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       if (Array.isArray(data.languages) && data.languages.length > 0) {
         fd.append('languages', JSON.stringify(data.languages));
       }
-      if (data.short_description) fd.append('short_description', data.short_description);
+      if (data.short_description) {
+        fd.append('short_description', data.short_description);
+        fd.append('bio', data.short_description); // Map short_description to bio for backend
+      }
 
       // Extra fields
       if (data.role) fd.append('role', data.role);
@@ -247,7 +250,7 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
             onClick={handleSubmit}
             disabled={!termsAccepted || !privacyAccepted}
           >
-            Confirm & Submit
+            Submit
           </button>
         </div>
       </div>

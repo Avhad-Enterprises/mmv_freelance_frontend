@@ -60,20 +60,27 @@ interface FreelancerCommonFields {
 export interface VideoEditorFormData extends FormDataCommon, FreelancerCommonFields {
   account_type: "videoEditor";
   address: string; // Added
+  full_address: string; // Added - the actual field collected in Step 3
   city: string; // Added
+  state: string; // Added
   country: string; // Added
   pincode: string; // Added
   coordinates: { lat: number; lng: number }; // Added
   experience_level: string;
   role: string;
+  bio: string; // Added
 }
 
 export interface VideographerFormData extends FormDataCommon, FreelancerCommonFields {
   account_type: "videographer";
   address: string;
+  full_address: string; // Added - the actual field collected in Step 3
   city: string;
+  state: string; // Added
   country: string;
+  pincode: string; // Added
   coordinates: { lat: number; lng: number };
+  bio: string; // Added
 }
 
 export interface ClientFormData extends FormDataCommon {
@@ -109,7 +116,7 @@ export interface ClientFormData extends FormDataCommon {
   bank_name: string;
   account_number: string;
   swift_iban: string;
-  business_document: File | null;
+  business_document: FileList | File | null;
   tax_id: string;
   city: string;
   country: string;

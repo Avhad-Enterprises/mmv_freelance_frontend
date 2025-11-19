@@ -10,7 +10,7 @@ const SocialLinks = () => {
       </li>
       <li>
         <a href="#">
-          <i className="bi bi-dribbble"></i>
+          <i className="bi bi-linkedin"></i>
         </a>
       </li>
       <li>

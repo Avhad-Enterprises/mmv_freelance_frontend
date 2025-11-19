@@ -64,19 +64,13 @@ const FooterOne = ({
             {/* Bottom Navigation */}
             <div className="col-lg-4 order-lg-1 mb-15">
               <ul className="d-flex style-none bottom-nav justify-content-center justify-content-lg-start">
-                <li>
-                  <Link href="/privacy">Privacy Policy</Link>
-                </li>
-                <li>
-                  <Link href="/contact">Contact Us</Link>
-                </li>
               </ul>
             </div>
 
             {/* Copyright */}
             <div className="col-lg-4 order-lg-2">
               <p className={`text-center mb-15 ${style_2 ? "text-white" : ""}`}>
-                © {new Date().getFullYear()} Jobi Inc. All rights reserved.
+                © {new Date().getFullYear()} Make My Vid. All rights reserved.
               </p>
             </div>
           </div>

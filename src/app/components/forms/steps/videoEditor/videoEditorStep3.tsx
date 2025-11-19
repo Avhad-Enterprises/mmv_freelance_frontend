@@ -100,11 +100,13 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     const geocodeResult = await geocodeAddress(fullAddressToGeocode);
 
     // The geocoding API now has built-in fallback, so it will never return an error
-    // It will use default coordinates (0, 0) if geocoding fails
-    const coordinates = geocodeResult.data || { lat: 0, lng: 0, formatted_address: data.full_address };
+    // It will use null coordinates if geocoding fails
+    const coordinates = geocodeResult.data || { lat: null, lng: null, formatted_address: formData.full_address };
 
     const submissionData = {
-      ...data,
+      ...formData,
+      ...data, // Include current form data (phone_number, id_type, address, city, country, pincode, etc.)
+      phone_number: `${countryCode}${data.phone_number}`, // Combine country code with phone number
       profile_photo: selectedProfilePhoto,
       id_document: selectedIdDocument,
       coordinates: {

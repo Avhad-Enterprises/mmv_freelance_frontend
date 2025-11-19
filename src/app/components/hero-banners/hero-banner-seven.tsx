@@ -1,17 +1,61 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { jwtDecode } from 'jwt-decode';
 import Image from 'next/image';
 import screen_1 from '@/assets/images/assets/screen_17.png';
 import screen_2 from '@/assets/images/assets/screen_18.png';
 import JobCategorySelect from '../select/job-category';
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import understroke from '@/assets/images/assets/picture 1.png';
+import { authCookies } from '@/utils/cookies';
+
+interface DecodedToken {
+  exp: number;
+}
 
 const HeroBannerSeven = () => {
+  const router = useRouter();
   const { handleSubmit, setCategoryVal, setSearchText } = useSearchFormSubmit();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check authentication status from cookies
+    const token = authCookies.getToken();
+    if (token) {
+      try {
+        const decodedToken = jwtDecode<DecodedToken>(token);
+        if (decodedToken.exp * 1000 > Date.now()) {
+          setIsAuthenticated(true);
+        } else {
+          authCookies.removeToken();
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        authCookies.removeToken();
+        setIsAuthenticated(false);
+      }
+    }
+  }, []);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
+  };
+
+  const handlePostProject = () => {
+    if (!isAuthenticated) {
+      // Show login modal
+      const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+      if (loginButton) loginButton.click();
+    } else {
+      // Redirect to coming soon page
+      router.push('/coming-soon');
+    }
+  };
+
+  const handleFindFreelanceWork = () => {
+    // Always redirect to coming soon page
+    router.push('/coming-soon');
   };
 
   return (
@@ -60,7 +104,7 @@ const HeroBannerSeven = () => {
                     <div className="row align-items-center">
                       <div className="col-md-5">
                         <div className="input-box">
-                          <div className="label">Job Categories</div>
+                          <div className="label">Select Superpowers</div>
                           <JobCategorySelect setCategoryVal={setCategoryVal} />
                         </div>
                       </div>
@@ -82,13 +126,20 @@ const HeroBannerSeven = () => {
                       </div>
                     </div>
                   </form>
-                  <ul className="filter-tags d-flex justify-content-center style-none mt-25 lg-mt-20">
-                    <li className="fw-500 text-dark me-2">Populer:</li>
-                    <li><a href="#">Design</a></li>
-                    <li><a href="#">Art</a></li>
-                    <li><a href="#">Business</a></li>
-                    <li><a href="#">Video Editing</a></li>
-                  </ul>
+                  <div className="d-flex justify-content-center gap-3 mt-25 lg-mt-20">
+                    <button 
+                      className="btn-five fw-500 tran3s flex-fill"
+                      onClick={handlePostProject}
+                    >
+                      Post Project
+                    </button>
+                    <button 
+                      className="btn-five fw-500 tran3s flex-fill"
+                      onClick={handleFindFreelanceWork}
+                    >
+                      Find Freelance Work
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

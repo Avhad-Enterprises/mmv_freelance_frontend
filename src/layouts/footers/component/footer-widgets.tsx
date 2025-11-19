@@ -34,10 +34,10 @@ export function WidgetTwo({ cls, style_2 }: { cls: string; style_2?: boolean }) 
 export function WidgetThree({ cls, style_2 }: { cls: string; style_2?: boolean }) {
   return (
     <div className={`${cls} mb-20`}>
-      <h5 className={`footer-title ${style_2 ? 'text-white' : ''}`}>Resources</h5>
+      <h5 className={`footer-title ${style_2 ? 'text-white' : ''}`}>Video Resources</h5>
       <ul className="footer-nav-link style-none">
         <li><Link href="/coming-soon">Blog: Video Trends & Tips</Link></li>
-        <li><Link href="/coming-soon">Video Tools (links to CompVid, etc.)</Link></li>
+        <li><Link href="/coming-soon">Video Resources</Link></li>
         <li><Link href="/coming-soon">Success Stories</Link></li>
         <li><Link href="/coming-soon">Help & Support Center</Link></li>
         <li><Link href="/coming-soon">Community Forum</Link></li>

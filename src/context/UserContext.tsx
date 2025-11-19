@@ -1,6 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { authCookies } from "@/utils/cookies";
+import { normalizeRoles } from "@/utils/role-utils";
 
 interface UserData {
   user_id?: number;
@@ -37,7 +38,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
       // If no token, user is not authenticated
       if (!token) {
-        console.log('No authentication token found - user not authenticated');
+        setUserData(null);
         setUserRoles([]);
         setCurrentRole('Not Authenticated');
         setIsLoading(false);
@@ -45,27 +46,39 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Decode token to get roles (do this early for fallback)
-      const base64Payload = token.split(".")[1];
-      const decodedPayload = JSON.parse(atob(base64Payload));
-      const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
-      const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
+      let decodedPayload: any = null;
+      let rolesArray: string[] = [];
+      
+      try {
+        const tokenParts = token.split(".");
+        if (tokenParts.length !== 3) {
+          throw new Error('Invalid JWT token format');
+        }
+        const base64Payload = tokenParts[1];
+        decodedPayload = JSON.parse(atob(base64Payload));
+        const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
+        rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
+      } catch (decodeError) {
+        // Token decode failed, clear invalid token and set unauthenticated state
+        authCookies.removeToken();
+        setUserData(null);
+        setUserRoles([]);
+        setCurrentRole('Not Authenticated');
+        setIsLoading(false);
+        return;
+      }
 
-      console.log('Fetching user data with token...');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        // Add timeout to prevent hanging
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(5000)
       });
 
       if (!res.ok) {
-        console.error(`API request failed with status: ${res.status}`);
         // If API is not available, fall back to token-based user info
-        console.log('API unavailable, using token data for authentication');
-        
         const data: UserData = {
           user_id: decodedPayload.user_id || decodedPayload.sub,
           first_name: decodedPayload.first_name || decodedPayload.name?.split(' ')[0] || '',
@@ -75,19 +88,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           account_type: decodedPayload.account_type || 'user'
         };
 
-        console.log('User data from token:', data);
         setUserData(data);
 
-        const roleMap: { [key: string]: string } = {
-          'freelancer': 'Freelancer',
-          'videographer': 'Videographer',
-          'videoeditor': 'Video Editor',
-          'video_editor': 'Video Editor',
-          'client': 'Client'
-        };
-
-        const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
-        console.log('Setting roles from token:', displayRoles);
+        const displayRoles = normalizeRoles(rolesArray);
         setUserRoles(displayRoles);
         setCurrentRole(displayRoles[0] || 'User');
         setIsLoading(false);
@@ -95,7 +98,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const response = await res.json();
-      console.log('API Response:', response);
       
       if (response.success && response.data) {
         const { user, userType } = response.data;
@@ -109,33 +111,23 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           account_type: userType || user?.account_type || 'user'
         };
 
-        console.log('User data extracted:', data);
-        setUserData(data);
+          setUserData(data);
 
-        // Map roles to display names
-        const roleMap: { [key: string]: string } = {
-          'freelancer': 'Freelancer',
-          'videographer': 'Videographer',
-          'videoeditor': 'Video Editor',
-          'video_editor': 'Video Editor',
-          'client': 'Client'
-        };
-
-        const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
-        console.log('Setting roles:', displayRoles);
-        setUserRoles(displayRoles);
-        setCurrentRole(displayRoles[0] || 'User'); // Set first role as current
+          const displayRoles = normalizeRoles(rolesArray);
+          setUserRoles(displayRoles);
+          setCurrentRole(displayRoles[0] || 'User');
       } else {
-        console.error('API response unsuccessful or missing data:', response);
         throw new Error('Invalid API response structure');
       }
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
-      
       // If API fails and we have a token, try to use token data as fallback
       if (token) {
         try {
-          const base64Payload = token.split(".")[1];
+          const tokenParts = token.split(".");
+          if (tokenParts.length !== 3) {
+            throw new Error('Invalid JWT token format');
+          }
+          const base64Payload = tokenParts[1];
           const decodedPayload = JSON.parse(atob(base64Payload));
           const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
           const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
@@ -149,35 +141,22 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             account_type: decodedPayload.account_type || 'user'
           };
 
-          console.log('Using token data as fallback:', data);
           setUserData(data);
 
-          const roleMap: { [key: string]: string } = {
-            'freelancer': 'Freelancer',
-            'videographer': 'Videographer',
-            'videoeditor': 'Video Editor',
-            'video_editor': 'Video Editor',
-            'client': 'Client'
-          };
-
-          const displayRoles = rolesArray.map((role: string) => roleMap[role.toLowerCase()] || role.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()));
-          console.log('Setting roles from token fallback:', displayRoles);
+          const displayRoles = normalizeRoles(rolesArray);
           setUserRoles(displayRoles);
           setCurrentRole(displayRoles[0] || 'User');
         } catch (tokenError) {
-          console.error('Token fallback also failed:', tokenError);
           // Only set error state if both API and token fallback fail
-          if (!userData) {
-            setUserRoles([]);
-            setCurrentRole('Error Loading');
-          }
-        }
-      } else {
-        // No token available
-        if (!userData) {
+          setUserData(null);
           setUserRoles([]);
           setCurrentRole('Error Loading');
         }
+      } else {
+        // No token available
+        setUserData(null);
+        setUserRoles([]);
+        setCurrentRole('Not Authenticated');
       }
     } finally {
       setIsLoading(false);

@@ -21,8 +21,7 @@ type ProfileData = {
   email: string;
   phone_number: string;
   bio: string;
-  address_line_first: string;
-  address_line_second: string;
+  address: string;
   city: string;
   state: string;
   country: string;
@@ -43,7 +42,6 @@ type ProfileData = {
   // Additional videographer-specific fields
   username?: string;
   website?: string;
-  timezone?: string;
   profile_title?: string;
   base_skills?: string[];
   work_type?: string;
@@ -353,8 +351,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         email: user.email || "",
         phone_number: user.phone_number || user.phone || "", // Unified API uses 'phone_number', fallback to 'phone'
         bio: user.bio || profile?.short_description || "",
-        address_line_first: user.address_line_first || user.address || "", // Unified API uses 'address_line_first', fallback to 'address'
-        address_line_second: user.address_line_second || "",
+        address: user.address || "",
         city: user.city || "",
         state: stateObj?.isoCode || "",
         country: countryObj?.isoCode || "",
@@ -372,7 +369,6 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
         // Additional videographer-specific fields
         username: user.username,
         website: user.website,
-        timezone: user.timezone,
         profile_title: profile?.profile_title,
         skill_tags: safeArray<string>(profile?.skill_tags),
         base_skills: safeArray<string>(profile?.base_skills),
@@ -1008,8 +1004,7 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
             )}
 
             <InfoSection title="Address & Location" sectionKey="address" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              <InfoRow label="Address Line 1" value={profileData.address_line_first} field="address_line_first" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
-              <InfoRow label="Address Line 2" value={profileData.address_line_second} field="address_line_second" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+              <InfoRow label="Address" value={profileData.address} field="address" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
               
               <div className="row mb-3">
                 <div className="col-md-4"><strong>Country:</strong></div>
