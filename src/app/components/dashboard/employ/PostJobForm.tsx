@@ -177,7 +177,6 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   return (
     <>
       <div className="bg-white card-box border-20">
-        <h2 className="main-title mb-30">Post a New Job</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="row">
             {/* Project Title */}

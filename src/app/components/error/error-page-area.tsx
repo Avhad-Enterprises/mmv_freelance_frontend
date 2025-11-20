@@ -17,10 +17,10 @@ const ErrorPageArea = () => {
                 or start from our Homepage.
               </p>
               <Link
-                href="/register"
+                href="/"
                 className="btn-one w-100 d-flex align-items-center justify-content-between mt-30"
               >
-                <span>REGISTER</span>
+                <span>GO TO HOMEPAGE</span>
                 <Image src={icon} alt="icon" />
               </Link>
             </div>

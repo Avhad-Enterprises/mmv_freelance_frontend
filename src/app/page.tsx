@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
+import FooterOne from "@/layouts/footers/footer-one";
 import shape from '@/assets/images/shape/shape_24.svg';
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
@@ -83,7 +84,7 @@ const HomeSix = () => {
 
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <div className="container">
-            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30">Trusted by</div>
+            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>Trusted by</div>
           </div>
           <PartnersSlider />
         </div>
@@ -93,7 +94,7 @@ const HomeSix = () => {
             <div className="row justify-content-between">
               <div className="col-sm-8">
                 <div className="title-three">
-                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Find Your Perfect Video Production Services.</h2>
+                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>Find Your Perfect Video Production Services.</h2>
                 </div>
               </div>
               <div className="col-sm-4">
@@ -115,11 +116,7 @@ const HomeSix = () => {
         {/* How It Works Two start*/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
-            <div className="title-one text-center mb-40 lg-mb-30">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
-            </div>
-
-            <div className="d-flex justify-content-center mb-60 lg-mb-40">
+            <div className="d-flex justify-content-center mb-30 lg-mb-20">
               <div className="role-toggle-container">
                 <button
                   onClick={() => setActiveRole('client')}
@@ -144,6 +141,10 @@ const HomeSix = () => {
                   For Freelancers
                 </button>
               </div>
+            </div>
+
+            <div className="title-one text-center mb-60 lg-mb-40">
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Your journey to abundance starts here</h2>
             </div>
 
             <div className="border-bottom">
@@ -230,9 +231,83 @@ const HomeSix = () => {
                 font-size: 14px;
               }
 
+              .role-toggle-btn svg {
+                width: 16px;
+                height: 16px;
+              }
+
               .icon-image-wrapper {
                 width: 80px;
                 height: 80px;
+              }
+
+              .card-style-five {
+                padding-left: 15px;
+                padding-right: 15px;
+              }
+
+              .card-style-five .title {
+                font-size: 1.1rem !important;
+              }
+
+              .card-style-five p {
+                font-size: 0.9rem;
+              }
+            }
+
+            @media (max-width: 576px) {
+              .role-toggle-container {
+                max-width: 100%;
+                padding: 3px;
+              }
+
+              .role-toggle-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+              }
+
+              .role-toggle-btn svg {
+                display: none;
+              }
+            }
+
+            /* Hero Banner Responsive Fixes */
+            :global(.understroke-img) {
+              bottom: -120px !important;
+            }
+
+            @media (max-width: 1200px) {
+              :global(.understroke-img) {
+                bottom: -80px !important;
+              }
+            }
+
+            @media (max-width: 768px) {
+              :global(.understroke-img) {
+                bottom: -50px !important;
+              }
+            }
+
+            @media (max-width: 576px) {
+              :global(.understroke-img) {
+                bottom: -30px !important;
+              }
+            }
+
+            /* Category Section Responsive */
+            @media (max-width: 991px) {
+              :global(.category-section-two .title-three h2) {
+                font-size: 1.8rem;
+              }
+            }
+
+            @media (max-width: 576px) {
+              :global(.category-section-two .title-three h2) {
+                font-size: 1.5rem;
+              }
+              
+              :global(.partner-logos .title) {
+                font-size: 1rem;
               }
             }
           `}</style>
@@ -267,6 +342,10 @@ const HomeSix = () => {
         </section>
 
         <FancyBannerSeven/>
+
+        {/* footer start */}
+        <FooterOne />
+        {/* footer end */}
       </div>
     </Wrapper>
   );

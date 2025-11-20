@@ -42,8 +42,9 @@ const slider_setting = {
   pauseOnHover: false,
   responsive: [
     { breakpoint: 1400, settings: { slidesToShow: 5 } },
-    { breakpoint: 768, settings: { slidesToShow: 4 } },
-    { breakpoint: 576, settings: { slidesToShow: 3 } },
+    { breakpoint: 992, settings: { slidesToShow: 4 } },
+    { breakpoint: 768, settings: { slidesToShow: 3 } },
+    { breakpoint: 576, settings: { slidesToShow: 2 } },
   ],
 };
 
@@ -82,8 +83,10 @@ const PartnersSlider = () => {
               src={logo}
               alt={`carousal logo ${i + 1}`}
               style={{ 
-                width: '160px',
-                height: '80px',
+                width: '100%',
+                maxWidth: '160px',
+                height: 'auto',
+                maxHeight: '80px',
                 objectFit: 'contain',
               }}
             />

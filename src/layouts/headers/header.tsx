@@ -57,7 +57,7 @@ const Header = () => {
                     )}
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/coming-soon" className="btn-one">
+                    <Link href="/coming-soon" className="btn-one hire-top-talents-btn">
                       Hire Top Talents
                     </Link>
                   </li>
@@ -102,7 +102,7 @@ const Header = () => {
                     <Menus />
                     {/* menus end */}
                     <li className="d-md-none">
-                      <Link href="/job-list" className="btn-one w-100">
+                      <Link href="/job-list" className="btn-one w-100 hire-top-talents-btn">
                         Hire Top Talents
                       </Link>
                     </li>

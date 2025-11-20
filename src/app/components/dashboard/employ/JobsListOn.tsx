@@ -13,7 +13,6 @@ interface JobsListProps {
   projects: ProjectSummary[];
   loading: boolean;
   error: string | null;
-  onViewApplicants: (project: ProjectSummary) => void;
   onViewSubmissions: (project: ProjectSummary) => void;
   getStatusInfo: (status: number) => { text: string; className: string };
 }
@@ -22,7 +21,6 @@ const JobsList: React.FC<JobsListProps> = ({
   projects,
   loading,
   error,
-  onViewApplicants,
   onViewSubmissions,
   getStatusInfo,
 }) => {
@@ -91,14 +89,6 @@ const JobsList: React.FC<JobsListProps> = ({
                   </td>
                   <td>
                     <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-sm btn-outline-primary"
-                        onClick={() => onViewApplicants(project)}
-                        title="View applicants for this job"
-                      >
-                        <i className="bi bi-people me-1"></i>
-                        Applicants
-                      </button>
                       <button
                         className="btn btn-sm btn-outline-success"
                         onClick={() => onViewSubmissions(project)}

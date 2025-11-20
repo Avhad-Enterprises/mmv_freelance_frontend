@@ -25,10 +25,8 @@ type CreditPackage = {
 
 const CREDIT_PACKAGES: CreditPackage[] = [
   { id: "starter", amount: 10, price: 10 },
-  { id: "basic", amount: 25, price: 25 },
   { id: "professional", amount: 50, price: 50, popular: true },
   { id: "premium", amount: 100, price: 100 },
-  { id: "enterprise", amount: 250, price: 250 },
 ];
 
 const CreditsArea = () => {
@@ -36,8 +34,6 @@ const CreditsArea = () => {
   const [balance, setBalance] = useState<CreditsBalance | null>(null);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [customAmount, setCustomAmount] = useState(10);
-  const [purchasingCustom, setPurchasingCustom] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingPurchase, setPendingPurchase] = useState<{ amount: number; packageId?: string } | null>(null);
 
@@ -85,8 +81,6 @@ const CreditsArea = () => {
     
     if (packageId) {
       setPurchasing(packageId);
-    } else {
-      setPurchasingCustom(true);
     }
 
     setShowConfirmModal(false);
@@ -112,7 +106,6 @@ const CreditsArea = () => {
       toast.error(err?.response?.data?.message || "Unable to complete purchase");
     } finally {
       setPurchasing(null);
-      setPurchasingCustom(false);
       setPendingPurchase(null);
     }
   };
@@ -128,7 +121,7 @@ const CreditsArea = () => {
       <div className="dashboard-body">
         <div className="position-relative">
           <DashboardHeader />
-          <div className="text-center py-5">
+          <div className="text-center py-45">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
             </div>
@@ -145,54 +138,44 @@ const CreditsArea = () => {
         <h2 className="main-title">Credits Management</h2>
 
         {/* Credits Balance Section */}
-        <div className="row mb-40">
-          <div className="col-12">
-            <div className="bg-white border-20 p-4">
-              <h4 className="dash-title-three mb-4">Your Credits Balance</h4>
-              <div className="row g-4">
-                <div className="col-lg-4 col-md-6">
-                  <div className="dash-card-one border-20 position-relative p-4 text-center">
-                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '70px', height: '70px', background: '#f0f5ff' }}>
-                      <Image src={icon_1} alt="Available Credits" className="lazy-img" />
-                    </div>
-                    <div className="value fw-500 fs-1 text-primary">
-                      {balance?.credits_balance || 0}
-                    </div>
-                    <span className="text-muted">Available Credits</span>
-                    <div className="fs-6 text-muted mt-2">
-                      Use credits to apply for projects
-                    </div>
-                  </div>
+        <div className="row mb-20">
+          <div className="col-lg-4 col-md-6">
+            <div className="dash-card-one bg-white border-30 position-relative mb-15">
+              <div className="d-sm-flex align-items-center justify-content-between">
+                <div className="icon rounded-circle d-flex align-items-center justify-content-center order-sm-1">
+                  <Image src={icon_1} alt="Available Credits" className="lazy-img" />
                 </div>
-
-                <div className="col-lg-4 col-md-6">
-                  <div className="dash-card-one border-20 position-relative p-4 text-center">
-                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '70px', height: '70px', background: '#f0fff4' }}>
-                      <Image src={icon_2} alt="Total Purchased" className="lazy-img" />
-                    </div>
-                    <div className="value fw-500 fs-1 text-success">
-                      {balance?.total_credits_purchased || 0}
-                    </div>
-                    <span className="text-muted">Total Purchased</span>
-                    <div className="fs-6 text-muted mt-2">
-                      Lifetime credits purchased
-                    </div>
-                  </div>
+                <div className="order-sm-0">
+                  <div className="value fw-500">{balance?.credits_balance || 0}</div>
+                  <span>Available Credits</span>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                <div className="col-lg-4 col-md-6">
-                  <div className="dash-card-one border-20 position-relative p-4 text-center">
-                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '70px', height: '70px', background: '#fff7ed' }}>
-                      <Image src={icon_3} alt="Credits Used" className="lazy-img" />
-                    </div>
-                    <div className="value fw-500 fs-1 text-warning">
-                      {balance?.credits_used || 0}
-                    </div>
-                    <span className="text-muted">Credits Used</span>
-                    <div className="fs-6 text-muted mt-2">
-                      Applied to {Math.floor((balance?.credits_used || 0) / 50)} projects
-                    </div>
-                  </div>
+          <div className="col-lg-4 col-md-6">
+            <div className="dash-card-one bg-white border-30 position-relative mb-15">
+              <div className="d-sm-flex align-items-center justify-content-between">
+                <div className="icon rounded-circle d-flex align-items-center justify-content-center order-sm-1">
+                  <Image src={icon_2} alt="Total Purchased" className="lazy-img" />
+                </div>
+                <div className="order-sm-0">
+                  <div className="value fw-500">{balance?.total_credits_purchased || 0}</div>
+                  <span>Total Purchased</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-lg-4 col-md-6">
+            <div className="dash-card-one bg-white border-30 position-relative mb-15">
+              <div className="d-sm-flex align-items-center justify-content-between">
+                <div className="icon rounded-circle d-flex align-items-center justify-content-center order-sm-1">
+                  <Image src={icon_3} alt="Credits Used" className="lazy-img" />
+                </div>
+                <div className="order-sm-0">
+                  <div className="value fw-500">{balance?.credits_used || 0}</div>
+                  <span>Credits Used</span>
                 </div>
               </div>
             </div>
@@ -200,40 +183,40 @@ const CreditsArea = () => {
         </div>
 
         {/* How Credits Work */}
-        <div className="row mb-40">
+        <div className="row mb-20">
           <div className="col-12">
-            <div className="bg-white border-20 p-4">
-              <h4 className="dash-title-three mb-4">How Credits Work</h4>
-              <div className="row g-4">
+            <div className="bg-white card-box border-20">
+              <h4 className="dash-title-three">How Credits Work</h4>
+              <div className="row">
                 <div className="col-md-4">
-                  <div className="text-center">
-                    <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', fontSize: '24px', fontWeight: 'bold' }}>
+                  <div className="text-center mt-25">
+                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-15" style={{ width: '60px', height: '60px', background: '#D2F34C', color: '#244034', fontSize: '24px', fontWeight: 'bold' }}>
                       1
                     </div>
-                    <h5 className="mb-2">Purchase Credits</h5>
-                    <p className="text-muted mb-0">
-                      Choose a package or customize your own credit amount below.
+                    <h5 className="mb-10">Purchase Credits</h5>
+                    <p>
+                      Choose from our credit packages to start applying for projects.
                     </p>
                   </div>
                 </div>
                 <div className="col-md-4">
-                  <div className="text-center">
-                    <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', fontSize: '24px', fontWeight: 'bold' }}>
+                  <div className="text-center mt-25">
+                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-15" style={{ width: '60px', height: '60px', background: '#D2F34C', color: '#244034', fontSize: '24px', fontWeight: 'bold' }}>
                       2
                     </div>
-                    <h5 className="mb-2">Apply to Projects</h5>
-                    <p className="text-muted mb-0">
+                    <h5 className="mb-10">Apply to Projects</h5>
+                    <p>
                       Each project application costs 50 credits. Credits are deducted automatically.
                     </p>
                   </div>
                 </div>
                 <div className="col-md-4">
-                  <div className="text-center">
-                    <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style={{ width: '60px', height: '60px', fontSize: '24px', fontWeight: 'bold' }}>
+                  <div className="text-center mt-25">
+                    <div className="icon rounded-circle d-flex align-items-center justify-content-center mx-auto mb-15" style={{ width: '60px', height: '60px', background: '#D2F34C', color: '#244034', fontSize: '24px', fontWeight: 'bold' }}>
                       3
                     </div>
-                    <h5 className="mb-2">Get Hired</h5>
-                    <p className="text-muted mb-0">
+                    <h5 className="mb-10">Get Hired</h5>
+                    <p>
                       Once hired, build your portfolio and grow your freelance career.
                     </p>
                   </div>
@@ -244,51 +227,57 @@ const CreditsArea = () => {
         </div>
 
         {/* Purchase Credits Section */}
-        <div className="row mb-40">
+        <div className="row mb-20">
           <div className="col-12">
-            <div className="bg-white border-20 p-4">
-              <h4 className="dash-title-three mb-4">Purchase Credit Packages</h4>
-              <p className="text-muted mb-4">
+            <div className="bg-white card-box border-20">
+              <h4 className="dash-title-three">Purchase Credit Packages</h4>
+              <p className="mb-25">
                 Choose a credit package to start applying for projects. Each application requires 50 credits.
               </p>
               
-              <div className="row g-4">
+              <div className="row">
                 {CREDIT_PACKAGES.map((pkg) => (
                   <div key={pkg.id} className="col-lg-4 col-md-6">
                     <div 
-                      className={`dash-card-one border-20 position-relative p-4 h-100 ${
-                        pkg.popular ? 'border border-primary' : ''
+                      className={`dash-card-one bg-white border-30 position-relative mb-15 ${
+                        pkg.popular ? 'border' : ''
                       }`}
                       style={{ 
                         transition: 'all 0.3s ease',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        borderColor: pkg.popular ? '#D2F34C' : undefined
                       }}
                     >
                       {pkg.popular && (
                         <div 
                           className="position-absolute top-0 start-50 translate-middle"
-                          style={{ marginTop: '10px' }}
+                          style={{ 
+                            marginTop: '10px',
+                            backgroundColor: '#D2F34C',
+                            color: '#244034',
+                            border: '2px solid #D2F34C'
+                          }}
                         >
-                          <span className="badge bg-primary">Most Popular</span>
+                          <span className="badge">Most Popular</span>
                         </div>
                       )}
                       
-                      <div className="text-center mb-4">
-                        <h3 className="fw-bold mb-2 text-capitalize">{pkg.id}</h3>
-                        <div className="mb-3">
-                          <span className="fs-1 fw-bold text-primary">{pkg.amount}</span>
+                      <div className="text-center mb-25">
+                        <h3 className="fw-bold mb-10 text-capitalize">{pkg.id}</h3>
+                        <div className="mb-15">
+                          <span className="fs-1 fw-bold" style={{ color: '#D2F34C' }}>{pkg.amount}</span>
                           <span className="text-muted ms-1">Credits</span>
                         </div>
-                        <div className="mb-3">
+                        <div className="mb-15">
                           <span className="fs-4 fw-bold">${pkg.price.toFixed(2)}</span>
                         </div>
-                        <div className="text-muted small mb-3">
+                        <div className="text-muted small mb-15">
                           ${(pkg.price / pkg.amount).toFixed(2)} per credit
                         </div>
                       </div>
 
                       <button
-                        className={`dash-btn-two w-100 ${
+                        className={`dash-btn-two w-100 tran3s ${
                           purchasing === pkg.id ? 'disabled' : ''
                         }`}
                         onClick={() => handlePurchase(pkg.amount, pkg.id)}
@@ -304,7 +293,7 @@ const CreditsArea = () => {
                         )}
                       </button>
 
-                      <div className="mt-3 text-center">
+                      <div className="mt-15 text-center">
                         <small className="text-muted">
                           {Math.floor(pkg.amount / 50)} project applications
                         </small>
@@ -312,73 +301,6 @@ const CreditsArea = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Amount Section */}
-        <div className="row">
-          <div className="col-12">
-            <div className="bg-white border-20 p-4">
-              <h4 className="dash-title-three mb-4">Custom Amount</h4>
-              <p className="text-muted mb-4">
-                Need a different amount? Use the slider to choose your custom credit amount.
-              </p>
-              
-              <div className="row justify-content-center">
-                <div className="col-lg-8">
-                  <div className="text-center mb-4">
-                    <div className="mb-3">
-                      <span className="fs-1 fw-bold text-primary">{customAmount}</span>
-                      <span className="text-muted ms-2 fs-5">Credits</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="fs-4 fw-bold">${customAmount.toFixed(2)}</span>
-                    </div>
-                    <div className="text-muted small">
-                      $1.00 per credit • {Math.floor(customAmount / 50)} project applications
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <input
-                      type="range"
-                      className="form-range"
-                      min="1"
-                      max="500"
-                      step="1"
-                      value={customAmount}
-                      onChange={(e) => setCustomAmount(Number(e.target.value))}
-                      style={{
-                        height: '8px',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    <div className="d-flex justify-content-between text-muted small mt-2">
-                      <span>1 Credit</span>
-                      <span>500 Credits</span>
-                    </div>
-                  </div>
-
-                  <div className="text-center">
-                    <button
-                      className={`dash-btn-two ${purchasingCustom ? 'disabled' : ''}`}
-                      onClick={() => handlePurchase(customAmount)}
-                      disabled={purchasingCustom}
-                      style={{ minWidth: '250px' }}
-                    >
-                      {purchasingCustom ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                          Processing...
-                        </>
-                      ) : (
-                        `Purchase ${customAmount} Credits - ${customAmount.toFixed(2)}`
-                      )}
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -392,9 +314,9 @@ const CreditsArea = () => {
             tabIndex={-1}
           >
             <div className="modal-dialog modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Confirm Purchase</h5>
+              <div className="modal-content border-20">
+                <div className="modal-header border-0 pb-0">
+                  <h5 className="modal-title dash-title-three">Confirm Purchase</h5>
                   <button 
                     type="button" 
                     className="btn-close" 
@@ -403,15 +325,15 @@ const CreditsArea = () => {
                   ></button>
                 </div>
                 <div className="modal-body">
-                  <div className="text-center py-3">
-                    <div className="mb-3">
-                      <span className="fs-2 fw-bold text-primary">{pendingPurchase.amount}</span>
+                  <div className="text-center py-25">
+                    <div className="mb-15">
+                      <span className="fs-2 fw-bold" style={{ color: '#D2F34C' }}>{pendingPurchase.amount}</span>
                       <span className="text-muted ms-2">Credits</span>
                     </div>
-                    <div className="mb-3">
+                    <div className="mb-15">
                       <span className="fs-4 fw-bold">${pendingPurchase.amount.toFixed(2)}</span>
                     </div>
-                    <div className="text-muted mb-4">
+                    <div className="text-muted mb-25">
                       This will give you <strong>{Math.floor(pendingPurchase.amount / 50)}</strong> project application{Math.floor(pendingPurchase.amount / 50) !== 1 ? 's' : ''}
                     </div>
                     <p className="text-muted">
@@ -419,7 +341,7 @@ const CreditsArea = () => {
                     </p>
                   </div>
                 </div>
-                <div className="modal-footer">
+                <div className="modal-footer border-0 pt-0">
                   <button 
                     type="button" 
                     className="btn btn-secondary" 
@@ -429,7 +351,7 @@ const CreditsArea = () => {
                   </button>
                   <button 
                     type="button" 
-                    className="dash-btn-two" 
+                    className="dash-btn-two tran3s" 
                     onClick={confirmPurchase}
                   >
                     Confirm Purchase
