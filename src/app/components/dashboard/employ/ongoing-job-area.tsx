@@ -625,8 +625,7 @@ const OngoingJobArea: FC = () => {
           ) : selectedProjectForSubmissions ? (
             // Submissions View
             <div className="bg-white card-box border-20">
-              <div className="dash-input-wrapper mb-30">
-                <h4 className="mb-3">Project Submissions</h4>
+              <div className="table-responsive">
                 {submissionsLoading ? (
                   <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status">
@@ -636,66 +635,73 @@ const OngoingJobArea: FC = () => {
                 ) : submissionsError ? (
                   <div className="alert alert-danger">{submissionsError}</div>
                 ) : submissions.length === 0 ? (
-                  <div className="text-center p-5 bg-light rounded">
+                  <div className="text-center p-5">
                     <h5>No Submissions Yet</h5>
-                    <p className="text-muted">No freelancers have submitted their work for this project.</p>
+                    <p className="text-muted mb-0">No freelancers have submitted their work for this project.</p>
                   </div>
                 ) : (
-                  <div className="table-responsive">
-                    <table className="table job-alert-table">
-                      <thead>
-                        <tr>
-                          <th>Freelancer</th>
-                          <th>Submitted On</th>
-                          <th>Status</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="border-0">
-                        {submissions.map((submission) => {
-                          const statusInfo = getSubmissionStatusInfo(submission.status);
-                          return (
-                            <tr key={submission.submission_id}>
-                              <td>
-                                <div className="d-flex align-items-center">
-                                  <img 
-                                    src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
-                                    alt={submission.freelancer_name}
-                                    className="rounded-circle me-2"
-                                    style={{ width: 40, height: 40, objectFit: 'cover' }}
-                                  />
-                                  <div>
-                                    <div className="fw-semibold">{submission.freelancer_name}</div>
-                                    <small className="text-muted">{submission.freelancer_email}</small>
-                                  </div>
+                  <table className="table job-alert-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '30%' }}>Freelancer</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th className="text-end">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="border-0">
+                      {submissions.map((submission) => {
+                        const statusInfo = getSubmissionStatusInfo(submission.status);
+                        return (
+                          <tr key={submission.submission_id} className="align-middle">
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <img 
+                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
+                                  alt={submission.freelancer_name}
+                                  className="rounded-circle me-3"
+                                  style={{ width: 50, height: 50, objectFit: 'cover' }}
+                                />
+                                <div>
+                                  <div className="job-name fw-500">{submission.freelancer_name}</div>
+                                  <small className="text-muted">{submission.freelancer_email}</small>
                                 </div>
-                              </td>
-                              <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}</td>
-                              <td>
-                                <span className={`badge ${statusInfo.className}`}>
-                                  {statusInfo.text}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  className="btn btn-sm btn-primary"
-                                  onClick={() => handleOpenSubmissionModal(submission)}
-                                >
-                                  Review
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                              </div>
+                            </td>
+                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}</td>
+                            <td>
+                              <span className={`fw-bold ${statusInfo.className === 'bg-warning' ? 'text-warning' : statusInfo.className === 'bg-success' ? 'text-success' : 'text-danger'}`}>
+                                {statusInfo.text}
+                              </span>
+                            </td>
+                            <td className="text-end">
+                              <button
+                                className="btn"
+                                onClick={() => handleOpenSubmissionModal(submission)}
+                                style={{
+                                  backgroundColor: '#31795A',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '14px',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                Review
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </div>
