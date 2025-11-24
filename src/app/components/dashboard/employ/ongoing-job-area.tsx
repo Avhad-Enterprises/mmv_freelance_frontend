@@ -4,11 +4,11 @@ import React, { useState, useEffect, useCallback, Fragment, type FC } from "reac
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
-import { useSidebar } from "@/context/SidebarContext";
+import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from "../candidate/dashboard-header";
-import JobsList from "./JobsListOn";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
+import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 
@@ -171,42 +171,41 @@ const OngoingJobArea: FC = () => {
     setSubmissionsError(null);
 
     try {
-      // TODO: Replace with actual API endpoint when available
-      // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`, {
-      //   headers: { 'Authorization': `Bearer ${authCookies.getToken()}` }
-      // });
-      
-      // TEMPORARY: Using dummy data until backend implements GET submissions endpoint
-      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
-      
-      const dummySubmissions: Submission[] = [
+      const token = authCookies.getToken();
+      if (!token) throw new Error('Authentication required');
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`,
         {
-          submission_id: 1,
-          projects_task_id: parseInt(project.project_id),
-          user_id: 101,
-          submitted_files: "https://dropbox.com/project-final-v1.mp4,https://drive.google.com/raw-footage.zip",
-          additional_notes: "Completed as per requirements. Applied color grading, transitions, and sound design. Final render in 4K resolution.",
-          status: 0,
-          created_at: "2025-11-01T10:30:00Z",
-          freelancer_name: "Rajesh Kumar",
-          freelancer_email: "rajesh.k@example.com",
-          freelancer_profile_picture: "https://i.pravatar.cc/150?img=12"
-        },
-        {
-          submission_id: 2,
-          projects_task_id: parseInt(project.project_id),
-          user_id: 102,
-          submitted_files: "https://wetransfer.com/final-edit-master.mp4",
-          additional_notes: "Added cinematic effects and background music as discussed. Please review and let me know if any changes needed.",
-          status: 0,
-          created_at: "2025-11-01T14:15:00Z",
-          freelancer_name: "Priya Sharma",
-          freelancer_email: "priya.sharma@example.com",
-          freelancer_profile_picture: "https://i.pravatar.cc/150?img=5"
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      ];
-      
-      setSubmissions(dummySubmissions);
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to load submissions');
+      }
+
+      if (result.success) {
+        const submissionsData: Submission[] = (result.data || []).map((sub: any) => ({
+          submission_id: sub.submission_id,
+          projects_task_id: sub.projects_task_id,
+          user_id: sub.user_id,
+          submitted_files: sub.submitted_files,
+          additional_notes: sub.additional_notes || '',
+          status: sub.status,
+          created_at: sub.created_at,
+          freelancer_name: `${sub.freelancer_first_name || ''} ${sub.freelancer_last_name || ''}`.trim(),
+          freelancer_email: sub.freelancer_email || '',
+          freelancer_profile_picture: sub.freelancer_profile_picture || ''
+        }));
+
+        setSubmissions(submissionsData);
+      }
     } catch (err: any) {
       const message = err.message || "Failed to load submissions.";
       setSubmissionsError(message);
@@ -598,7 +597,7 @@ const OngoingJobArea: FC = () => {
                 ? `Submissions for: ${selectedProjectForSubmissions.title}`
                 : selectedProjectForApplicants 
                 ? `Applications for: ${selectedProjectForApplicants.title}` 
-                : (isPostingJob ? "Post a New Job" : "My Jobs")}
+                : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
             </h2>
             {!isPostingJob && !selectedProjectForApplicants && !selectedProjectForSubmissions && !selectedApplicant && (
               <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
@@ -626,8 +625,7 @@ const OngoingJobArea: FC = () => {
           ) : selectedProjectForSubmissions ? (
             // Submissions View
             <div className="bg-white card-box border-20">
-              <div className="dash-input-wrapper mb-30">
-                <h4 className="mb-3">Project Submissions</h4>
+              <div className="table-responsive">
                 {submissionsLoading ? (
                   <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status">
@@ -637,66 +635,73 @@ const OngoingJobArea: FC = () => {
                 ) : submissionsError ? (
                   <div className="alert alert-danger">{submissionsError}</div>
                 ) : submissions.length === 0 ? (
-                  <div className="text-center p-5 bg-light rounded">
+                  <div className="text-center p-5">
                     <h5>No Submissions Yet</h5>
-                    <p className="text-muted">No freelancers have submitted their work for this project.</p>
+                    <p className="text-muted mb-0">No freelancers have submitted their work for this project.</p>
                   </div>
                 ) : (
-                  <div className="table-responsive">
-                    <table className="table job-alert-table">
-                      <thead>
-                        <tr>
-                          <th>Freelancer</th>
-                          <th>Submitted On</th>
-                          <th>Status</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="border-0">
-                        {submissions.map((submission) => {
-                          const statusInfo = getSubmissionStatusInfo(submission.status);
-                          return (
-                            <tr key={submission.submission_id}>
-                              <td>
-                                <div className="d-flex align-items-center">
-                                  <img 
-                                    src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
-                                    alt={submission.freelancer_name}
-                                    className="rounded-circle me-2"
-                                    style={{ width: 40, height: 40, objectFit: 'cover' }}
-                                  />
-                                  <div>
-                                    <div className="fw-semibold">{submission.freelancer_name}</div>
-                                    <small className="text-muted">{submission.freelancer_email}</small>
-                                  </div>
+                  <table className="table job-alert-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '30%' }}>Freelancer</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th className="text-end">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="border-0">
+                      {submissions.map((submission) => {
+                        const statusInfo = getSubmissionStatusInfo(submission.status);
+                        return (
+                          <tr key={submission.submission_id} className="align-middle">
+                            <td>
+                              <div className="d-flex align-items-center">
+                                <img 
+                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
+                                  alt={submission.freelancer_name}
+                                  className="rounded-circle me-3"
+                                  style={{ width: 50, height: 50, objectFit: 'cover' }}
+                                />
+                                <div>
+                                  <div className="job-name fw-500">{submission.freelancer_name}</div>
+                                  <small className="text-muted">{submission.freelancer_email}</small>
                                 </div>
-                              </td>
-                              <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
-                                year: 'numeric', 
-                                month: 'short', 
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}</td>
-                              <td>
-                                <span className={`badge ${statusInfo.className}`}>
-                                  {statusInfo.text}
-                                </span>
-                              </td>
-                              <td>
-                                <button
-                                  className="btn btn-sm btn-primary"
-                                  onClick={() => handleOpenSubmissionModal(submission)}
-                                >
-                                  Review
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                              </div>
+                            </td>
+                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}</td>
+                            <td>
+                              <span className={`fw-bold ${statusInfo.className === 'bg-warning' ? 'text-warning' : statusInfo.className === 'bg-success' ? 'text-success' : 'text-danger'}`}>
+                                {statusInfo.text}
+                              </span>
+                            </td>
+                            <td className="text-end">
+                              <button
+                                className="btn"
+                                onClick={() => handleOpenSubmissionModal(submission)}
+                                style={{
+                                  backgroundColor: '#31795A',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '14px',
+                                  fontWeight: '500'
+                                }}
+                              >
+                                Review
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </div>
@@ -718,14 +723,89 @@ const OngoingJobArea: FC = () => {
               {isPostingJob ? (
                 <PostJobForm onBackToList={handleReturnToList} />
               ) : (
-                <JobsList
-                  projects={projects}
-                  loading={loading}
-                  error={error}
-                  onViewApplicants={handleViewApplicantsClick}
-                  onViewSubmissions={handleViewSubmissionsClick}
-                  getStatusInfo={getStatusInfo}
-                />
+                <div className="bg-white card-box border-20">
+                  <div className="table-responsive">
+                    <table className="table job-alert-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '30%' }}>Title</th>
+                          <th>Category</th>
+                          <th>Budget</th>
+                          <th>Date Created</th>
+                          <th>Status</th>
+                          <th className="text-end">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="border-0">
+                        {loading && (
+                          <tr>
+                            <td colSpan={6} className="text-center py-5">
+                              <div className="spinner-border text-primary" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        {error && (
+                          <tr>
+                            <td colSpan={6} className="text-center text-danger py-4">
+                              {error}
+                            </td>
+                          </tr>
+                        )}
+                        {!loading && !error && projects.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="text-center py-5">
+                              <h5>No Ongoing Projects</h5>
+                              <p className="text-muted mb-0">You don't have any ongoing projects at the moment.</p>
+                            </td>
+                          </tr>
+                        )}
+                        {!loading && !error && projects.map((project) => {
+                          const statusInfo = getStatusInfo(project.status);
+                          return (
+                            <tr key={project.project_id} className="align-middle">
+                              <td>
+                                <div className="job-name fw-500">{project.title}</div>
+                              </td>
+                              <td>{project.category}</td>
+                              <td>₹{project.budget?.toLocaleString() ?? 0}</td>
+                              <td>
+                                {new Date(project.date_created).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                              </td>
+                              <td>
+                                <span className={`fw-bold ${statusInfo.className}`}>
+                                  {statusInfo.text}
+                                </span>
+                              </td>
+                              <td className="text-end">
+                                <button
+                                  className="btn"
+                                  onClick={() => handleViewSubmissionsClick(project)}
+                                  style={{
+                                    backgroundColor: '#31795A',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '14px',
+                                    fontWeight: '500'
+                                  }}
+                                >
+                                  View Submissions
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               )}
             </>
           )}

@@ -14,45 +14,6 @@ import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 import toast from "react-hot-toast";
 
-// Currency conversion rates (hardcoded, base currency: USD)
-const EXCHANGE_RATES: { [key: string]: number } = {
-  'USD': 1,
-  'INR': 83.12,
-  'EUR': 0.92,
-  'GBP': 0.79,
-  'JPY': 149.50,
-  'AUD': 1.52,
-  'CAD': 1.36,
-  'CHF': 0.88,
-  'CNY': 7.24,
-  'NZD': 1.67,
-  'SGD': 1.34,
-  'HKD': 7.83,
-  'KRW': 1338.50,
-  'SEK': 10.87,
-  'NOK': 10.93,
-  'DKK': 6.88,
-  'MXN': 17.12,
-  'BRL': 4.98,
-  'ZAR': 18.65,
-  'RUB': 92.50,
-  'TRY': 34.15,
-  'AED': 3.67,
-  'SAR': 3.75,
-  'MYR': 4.48,
-  'THB': 34.82,
-  'IDR': 15680.00,
-  'PHP': 56.45,
-  'PLN': 3.98,
-  'CZK': 23.15,
-  'ILS': 3.68,
-};
-
-const convertToUserCurrency = (amountInUSD: number, userCurrency: string): number => {
-  const rate = EXCHANGE_RATES[userCurrency] || 1;
-  return amountInUSD * rate;
-};
-
 const DashboardJobBrowseArea = () => {
   const { setIsOpenSidebar } = useSidebar();
   const dispatch = useAppDispatch();
@@ -65,17 +26,14 @@ const DashboardJobBrowseArea = () => {
   const [filterItems, setFilterItems] = useState<IJobType[]>([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemOffset, setItemOffset] = useState(0);
-  const [priceValue, setPriceValue] = useState<[number, number]>([0, 10000]);
-  const [shortValue, setShortValue] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [biddingFilter, setBiddingFilter] = useState<string>("all"); // "all", "bidding", "fixed"
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
-  const [userCurrency, setUserCurrency] = useState<string>('USD');
+  const [shortValue, setShortValue] = useState<string>("");
 
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
-  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
 
   const itemsPerPage = 10;
 
@@ -99,7 +57,6 @@ const DashboardJobBrowseArea = () => {
         // Get user currency
         const userData = userRes.data?.data;
         const currency = userData?.profile?.currency || 'USD';
-        setUserCurrency(currency);
 
         // Extract unique skills from all jobs
         const skillsSet = new Set<string>();
@@ -111,20 +68,6 @@ const DashboardJobBrowseArea = () => {
           }
         });
         setAvailableSkills(Array.from(skillsSet).sort());
-
-        // Extract unique project types from all jobs
-        const typesSet = new Set<string>();
-        jobsData.forEach((job: IJobType) => {
-          if (job.projects_type) {
-            typesSet.add(job.projects_type);
-          }
-        });
-        setAvailableTypes(Array.from(typesSet).sort());
-
-        // Calculate max budget in user's currency
-        const maxBudgetUSD = Math.max(...jobsData.map((j: any) => j.budget || 0), 0);
-        const maxBudgetUserCurrency = convertToUserCurrency(maxBudgetUSD, currency);
-        setPriceValue([0, Math.ceil(maxBudgetUserCurrency)]);
 
         // Fetch saved projects if user is logged in
         if (decoded?.user_id) {
@@ -166,10 +109,11 @@ const DashboardJobBrowseArea = () => {
       );
     }
 
-    if (selectedTypes.length > 0) {
-      filteredData = filteredData.filter((item) =>
-        item.projects_type && selectedTypes.includes(item.projects_type)
-      );
+    // Filter by bidding status
+    if (biddingFilter === "bidding") {
+      filteredData = filteredData.filter((item) => item.bidding_enabled === true);
+    } else if (biddingFilter === "fixed") {
+      filteredData = filteredData.filter((item) => item.bidding_enabled === false);
     }
 
     if (projects_type) {
@@ -177,12 +121,6 @@ const DashboardJobBrowseArea = () => {
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
       );
     }
-
-    // Filter by budget range (convert job budget to user currency for comparison)
-    filteredData = filteredData.filter((item) => {
-      const budgetInUserCurrency = convertToUserCurrency(item.budget ?? 0, userCurrency);
-      return budgetInUserCurrency >= priceValue[0] && budgetInUserCurrency <= priceValue[1];
-    });
 
     if (search_key) {
       filteredData = filteredData.filter((item) =>
@@ -202,8 +140,8 @@ const DashboardJobBrowseArea = () => {
     setCurrentItems(filteredData.slice(itemOffset, endOffset));
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
-    itemOffset, itemsPerPage, selectedSkills, selectedTypes, projects_type,
-    all_jobs, priceValue, shortValue, search_key, userCurrency,
+    itemOffset, itemsPerPage, selectedSkills, projects_type,
+    all_jobs, search_key, biddingFilter, shortValue,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -253,11 +191,8 @@ const DashboardJobBrowseArea = () => {
 
   const handleReset = () => {
     dispatch(resetFilter());
-    const maxBudgetUSD = Math.max(...all_jobs.map((j: any) => j.budget || 0), 0);
-    const maxBudgetUserCurrency = convertToUserCurrency(maxBudgetUSD, userCurrency);
-    setPriceValue([0, Math.ceil(maxBudgetUserCurrency)]);
     setSelectedSkills([]);
-    setSelectedTypes([]);
+    setBiddingFilter("all");
     setShortValue("");
     setItemOffset(0);
     toast.success("Filters reset successfully");
@@ -270,24 +205,12 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const toggleType = (type: string) => {
-    setSelectedTypes(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    );
-    setItemOffset(0);
-  };
-
   const handleRemoveSkill = (skillToRemove: string) => {
     setSelectedSkills(prev => prev.filter(skill => skill !== skillToRemove));
     setItemOffset(0);
   };
 
-  const handleRemoveType = (typeToRemove: string) => {
-    setSelectedTypes(prev => prev.filter(type => type !== typeToRemove));
-    setItemOffset(0);
-  };
-
-  const hasSelections = selectedSkills.length > 0 || selectedTypes.length > 0;
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || shortValue !== "";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
@@ -334,6 +257,31 @@ const DashboardJobBrowseArea = () => {
                       <li className="more">+{item.skills_required.length - 3}</li>
                     )}
                   </ul>
+                  
+                  {/* Bidding Badge */}
+                  <div className="mt-2">
+                    {item.bidding_enabled ? (
+                      <span className="badge" style={{ 
+                        backgroundColor: '#D2F34C', 
+                        color: '#244034',
+                        fontSize: '11px',
+                        padding: '4px 10px',
+                        fontWeight: '500'
+                      }}>
+                        <i className="bi bi-gavel me-1"></i>Bidding Enabled
+                      </span>
+                    ) : (
+                      <span className="badge" style={{ 
+                        backgroundColor: '#6c757d', 
+                        color: 'white',
+                        fontSize: '11px',
+                        padding: '4px 10px',
+                        fontWeight: '500'
+                      }}>
+                        <i className="bi bi-cash-stack me-1"></i>Fixed Price
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -420,6 +368,31 @@ const DashboardJobBrowseArea = () => {
               <li key={i} className="text-nowrap">{s}</li>
             ))}
           </ul>
+          
+          {/* Bidding Badge */}
+          <div className="mb-3">
+            {item.bidding_enabled ? (
+              <span className="badge" style={{ 
+                backgroundColor: '#D2F34C', 
+                color: '#244034',
+                fontSize: '11px',
+                padding: '4px 10px',
+                fontWeight: '500'
+              }}>
+                <i className="bi bi-gavel me-1"></i>Bidding Enabled
+              </span>
+            ) : (
+              <span className="badge" style={{ 
+                backgroundColor: '#6c757d', 
+                color: 'white',
+                fontSize: '11px',
+                padding: '4px 10px',
+                fontWeight: '500'
+              }}>
+                <i className="bi bi-cash-stack me-1"></i>Fixed Price
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="candidate-info text-center mb-3">
@@ -456,19 +429,14 @@ const DashboardJobBrowseArea = () => {
           <DashboardHeader />
           <h2 className="main-title mb-30">Browse Projects</h2>
 
-          {/* Horizontal Filter Area - Clean Style */}
-          <div className="p-4 rounded-3 mb-30" style={{ backgroundColor: '#f8f9fa' }}>
-            <div className="row g-4 align-items-end">
+          {/* Horizontal Filter Area - Theme Consistent Style */}
+          <div className="bg-white card-box border-20 mb-30">
+            <div className="row g-3 g-lg-4 align-items-end">
               {/* Skills Filter */}
-              <div className="col-lg-3 col-md-6">
+              <div className="col-lg-3 col-md-6 col-12">
                 <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Skills</label>
                 <select
-                  className="form-select py-2"
-                  style={{ 
-                    borderRadius: '8px',
-                    border: '1px solid #e0e0e0',
-                    fontSize: '14px'
-                  }}
+                  className="filter-select form-select"
                   value=""
                   onChange={(e) => {
                     if (e.target.value && !selectedSkills.includes(e.target.value)) {
@@ -483,121 +451,108 @@ const DashboardJobBrowseArea = () => {
                 </select>
               </div>
 
-              {/* Project Type Filter */}
-              <div className="col-lg-3 col-md-6">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Project Type</label>
+              {/* Bidding Filter */}
+              <div className="col-lg-3 col-md-6 col-12">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Pricing Type</label>
                 <select
-                  className="form-select py-2"
-                  style={{ 
-                    borderRadius: '8px',
-                    border: '1px solid #e0e0e0',
-                    fontSize: '14px'
-                  }}
-                  value=""
+                  className="filter-select form-select"
+                  value={biddingFilter}
                   onChange={(e) => {
-                    if (e.target.value && !selectedTypes.includes(e.target.value)) {
-                      toggleType(e.target.value);
-                    }
+                    setBiddingFilter(e.target.value);
+                    setItemOffset(0);
                   }}
                 >
-                  <option value="">Select Type</option>
-                  {availableTypes.map((type, idx) => (
-                    <option key={idx} value={type}>{type}</option>
-                  ))}
+                  <option value="all">All Projects</option>
+                  <option value="bidding">Bidding Only</option>
+                  <option value="fixed">Fixed Price Only</option>
                 </select>
               </div>
 
-              {/* Budget Range */}
-              <div className="col-lg-4 col-md-6">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Budget Range ({userCurrency})</label>
-                <input
-                  type="range"
-                  className="form-range mb-2"
-                  min="0"
-                  max={Math.ceil(Math.max(...all_jobs.map((j: any) => convertToUserCurrency(j.budget || 0, userCurrency)), 0))}
-                  value={priceValue[1]}
+              {/* Sort Filter */}
+              <div className="col-lg-3 col-md-6 col-12">
+                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Sort By</label>
+                <select
+                  className="filter-select form-select"
+                  value={shortValue}
                   onChange={(e) => {
-                    setPriceValue([0, Number(e.target.value)]);
+                    setShortValue(e.target.value);
                     setItemOffset(0);
                   }}
-                />
-                <div className="d-flex justify-content-between align-items-center">
-                  <span style={{ fontSize: '13px', color: '#666' }}>{userCurrency} 0</span>
-                  <span style={{ fontSize: '13px', color: '#666', fontWeight: '500' }}>{userCurrency} {Math.round(priceValue[1]).toLocaleString()}</span>
-                </div>
+                >
+                  <option value="">Default</option>
+                  <option value="price-low-to-high">Price: Low to High</option>
+                  <option value="price-high-to-low">Price: High to Low</option>
+                </select>
               </div>
 
               {/* Clear Button */}
-              <div className="col-lg-2 col-md-6">
+              <div className="col-lg-3 col-md-6 col-12">
                 <button
                   onClick={handleReset}
-                  className="btn btn-outline-secondary w-100 py-2 fw-500"
-                  style={{ 
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
+                  className="dash-btn-two w-100 fw-500"
+                  style={{ height: '55px' }}
                 >
                   Clear
                 </button>
               </div>
             </div>
 
-            {/* Sort By Price Row */}
-            <div className="row g-4 mt-1">
-              <div className="col-lg-3 col-md-6">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Sort By Price</label>
-                <select
-                  className="form-select py-2"
-                  style={{ 
-                    borderRadius: '8px',
-                    border: '1px solid #e0e0e0',
-                    fontSize: '14px'
-                  }}
-                  value={shortValue}
-                  onChange={(e) => setShortValue(e.target.value)}
-                >
-                  <option value="">Select Sort</option>
-                  <option value="price-low-to-high">Low to High</option>
-                  <option value="price-high-to-low">High to Low</option>
-                </select>
-              </div>
-            </div>
-
             {/* Selected Filters Display */}
             {hasSelections && (
-              <div className="d-flex flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #e0e0e0' }}>
-                {selectedTypes.map(type => (
+              <div className="d-flex flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #E3F0EB' }}>
+                {biddingFilter !== "all" && (
                   <span 
-                    key={type} 
                     className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
                     style={{ 
-                      backgroundColor: '#00BF58', 
-                      color: 'white',
+                      backgroundColor: '#D2F34C', 
+                      color: '#244034',
                       fontSize: '13px',
                       fontWeight: '500'
                     }}
                   >
-                    {type}
+                    {biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}
                     <button 
-                      onClick={() => handleRemoveType(type)} 
+                      onClick={() => setBiddingFilter("all")} 
                       className="btn-close ms-2 opacity-100" 
                       style={{ 
                         width: '8px', 
-                        height: '8px', 
-                        filter: 'brightness(0) invert(1)',
+                        height: '8px',
                         fontSize: '10px'
                       }}
                       aria-label="Remove filter"
                     ></button>
                   </span>
-                ))}
+                )}
+                {shortValue && (
+                  <span 
+                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
+                    style={{ 
+                      backgroundColor: '#D2F34C', 
+                      color: '#244034',
+                      fontSize: '13px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {shortValue === "price-low-to-high" ? "Price: Low to High" : "Price: High to Low"}
+                    <button 
+                      onClick={() => setShortValue("")} 
+                      className="btn-close ms-2 opacity-100" 
+                      style={{ 
+                        width: '8px', 
+                        height: '8px',
+                        fontSize: '10px'
+                      }}
+                      aria-label="Remove filter"
+                    ></button>
+                  </span>
+                )}
                 {selectedSkills.map(skill => (
                   <span 
                     key={skill} 
                     className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
                     style={{ 
-                      backgroundColor: '#00BF58', 
-                      color: 'white',
+                      backgroundColor: '#D2F34C', 
+                      color: '#244034',
                       fontSize: '13px',
                       fontWeight: '500'
                     }}
@@ -608,8 +563,7 @@ const DashboardJobBrowseArea = () => {
                       className="btn-close ms-2 opacity-100" 
                       style={{ 
                         width: '8px', 
-                        height: '8px', 
-                        filter: 'brightness(0) invert(1)',
+                        height: '8px',
                         fontSize: '10px'
                       }}
                       aria-label="Remove filter"

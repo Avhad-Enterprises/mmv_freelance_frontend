@@ -150,9 +150,9 @@
     &.list-layout {
         padding: 27px 30px 38px;
         .cadidate-skills {
-            position: absolute;
-            left: 0;
-            bottom: -45px;
+            position: static;
+            left: auto;
+            bottom: auto;
         }
         .right-side {
             width: calc(100% - 80px);

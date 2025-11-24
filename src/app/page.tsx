@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -85,7 +84,7 @@ const HomeSix = () => {
 
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <div className="container">
-            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30">Trusted by</div>
+            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>Trusted by</div>
           </div>
           <PartnersSlider />
         </div>
@@ -95,30 +94,29 @@ const HomeSix = () => {
             <div className="row justify-content-between">
               <div className="col-sm-8">
                 <div className="title-three">
-                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Find Your Perfect Video Production Services.</h2>
+                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>Find Your Perfect Video Production Services.</h2>
                 </div>
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/coming-soon" className="btn-six">All Categories</Link>
+                  <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
                 </div>
               </div>
             </div>
+            {/* CategoryCardWrapper */}
             <CategoryCardWrapper />
+            {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/coming-soon" className="btn-six">All Categories</Link>
+              <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
         </section>
 
+        {/* How It Works Two start*/}
         <section className="how-it-works-two position-relative pt-130 lg-pt-80">
           <div className="container">
-            <div className="title-one text-center mb-40 lg-mb-30">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">How it's Work?</h2>
-            </div>
-
-            <div className="d-flex justify-content-center mb-60 lg-mb-40">
+            <div className="d-flex justify-content-center mb-30 lg-mb-20">
               <div className="role-toggle-container">
                 <button
                   onClick={() => setActiveRole('client')}
@@ -143,6 +141,10 @@ const HomeSix = () => {
                   For Freelancers
                 </button>
               </div>
+            </div>
+
+            <div className="title-one text-center mb-60 lg-mb-40">
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Your journey to abundance starts here</h2>
             </div>
 
             <div className="border-bottom">
@@ -229,15 +231,93 @@ const HomeSix = () => {
                 font-size: 14px;
               }
 
+              .role-toggle-btn svg {
+                width: 16px;
+                height: 16px;
+              }
+
               .icon-image-wrapper {
                 width: 80px;
                 height: 80px;
               }
+
+              .card-style-five {
+                padding-left: 15px;
+                padding-right: 15px;
+              }
+
+              .card-style-five .title {
+                font-size: 1.1rem !important;
+              }
+
+              .card-style-five p {
+                font-size: 0.9rem;
+              }
+            }
+
+            @media (max-width: 576px) {
+              .role-toggle-container {
+                max-width: 100%;
+                padding: 3px;
+              }
+
+              .role-toggle-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+              }
+
+              .role-toggle-btn svg {
+                display: none;
+              }
+            }
+
+            /* Hero Banner Responsive Fixes */
+            :global(.understroke-img) {
+              bottom: -120px !important;
+            }
+
+            @media (max-width: 1200px) {
+              :global(.understroke-img) {
+                bottom: -80px !important;
+              }
+            }
+
+            @media (max-width: 768px) {
+              :global(.understroke-img) {
+                bottom: -50px !important;
+              }
+            }
+
+            @media (max-width: 576px) {
+              :global(.understroke-img) {
+                bottom: -30px !important;
+              }
+            }
+
+            /* Category Section Responsive */
+            @media (max-width: 991px) {
+              :global(.category-section-two .title-three h2) {
+                font-size: 1.8rem;
+              }
+            }
+
+            @media (max-width: 576px) {
+              :global(.category-section-two .title-three h2) {
+                font-size: 1.5rem;
+              }
+              
+              :global(.partner-logos .title) {
+                font-size: 1rem;
+              }
             }
           `}</style>
         </section>
+        {/* How It Works Two end */}
 
         <FeatureTen />
+        {/* text feature end */}
+
+        {/* top company start */}
         <TopCompany />
         <FeedbackOne/>
 
@@ -255,14 +335,17 @@ const HomeSix = () => {
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
               <div className="btn-eight fw-500">Don't find the answer? We can help.
-              <Link href="/coming-soon">Click here</Link>
+              <Link href="/faq">Click here</Link>
               </div>
             </div>
           </div>
         </section>
 
         <FancyBannerSeven/>
+
+        {/* footer start */}
         <FooterOne />
+        {/* footer end */}
       </div>
     </Wrapper>
   );

@@ -1170,6 +1170,7 @@
                         display: -webkit-box;
                         -webkit-line-clamp: 2;
                         -webkit-box-orient: vertical;
+                        line-clamp: 2;
                     }
                     .file {
                         padding: 3px 10px;
@@ -1312,6 +1313,69 @@
             &:hover {
                 color: #ff2730;
             }
+        }
+    }
+
+    // Custom form-range styling for theme consistency
+    .form-range {
+        height: 6px;
+        &::-webkit-slider-thumb {
+            background: $color-two;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-top: -7px; // Center the thumb on the track
+            &:hover {
+                background: $color-five;
+            }
+        }
+        &::-moz-range-thumb {
+            background: $color-two;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            &:hover {
+                background: $color-five;
+            }
+        }
+        &::-webkit-slider-track {
+            background: #E5E5E5;
+            height: 6px;
+            border-radius: 3px;
+            border: none;
+        }
+        &::-moz-range-track {
+            background: #E5E5E5;
+            height: 6px;
+            border-radius: 3px;
+            border: none;
+        }
+    }
+
+    // Custom form-select styling for theme consistency
+    .form-select {
+        &:focus {
+            border-color: $color-five;
+            box-shadow: 0 0 0 0.2rem rgba($color-five, 0.25);
+        }
+    }
+
+    // Custom filter select styling
+    .filter-select {
+        height: 55px;
+        border-radius: 7px;
+        border: 1px solid #E5E5E5;
+        font-size: 14px;
+        padding: 0 20px 0 20px;
+        &:focus {
+            border-color: $color-five;
+            box-shadow: 0 0 0 0.2rem rgba($color-five, 0.25);
         }
     }
 }

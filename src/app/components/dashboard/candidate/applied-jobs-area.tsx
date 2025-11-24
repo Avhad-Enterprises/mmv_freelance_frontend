@@ -6,6 +6,7 @@ import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
+import { IJobType } from '@/types/job-data-type';
 
 // Status Mapping
 const statusMap: Record<number, { text: string; className: string }> = {
@@ -16,24 +17,8 @@ const statusMap: Record<number, { text: string; className: string }> = {
 };
 
 // Job Interface - Aligned with IJobType
-interface IJob {
-  projects_task_id: number;
-  project_title: string;
-  budget: number;
-  deadline: string;
-  category: string;
-  projects_type: string;
+interface IJob extends IJobType {
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
-  skills_required?: string[];
-  project_description?: string;
-  project_format?: string;
-  audio_voiceover?: string;
-  video_length?: number;
-  preferred_video_style?: string;
-  audio_description?: string;
-  reference_links?: string[];
-  created_at?: string;
-  additional_notes?: string;
 }
 
 type IProps = {};
@@ -95,6 +80,7 @@ const AppliedJobsArea = ({}: IProps) => {
           reference_links: job.reference_links || [],
           created_at: job.created_at || '',
           additional_notes: job.additional_notes || '',
+          bidding_enabled: job.bidding_enabled || false,
         }));
         setJobs(jobData);
         setFilteredJobs(jobData);
@@ -205,8 +191,8 @@ const AppliedJobsArea = ({}: IProps) => {
                     </a>
                   </div>
                   <div className="right-side">
-                    <div className="row gx-2 align-items-center">
-                      <div className="col-lg-3">
+                    <div className="row gx-2 align-items-center mb-2">
+                      <div className="col-lg-4">
                         <div className="position-relative">
                           <h4 className="candidate-name mb-0">
                             <a
@@ -216,20 +202,6 @@ const AppliedJobsArea = ({}: IProps) => {
                               {job.project_title}
                             </a>
                           </h4>
-                          <ul className="cadidate-skills style-none d-flex align-items-center">
-                            {job.skills_required &&
-                              job.skills_required.slice(0, 2).map((s, i) => (
-                                <li key={i} className="text-nowrap">
-                                  {s}
-                                </li>
-                              ))}
-                            {job.skills_required &&
-                              job.skills_required.length > 2 && (
-                                <li className="more">
-                                  +{job.skills_required.length - 2}
-                                </li>
-                              )}
-                          </ul>
                         </div>
                       </div>
                       <div className="col-lg-2 col-md-4 col-sm-6">
@@ -244,7 +216,7 @@ const AppliedJobsArea = ({}: IProps) => {
                           <div>{job.projects_type || 'N/A'}</div>
                         </div>
                       </div>
-                      <div className="col-lg-3 col-md-4 col-sm-6">
+                      <div className="col-lg-2 col-md-4 col-sm-6">
                         <div className="candidate-info">
                           <span>Status</span>
                           <div>
@@ -265,6 +237,24 @@ const AppliedJobsArea = ({}: IProps) => {
                             View Details
                           </a>
                         </div>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-12">
+                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                          {job.skills_required &&
+                            job.skills_required.slice(0, 5).map((s, i) => (
+                              <li key={i}>
+                                {s}
+                              </li>
+                            ))}
+                          {job.skills_required &&
+                            job.skills_required.length > 5 && (
+                              <li className="more">
+                                +{job.skills_required.length - 5}
+                              </li>
+                            )}
+                        </ul>
                       </div>
                     </div>
                   </div>

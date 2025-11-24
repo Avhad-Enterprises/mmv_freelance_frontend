@@ -15,6 +15,8 @@ interface Applicant {
   bio: string | null;
   skills?: string[];
   applied_date?: string;
+  bid_amount?: number;
+  bid_message?: string;
 }
 
 interface ApplicantsListProps {
@@ -22,7 +24,7 @@ interface ApplicantsListProps {
   applicantsLoading: boolean;
   applicantsError: string | null;
   savedApplicants: number[];
-  selectedProjectForApplicants: { project_id: string; title: string } | null;
+  selectedProjectForApplicants: { project_id: string; title: string; budget?: number } | null;
   onViewProfile: (applicantId: number) => void;
   onToggleSave: (applicantId: number) => void;
   onUpdateApplicantStatus: (projectId: string, applicationId: number, newStatus: Applicant['status']) => void;
@@ -47,13 +49,23 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
   const [applicantToApprove, setApplicantToApprove] = useState<Applicant | null>(null);
   const approveModalRef = useRef<any>(null);
 
-  // Initialize Bootstrap modal
+  // Modal state for bid message
+  const [showBidMessageModal, setShowBidMessageModal] = useState(false);
+  const [selectedBidMessage, setSelectedBidMessage] = useState<{ name: string; message: string; amount: number } | null>(null);
+  const bidMessageModalRef = useRef<any>(null);
+
+  // Initialize Bootstrap modals
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const bootstrap = require('bootstrap');
-      const modalElement = document.getElementById('approveConfirmationModal');
-      if (modalElement) {
-        approveModalRef.current = new bootstrap.Modal(modalElement);
+      const approveModalElement = document.getElementById('approveConfirmationModal');
+      const bidModalElement = document.getElementById('bidMessageModal');
+      
+      if (approveModalElement) {
+        approveModalRef.current = new bootstrap.Modal(approveModalElement);
+      }
+      if (bidModalElement) {
+        bidMessageModalRef.current = new bootstrap.Modal(bidModalElement);
       }
     }
   }, []);
@@ -80,6 +92,24 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
     approveModalRef.current?.hide();
     setShowApproveModal(false);
     setApplicantToApprove(null);
+  };
+
+  // Handle view bid message
+  const handleViewBidMessage = (applicant: Applicant) => {
+    setSelectedBidMessage({
+      name: `${applicant.first_name} ${applicant.last_name}`,
+      message: applicant.bid_message || 'No proposal message provided.',
+      amount: applicant.bid_amount || 0
+    });
+    setShowBidMessageModal(true);
+    bidMessageModalRef.current?.show();
+  };
+
+  // Handle close bid message modal
+  const handleCloseBidMessage = () => {
+    bidMessageModalRef.current?.hide();
+    setShowBidMessageModal(false);
+    setSelectedBidMessage(null);
   };
 
   return (
@@ -111,9 +141,9 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
           applicants.map(applicant => {
             const status = getStatusInfo(applicant.status);
             return (
-              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25">
-                <div className="d-flex align-items-center">
-                  <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+              <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25" style={{ minHeight: '160px', padding: '30px 25px' }}>
+                <div className="d-flex align-items-start">
+                  <div className="cadidate-avatar online position-relative d-block me-auto ms-auto" style={{ flexShrink: 0 }}>
                     <AuthenticatedImage
                       src={applicant.profile_picture || "/images/default-avatar.png"}
                       alt="Candidate"
@@ -125,72 +155,55 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                       fallbackSrc="/images/default-avatar.png"
                     />
                   </div>
-                  <div className="right-side">
-                    <div className="row gx-1 align-items-center">
-                      <div className="col-xl-3">
+                  <div className="right-side" style={{ width: '100%', paddingLeft: '20px' }}>
+                    {/* First Row: Name, Bid Amount, Status, Date, Actions */}
+                    <div className="row gx-2 align-items-center mb-2">
+                      <div className="col-xl-2 col-md-12 mb-xl-0 mb-2">
                         <div className="position-relative">
-                          <h4 className="candidate-name mb-0">
+                          <h4 className="candidate-name mb-0" style={{ fontSize: '16px', lineHeight: '1.4' }}>
                             {applicant.first_name} {applicant.last_name}
                           </h4>
-
-                          <ul className="cadidate-skills style-none d-flex align-items-center">
-                            {applicant.skills && applicant.skills.slice(0, 3).map((skill, i) => (
-                              <li key={i} className="text-nowrap">{skill}</li>
-                            ))}
-                            {applicant.skills && applicant.skills.length > 3 && (
-                              <li className="more">+{applicant.skills.length - 3}</li>
-                            )}
-                          </ul>
                         </div>
                       </div>
 
-                      <div className="col-xl-3 col-md-4 col-sm-6">
+                      <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
                         <div className="candidate-info">
-                          <span>Application Status</span>
-                          <div className={`fw-bold ${status.className}`}>{status.text}</div>
+                          <span style={{ fontSize: '12px', color: '#666' }}>Bid Amount</span>
+                          <div className="fw-bold text-success" style={{ fontSize: '15px', marginTop: '4px' }}>
+                            ${applicant.bid_amount?.toFixed(2) || '0.00'}
+                          </div>
                         </div>
                       </div>
 
-                      <div className="col-xl-3 col-md-4 col-sm-6">
+                      <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
                         <div className="candidate-info">
-                          <span>Applied Date</span>
-                          <div>{applicant.applied_date ? new Date(applicant.applied_date as string).toLocaleDateString() : 'N/A'}</div>
+                          <span style={{ fontSize: '12px', color: '#666' }}>Application Status</span>
+                          <div className={`fw-bold ${status.className}`} style={{ fontSize: '14px', marginTop: '4px' }}>{status.text}</div>
                         </div>
                       </div>
 
-                      <div className="col-xl-3 col-md-4">
-                        <div className="d-flex justify-content-lg-end align-items-center">
+                      <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
+                        <div className="candidate-info">
+                          <span style={{ fontSize: '12px', color: '#666' }}>Applied Date</span>
+                          <div style={{ fontSize: '14px', marginTop: '4px' }}>{applicant.applied_date ? new Date(applicant.applied_date as string).toLocaleDateString() : 'N/A'}</div>
+                        </div>
+                      </div>
+
+                      <div className="col-xl-4 col-md-12">
+                        <div className="d-flex justify-content-lg-end align-items-center flex-wrap gap-2">
                           <button
                             type="button"
                             className="save-btn text-center rounded-circle tran3s"
                             onClick={() => onToggleSave(applicant.user_id)}
                             title={savedApplicants.includes(applicant.user_id) ? "Unsave" : "Save"}
+                            style={{ width: '36px', height: '36px' }}
                           >
                             <i className={`bi ${savedApplicants.includes(applicant.user_id) ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                           </button>
-                          
-                          <button
-                            onClick={() => onOpenChat(applicant)}
-                            className="btn mx-2"
-                            style={{ 
-                              fontSize: '13px', 
-                              padding: '6px 12px',
-                              backgroundColor: applicant.status === 0 ? '#FFA500' : '#244034',
-                              borderColor: applicant.status === 0 ? '#FFA500' : '#244034',
-                              color: '#ffffff',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                            }}
-                            title={applicant.status === 0 ? 'Chat with applicant (10 message limit)' : 'Chat with applicant'}
-                          >
-                            <i className="bi bi-chat-dots"></i>
-                            {applicant.status === 0 ? '10 msgs' : 'Chat'}
-                          </button>
 
-                          <div className="dropdown ms-2">
+                          <div className="dropdown">
                             <button
-                              className="btn dropdown-toggle profile-btn tran3s"
+                              className="btn btn-sm dropdown-toggle profile-btn tran3s"
                               type="button"
                               data-bs-toggle="dropdown"
                               aria-expanded="false"
@@ -203,7 +216,15 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                   className="dropdown-item"
                                   onClick={() => onViewProfile(applicant.user_id)}
                                 >
-                                  View Profile
+                                  <i className="bi bi-person me-2"></i>View Profile
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => handleViewBidMessage(applicant)}
+                                >
+                                  <i className="bi bi-file-text me-2"></i>View Proposal
                                 </button>
                               </li>
                               {applicant.status !== 1 && (
@@ -244,6 +265,20 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                         </div>
                       </div>
                     </div>
+
+                    {/* Second Row: Skills */}
+                    <div className="row">
+                      <div className="col-12">
+                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap" style={{ gap: '6px' }}>
+                          {applicant.skills && applicant.skills.slice(0, 3).map((skill, i) => (
+                            <li key={i} className="text-nowrap">{skill}</li>
+                          ))}
+                          {applicant.skills && applicant.skills.length > 3 && (
+                            <li className="more">+{applicant.skills.length - 3}</li>
+                          )}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -267,6 +302,38 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={handleCancelApprove}>Cancel</button>
               <button type="button" className="btn btn-success" onClick={handleConfirmApprove}>Yes, Approve</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bid Message Modal */}
+      <div className="modal fade" id="bidMessageModal" tabIndex={-1} aria-labelledby="bidMessageModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-content">
+            <div className="modal-header bg-light">
+              <div>
+                <h5 className="modal-title mb-1" id="bidMessageModalLabel">
+                  Proposal from {selectedBidMessage?.name}
+                </h5>
+                <div className="text-success fw-bold">
+                  Bid Amount: ${selectedBidMessage?.amount?.toFixed(2) || '0.00'}
+                </div>
+              </div>
+              <button type="button" className="btn-close" onClick={handleCloseBidMessage} aria-label="Close"></button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <div className="p-3" style={{ 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: '8px',
+                whiteSpace: 'pre-wrap',
+                lineHeight: '1.6'
+              }}>
+                {selectedBidMessage?.message || 'No proposal message provided.'}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleCloseBidMessage}>Close</button>
             </div>
           </div>
         </div>

@@ -67,7 +67,7 @@ const HeroBannerSeven = () => {
               <h1
                 className="wow fadeInUp text-3xl md:text-4xl lg:text-5xl"
                 data-wow-delay="0.3s"
-                style={{ fontSize: '4em' }}
+                style={{ fontSize: 'clamp(1.5rem, 5vw, 4rem)' }}
               >
                 World's First & Only Freelance Marketplace Exclusively for{' '}
                 <span style={{ position: 'relative', display: 'inline-block' }}>
@@ -75,7 +75,7 @@ const HeroBannerSeven = () => {
                   <Image
                     src={understroke}
                     alt=""
-                    className="lazy-img"
+                    className="lazy-img understroke-img"
                     style={{
                       position: 'absolute',
                       bottom: '-120px',
@@ -126,7 +126,7 @@ const HeroBannerSeven = () => {
                       </div>
                     </div>
                   </form>
-                  <div className="d-flex justify-content-center gap-3 mt-25 lg-mt-20">
+                  <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-25 lg-mt-20">
                     <button 
                       className="btn-five fw-500 tran3s flex-fill"
                       onClick={handlePostProject}

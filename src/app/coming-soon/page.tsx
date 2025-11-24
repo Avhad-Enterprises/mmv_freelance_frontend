@@ -33,7 +33,7 @@ const ComingSoonPage = () => {
                 {/* Button */}
                 <Link
                     href="/register"
-                    className="btn-one d-flex align-items-center justify-content-between mt-3"
+                    className="btn-one register-coming-soon d-flex align-items-center justify-content-between mt-3"
                     style={{ maxWidth: "250px", width: "100%" }}
                 >
                     <span>REGISTER</span>

@@ -163,17 +163,42 @@ hr {opacity: 0.09; margin: 5px 0;}
   padding: 8px 26px;
   text-align: center;
   border-radius: 50px;
-  color: #000;
-  background-color: $color-two;
+  color: #fff;
+  background-color: $color-one;
   border:2px solid transparent;
   @include transition(0.3s);
   &.lg {
     padding: 8px 32px;
   }
   &:hover {
-    background-color: $color-one;
-    color: $color-two;
+    background-color: $color-two;
+    color: $color-one;
     border-color: $color-two;
+  }
+  &.active {
+    background-color: $color-two;
+    color: $color-one;
+    border-color: $color-two;
+  }
+}
+// Custom styling for Hire Top Talents button to appear in hover state by default
+.hire-top-talents-btn {
+  background-color: $color-two !important;
+  color: $color-one !important;
+  border-color: $color-two !important;
+  &:hover {
+    background-color: $color-two !important;
+    color: $color-one !important;
+    border-color: $color-two !important;
+  }
+}
+// Custom styling for Coming Soon register button arrow
+.register-coming-soon {
+  img {
+    filter: brightness(0) invert(1); // Makes the black arrow white
+  }
+  &:hover img {
+    filter: brightness(0); // Makes it black on hover
   }
 }
 .btn-two {

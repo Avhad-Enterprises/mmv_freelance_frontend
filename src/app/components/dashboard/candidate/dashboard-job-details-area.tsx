@@ -6,6 +6,7 @@ import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { authCookies } from "@/utils/cookies";
+import BiddingModal from './bidding-modal'; // Import BiddingModal component
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -33,6 +34,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [showBiddingModal, setShowBiddingModal] = useState(false);
 
   useEffect(() => {
     const token = authCookies.getToken();
@@ -79,26 +81,32 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
         setIsSaved(true);
       }
 
-      // Check if already applied to this specific project
-      const appliedRes = await makeGetRequest(`api/v1/applications/my-applications/project/${job.projects_task_id}`);
+      // Check if already applied to this specific project using the correct API
+      const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
       
       if (appliedRes.data?.success && appliedRes.data?.data) {
-        const application = appliedRes.data.data;
-        setIsApplied(true);
-        setApplicationId(application.applied_projects_id);
+        // Find if user has applied to THIS specific project
+        const applicationForThisProject = appliedRes.data.data.find(
+          (app: any) => app.projects_task_id === job.projects_task_id
+        );
+        
+        if (applicationForThisProject) {
+          setIsApplied(true);
+          setApplicationId(applicationForThisProject.applied_projects_id);
+        } else {
+          setIsApplied(false);
+          setApplicationId(null);
+        }
       } else {
         setIsApplied(false);
         setApplicationId(null);
       }
 
     } catch (error: any) {
-      // If 404 or no application found, user hasn't applied
-      if (error.response?.status === 404) {
-        setIsApplied(false);
-        setApplicationId(null);
-      } else {
-        console.error("Error checking initial job status:", error);
-      }
+      console.error("Error checking initial job status:", error);
+      // If there's an error fetching applications, assume not applied
+      setIsApplied(false);
+      setApplicationId(null);
     }
   };
 
@@ -116,7 +124,46 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     if (isApplied && applicationId) {
       handleWithdrawApplication();
     } else {
-      handleApplySubmit();
+      // Check if bidding is enabled
+      if (job.bidding_enabled) {
+        setShowBiddingModal(true);
+      } else {
+        handleApplySubmit();
+      }
+    }
+  };
+
+  const handleBidSubmit = async (bidAmount: number, bidMessage: string) => {
+    if (!userId) {
+      toast.error('Could not verify user. Please refresh and try again.');
+      return;
+    }
+    
+    setIsApplying(true);
+    try {
+      const payload = {
+        projects_task_id: job.projects_task_id,
+        description: "",
+        bid_amount: bidAmount,
+        bid_message: bidMessage
+      };
+
+      const response = await makePostRequest('api/v1/applications/projects/apply', payload);
+
+      if (response.data?.success) {
+        toast.success('Bid submitted successfully!');
+        setIsApplied(true);
+        setApplicationId(response.data.data?.applied_projects_id || null);
+        setShowBiddingModal(false);
+      } else {
+        toast.error(response.data?.message || 'Failed to submit bid.');
+      }
+    } catch (error: any) {
+      console.error('Error submitting bid:', error);
+      const errorMessage = error.response?.data?.message || 'An error occurred while submitting your bid.';
+      toast.error(errorMessage);
+    } finally {
+      setIsApplying(false);
     }
   };
   
@@ -130,7 +177,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     try {
       const payload = {
         projects_task_id: job.projects_task_id,
-        description: "" // Sending blank description
+        description: "" // Sending blank description for non-bidding projects
       };
 
       const response = await makePostRequest('api/v1/applications/projects/apply', payload);
@@ -355,6 +402,16 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       </div>
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
+      
+      {showBiddingModal && (
+        <BiddingModal
+          originalBudget={job.budget || 0}
+          currency="USD"
+          onSubmit={handleBidSubmit}
+          onCancel={() => setShowBiddingModal(false)}
+          isSubmitting={isApplying}
+        />
+      )}
     </>
   );
 };
