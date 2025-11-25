@@ -491,11 +491,11 @@ const EmployJobArea: FC = () => {
           <h2 className="main-title m0">
             {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Job" : "My Jobs")}
           </h2>
-          {!isPostingJob && !selectedProjectForApplicants && !selectedApplicant && (
+          {/* {!isPostingJob && !selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
               Post a Job
             </button>
-          )}
+          )} */}
           {selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
               ← Back to Applicants
