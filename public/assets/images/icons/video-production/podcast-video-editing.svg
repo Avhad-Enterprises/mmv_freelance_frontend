@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 943.92 838.23">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-1, .cls-3 {
+        stroke-width: 39px;
+      }
+
+      .cls-2 {
+        stroke-width: 37px;
+      }
+
+      .cls-2, .cls-3 {
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="364.64" y="53.87" width="338.51" height="531.95" rx="169.26" ry="169.26"/>
+  <path class="cls-3" d="M711.52,22.62s125.2,68.89,110.03,216.85"/>
+  <path class="cls-3" d="M851.43,22.54s88.81,56.75,70.5,164.9"/>
+  <path class="cls-3" d="M356.27,19.58s-125.2,68.89-110.03,216.85"/>
+  <path class="cls-3" d="M216.36,19.5s-88.81,56.75-70.5,164.9"/>
+  <line class="cls-2" x1="471.03" y1="331.96" x2="596.77" y2="331.96"/>
+  <path class="cls-3" d="M799.58,414.9s14.25,267.88-193.13,284.61h-83.43s8.91,0,8.91,0h-83.43c-207.38-16.73-193.13-284.61-193.13-284.61"/>
+  <polyline class="cls-3" points="531.93 699.51 531.93 818.73 401.19 818.73"/>
+  <line class="cls-3" x1="531.93" y1="818.73" x2="664.72" y2="818.73"/>
+</svg>

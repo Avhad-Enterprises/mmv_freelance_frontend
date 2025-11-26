@@ -2,13 +2,13 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 // internal
-import icon_1 from '@/assets/images/icon/icon_12.svg';
-import icon_2 from '@/assets/images/icon/icon_13.svg';
-import icon_3 from '@/assets/images/icon/icon_14.svg';
-import icon_4 from '@/assets/images/icon/icon_15.svg';
-import icon_5 from '@/assets/images/icon/icon_16.svg';
-import icon_6 from '@/assets/images/icon/icon_17.svg';
-import icon_7 from '@/assets/images/icon/icon_18.svg';
+import icon_1 from '@/assets/images/icons/video-production/reels-shorts-editing.svg';
+import icon_2 from '@/assets/images/icons/video-production/podcast-video-editing.svg';
+import icon_3 from '@/assets/images/icons/video-production/wedding-films.svg';
+import icon_4 from '@/assets/images/icons/video-production/ai-video-ads.svg';
+import icon_5 from '@/assets/images/icons/video-production/corporate-production.svg';
+import icon_6 from '@/assets/images/icons/video-production/event-highlight-videos.svg';
+import icon_7 from '@/assets/images/icons/video-production/long-format-videos.svg';
 import icon_8 from '@/assets/images/icon/icon_19.svg';
 import shape_1 from '@/assets/images/shape/shape_23.svg';
 import shape_2 from '@/assets/images/shape/shape_22.svg';
@@ -91,7 +91,7 @@ export function CategoryCardWrapper() {
             {!item.df && (
               <Link href="/coming-soon" className="d-block">
                 <div className="icon tran3s d-flex align-items-center justify-content-center">
-                  <Image src={item.icon} alt="icon" className="lazy-img" style={{ filter: 'brightness(0) saturate(100%) invert(47%) sepia(95%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%)' }} />
+                  <Image src={item.icon} alt="icon" width={60} height={60} className="lazy-img" style={{ filter: 'brightness(0) saturate(100%) invert(47%) sepia(95%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%)' }} />
                 </div>
                 <div className="title tran3s fw-500 text-lg">{item.title}</div>
                 <div className="total-job">{item.vacancy} talents</div>

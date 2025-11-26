@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #161515;
+        stroke-miterlimit: 10;
+        stroke-width: 16px;
+      }
+
+      .cls-2 {
+        stroke-linecap: round;
+      }
+    </style>
+  </defs>
+  <rect class="cls-1" x="268.6" y="339.41" width="542.8" height="400.93" rx="92.31" ry="92.31"/>
+  <g>
+    <circle class="cls-1" cx="74.52" cy="384.01" r="42.04"/>
+    <circle class="cls-1" cx="126.92" cy="532.08" r="42.04"/>
+    <circle class="cls-1" cx="74.52" cy="694.22" r="42.04"/>
+    <polyline class="cls-1" points="110.52 405.74 161.64 460.41 268.6 460.41"/>
+    <line class="cls-1" x1="168.96" y1="532.08" x2="268.6" y2="532.08"/>
+    <polyline class="cls-1" points="104.69 664.95 158.68 610.96 268.6 610.96"/>
+  </g>
+  <g>
+    <circle class="cls-1" cx="383.84" cy="930.5" r="42.04"/>
+    <circle class="cls-1" cx="531.91" cy="878.11" r="42.04"/>
+    <circle class="cls-1" cx="694.05" cy="930.5" r="42.04"/>
+    <polyline class="cls-1" points="405.57 894.5 460.24 843.38 460.24 736.42"/>
+    <line class="cls-1" x1="531.91" y1="836.06" x2="531.91" y2="736.42"/>
+    <polyline class="cls-1" points="664.78 900.34 610.79 846.35 610.79 736.42"/>
+  </g>
+  <g>
+    <circle class="cls-1" cx="1005.48" cy="687.18" r="42.04"/>
+    <circle class="cls-1" cx="953.08" cy="539.12" r="42.04"/>
+    <circle class="cls-1" cx="1005.48" cy="376.97" r="42.04"/>
+    <polyline class="cls-1" points="969.48 665.46 918.36 610.79 811.4 610.79"/>
+    <line class="cls-1" x1="911.04" y1="539.12" x2="811.4" y2="539.12"/>
+    <polyline class="cls-1" points="975.31 406.25 921.32 460.24 811.4 460.24"/>
+  </g>
+  <g>
+    <circle class="cls-1" cx="692.31" cy="149.5" r="42.04"/>
+    <circle class="cls-1" cx="544.25" cy="201.89" r="42.04"/>
+    <circle class="cls-1" cx="382.1" cy="149.5" r="42.04"/>
+    <polyline class="cls-1" points="670.59 185.5 615.92 236.62 615.92 343.58"/>
+    <line class="cls-1" x1="544.25" y1="243.94" x2="544.25" y2="343.58"/>
+    <polyline class="cls-1" points="411.38 179.66 465.37 233.65 465.37 343.58"/>
+  </g>
+  <path class="cls-2" d="M624.87,586.65s68.49-32.19,8.59-81.25c-59.9-49.06-172.3-126.68-188.41-60.12-16.1,66.56-30.6,218.64,40.26,220.16,0,0,41.39-1.5,83.23-25.75"/>
+</svg>
