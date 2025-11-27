@@ -46,23 +46,33 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
       });
       const result = res.data;
       const token = result?.data?.token;
+      const userRoles = result?.data?.user?.roles;
 
-      if (token) {
+      if (token && userRoles) {
+        // Check if user has allowed roles for client portal
+        const allowedRoles = ['CLIENT', 'VIDEOGRAPHER', 'VIDEO_EDITOR'];
+        const hasAllowedRole = userRoles.some((role: string) => allowedRoles.includes(role));
+
+        if (!hasAllowedRole) {
+          toast.error("Access denied. Admin accounts cannot login to the client portal.");
+          return;
+        }
+
         // Store token using cookies
         authCookies.setToken(token, data.rememberMe);
 
         reset();
 
-        // Decode token to get user role
+        // Decode token to get user role for redirection
         const tokenParts = token.split(".");
         if (tokenParts.length !== 3) {
           throw new Error('Invalid JWT token format');
         }
         const base64Payload = tokenParts[1];
         const decodedPayload = JSON.parse(atob(base64Payload));
-        const userRoles = decodedPayload.roles || decodedPayload.role || [];
+        const tokenRoles = decodedPayload.roles || decodedPayload.role || [];
 
-        const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+        const rolesArray = Array.isArray(tokenRoles) ? tokenRoles : [tokenRoles];
         const normalizedRoles = rolesArray.map((role: string) => role.toUpperCase());
 
         toast.success("Login successful! Redirecting to dashboard...");
@@ -83,7 +93,7 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         }
 
       } else {
-        toast.error(result?.message || "Login failed: No token received.");
+        toast.error(result?.message || "Login failed: No token or user data received.");
       }
     } catch (error: any) {
       if (error.response?.status === 401) {
