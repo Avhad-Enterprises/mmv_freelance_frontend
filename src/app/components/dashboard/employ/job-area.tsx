@@ -39,10 +39,15 @@ export interface Applicant {
   bid_amount?: number; // Bidded amount
   bid_message?: string; // Bid proposal/message
 }
-const EmployJobArea: FC = () => {
+
+interface EmployJobAreaProps {
+  startInPostMode?: boolean;
+}
+
+const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   const router = useRouter();
   const { setIsOpenSidebar } = useSidebar();
-  const [isPostingJob, setIsPostingJob] = useState(false);
+  const [isPostingJob, setIsPostingJob] = useState(startInPostMode);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -144,8 +149,13 @@ const EmployJobArea: FC = () => {
   }, []);
 
   const handleReturnToList = () => {
-    setIsPostingJob(false);
-    fetchClientData();
+    // If started in post mode (from submit-job page), navigate to jobs page
+    if (startInPostMode) {
+      router.push('/dashboard/client-dashboard/jobs');
+    } else {
+      setIsPostingJob(false);
+      fetchClientData();
+    }
   };
 
   const handleViewApplicantsClick = async (project: ProjectSummary) => {

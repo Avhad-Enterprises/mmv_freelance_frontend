@@ -1,9 +1,9 @@
 'use client'
 import React from "react";
-import EmployChatArea from "@/app/components/dashboard/employ/chat-area";
+import EmployJobArea from "@/app/components/dashboard/employ/job-area";
 
-const EmployDashboardChatPage = () => {
-  return <EmployChatArea />;
+const EmployDashboardSubmitJobPage = () => {
+  return <EmployJobArea startInPostMode={true} />;
 };
 
-export default EmployDashboardChatPage;
+export default EmployDashboardSubmitJobPage;

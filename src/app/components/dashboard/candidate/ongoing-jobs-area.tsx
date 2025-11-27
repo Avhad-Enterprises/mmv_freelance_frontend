@@ -373,7 +373,7 @@ const OngoingJobsArea = ({}: IProps) => {
                     </a>
                   </div>
                   <div className="right-side">
-                    <div className="row gx-2 align-items-center">
+                    <div className="row gx-2 align-items-center mb-2">
                       <div className="col-lg-3">
                         <div className="position-relative">
                           <h4 className="candidate-name mb-0">
@@ -381,27 +381,17 @@ const OngoingJobsArea = ({}: IProps) => {
                               onClick={() => setSelectedJob(job)}
                               className="tran3s cursor-pointer"
                             >
-                              {job.project_title}
+                              {job.project_title
+                                ? `${job.project_title.slice(0, 22)}${
+                                    job.project_title.length > 22 ? ".." : ""
+                                  }`
+                                : "Untitled Project"}
                             </a>
-                            {getSubmissionStatusBadge(job)}
                           </h4>
-                          <ul className="cadidate-skills style-none d-flex align-items-center">
-                            {job.skills_required &&
-                              job.skills_required.slice(0, 2).map((s, i) => (
-                                <li key={i} className="text-nowrap">
-                                  {s}
-                                </li>
-                              ))}
-                            {job.skills_required &&
-                              job.skills_required.length > 2 && (
-                                <li className="more">
-                                  +{job.skills_required.length - 2}
-                                </li>
-                              )}
-                          </ul>
+                          {getSubmissionStatusBadge(job)}
                           {job.submission_status === 2 && (
-                            <small className="text-danger fw-semibold">
-                              ⚠️ Your submission was rejected. Please review and resubmit.
+                            <small className="text-danger fw-semibold d-block mt-1">
+                              ⚠️ Submission rejected. Please resubmit.
                             </small>
                           )}
                         </div>
@@ -433,15 +423,27 @@ const OngoingJobsArea = ({}: IProps) => {
                           <a
                             onClick={() => setSelectedJob(job)}
                             className="profile-btn tran3s cursor-pointer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              height: '40px',
+                              padding: '0 16px',
+                              lineHeight: '40px'
+                            }}
                           >
                             View Details
                           </a>
                           <button
                             onClick={() => handleOpenSubmitModal(job)}
-                            className="btn-one"
+                            className="profile-btn tran3s"
                             style={{ 
-                              fontSize: '14px', 
-                              padding: '8px 16px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              height: '40px',
+                              padding: '0 16px',
+                              lineHeight: '40px',
                               ...(job.submission_status === 2 && {
                                 backgroundColor: '#dc3545',
                                 borderColor: '#dc3545',
@@ -450,13 +452,13 @@ const OngoingJobsArea = ({}: IProps) => {
                               ...(job.submission_status === 0 && {
                                 backgroundColor: '#6c757d',
                                 borderColor: '#6c757d',
-                                opacity: 0.6,
+                                opacity: 0.7,
                                 cursor: 'not-allowed'
                               }),
                               ...(job.submission_status === 1 && {
                                 backgroundColor: '#198754',
                                 borderColor: '#198754',
-                                opacity: 0.6,
+                                opacity: 0.7,
                                 cursor: 'not-allowed'
                               })
                             }}
@@ -465,6 +467,24 @@ const OngoingJobsArea = ({}: IProps) => {
                             {getSubmitButtonText(job)}
                           </button>
                         </div>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-12">
+                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                          {job.skills_required &&
+                            job.skills_required.slice(0, 5).map((s, i) => (
+                              <li key={i}>
+                                {s}
+                              </li>
+                            ))}
+                          {job.skills_required &&
+                            job.skills_required.length > 5 && (
+                              <li className="more">
+                                +{job.skills_required.length - 5}
+                              </li>
+                            )}
+                        </ul>
                       </div>
                     </div>
                   </div>

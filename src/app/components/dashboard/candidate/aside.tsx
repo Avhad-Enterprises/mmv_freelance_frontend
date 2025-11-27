@@ -32,12 +32,12 @@ import LogoutModal from "../../common/popup/logout-modal";
 const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/freelancer-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/freelancer-dashboard/profile", title: "My Profile" },
-    // { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Job" },
-    // { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
-    // { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
-    // { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
+    { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Job" },
+    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
+    { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
+    { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
     // { id: 10 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/chat" , title : "Chat" },
-    // { id: 11 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/credits" , title : "Credits" },
+    { id: 11 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/credits" , title : "Credits" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ];
 

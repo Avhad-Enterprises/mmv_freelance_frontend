@@ -33,20 +33,56 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
   onToggleSave,
   onViewProfile, // <-- ADDED: Destructure the new prop
 }) => {
+  // Get initials for fallback avatar
+  const getInitials = () => {
+    const first = item.first_name?.charAt(0) || '';
+    const last = item.last_name?.charAt(0) || '';
+    return (first + last).toUpperCase() || '?';
+  };
+
   return (
     <div className="candidate-profile-card position-relative list-layout mb-25">
       <div className="d-flex align-items-start">
         <div className="cadidate-avatar online position-relative d-block me-auto ms-auto" style={{ flexShrink: 0 }}>
           {/* This link can remain for SEO purposes or right-click behavior, but the main action is the button */}
           <div className="rounded-circle">
-            <Image
-              src={item.profile_picture || "/images/default-avatar.png"}
-              alt="Candidate"
-              width={80}
-              height={80}
-              className="lazy-img rounded-circle"
-              style={{ objectFit: 'cover' }}
-            />
+            {item.profile_picture ? (
+              <img
+                src={item.profile_picture}
+                alt={`${item.first_name} ${item.last_name}`}
+                width={80}
+                height={80}
+                className="lazy-img rounded-circle"
+                style={{ objectFit: 'cover', width: '80px', height: '80px' }}
+                onError={(e) => {
+                  // On error, replace with initials avatar
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent && !parent.querySelector('.initials-avatar')) {
+                    const initialsDiv = document.createElement('div');
+                    initialsDiv.className = 'initials-avatar rounded-circle d-flex align-items-center justify-content-center';
+                    initialsDiv.style.cssText = 'width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 24px; font-weight: bold;';
+                    initialsDiv.textContent = getInitials();
+                    parent.appendChild(initialsDiv);
+                  }
+                }}
+              />
+            ) : (
+              <div 
+                className="initials-avatar rounded-circle d-flex align-items-center justify-content-center"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  fontSize: '24px',
+                  fontWeight: 'bold'
+                }}
+              >
+                {getInitials()}
+              </div>
+            )}
           </div>
         </div>
         <div className="right-side" style={{ width: '100%', paddingLeft: '30px' }}>
@@ -83,6 +119,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                   className="save-btn text-center rounded-circle tran3s"
                   onClick={() => onToggleSave(item.user_id)}
                   title={isSaved ? "Unsave" : "Save"}
+                  style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                 >
                   <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                 </button>

@@ -599,11 +599,6 @@ const OngoingJobArea: FC = () => {
                 ? `Applications for: ${selectedProjectForApplicants.title}` 
                 : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
             </h2>
-            {!isPostingJob && !selectedProjectForApplicants && !selectedProjectForSubmissions && !selectedApplicant && (
-              <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
-                Post a Job
-              </button>
-            )}
             {selectedApplicant && (
               <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
                 ← Back to Applicants

@@ -14,9 +14,9 @@ const styles = {
     fontSize: '14px',
   },
   selectedOption: {
-    backgroundColor: '#0c6efd',
+    backgroundColor: '#31795a',
     color: 'white',
-    borderColor: '#0c6efd',
+    borderColor: '#31795a',
   }
 };
 
