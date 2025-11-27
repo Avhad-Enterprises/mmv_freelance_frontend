@@ -14,6 +14,12 @@ interface AuthenticatedImageProps {
   unoptimized?: boolean;
 }
 
+// Helper to check if URL is external
+const isExternalUrl = (url: string): boolean => {
+  if (!url) return false;
+  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:');
+};
+
 const AuthenticatedImage: React.FC<AuthenticatedImageProps> = ({
   src,
   alt,
@@ -22,10 +28,14 @@ const AuthenticatedImage: React.FC<AuthenticatedImageProps> = ({
   className = '',
   style = {},
   fallbackSrc = '/images/default-avatar.png',
-  unoptimized = false
+  unoptimized: unoptimizedProp
 }) => {
   const [imageSrc, setImageSrc] = useState<string>(src || fallbackSrc);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Default to unoptimized for external URLs to avoid domain restrictions
+  // Check both original src and current imageSrc (could be blob URL)
+  const shouldUnoptimize = unoptimizedProp ?? (isExternalUrl(src || '') || isExternalUrl(imageSrc));
 
   useEffect(() => {
     // If no src or src is already a fallback, don't do anything
@@ -100,7 +110,7 @@ const AuthenticatedImage: React.FC<AuthenticatedImageProps> = ({
       height={height}
       className={className}
       style={style}
-      unoptimized={unoptimized}
+      unoptimized={shouldUnoptimize}
     />
   );
 };

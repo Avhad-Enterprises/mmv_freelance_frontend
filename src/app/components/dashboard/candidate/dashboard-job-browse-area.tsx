@@ -13,6 +13,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 import toast from "react-hot-toast";
+import Select from 'react-select';
 
 const DashboardJobBrowseArea = () => {
   const { setIsOpenSidebar } = useSidebar();
@@ -34,6 +35,7 @@ const DashboardJobBrowseArea = () => {
 
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState<boolean>(true);
 
   const itemsPerPage = 10;
 
@@ -46,6 +48,17 @@ const DashboardJobBrowseArea = () => {
     const fetchInitialData = async () => {
       setLoading(true);
       try {
+        // Fetch skills from API
+        const skillsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`);
+        if (skillsResponse.ok) {
+          const skillsResult = await skillsResponse.json();
+          if (skillsResult.data && Array.isArray(skillsResult.data)) {
+            const skillNames: string[] = skillsResult.data.map((skill: any) => skill.skill_name);
+            const uniqueSkillNames = [...new Set(skillNames)];
+            setAvailableSkills(uniqueSkillNames);
+          }
+        }
+
         const [jobsRes, userRes] = await Promise.all([
           makeGetRequest("api/v1/projects-tasks/listings"),
           makeGetRequest("api/v1/users/me"),
@@ -57,17 +70,6 @@ const DashboardJobBrowseArea = () => {
         // Get user currency
         const userData = userRes.data?.data;
         const currency = userData?.profile?.currency || 'USD';
-
-        // Extract unique skills from all jobs
-        const skillsSet = new Set<string>();
-        jobsData.forEach((job: IJobType) => {
-          if (job.skills_required && Array.isArray(job.skills_required)) {
-            job.skills_required.forEach(skill => {
-              if (skill) skillsSet.add(skill);
-            });
-          }
-        });
-        setAvailableSkills(Array.from(skillsSet).sort());
 
         // Fetch saved projects if user is logged in
         if (decoded?.user_id) {
@@ -91,6 +93,7 @@ const DashboardJobBrowseArea = () => {
         toast.error("Failed to load jobs. Please try again.");
       } finally {
         setLoading(false);
+        setLoadingSkills(false);
       }
     };
 
@@ -236,8 +239,8 @@ const DashboardJobBrowseArea = () => {
             </a>
           </div>
           <div className="right-side">
-            <div className="row gx-1 align-items-center">
-              <div className="col-xl-3">
+            <div className="row gx-2 align-items-center mb-2">
+              <div className="col-lg-4">
                 <div className="position-relative">
                   <h4 className="candidate-name mb-0">
                     <a onClick={() => setSelectedJob(item)} className="tran3s cursor-pointer">
@@ -248,18 +251,24 @@ const DashboardJobBrowseArea = () => {
                         : ""}
                     </a>
                   </h4>
-
-                  <ul className="cadidate-skills style-none d-flex align-items-center">
-                    {item.skills_required && item.skills_required.slice(0, 3).map((s, i) => (
-                      <li key={i} className="text-nowrap">{s}</li>
-                    ))}
-                    {item.skills_required && item.skills_required.length > 3 && (
-                      <li className="more">+{item.skills_required.length - 3}</li>
-                    )}
-                  </ul>
-                  
-                  {/* Bidding Badge */}
-                  <div className="mt-2">
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-4 col-sm-6">
+                <div className="candidate-info">
+                  <span>Budget</span>
+                  <div>${item.budget ?? 0}</div>
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-4 col-sm-6">
+                <div className="candidate-info">
+                  <span>Type</span>
+                  <div>{item.projects_type || 'Not specified'}</div>
+                </div>
+              </div>
+              <div className="col-lg-2 col-md-4 col-sm-6">
+                <div className="candidate-info">
+                  <span>Pricing</span>
+                  <div>
                     {item.bidding_enabled ? (
                       <span className="badge" style={{ 
                         backgroundColor: '#D2F34C', 
@@ -268,7 +277,7 @@ const DashboardJobBrowseArea = () => {
                         padding: '4px 10px',
                         fontWeight: '500'
                       }}>
-                        <i className="bi bi-gavel me-1"></i>Bidding Enabled
+                        <i className="bi bi-gavel me-1"></i>Bidding
                       </span>
                     ) : (
                       <span className="badge" style={{ 
@@ -278,44 +287,43 @@ const DashboardJobBrowseArea = () => {
                         padding: '4px 10px',
                         fontWeight: '500'
                       }}>
-                        <i className="bi bi-cash-stack me-1"></i>Fixed Price
+                        <i className="bi bi-cash-stack me-1"></i>Fixed
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-
-              <div className="col-xl-3 col-md-4 col-sm-6">
-                <div className="candidate-info">
-                  <span>Budget</span>
-                  <div>${item.budget ?? 0}</div>
-                </div>
-              </div>
-
-              <div className="col-xl-3 col-md-4 col-sm-6">
-                <div className="candidate-info">
-                  <span>Type</span>
-                  <div>{item.projects_type || 'Not specified'}</div>
-                </div>
-              </div>
-
-              <div className="col-xl-3 col-md-4">
+              <div className="col-lg-2 col-md-4">
                 <div className="d-flex justify-content-lg-end align-items-center">
                   <button
                     type="button"
                     className="save-btn text-center rounded-circle tran3s"
                     onClick={() => handleToggleSave(item)}
                     title={isActive ? "Unsave" : "Save"}
+                    style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                   >
                     <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                   </button>
                   <a
                     onClick={() => setSelectedJob(item)}
                     className="profile-btn tran3s ms-md-2 cursor-pointer"
+                    style={{ whiteSpace: 'nowrap', display: 'inline-block' }}
                   >
                     View Details
                   </a>
                 </div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-12">
+                <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                  {item.skills_required && item.skills_required.slice(0, 5).map((s, i) => (
+                    <li key={i} className="text-nowrap">{s}</li>
+                  ))}
+                  {item.skills_required && item.skills_required.length > 5 && (
+                    <li className="more">+{item.skills_required.length - 5}</li>
+                  )}
+                </ul>
               </div>
             </div>
           </div>
@@ -334,6 +342,7 @@ const DashboardJobBrowseArea = () => {
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
           title={isActive ? 'Unsave Job' : 'Save Job'}
+          style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
         </a>
@@ -379,7 +388,7 @@ const DashboardJobBrowseArea = () => {
                 padding: '4px 10px',
                 fontWeight: '500'
               }}>
-                <i className="bi bi-gavel me-1"></i>Bidding Enabled
+                <i className="bi bi-gavel me-1"></i>Bidding
               </span>
             ) : (
               <span className="badge" style={{ 
@@ -389,7 +398,7 @@ const DashboardJobBrowseArea = () => {
                 padding: '4px 10px',
                 fontWeight: '500'
               }}>
-                <i className="bi bi-cash-stack me-1"></i>Fixed Price
+                <i className="bi bi-cash-stack me-1"></i>Fixed
               </span>
             )}
           </div>
@@ -408,7 +417,8 @@ const DashboardJobBrowseArea = () => {
         <div className="d-flex justify-content-center">
           <a
             onClick={() => setSelectedJob(item)}
-            className="profile-btn tran3s cursor-pointer"
+            className="profile-btn tran3s ms-md-2 cursor-pointer"
+            style={{ whiteSpace: 'nowrap', display: 'inline-block' }}
           >
             View Details
           </a>
@@ -429,149 +439,132 @@ const DashboardJobBrowseArea = () => {
           <DashboardHeader />
           <h2 className="main-title mb-30">Browse Projects</h2>
 
-          {/* Horizontal Filter Area - Theme Consistent Style */}
+          {/* Horizontal Filter Area - Matching Client Candidate Filter Style */}
           <div className="bg-white card-box border-20 mb-30">
-            <div className="row g-3 g-lg-4 align-items-end">
-              {/* Skills Filter */}
-              <div className="col-lg-3 col-md-6 col-12">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Skills</label>
-                <select
-                  className="filter-select form-select"
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value && !selectedSkills.includes(e.target.value)) {
-                      toggleSkill(e.target.value);
-                    }
-                  }}
-                >
-                  <option value="">Select Skills</option>
-                  {availableSkills.map((skill, idx) => (
-                    <option key={idx} value={skill}>{skill}</option>
+            <div className="p-4 rounded-3" style={{ backgroundColor: '#f0f5f3' }}>
+              <div className="row g-3 align-items-end">
+                {/* Skills Filter - Multi Select */}
+                <div className="col-lg-3 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Skills</div>
+                  <Select
+                    isMulti
+                    options={availableSkills.map(skill => ({ value: skill, label: skill }))}
+                    value={selectedSkills.map(skill => ({ value: skill, label: skill }))}
+                    onChange={(selectedOptions) => {
+                      setSelectedSkills(selectedOptions ? selectedOptions.map(option => option.value) : []);
+                      setItemOffset(0);
+                    }}
+                    isLoading={loadingSkills}
+                    isDisabled={loadingSkills}
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    placeholder={loadingSkills ? "Loading skills..." : "Select Skills"}
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        minHeight: '48px',
+                        borderColor: '#dee2e6',
+                      }),
+                    }}
+                  />
+                </div>
+
+                {/* Bidding Filter */}
+                <div className="col-lg-3 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Pricing Type</div>
+                  <select
+                    className="form-select"
+                    value={biddingFilter}
+                    onChange={(e) => {
+                      setBiddingFilter(e.target.value);
+                      setItemOffset(0);
+                    }}
+                    style={{ height: '48px' }}
+                  >
+                    <option value="all">All Projects</option>
+                    <option value="bidding">Bidding Only</option>
+                    <option value="fixed">Fixed Price Only</option>
+                  </select>
+                </div>
+
+                {/* Sort Filter */}
+                <div className="col-lg-3 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Sort By</div>
+                  <select
+                    className="form-select"
+                    value={shortValue}
+                    onChange={(e) => {
+                      setShortValue(e.target.value);
+                      setItemOffset(0);
+                    }}
+                    style={{ height: '48px' }}
+                  >
+                    <option value="">Default</option>
+                    <option value="price-low-to-high">Price: Low to High</option>
+                    <option value="price-high-to-low">Price: High to Low</option>
+                  </select>
+                </div>
+
+                {/* Reset Filters Button */}
+                <div className="col-lg-3 col-md-6">
+                  <button
+                    onClick={handleReset}
+                    className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              </div>
+
+              {/* Selected Filters Display */}
+              {hasSelections && (
+                <div className="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
+                  {biddingFilter !== "all" && (
+                    <div 
+                      className="btn-eight fw-500 d-flex align-items-center" 
+                      style={{ backgroundColor: '#00BF58', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>{biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}</span>
+                      <button 
+                        onClick={() => setBiddingFilter("all")} 
+                        className="btn-close ms-2" 
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
+                  {shortValue && (
+                    <div 
+                      className="btn-eight fw-500 d-flex align-items-center" 
+                      style={{ backgroundColor: '#FF6B35', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>{shortValue === "price-low-to-high" ? "Price: Low to High" : "Price: High to Low"}</span>
+                      <button 
+                        onClick={() => setShortValue("")} 
+                        className="btn-close ms-2" 
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
+                  {selectedSkills.map(skill => (
+                    <div 
+                      key={skill} 
+                      className="btn-eight fw-500 d-flex align-items-center" 
+                      style={{ backgroundColor: '#00BF58', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>{skill}</span>
+                      <button 
+                        onClick={() => handleRemoveSkill(skill)} 
+                        className="btn-close ms-2" 
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
                   ))}
-                </select>
-              </div>
-
-              {/* Bidding Filter */}
-              <div className="col-lg-3 col-md-6 col-12">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Pricing Type</label>
-                <select
-                  className="filter-select form-select"
-                  value={biddingFilter}
-                  onChange={(e) => {
-                    setBiddingFilter(e.target.value);
-                    setItemOffset(0);
-                  }}
-                >
-                  <option value="all">All Projects</option>
-                  <option value="bidding">Bidding Only</option>
-                  <option value="fixed">Fixed Price Only</option>
-                </select>
-              </div>
-
-              {/* Sort Filter */}
-              <div className="col-lg-3 col-md-6 col-12">
-                <label className="form-label fw-500 text-dark mb-2" style={{ fontSize: '15px' }}>Sort By</label>
-                <select
-                  className="filter-select form-select"
-                  value={shortValue}
-                  onChange={(e) => {
-                    setShortValue(e.target.value);
-                    setItemOffset(0);
-                  }}
-                >
-                  <option value="">Default</option>
-                  <option value="price-low-to-high">Price: Low to High</option>
-                  <option value="price-high-to-low">Price: High to Low</option>
-                </select>
-              </div>
-
-              {/* Clear Button */}
-              <div className="col-lg-3 col-md-6 col-12">
-                <button
-                  onClick={handleReset}
-                  className="dash-btn-two w-100 fw-500"
-                  style={{ height: '55px' }}
-                >
-                  Clear
-                </button>
-              </div>
+                </div>
+              )}
             </div>
-
-            {/* Selected Filters Display */}
-            {hasSelections && (
-              <div className="d-flex flex-wrap gap-2 mt-4 pt-3" style={{ borderTop: '1px solid #E3F0EB' }}>
-                {biddingFilter !== "all" && (
-                  <span 
-                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
-                    style={{ 
-                      backgroundColor: '#D2F34C', 
-                      color: '#244034',
-                      fontSize: '13px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}
-                    <button 
-                      onClick={() => setBiddingFilter("all")} 
-                      className="btn-close ms-2 opacity-100" 
-                      style={{ 
-                        width: '8px', 
-                        height: '8px',
-                        fontSize: '10px'
-                      }}
-                      aria-label="Remove filter"
-                    ></button>
-                  </span>
-                )}
-                {shortValue && (
-                  <span 
-                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
-                    style={{ 
-                      backgroundColor: '#D2F34C', 
-                      color: '#244034',
-                      fontSize: '13px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {shortValue === "price-low-to-high" ? "Price: Low to High" : "Price: High to Low"}
-                    <button 
-                      onClick={() => setShortValue("")} 
-                      className="btn-close ms-2 opacity-100" 
-                      style={{ 
-                        width: '8px', 
-                        height: '8px',
-                        fontSize: '10px'
-                      }}
-                      aria-label="Remove filter"
-                    ></button>
-                  </span>
-                )}
-                {selectedSkills.map(skill => (
-                  <span 
-                    key={skill} 
-                    className="d-inline-flex align-items-center px-3 py-2 rounded-pill" 
-                    style={{ 
-                      backgroundColor: '#D2F34C', 
-                      color: '#244034',
-                      fontSize: '13px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {skill}
-                    <button 
-                      onClick={() => handleRemoveSkill(skill)} 
-                      className="btn-close ms-2 opacity-100" 
-                      style={{ 
-                        width: '8px', 
-                        height: '8px',
-                        fontSize: '10px'
-                      }}
-                      aria-label="Remove filter"
-                    ></button>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Jobs Display Area */}

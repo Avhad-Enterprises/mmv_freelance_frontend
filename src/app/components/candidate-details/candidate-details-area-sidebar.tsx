@@ -160,7 +160,14 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
                       {profile_picture && profile_picture.trim() !== '' ? (
-                        <Image src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
+                        <img 
+                          src={profile_picture} 
+                          alt="avatar" 
+                          width={85} 
+                          height={85} 
+                          className="lazy-img rounded-circle w-100" 
+                          style={{ objectFit: 'cover', width: '85px', height: '85px' }} 
+                        />
                       ) : (
                         <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
                       )}

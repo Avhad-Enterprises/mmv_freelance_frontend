@@ -252,17 +252,17 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                 <label>Tags</label>
                 <div className="tags-input-container p-2 border rounded">
                   {tags.map((tag, index) => (
-                    <span key={index} className="tag-chip badge bg-light text-dark me-2 mb-2">
+                    <span key={index} className="tag-chip badge me-2 mb-2" style={{ backgroundColor: '#e8f5e9', color: '#31795a', border: '1px solid #31795a' }}>
                       {tag}
                       <button type="button" className="btn-close ms-2" style={{ fontSize: '0.65em' }} onClick={() => handleRemoveTag(index)}></button>
                     </span>
                   ))}
                   <div className="d-flex">
                     <input type="text" className="form-control" placeholder="Add a tag..." value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} />
-                    <button type="button" className="btn btn-primary ms-2" onClick={handleAddTag}>+</button>
+                    <button type="button" className="dash-btn-two ms-2" style={{ minWidth: '45px', lineHeight: '38px', padding: '0 15px' }} onClick={handleAddTag}>+</button>
                   </div>
                 </div>
-                <small style={{ color: "blue", display: 'block', marginTop: '5px' }}>Press Enter or click '+' to add a tag.</small>
+                <small style={{ color: '#6c757d', display: 'block', marginTop: '5px' }}>Press Enter or click '+' to add a tag.</small>
               </div>
             </div>
 
@@ -338,10 +338,10 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                 {referenceLinks.map((link, index) => (
                   <div key={index} className="d-flex align-items-center mb-10">
                     <input type="url" placeholder="https://example.com/reference1" className="form-control" value={link} onChange={(e) => updateReferenceLink(index, e.target.value)} />
-                    {referenceLinks.length > 1 && <button type="button" className="btn btn-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                    {referenceLinks.length > 1 && <button type="button" className="btn btn-outline-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
                   </div>
                 ))}
-                <button type="button" className="btn btn-outline-primary btn-sm mt-2" onClick={addReferenceLink}>+ Add Another Link</button>
+                <button type="button" className="dash-btn-two mt-2" style={{ minWidth: 'auto', lineHeight: '35px', padding: '0 15px', fontSize: '14px' }} onClick={addReferenceLink}>+ Add Another Link</button>
               </div>
             </div>
 
@@ -375,8 +375,8 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             {/* Error & Action Buttons */}
             {error && <div className="col-12"><div className="alert alert-danger my-3">{error}</div></div>}
             <div className="col-12 d-flex justify-content-between mt-30">
-              <button type="button" className="btn-one" onClick={onBackToList} disabled={loading}>Cancel</button>
-              <button type="submit" className="btn-one" disabled={loading}>{loading ? "Submitting..." : "Post Job"}</button>
+              <button type="button" className="dash-btn-two" style={{ background: '#6c757d' }} onClick={onBackToList} disabled={loading}>Cancel</button>
+              <button type="submit" className="dash-btn-two" disabled={loading}>{loading ? "Submitting..." : "Post Job"}</button>
             </div>
           </div>
         </form>
@@ -418,7 +418,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                 <button type="button" className="btn btn-secondary" onClick={handleCancelModal}>
                   Cancel
                 </button>
-                <button type="button" className="btn btn-primary" onClick={handleConfirmPost} disabled={loading}>
+                <button type="button" className="dash-btn-two" onClick={handleConfirmPost} disabled={loading}>
                   {loading ? 'Posting...' : 'Confirm & Post Job'}
                 </button>
               </div>

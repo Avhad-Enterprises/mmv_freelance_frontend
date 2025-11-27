@@ -83,6 +83,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                   className="save-btn text-center rounded-circle tran3s"
                   onClick={() => onToggleSave(item.user_id)}
                   title={isSaved ? "Unsave" : "Save"}
+                  style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                 >
                   <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
                 </button>
