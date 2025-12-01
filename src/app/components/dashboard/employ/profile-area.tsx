@@ -583,7 +583,7 @@ const DashboardProfileArea = ({}: IProps) => {
                 )}
               </InfoSection>
 
-              <InfoSection title="Work Preferences" sectionKey="workPreferences" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+              {/* <InfoSection title="Work Preferences" sectionKey="workPreferences" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
                 {(profileData.work_arrangement || isEditModeFor("workPreferences")) && (
                   <div className="row mb-3">
                     <div className="col-md-4"><strong>Work Arrangement:</strong></div>
@@ -629,7 +629,7 @@ const DashboardProfileArea = ({}: IProps) => {
                     </div>
                   </div>
                 )}
-              </InfoSection>
+              </InfoSection> */}
 
               <InfoSection title="Contact & Billing" sectionKey="address" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
                 <InfoRow label="Address" value={displayData.address} field="address" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
