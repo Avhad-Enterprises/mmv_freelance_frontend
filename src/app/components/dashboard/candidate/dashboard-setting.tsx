@@ -1,13 +1,14 @@
 import React from "react";
 import DashboardHeader from "./dashboard-header-minus";
 import ChangePasswordArea from "./change-password";
+import LinkedAccountsSection from "../settings/linked-accounts";
 import { useSidebar } from "@/context/SidebarContext";
 
 type IProps = {
   // No props needed, using context
 };
 
-const DashboardSettingArea = ({}: IProps) => {
+const DashboardSettingArea = ({ }: IProps) => {
   const { setIsOpenSidebar } = useSidebar();
 
   return (
@@ -22,6 +23,10 @@ const DashboardSettingArea = ({}: IProps) => {
         {/* change password area */}
         <ChangePasswordArea />
         {/* change password area */}
+
+        {/* linked accounts area */}
+        <LinkedAccountsSection />
+        {/* linked accounts area end */}
       </div>
     </div>
   );

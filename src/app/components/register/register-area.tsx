@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import MultiStepRegisterForm from "../forms/MultiStepRegisterForm";
 import LoadingSpinner from "../common/loading-spinner";
+import SocialLoginButton from "../common/social-login-button";
+import { initiateOAuthLogin, OAuthProvider } from "@/utils/oauth";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
 import apple from "@/assets/images/icon/apple.png";
@@ -64,6 +66,7 @@ const customButtonCss = `
 const RegisterArea = () => {
   const [activeTab, setActiveTab] = useState<AccountType>("videoEditor");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -83,6 +86,25 @@ const RegisterArea = () => {
       document.head.removeChild(styleElement);
     };
   }, []); // Empty dependency array means this runs once on mount and unmount
+
+  /**
+   * Handle OAuth login/registration
+   * For registration, OAuth users are created with CLIENT role by default
+   * They can update their role later in settings
+   */
+  const handleOAuthLogin = (provider: OAuthProvider) => {
+    setLoadingProvider(provider);
+
+    // Small delay for UX
+    setTimeout(() => {
+      initiateOAuthLogin(provider);
+    }, 100);
+  };
+
+  // Check if providers are enabled
+  const isGoogleEnabled = true; // Enabled
+  const isFacebookEnabled = false; // Coming soon
+  const isAppleEnabled = false; // Coming soon
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -129,38 +151,76 @@ const RegisterArea = () => {
           <p className="text-center mb-15" style={{ fontSize: '15px', color: '#6B7280', fontWeight: '500' }}>
             Continue with
           </p>
-          <div className="row gx-2">
-            <div className="col-sm-4">
-              <a
-                href="coming-soon"
-                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-                style={{ padding: '10px 8px', fontSize: '14px' }}
-              >
-                <Image src={google} alt="google-img" width={20} height={20} />
-                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Google</span>
-              </a>
+          <div className="row gx-2 justify-content-center">
+            {/* Google Sign Up */}
+            <div className="col-sm-4 col-6">
+              <div className="mt-10">
+                <SocialLoginButton
+                  provider="google"
+                  icon={google}
+                  label="Google"
+                  onClick={() => handleOAuthLogin('google')}
+                  isLoading={loadingProvider === 'google'}
+                  disabled={!isGoogleEnabled || loadingProvider !== null}
+                />
+              </div>
             </div>
-            <div className="col-sm-4">
-              <a
-                href="coming-soon"
-                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-                style={{ padding: '10px 8px', fontSize: '14px' }}
-              >
-                <Image src={facebook} alt="facebook-img" width={20} height={20} />
-                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Facebook</span>
-              </a>
+
+            {/* Facebook Sign Up */}
+            <div className="col-sm-4 col-6">
+              <div className="mt-10 position-relative">
+                <SocialLoginButton
+                  provider="facebook"
+                  icon={facebook}
+                  label="Facebook"
+                  onClick={() => handleOAuthLogin('facebook')}
+                  isLoading={loadingProvider === 'facebook'}
+                  disabled={!isFacebookEnabled || loadingProvider !== null}
+                />
+                {!isFacebookEnabled && (
+                  <small
+                    className="text-muted d-block text-center mt-1"
+                    style={{ fontSize: '11px' }}
+                  >
+                    Coming Soon
+                  </small>
+                )}
+              </div>
             </div>
-            <div className="col-sm-4">
-              <a
-                href="coming-soon"
-                className="social-use-btn d-flex align-items-center justify-content-center tran3s w-100 mt-10"
-                style={{ padding: '10px 8px', fontSize: '14px' }}
-              >
-                <Image src={apple} alt="apple-img" width={20} height={20} />
-                <span className="ps-2" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Apple</span>
-              </a>
+
+            {/* Apple Sign Up */}
+            <div className="col-sm-4 col-6">
+              <div className="mt-10 position-relative">
+                <SocialLoginButton
+                  provider="apple"
+                  icon={apple}
+                  label="Apple"
+                  onClick={() => handleOAuthLogin('apple')}
+                  isLoading={loadingProvider === 'apple'}
+                  disabled={!isAppleEnabled || loadingProvider !== null}
+                />
+                {!isAppleEnabled && (
+                  <small
+                    className="text-muted d-block text-center mt-1"
+                    style={{ fontSize: '11px' }}
+                  >
+                    Coming Soon
+                  </small>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Info text for OAuth registration */}
+          <p
+            className="text-center mt-20"
+            style={{ fontSize: '13px', color: '#9CA3AF' }}
+          >
+            By signing up with a social account, you agree to our{' '}
+            <a href="/terms-condition" className="fw-500">Terms</a> and{' '}
+            <a href="/privacy-policy" className="fw-500">Privacy Policy</a>
+          </p>
+
           <p className="text-center mt-10">
             Have an account?{" "}
             <a
