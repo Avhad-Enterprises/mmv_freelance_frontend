@@ -4,7 +4,7 @@ import Image from "next/image";
 import MultiStepRegisterForm from "../forms/MultiStepRegisterForm";
 import LoadingSpinner from "../common/loading-spinner";
 import SocialLoginButton from "../common/social-login-button";
-import { initiateOAuthLogin, OAuthProvider } from "@/utils/oauth";
+import { initiateOAuthLogin, getAvailableProviders, OAuthProvider } from "@/utils/oauth";
 import google from "@/assets/images/icon/google.png";
 import facebook from "@/assets/images/icon/facebook.png";
 import apple from "@/assets/images/icon/apple.png";
@@ -63,10 +63,42 @@ const customButtonCss = `
   }
 `;
 
+// Provider enabled status type
+interface ProviderStatus {
+  google: boolean;
+  facebook: boolean;
+  apple: boolean;
+}
+
 const RegisterArea = () => {
   const [activeTab, setActiveTab] = useState<AccountType>("videoEditor");
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus>({
+    google: true, // Default to true for Google (most likely enabled)
+    facebook: false,
+    apple: false,
+  });
+
+  // Fetch provider status from API
+  useEffect(() => {
+    const fetchProviderStatus = async () => {
+      try {
+        const providers = await getAvailableProviders();
+        const status: ProviderStatus = {
+          google: providers.find(p => p.name === 'google')?.enabled ?? true,
+          facebook: providers.find(p => p.name === 'facebook')?.enabled ?? false,
+          apple: providers.find(p => p.name === 'apple')?.enabled ?? false,
+        };
+        setProviderStatus(status);
+      } catch (error) {
+        console.error('Failed to fetch provider status:', error);
+        // Keep defaults if API fails
+      }
+    };
+
+    fetchProviderStatus();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -100,11 +132,6 @@ const RegisterArea = () => {
       initiateOAuthLogin(provider);
     }, 100);
   };
-
-  // Check if providers are enabled
-  const isGoogleEnabled = true; // Enabled
-  const isFacebookEnabled = false; // Coming soon
-  const isAppleEnabled = false; // Coming soon
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -161,7 +188,7 @@ const RegisterArea = () => {
                   label="Google"
                   onClick={() => handleOAuthLogin('google')}
                   isLoading={loadingProvider === 'google'}
-                  disabled={!isGoogleEnabled || loadingProvider !== null}
+                  disabled={!providerStatus.google || loadingProvider !== null}
                 />
               </div>
             </div>
@@ -175,9 +202,9 @@ const RegisterArea = () => {
                   label="Facebook"
                   onClick={() => handleOAuthLogin('facebook')}
                   isLoading={loadingProvider === 'facebook'}
-                  disabled={!isFacebookEnabled || loadingProvider !== null}
+                  disabled={!providerStatus.facebook || loadingProvider !== null}
                 />
-                {!isFacebookEnabled && (
+                {!providerStatus.facebook && (
                   <small
                     className="text-muted d-block text-center mt-1"
                     style={{ fontSize: '11px' }}
@@ -197,9 +224,9 @@ const RegisterArea = () => {
                   label="Apple"
                   onClick={() => handleOAuthLogin('apple')}
                   isLoading={loadingProvider === 'apple'}
-                  disabled={!isAppleEnabled || loadingProvider !== null}
+                  disabled={!providerStatus.apple || loadingProvider !== null}
                 />
-                {!isAppleEnabled && (
+                {!providerStatus.apple && (
                   <small
                     className="text-muted d-block text-center mt-1"
                     style={{ fontSize: '11px' }}

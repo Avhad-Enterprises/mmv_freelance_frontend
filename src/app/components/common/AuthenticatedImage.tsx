@@ -32,10 +32,25 @@ const AuthenticatedImage: React.FC<AuthenticatedImageProps> = ({
 }) => {
   const [imageSrc, setImageSrc] = useState<string>(src || fallbackSrc);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Default to unoptimized for external URLs to avoid domain restrictions
   // Check both original src and current imageSrc (could be blob URL)
   const shouldUnoptimize = unoptimizedProp ?? (isExternalUrl(src || '') || isExternalUrl(imageSrc));
+
+  // Check if URL is from a known OAuth provider (don't need auth for these)
+  const isKnownExternalProvider = (url: string): boolean => {
+    if (!url) return false;
+    const knownDomains = [
+      'googleusercontent.com',
+      'fbcdn.net',
+      'facebook.com',
+      'fbsbx.com',
+      'apple.com',
+      'placeholder.com',
+      'placehold.co',
+    ];
+    return knownDomains.some(domain => url.includes(domain));
+  };
 
   useEffect(() => {
     // If no src or src is already a fallback, don't do anything
@@ -44,17 +59,30 @@ const AuthenticatedImage: React.FC<AuthenticatedImageProps> = ({
       return;
     }
 
-    // Try to load the image directly first
-    const img = document.createElement('img');
-    img.onload = () => {
-      // Image loaded successfully, use the original src
+    // For known external OAuth providers, use the URL directly (no auth needed)
+    if (isExternalUrl(src) && isKnownExternalProvider(src)) {
       setImageSrc(src);
-    };
-    img.onerror = () => {
-      // Image failed to load, try with authentication
-      loadImageWithAuth();
-    };
-    img.src = src;
+      return;
+    }
+
+    // For other external URLs, try to load directly first
+    if (isExternalUrl(src)) {
+      // Try to load the image directly first
+      const img = document.createElement('img');
+      img.onload = () => {
+        // Image loaded successfully, use the original src
+        setImageSrc(src);
+      };
+      img.onerror = () => {
+        // Image failed to load, try with authentication
+        loadImageWithAuth();
+      };
+      img.src = src;
+      return;
+    }
+
+    // For relative URLs (local API), always use authentication
+    loadImageWithAuth();
   }, [src, fallbackSrc]);
 
   const loadImageWithAuth = async () => {

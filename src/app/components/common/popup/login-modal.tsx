@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import LoginForm from '@/app/components/forms/login-form';
 import SocialLoginButton from '@/app/components/common/social-login-button';
-import { initiateOAuthLogin, OAuthProvider } from '@/utils/oauth';
+import { initiateOAuthLogin, getAvailableProviders, OAuthProvider } from '@/utils/oauth';
 import google from '@/assets/images/icon/google.png';
 import facebook from '@/assets/images/icon/facebook.png';
 import apple from '@/assets/images/icon/apple.png';
@@ -15,9 +15,40 @@ interface LoginModalProps {
   onLoginSuccess?: () => void;
 }
 
+// Provider enabled status type
+interface ProviderStatus {
+  google: boolean;
+  facebook: boolean;
+  apple: boolean;
+}
+
 const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) => {
   const { refreshUserData } = useUser();
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus>({
+    google: true, // Default to true for Google
+    facebook: false,
+    apple: false,
+  });
+
+  // Fetch provider status from API
+  useEffect(() => {
+    const fetchProviderStatus = async () => {
+      try {
+        const providers = await getAvailableProviders();
+        const status: ProviderStatus = {
+          google: providers.find(p => p.name === 'google')?.enabled ?? true,
+          facebook: providers.find(p => p.name === 'facebook')?.enabled ?? false,
+          apple: providers.find(p => p.name === 'apple')?.enabled ?? false,
+        };
+        setProviderStatus(status);
+      } catch (error) {
+        console.error('Failed to fetch provider status:', error);
+      }
+    };
+
+    fetchProviderStatus();
+  }, []);
 
   const handleLoginSuccess = async () => {
     // Refresh user context after successful login
@@ -47,11 +78,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
       initiateOAuthLogin(provider);
     }, 100);
   };
-
-  // Check if providers are enabled (Google is enabled by default in our setup)
-  const isGoogleEnabled = true;
-  const isFacebookEnabled = false; // Coming soon
-  const isAppleEnabled = false; // Coming soon
 
   return (
     <div
@@ -108,7 +134,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                     label="Google"
                     onClick={() => handleOAuthLogin('google')}
                     isLoading={loadingProvider === 'google'}
-                    disabled={!isGoogleEnabled || loadingProvider !== null}
+                    disabled={!providerStatus.google || loadingProvider !== null}
                   />
                 </div>
 
@@ -120,9 +146,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                     label="Facebook"
                     onClick={() => handleOAuthLogin('facebook')}
                     isLoading={loadingProvider === 'facebook'}
-                    disabled={!isFacebookEnabled || loadingProvider !== null}
+                    disabled={!providerStatus.facebook || loadingProvider !== null}
                   />
-                  {!isFacebookEnabled && (
+                  {!providerStatus.facebook && (
                     <small className="text-muted d-block mt-1" style={{ fontSize: '11px' }}>
                       Coming Soon
                     </small>
@@ -137,9 +163,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                     label="Apple"
                     onClick={() => handleOAuthLogin('apple')}
                     isLoading={loadingProvider === 'apple'}
-                    disabled={!isAppleEnabled || loadingProvider !== null}
+                    disabled={!providerStatus.apple || loadingProvider !== null}
                   />
-                  {!isAppleEnabled && (
+                  {!providerStatus.apple && (
                     <small className="text-muted d-block mt-1" style={{ fontSize: '11px' }}>
                       Coming Soon
                     </small>
