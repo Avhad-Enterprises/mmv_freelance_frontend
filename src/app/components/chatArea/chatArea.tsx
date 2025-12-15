@@ -8,6 +8,7 @@ import {
 import { getAuth, signInAnonymously, Auth } from "firebase/auth";
 import { Search, Send, Plus, MessageCircle, Check, CheckCheck } from 'lucide-react';
 import Conversation from '@/app/components/conversation/Conversation';
+import ChatHeader from '@/app/components/chatHeader/ChatHeader';
 import Cookies from 'js-cookie';
 
 // ---------------- CONFIG ----------------
@@ -352,29 +353,15 @@ const ChatArea: React.FC = () => {
       <div className="right-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {selectedConversation ? (
           <>
-            {/* Header */}
-            <div style={{ padding: '1rem', borderBottom: '1px solid #E5E7EB', background: 'white' }}>
-              <h3 style={{ margin: 0 }}>
-                {(() => {
-                  const otherUserId = selectedConversation.participants.find(p => p !== currentUser?.user_id);
-                  const otherUserDetails = otherUserId ? selectedConversation.participantDetails[otherUserId] : null;
-                  return otherUserDetails?.firstName || 'Chat';
-                })()}
-              </h3>
-            </div>
-
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ padding: '1rem', borderBottom: '1px solid #E5E7EB', background: 'white' }}>
-                <h3 style={{ margin: 0 }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  {/* Header */}
                   {(() => {
                     const otherUserId = selectedConversation.participants.find(p => p !== currentUser?.user_id);
                     const otherUserDetails = otherUserId ? selectedConversation.participantDetails[otherUserId] : null;
-                    return otherUserDetails?.firstName || 'Chat';
+                    return <ChatHeader name={otherUserDetails?.firstName || 'Chat'} userId={otherUserId} role={otherUserDetails?.firstName ? 'Editor' : ''} />;
                   })()}
-                </h3>
-              </div>
 
-              <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1 }}>
                 {/* Conversation component handles realtime messages + sending */}
                 {currentUser?.user_id && <Conversation conversationId={selectedConversation.id} currentUserId={String(currentUser.user_id)} />}
               </div>
