@@ -1,6 +1,10 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import DashboardHeader from "../dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
@@ -151,6 +155,42 @@ const CandidateV1Area = () => {
       portfolio_links: apiCandidate.portfolio_links || [],
     };
   }, []);
+
+  const router = useRouter();
+  const { userData } = useUser();
+
+  const handleStartChat = async (candidateUserId: number) => {
+    if (!userData) {
+      toast.error('Please sign in to message freelancers');
+      return;
+    }
+
+    const currentUserId = String(userData.user_id);
+    const otherId = String(candidateUserId);
+    const participants = [currentUserId, otherId].sort();
+    const conversationId = participants.join('_');
+
+    try {
+      const convRef = doc(db, 'conversations', conversationId);
+      const convSnap = await getDoc(convRef);
+      if (!convSnap.exists()) {
+        await setDoc(convRef, {
+          participants,
+          participantRoles: {
+            [currentUserId]: 'client',
+            [otherId]: 'freelancer',
+          },
+          lastMessage: '',
+          updatedAt: serverTimestamp(),
+        });
+      }
+
+      router.push(`/dashboard/client-dashboard/messages/thread/${conversationId}`);
+    } catch (err) {
+      console.error('Failed to start chat', err);
+      toast.error('Failed to start chat');
+    }
+  };
 
   // Effect to fetch all candidates
   useEffect(() => {
@@ -411,11 +451,12 @@ const CandidateV1Area = () => {
                     {error && <p className="text-danger text-center p-5">{error}</p>}
                     
                     {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
-                        <CandidateListItem
+                      <CandidateListItem
                             key={apiCandidate.user_id}
                             isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
                             onViewProfile={handleViewProfile}
+                        onMessage={handleStartChat}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,

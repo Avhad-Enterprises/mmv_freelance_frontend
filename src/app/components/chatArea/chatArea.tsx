@@ -7,6 +7,7 @@ import {
 } from "firebase/firestore";
 import { getAuth, signInAnonymously, Auth } from "firebase/auth";
 import { Search, Send, Plus, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import Conversation from '@/app/components/conversation/Conversation';
 import Cookies from 'js-cookie';
 
 // ---------------- CONFIG ----------------
@@ -56,14 +57,11 @@ const ChatArea: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState<string>("");
   const [newChatUserId, setNewChatUserId] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showNewChatModal, setShowNewChatModal] = useState<boolean>(false);
   const [firebaseInstances, setFirebaseInstances] = useState<FirebaseInstances>({ db: undefined, auth: undefined });
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // ---------------- FIREBASE INIT ----------------
   useEffect(() => {
@@ -179,91 +177,12 @@ const ChatArea: React.FC = () => {
     return () => unsubscribe();
   }, [currentUser, firebaseInstances]);
 
-  // ---------------- SUBSCRIBE TO MESSAGES ----------------
-  useEffect(() => {
-    const { db } = firebaseInstances;
-    if (!selectedConversation || !db || !currentUser?.user_id) {
-      setMessages([]);
-      return;
-    }
 
-    const q = query(
-      collection(db, `conversations/${selectedConversation.id}/messages`),
-      orderBy("timestamp", "asc"),
-      limit(100)
-    );
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const msgs = querySnapshot.docs.map(docSnap => {
-        const data = docSnap.data();
-        const msg: Message = {
-          id: docSnap.id,
-          text: data.text || '',
-          senderId: data.senderId || '',
-          receiverId: data.receiverId || '',
-          timestamp: data.timestamp,
-          read: data.read || false
-        };
 
-        // Mark message as read
-        if (!msg.read && msg.receiverId === currentUser.user_id) {
-          setDoc(docSnap.ref, { read: true }, { merge: true });
-        }
-        return msg;
-      });
-      setMessages(msgs);
-
-      if (selectedConversation.lastSenderId !== currentUser.user_id) {
-        setDoc(doc(db, "conversations", selectedConversation.id), { lastMessageRead: true }, { merge: true });
-      }
-    }, (err) => {
-      console.error("Error fetching messages:", err);
-      setError(`Could not load messages: ${err.message}`);
-    });
-
-    return () => unsubscribe();
-  }, [selectedConversation, currentUser, firebaseInstances]);
-
-  // ---------------- SCROLL ON NEW MESSAGE ----------------
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   // ---------------- HANDLERS ----------------
-  const handleSendMessage = async () => {
-    const { db } = firebaseInstances;
-    if (!selectedConversation || !newMessage.trim() || !db || !currentUser?.user_id) return;
 
-    const otherUserId = selectedConversation.participants.find(p => p !== currentUser.user_id);
-    if (!otherUserId) {
-      setError("Error: Could not find chat recipient.");
-      return;
-    }
-
-    try {
-      const messageText = newMessage.trim();
-      await addDoc(collection(db, `conversations/${selectedConversation.id}/messages`), {
-        text: messageText,
-        senderId: currentUser.user_id,
-        receiverId: otherUserId,
-        timestamp: serverTimestamp(),
-        read: false
-      });
-
-      await setDoc(doc(db, "conversations", selectedConversation.id), {
-        lastMessage: messageText,
-        lastMessageTime: serverTimestamp(),
-        lastSenderId: currentUser.user_id,
-        lastMessageRead: false
-      }, { merge: true });
-
-      setNewMessage("");
-      setError(null);
-    } catch (err: any) {
-      console.error("Error sending message:", err);
-      setError(`Failed to send: ${err.message}`);
-    }
-  };
 
   const handleStartNewChat = async () => {
     const { db } = firebaseInstances;
@@ -377,9 +296,9 @@ const ChatArea: React.FC = () => {
 
   // ---------------- MAIN UI ----------------
   return (
-    <div style={{ display: 'flex', background: '#EFF6F3', minHeight: '600px', borderRadius: '12px', overflow: 'hidden' }}>
+    <div className="chat-area-container" style={{ background: '#EFF6F3', minHeight: '600px', borderRadius: '12px', overflow: 'hidden' }}>
       {/* LEFT SIDEBAR */}
-      <div style={{ width: '100%', maxWidth: '24rem', background: 'white', borderRight: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column' }}>
+      <div className="left-sidebar" style={{ width: '100%', maxWidth: '24rem', background: 'white', borderRight: '1px solid #E5E7EB' }}>
         <div style={{ background: '#244034', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#D2F34C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -397,7 +316,7 @@ const ChatArea: React.FC = () => {
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="conversations-list" style={{ flex: 1, overflowY: 'auto' }}>
           {conversations.map(convo => {
             const otherUserId = convo.participants.find(p => p !== currentUser?.user_id);
             const otherUserDetails = otherUserId ? convo.participantDetails[otherUserId] : null;
@@ -430,7 +349,7 @@ const ChatArea: React.FC = () => {
       </div>
 
       {/* RIGHT CHAT PANEL */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="right-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {selectedConversation ? (
           <>
             {/* Header */}
@@ -444,57 +363,20 @@ const ChatArea: React.FC = () => {
               </h3>
             </div>
 
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
-              {messages.map(msg => {
-                const isOwn = msg.senderId === currentUser?.user_id;
-                return (
-                  <div key={msg.id} style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
-                    <div style={{
-                      background: isOwn ? '#244034' : 'white',
-                      color: isOwn ? 'white' : '#1F2937',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '12px',
-                      margin: '0.25rem 0',
-                      maxWidth: '70%'
-                    }}>
-                      <p style={{ margin: 0 }}>{msg.text}</p>
-                      <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#9CA3AF' }}>
-                        {msg.timestamp?.toDate?.()?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '...'}
-                        {isOwn && (msg.read ? <CheckCheck style={{ width: '12px', height: '12px', marginLeft: 4 }} /> : <Check style={{ width: '12px', height: '12px', marginLeft: 4 }} />)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: '1rem', borderBottom: '1px solid #E5E7EB', background: 'white' }}>
+                <h3 style={{ margin: 0 }}>
+                  {(() => {
+                    const otherUserId = selectedConversation.participants.find(p => p !== currentUser?.user_id);
+                    const otherUserDetails = otherUserId ? selectedConversation.participantDetails[otherUserId] : null;
+                    return otherUserDetails?.firstName || 'Chat';
+                  })()}
+                </h3>
+              </div>
 
-            {/* Input */}
-            <div style={{ background: 'white', padding: '1rem', borderTop: '1px solid #E5E7EB' }}>
-              {error && <p style={{ color: 'red' }}>{error}</p>}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  onKeyPress={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
-                  style={{ flex: 1, borderRadius: '8px', border: '1px solid #E5E7EB', padding: '0.75rem' }}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  style={{
-                    background: newMessage.trim() ? '#244034' : '#D1D5DB',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '0.75rem',
-                    cursor: newMessage.trim() ? 'pointer' : 'not-allowed'
-                  }}
-                >
-                  <Send style={{ width: '20px', height: '20px' }} />
-                </button>
+              <div style={{ flex: 1 }}>
+                {/* Conversation component handles realtime messages + sending */}
+                {currentUser?.user_id && <Conversation conversationId={selectedConversation.id} currentUserId={String(currentUser.user_id)} />}
               </div>
             </div>
           </>
