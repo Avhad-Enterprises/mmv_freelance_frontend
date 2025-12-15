@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import MessageInputBar from './MessageInputBar';
 import { db } from "@/lib/firebase";
 import {
   collection,
@@ -31,7 +32,6 @@ interface Props {
 
 export default function Conversation({ conversationId, currentUserId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [receiverId, setReceiverId] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -104,9 +104,10 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
+  const sendMessage = async (text: string) => {
     setError(null);
-    if (!input.trim()) return;
+    const content = text?.trim();
+    if (!content) return;
     if (!conversationId) return setError("Missing conversation id");
     if (!currentUserId) return setError("Missing current user id");
     if (!receiverId) return setError("Missing recipient id");
@@ -115,7 +116,7 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
       await addDoc(collection(db, `conversations/${conversationId}/messages`), {
         senderId: currentUserId,
         receiverId,
-        text: input.trim(),
+        text: content,
         createdAt: serverTimestamp(),
         isRead: false,
       });
@@ -124,15 +125,13 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
       await setDoc(
         doc(db, "conversations", conversationId),
         {
-          lastMessage: input.trim(),
+          lastMessage: content,
           lastMessageTime: serverTimestamp(),
           lastSenderId: currentUserId,
           lastMessageRead: false,
         },
         { merge: true }
       );
-
-      setInput("");
     } catch (err: any) {
       console.error("Send message failed:", err);
       setError(err.message || String(err));
@@ -151,25 +150,9 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <ChatMessagesBody messages={mappedMessages} currentUserId={currentUserId} />
 
-      <div style={{ padding: 12, borderTop: "1px solid #e5e7eb", background: "#fff" }}>
-        {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            placeholder="Type a message"
-            style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #E5E7EB" }}
-          />
-          <button onClick={sendMessage} disabled={!input.trim()} style={{ background: input.trim() ? "#244034" : "#D1D5DB", color: "white", border: "none", padding: "8px 12px", borderRadius: 6 }}>
-            Send
-          </button>
-        </div>
+      <div style={{ borderTop: "1px solid #e5e7eb", background: "#fff" }}>
+        {error && <div style={{ color: "red", margin: 8 }}>{error}</div>}
+        <MessageInputBar onSend={async (text) => await sendMessage(text)} />
       </div>
     </div>
   );
