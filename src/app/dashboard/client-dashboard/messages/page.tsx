@@ -16,7 +16,18 @@ export default function ClientMessagesPage() {
     <Box sx={{ minHeight: "100vh", py: 3, px: { xs: 2, md: 4 } }}>
       <Typography variant="h4" sx={{ mb: 2, fontFamily: 'inherit', color: '#244034' }}>Messages</Typography>
 
-      <Paper sx={{ display: "flex", minHeight: "calc(100vh - 150px)", height: { xs: 'auto', md: 'calc(100vh - 150px)' }, borderRadius: 2, overflow: "hidden", width: '100%' }}>
+      <Paper
+        sx={{
+          display: "flex",
+          minHeight: "calc(100vh - 150px)",
+          height: { xs: 'auto', md: 'calc(100vh - 150px)' },
+          borderRadius: 2,
+          overflow: "hidden",
+          width: '100%',
+          ml: { xs: 0, md: '20px' },
+          boxShadow: '0 6px 18px rgba(15, 23, 42, 0.06)'
+        }}
+      >
         {/* Left - Chat list (30% on md+, full width on xs) */}
         <Box sx={{ width: { xs: "100%", md: "30%" }, minWidth: { md: '300px' }, borderRight: { md: "1px solid" }, borderColor: "divider", bgcolor: "background.paper" }}>
           <ChatList />

@@ -11,7 +11,7 @@ const ChatList: React.FC = () => {
   }));
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", fontFamily: 'inherit' }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", fontFamily: 'inherit', pl: { md: 2 } }}>
       <Box sx={{ p: { xs: 1.5, md: 2 }, borderBottom: "1px solid", borderColor: "divider", bgcolor: 'background.paper' }}>
         <Typography variant="h6" sx={{ fontFamily: 'inherit', color: '#244034' }}>Messages</Typography>
         <Typography variant="body2" color="text.secondary">Recent conversations</Typography>
