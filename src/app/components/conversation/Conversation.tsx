@@ -13,6 +13,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import type { Timestamp } from "firebase/firestore";
+import ChatMessagesBody, { MessageItem } from './ChatMessagesBody';
 
 export type ChatMessage = {
   id: string;
@@ -138,21 +139,17 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
     }
   };
 
+  // map firebase ChatMessage -> MessageItem for presentational component
+  const mappedMessages: MessageItem[] = messages.length
+    ? messages.map((m) => ({ id: m.id, senderId: m.senderId, text: m.text, createdAt: m.createdAt ? m.createdAt.toDate() : new Date() }))
+    : [
+        { id: "d1", senderId: "other", text: "Hi there — welcome to the chat!", createdAt: new Date() },
+        { id: "d2", senderId: currentUserId, text: "Thanks — looks good!", createdAt: new Date() },
+      ];
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ flex: 1, overflowY: "auto", padding: 12 }}>
-        {messages.map((m) => (
-          <div key={m.id} style={{ marginBottom: 8, display: "flex", justifyContent: m.senderId === currentUserId ? "flex-end" : "flex-start" }}>
-            <div style={{ maxWidth: "75%", padding: 8, borderRadius: 8, background: m.senderId === currentUserId ? "#244034" : "#fff", color: m.senderId === currentUserId ? "#fff" : "#111" }}>
-              <div style={{ fontSize: 14, lineHeight: "18px" }}>{m.text}</div>
-              <div style={{ fontSize: 11, color: "#9CA3AF", textAlign: "right", marginTop: 6 }}>
-                {m.createdAt?.toDate?.()?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "..."}
-              </div>
-            </div>
-          </div>
-        ))}
-        <div ref={endRef} />
-      </div>
+      <ChatMessagesBody messages={mappedMessages} currentUserId={currentUserId} />
 
       <div style={{ padding: 12, borderTop: "1px solid #e5e7eb", background: "#fff" }}>
         {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
