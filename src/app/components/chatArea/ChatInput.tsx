@@ -148,7 +148,7 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
       background: '#FFFFFF',
       display: 'flex',
       gap: 12,
-      alignItems: 'flex-end',
+      alignItems: 'center',
       flexShrink: 0,
       position: 'sticky',
       bottom: 0,
@@ -171,8 +171,11 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
           outline: 'none',
           fontSize: '0.95rem',
           lineHeight: '1.5',
-          transition: 'border-color 0.2s ease, box-shadow 0.2s ease'
-        }}
+          transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+          boxSizing: 'border-box',
+          height: 'auto',
+          minHeight: '48px' // Match button height exactly
+        }} 
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -202,19 +205,22 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
             : '#244034',
           color: 'white',
           border: 'none',
-          padding: '12px 24px',
-          borderRadius: '20px',
+          padding: 0,
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
           fontWeight: 600,
           fontSize: '0.9rem',
           cursor: (disabled || !value.trim()) ? 'not-allowed' : 'pointer',
           opacity: sending ? 0.85 : 1,
           whiteSpace: 'nowrap',
           boxShadow: (disabled || !value.trim()) ? 'none' : '0 4px 14px rgba(36,64,52,0.2)',
-          transition: 'all 0.2s ease',
+          transition: 'all 0.12s ease',
           display: 'flex',
+          justifyContent: 'center',
           alignItems: 'center',
-          gap: '6px'
-        }}
+          gap: 0
+        }} 
         onMouseEnter={(e) => {
           if (!disabled && value.trim()) {
             e.currentTarget.style.transform = 'translateY(-2px)';
@@ -227,25 +233,19 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
         }}
       >
         {sending ? (
-          <>
-            <span style={{
-              width: '14px',
-              height: '14px',
-              border: '2px solid rgba(255,255,255,0.3)',
-              borderTopColor: 'white',
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite'
-            }} />
-            Sending
-          </>
+          <span style={{
+            width: '18px',
+            height: '18px',
+            border: '2px solid rgba(255,255,255,0.35)',
+            borderTopColor: 'white',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }} />
         ) : (
-          <>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Send
-          </>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         )}
       </button>
     </div>
