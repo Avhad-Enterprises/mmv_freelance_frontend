@@ -587,8 +587,10 @@
   .dashboard-body .membership-plan-wrapper .column.border-left {border-left: none; border-top: 1px solid #254035;}
 }
 @media (max-width: 767px) { 
+@media (max-width: 991px) {
   .dash-aside-navbar {transform: translateX(-100%); opacity: 0; visibility: hidden; transition: all 0.3s ease; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 90vw; z-index: 1050;}
   .dash-aside-navbar.show {transform: translateX(0); box-shadow: 15px 0 25px rgba(35,35,35,0.09); opacity: 1; visibility: visible;}
+}
   /* keep header fixed on mobile and above sidebar */
   .dashboard-body {margin: 0; border-radius: 0; padding-top: 64px;}
   .dashboard-body .dashboard-header {position: fixed; top: 0; left: 0; right: 0; border-bottom: 1px solid #e5e5e5; padding: 12px 15px; z-index: 1100; background: #fff;}

@@ -3,16 +3,17 @@ import React, { useState, useEffect, useCallback } from "react";
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import DashboardHeader from "../dashboard/candidate/dashboard-header";
+import { db, auth } from '@/lib/firebase';
+import { ref, get, set } from 'firebase/database';
+import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { authCookies } from "@/utils/cookies";
+import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
-import { authCookies } from "@/utils/cookies";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -165,30 +166,100 @@ const CandidateV1Area = () => {
       return;
     }
 
+    // Ensure Firebase authentication before creating conversation
+    try {
+      if (!auth.currentUser) {
+        console.log('Authenticating with Firebase...');
+        const authToken = authCookies.getToken();
+        if (!authToken) {
+          toast.error('Authentication required. Please sign in again.');
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get Firebase authentication token');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data?.customToken) {
+          await signInWithCustomToken(auth, data.data.customToken);
+          console.log('✅ Firebase authentication successful');
+        } else {
+          throw new Error('Invalid Firebase token response');
+        }
+      }
+    } catch (authErr: any) {
+      console.error('Firebase authentication error:', authErr);
+      toast.error('Failed to authenticate. Please try again.');
+      return;
+    }
+
     const currentUserId = String(userData.user_id);
     const otherId = String(candidateUserId);
     const participants = [currentUserId, otherId].sort();
     const conversationId = participants.join('_');
 
     try {
-      const convRef = doc(db, 'conversations', conversationId);
-      const convSnap = await getDoc(convRef);
+      console.log('Creating/opening conversation:', { currentUserId, otherId, conversationId });
+      
+      const convRef = ref(db, `conversations/${conversationId}`);
+      const convSnap = await get(convRef);
+      
       if (!convSnap.exists()) {
-        await setDoc(convRef, {
+        console.log('Conversation does not exist, creating new one');
+
+        // Build participantDetails from local state and current user
+        const participantDetails: any = {};
+        participantDetails[currentUserId] = { 
+          firstName: userData.first_name || '', 
+          email: userData.email || '',
+          profilePicture: userData.profile_picture || null
+        };
+        const otherCandidate = candidates.find(c => String(c.user_id) === otherId);
+        if (otherCandidate) {
+          participantDetails[otherId] = { 
+            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`, 
+            email: `${otherCandidate.username || 'unknown'}@example.com`,
+            profilePicture: otherCandidate.profile_picture || null
+          };
+        }
+
+        await set(convRef, {
           participants,
           participantRoles: {
             [currentUserId]: 'client',
             [otherId]: 'freelancer',
           },
+          participantDetails,
           lastMessage: '',
-          updatedAt: serverTimestamp(),
+          lastSenderId: '',
+          updatedAt: Date.now(),
+          createdAt: Date.now(),
         });
+        console.log('Conversation created successfully');
+        toast.success('Chat started! Redirecting...');
+      } else {
+        console.log('Conversation already exists');
+        toast.success('Opening chat...');
       }
 
+      // Redirect to the thread page to show the conversation
       router.push(`/dashboard/client-dashboard/messages/thread/${conversationId}`);
-    } catch (err) {
-      console.error('Failed to start chat', err);
-      toast.error('Failed to start chat');
+    } catch (err: any) {
+      console.error('Failed to start chat:', err);
+      console.error('Error details:', {
+        code: err?.code,
+        message: err?.message,
+        stack: err?.stack
+      });
+      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
     }
   };
 

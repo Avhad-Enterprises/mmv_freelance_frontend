@@ -1,27 +1,16 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import MessageInputBar from './MessageInputBar';
 import { db } from "@/lib/firebase";
 import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  serverTimestamp,
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
-import type { Timestamp } from "firebase/firestore";
-import ChatMessagesBody, { MessageItem } from './ChatMessagesBody';
+  ref, push, set, onValue, get, update, query, limitToLast, off
+} from "firebase/database";
 
 export type ChatMessage = {
   id: string;
   senderId: string;
   receiverId: string;
   text: string;
-  createdAt?: Timestamp | null;
+  createdAt?: number | null;
   isRead: boolean;
 };
 
@@ -32,6 +21,7 @@ interface Props {
 
 export default function Conversation({ conversationId, currentUserId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [receiverId, setReceiverId] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
@@ -41,10 +31,10 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
     if (!conversationId) return;
     const load = async () => {
       try {
-        const convRef = doc(db, "conversations", conversationId);
-        const convSnap = await getDoc(convRef);
+        const convRef = ref(db, `conversations/${conversationId}`);
+        const convSnap = await get(convRef);
         if (!convSnap.exists()) return;
-        const data = convSnap.data() as any;
+        const data = convSnap.val() as any;
         const participants: string[] = data.participants || [];
         const other = participants.find((p) => p !== currentUserId) || null;
         setReceiverId(other);
@@ -59,32 +49,43 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
   // realtime listener for messages
   useEffect(() => {
     if (!conversationId) return;
-    const messagesRef = collection(db, `conversations/${conversationId}/messages`);
-    const q = query(messagesRef, orderBy("createdAt", "asc"));
+    const messagesRef = ref(db, `conversations/${conversationId}/messages`);
+    const messagesQuery = query(messagesRef, limitToLast(100));
 
-    const unsubscribe = onSnapshot(
-      q,
-      async (snap) => {
-        const msgs: ChatMessage[] = snap.docs.map((d) => {
-          const data = d.data() as any;
+    const unsubscribe = onValue(
+      messagesQuery,
+      async (snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+          setMessages([]);
+          return;
+        }
+
+        const msgs: ChatMessage[] = Object.keys(data).map((messageId) => {
+          const messageData = data[messageId];
           return {
-            id: d.id,
-            senderId: data.senderId || "",
-            receiverId: data.receiverId || "",
-            text: data.text || "",
-            createdAt: data.createdAt || null,
-            isRead: !!data.isRead,
+            id: messageId,
+            senderId: messageData.senderId || "",
+            receiverId: messageData.receiverId || "",
+            text: messageData.text || "",
+            createdAt: messageData.createdAt || null,
+            isRead: !!messageData.isRead,
           } as ChatMessage;
+        }).sort((a, b) => {
+          const timeA = a.createdAt || 0;
+          const timeB = b.createdAt || 0;
+          return timeA - timeB;
         });
 
         setMessages(msgs);
 
         // mark unread messages addressed to current user as read
-        snap.docs.forEach(async (d) => {
-          const data = d.data() as any;
-          if (data.receiverId === currentUserId && !data.isRead) {
+        Object.keys(data).forEach(async (messageId) => {
+          const messageData = data[messageId];
+          if (messageData.receiverId === currentUserId && !messageData.isRead) {
             try {
-              await setDoc(d.ref, { isRead: true }, { merge: true });
+              const msgRef = ref(db, `conversations/${conversationId}/messages/${messageId}`);
+              await update(msgRef, { isRead: true });
             } catch (err) {
               // non-fatal
             }
@@ -97,62 +98,85 @@ export default function Conversation({ conversationId, currentUserId }: Props) {
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      const messagesRef = ref(db, `conversations/${conversationId}/messages`);
+      off(messagesRef, 'value', unsubscribe);
+    };
   }, [conversationId, currentUserId]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async () => {
     setError(null);
-    const content = text?.trim();
-    if (!content) return;
+    if (!input.trim()) return;
     if (!conversationId) return setError("Missing conversation id");
     if (!currentUserId) return setError("Missing current user id");
     if (!receiverId) return setError("Missing recipient id");
 
     try {
-      await addDoc(collection(db, `conversations/${conversationId}/messages`), {
+      const messagesRef = ref(db, `conversations/${conversationId}/messages`);
+      const newMessageRef = push(messagesRef);
+      await set(newMessageRef, {
         senderId: currentUserId,
         receiverId,
-        text: content,
-        createdAt: serverTimestamp(),
+        text: input.trim(),
+        createdAt: Date.now(),
         isRead: false,
       });
 
       // update conversation metadata
-      await setDoc(
-        doc(db, "conversations", conversationId),
-        {
-          lastMessage: content,
-          lastMessageTime: serverTimestamp(),
-          lastSenderId: currentUserId,
-          lastMessageRead: false,
-        },
-        { merge: true }
-      );
+      const convRef = ref(db, `conversations/${conversationId}`);
+      await update(convRef, {
+        lastMessage: input.trim(),
+        lastMessageTime: Date.now(),
+        lastSenderId: currentUserId,
+        lastMessageRead: false,
+      });
+
+      setInput("");
     } catch (err: any) {
       console.error("Send message failed:", err);
       setError(err.message || String(err));
     }
   };
 
-  // map firebase ChatMessage -> MessageItem for presentational component
-  const mappedMessages: MessageItem[] = messages.length
-    ? messages.map((m) => ({ id: m.id, senderId: m.senderId, text: m.text, createdAt: m.createdAt ? m.createdAt.toDate() : new Date() }))
-    : [
-        { id: "d1", senderId: "other", text: "Hi there — welcome to the chat!", createdAt: new Date() },
-        { id: "d2", senderId: currentUserId, text: "Thanks — looks good!", createdAt: new Date() },
-      ];
-
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <ChatMessagesBody messages={mappedMessages} currentUserId={currentUserId} />
+      <div style={{ flex: 1, overflowY: "auto", padding: 12 }}>
+        {messages.map((m) => (
+          <div key={m.id} style={{ marginBottom: 8, display: "flex", justifyContent: m.senderId === currentUserId ? "flex-end" : "flex-start" }}>
+            <div style={{ maxWidth: "75%", padding: 8, borderRadius: 8, background: m.senderId === currentUserId ? "#244034" : "#fff", color: m.senderId === currentUserId ? "#fff" : "#111" }}>
+              <div style={{ fontSize: 14, lineHeight: "18px" }}>{m.text}</div>
+              <div style={{ fontSize: 11, color: "#9CA3AF", textAlign: "right", marginTop: 6 }}>
+                {m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "..."}
+              </div>
+            </div>
+          </div>
+        ))}
+        <div ref={endRef} />
+      </div>
 
-      <div style={{ borderTop: "1px solid #e5e7eb", background: "#fff" }}>
-        {error && <div style={{ color: "red", margin: 8 }}>{error}</div>}
-        <MessageInputBar onSend={async (text) => await sendMessage(text)} />
+      <div style={{ padding: 12, borderTop: "1px solid #e5e7eb", background: "#fff" }}>
+        {error && <div style={{ color: "red", marginBottom: 8 }}>{error}</div>}
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Type a message"
+            style={{ flex: 1, padding: 8, borderRadius: 6, border: "1px solid #E5E7EB" }}
+          />
+          <button onClick={sendMessage} disabled={!input.trim()} style={{ background: input.trim() ? "#244034" : "#D1D5DB", color: "white", border: "none", padding: "8px 12px", borderRadius: 6 }}>
+            Send
+          </button>
+        </div>
       </div>
     </div>
   );

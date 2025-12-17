@@ -2,13 +2,20 @@
     position: fixed;
     z-index: 1000;
     left: 0;
-    top:0;
+    top:0; /* default for small screens */
     bottom: 0;
     min-height: 100vh;
     overflow-y: auto;
     width: 260px;
     background: #fff;
     padding: 30px 20px 30px;
+
+    /* Desktop: keep the sidebar flush to the top so it aligns with the header */
+    @media (min-width: 992px) {
+      top: 0;
+      bottom: 0;
+      min-height: 100vh;
+    }
 
     &::-webkit-scrollbar{ width: 5px; }
     &::-webkit-scrollbar-track { background: #fff;}
@@ -237,8 +244,35 @@
         left: 315px;
         background: #F0F5F3;
         padding: 30px 0;
-        z-index: 999;
-        .search-form {
+        z-index: 1100; /* ensure header appears above sidebar */
+
+        /* Medium screens: reduce left offset so header aligns with reduced sidebar width */
+        @media (max-width: 1199px) {
+          left: 15px; /* 80px sidebar + 55px gap */
+        }
+
+        /* Small screens: no left offset, header spans full width */
+        @media (max-width: 991px) {
+          left: 0;
+          right: 0;
+          padding: 18px 0;
+        }
+    }
+
+    /* Responsive adjustments for dashboard content margins */
+    @media (max-width: 1199px) {
+      .dashboard-body {
+        margin-left: 80px; /* reduced sidebar width space */
+        padding: 140px 25px 50px;
+      }
+    }
+
+    @media (max-width: 991px) {
+      .dashboard-body {
+        margin-left: 0; /* sidebar overlays on mobile, content takes full width */
+        padding: 100px 18px 50px;
+      }
+    }        .search-form {
             position: relative;
             height: 45px;
             width: 318px;
@@ -1377,9 +1411,8 @@
             border-color: $color-five;
             box-shadow: 0 0 0 0.2rem rgba($color-five, 0.25);
         }
-    }
-}
 
+}
 // New Message Container
 .compose-new-email-container {
     border: 1px solid rgba($color: #000, $alpha: 0.1);

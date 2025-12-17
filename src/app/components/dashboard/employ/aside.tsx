@@ -11,6 +11,7 @@ import { useUser } from "@/context/UserContext";
 import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
 import { authCookies } from "@/utils/cookies";
+import { useConversations } from "@/hooks/useConversations";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -50,6 +51,8 @@ const EmployAside = ({}: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
+    const currentUserId = userData?.user_id ? String(userData.user_id) : null;
+    const { conversations } = useConversations(currentUserId);
     
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
@@ -60,6 +63,11 @@ const EmployAside = ({}: IProps) => {
     
     const profilePictureUrl = userData?.profile_picture || null;
     console.log('Current profile picture URL in employ aside:', profilePictureUrl);
+
+    // Check for unread messages
+    const hasUnreadMessages = conversations.some(convo => 
+        convo.lastSenderId !== currentUserId && !convo.lastMessageRead
+    );
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -214,8 +222,11 @@ const EmployAside = ({}: IProps) => {
                         <ul className="style-none">
                             {nav_data.map((item) => {
                                 const isActive = pathname === item.link;
+                                const isMessagesItem = item.id === 10; // Messages item
+                                const showNotification = isMessagesItem && hasUnreadMessages;
+                                
                                 return (
-                                    <li key={item.id} onClick={() => setIsOpenSidebar(false)}>
+                                    <li key={item.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
                                         <Link
                                             href={item.link}
                                             className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}
@@ -223,6 +234,22 @@ const EmployAside = ({}: IProps) => {
                                             <Image src={isActive ? item.icon_active : item.icon} alt="icon" className="lazy-img" />
                                             <span>{item.title}</span>
                                         </Link>
+                                        {showNotification && (
+                                            <div
+                                                className="position-absolute"
+                                                style={{
+                                                    top: '8px',
+                                                    right: '8px',
+                                                    width: '10px',
+                                                    height: '10px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#D2F34C',
+                                                    border: '2px solid white',
+                                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                                    zIndex: 10
+                                                }}
+                                            />
+                                        )}
                                     </li>
                                 );
                             })}

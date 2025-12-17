@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { MessageCircle } from 'lucide-react';
 import useConversations, { ConversationSummary } from "@/hooks/useConversations";
 
 interface Props {
@@ -25,7 +26,15 @@ export default function ClientChatList({ currentUserId, onSelect }: Props) {
 
   return (
     <div style={{ width: "100%", maxWidth: 420 }}>
-      <h3 style={{ margin: "0 0 12px 0" }}>Messages</h3>
+      <div style={{ background: '#244034', padding: '1rem', borderRadius: 10, color: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: 12 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <MessageCircle style={{ color: 'white' }} />
+        </div>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Messages</h3>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: '#D1D5DB' }}>Recent conversations</p>
+        </div>
+      </div>
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: "red" }}>{error}</div>}
 

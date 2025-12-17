@@ -9,6 +9,7 @@ import { useUser } from "@/context/UserContext";
 import ProfilePictureModal from "../../common/ProfilePictureModal";
 import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
+import { useConversations } from "@/hooks/useConversations";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -36,7 +37,7 @@ const nav_data = [
     // { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
     // { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
     // { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
-    // { id: 10 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/chat" , title : "Chat" },
+    { id: 10, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
     // { id: 11 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/credits" , title : "Credits" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ];
@@ -49,6 +50,8 @@ const CandidateAside = ({}: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
+    const currentUserId = userData?.user_id ? String(userData.user_id) : null;
+    const { conversations } = useConversations(currentUserId);
     
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
@@ -58,6 +61,11 @@ const CandidateAside = ({}: IProps) => {
         : "Loading...";
     
     const profilePictureUrl = userData?.profile_picture || null;
+
+    // Check for unread messages
+    const hasUnreadMessages = conversations.some(convo => 
+        convo.lastSenderId !== currentUserId && !convo.lastMessageRead
+    );
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -103,6 +111,18 @@ const CandidateAside = ({}: IProps) => {
 
     return (
         <>
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.1);
+                        opacity: 0.8;
+                    }
+                }
+            `}</style>
             <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
                 <div className="position-relative" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
                     {/* Logo + Close Button */}
@@ -206,12 +226,32 @@ const CandidateAside = ({}: IProps) => {
                         <ul className="style-none">
                             {nav_data.map((m) => {
                                 const isActive = pathname === m.link;
+                                const isChatItem = m.id === 10; // Chat item
+                                const showNotification = isChatItem && hasUnreadMessages;
+                                
                                 return (
-                                    <li key={m.id} onClick={() => setIsOpenSidebar(false)}>
+                                    <li key={m.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
                                         <Link href={m.link} className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}>
                                             <Image src={isActive ? m.icon_active : m.icon} alt="icon" className="lazy-img" />
                                             <span>{m.title}</span>
                                         </Link>
+                                        {showNotification && (
+                                            <div
+                                                className="position-absolute"
+                                                style={{
+                                                    top: '12px',
+                                                    right: '20px',
+                                                    width: '12px',
+                                                    height: '12px',
+                                                    borderRadius: '50%',
+                                                    backgroundColor: '#1a5f3d',
+                                                    border: '2px solid white',
+                                                    boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
+                                                    zIndex: 10,
+                                                    animation: 'pulse 2s infinite'
+                                                }}
+                                            />
+                                        )}
                                     </li>
                                 );
                             })}
