@@ -1,15 +1,20 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "@/context/UserContext";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import { useMediaQuery, useTheme } from "@mui/material";
 import ChatList from "./ChatList";
 import EmptyChat from "./EmptyChat";
+import InlineThreadView from "./InlineThreadView";
 import Typography from "@mui/material/Typography";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 
 export default function ClientMessagesPage() {
   const { userData, isLoading } = useUser();
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
 
   if (isLoading) return (
     <div className="dashboard-body">
@@ -58,19 +63,26 @@ export default function ClientMessagesPage() {
                 height: "100%",
               }}
             >
-              <ChatList />
+              <ChatList 
+                onSelectConversation={isDesktop ? (id) => setSelectedConversationId(id) : undefined}
+                selectedConversationId={isDesktop ? selectedConversationId : undefined}
+              />
             </Box>
 
-            {/* Right - Empty state (desktop only) */}
+            {/* Right - Chat or Empty state (desktop only) */}
             <Box
               sx={{
                 flex: 1,
                 display: { xs: "none", md: "block" },
-                background: "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
+                background: selectedConversationId ? "#FFFFFF" : "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
                 height: "100%",
               }}
             >
-              <EmptyChat />
+              {selectedConversationId ? (
+                <InlineThreadView conversationId={selectedConversationId} />
+              ) : (
+                <EmptyChat />
+              )}
             </Box>
           </Paper>
         </div>

@@ -21,6 +21,10 @@ import Cookies from "js-cookie";
 type ChatListProps = {
   /** Base path for thread page, e.g. "/dashboard/client-dashboard/messages/thread" */
   threadBasePath?: string;
+  /** Callback for desktop inline view */
+  onSelectConversation?: (id: string) => void;
+  /** Currently selected conversation ID for highlighting */
+  selectedConversationId?: string | null;
 } & Omit<ComponentProps<"div">, "ref">;
 
 const formatTime = (ts?: any) => {
@@ -42,6 +46,8 @@ const formatTime = (ts?: any) => {
 
 const ChatList: React.FC<ChatListProps> = ({
   threadBasePath = "/dashboard/client-dashboard/messages/thread",
+  onSelectConversation,
+  selectedConversationId,
 }) => {
   const router = useRouter();
   const { userData, isLoading } = useUser();
@@ -162,7 +168,13 @@ const ChatList: React.FC<ChatListProps> = ({
     (userData as any)?.user_type === "freelancer";
 
   const handleClick = (id: string) => {
-    router.push(`${threadBasePath}/${id}`);
+    if (onSelectConversation) {
+      // Desktop: inline view
+      onSelectConversation(id);
+    } else {
+      // Mobile: navigate to thread page
+      router.push(`${threadBasePath}/${id}`);
+    }
   };
 
   return (
@@ -314,6 +326,7 @@ const ChatList: React.FC<ChatListProps> = ({
             filteredConversations.map((c) => (
               <React.Fragment key={c.conversationId}>
                 <ListItemButton
+                  selected={selectedConversationId === c.conversationId}
                   onClick={() => handleClick(c.conversationId)}
                   sx={{
                     py: 1.5,
