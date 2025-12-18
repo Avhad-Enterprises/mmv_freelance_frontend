@@ -19,12 +19,14 @@ const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
         <span>Location: </span>
         <div>{bio.location}</div>
       </li>
-      <li>
-        <span>Email: </span>
-        <div>
-          <a href={`mailto:${bio.email}`}>{bio.email}</a>
-        </div>
-      </li>
+      {bio.email && !bio.email.includes('@example.com') && bio.email.trim() !== '' && (
+        <li>
+          <span>Email: </span>
+          <div>
+            <a href={`mailto:${bio.email}`}>{bio.email}</a>
+          </div>
+        </li>
+      )}
       <li>
         <span>Expected Rate: </span>
         <div>{bio.rateAmount} / hr</div>
@@ -47,7 +49,7 @@ const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
           <div className="text-capitalize">{bio.role_name.replace(/_/g, ' ')}</div>
         </li>
       )}
-      
+
     </ul>
   );
 };

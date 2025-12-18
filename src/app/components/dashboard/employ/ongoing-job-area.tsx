@@ -241,7 +241,7 @@ const OngoingJobArea: FC = () => {
           user_id: app.user_id,
           first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
           last_name: app.applicant?.last_name || freelancer?.last_name || '',
-          email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
+          email: app.applicant?.email || freelancer?.email || '',
           profile_picture: freelancer?.profile_picture || '',
           status: app.status,
           bio: freelancer?.bio || freelancer?.short_description || null,
@@ -536,7 +536,7 @@ const OngoingJobArea: FC = () => {
           languages: foundFreelancer.languages || [],
           city: foundFreelancer.city || null,
           country: foundFreelancer.country || null,
-          email: `${foundFreelancer.username || 'unknown'}@example.com`,
+          email: foundFreelancer.email || '',
           rate_amount: foundFreelancer.rate_amount || "0.00",
           currency: foundFreelancer.currency || "USD",
           availability: foundFreelancer.availability || "not specified",
@@ -809,7 +809,7 @@ const OngoingJobArea: FC = () => {
 
       {/* Submission Review Modal */}
       {showSubmissionModal && selectedSubmission && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflow: 'auto' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">

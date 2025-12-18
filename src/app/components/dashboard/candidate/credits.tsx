@@ -46,9 +46,9 @@ const CreditsArea = () => {
         setLoading(false);
         return;
       }
-      
+
       const response = await makeGetRequest("api/v1/credits/balance");
-      
+
       if (response?.data?.success) {
         setBalance(response.data.data);
       } else {
@@ -78,7 +78,7 @@ const CreditsArea = () => {
     if (!pendingPurchase) return;
 
     const { amount, packageId } = pendingPurchase;
-    
+
     if (packageId) {
       setPurchasing(packageId);
     }
@@ -88,7 +88,7 @@ const CreditsArea = () => {
     try {
       // In production, integrate with payment gateway here
       const paymentReference = `PAY-${Date.now()}-${amount}`;
-      
+
       const response = await makePostRequest("api/v1/credits/purchase", {
         credits_amount: amount,
         payment_reference: paymentReference,
@@ -234,24 +234,23 @@ const CreditsArea = () => {
               <p className="mb-25">
                 Choose a credit package to start applying for projects. Each application requires 50 credits.
               </p>
-              
+
               <div className="row">
                 {CREDIT_PACKAGES.map((pkg) => (
                   <div key={pkg.id} className="col-lg-4 col-md-6">
-                    <div 
-                      className={`dash-card-one bg-white border-30 position-relative mb-15 ${
-                        pkg.popular ? 'border' : ''
-                      }`}
-                      style={{ 
+                    <div
+                      className={`dash-card-one bg-white border-30 position-relative mb-15 ${pkg.popular ? 'border' : ''
+                        }`}
+                      style={{
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
                         borderColor: pkg.popular ? '#D2F34C' : undefined
                       }}
                     >
                       {pkg.popular && (
-                        <div 
+                        <div
                           className="position-absolute top-0 start-50 translate-middle"
-                          style={{ 
+                          style={{
                             marginTop: '10px',
                             backgroundColor: '#D2F34C',
                             color: '#244034',
@@ -261,7 +260,7 @@ const CreditsArea = () => {
                           <span className="badge">Most Popular</span>
                         </div>
                       )}
-                      
+
                       <div className="text-center mb-25">
                         <h3 className="fw-bold mb-10 text-capitalize">{pkg.id}</h3>
                         <div className="mb-15">
@@ -277,9 +276,8 @@ const CreditsArea = () => {
                       </div>
 
                       <button
-                        className={`dash-btn-two w-100 tran3s ${
-                          purchasing === pkg.id ? 'disabled' : ''
-                        }`}
+                        className={`dash-btn-two w-100 tran3s ${purchasing === pkg.id ? 'disabled' : ''
+                          }`}
                         onClick={() => handlePurchase(pkg.amount, pkg.id)}
                         disabled={purchasing === pkg.id}
                       >
@@ -308,18 +306,18 @@ const CreditsArea = () => {
 
         {/* Confirmation Modal */}
         {showConfirmModal && pendingPurchase && (
-          <div 
-            className="modal fade show d-block" 
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          <div
+            className="modal fade show d-block"
+            style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflow: 'auto' }}
             tabIndex={-1}
           >
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content border-20">
                 <div className="modal-header border-0 pb-0">
                   <h5 className="modal-title dash-title-three">Confirm Purchase</h5>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
+                  <button
+                    type="button"
+                    className="btn-close"
                     onClick={cancelPurchase}
                     aria-label="Close"
                   ></button>
@@ -342,16 +340,16 @@ const CreditsArea = () => {
                   </div>
                 </div>
                 <div className="modal-footer border-0 pt-0">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
                     onClick={cancelPurchase}
                   >
                     Cancel
                   </button>
-                  <button 
-                    type="button" 
-                    className="dash-btn-two tran3s" 
+                  <button
+                    type="button"
+                    className="dash-btn-two tran3s"
                     onClick={confirmPurchase}
                   >
                     Confirm Purchase
