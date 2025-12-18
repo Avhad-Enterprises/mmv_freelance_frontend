@@ -47,7 +47,7 @@ const getCountryName = (isoCode: string): string => {
 const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister }) => {
   const [termsAccepted, setTermsAccepted] = React.useState<boolean>(false);
   const [privacyAccepted, setPrivacyAccepted] = React.useState<boolean>(false);
-  
+
   const handleSubmit = async () => {
     if (!termsAccepted) {
       toast.error('Please accept the Terms and Conditions to continue');
@@ -60,16 +60,16 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
     }
 
     const loadingToast = toast.loading('Submitting registration...');
-    
+
     try {
       const fd = new FormData();
-  
+
       fd.append('first_name', formData.first_name || '');
       fd.append('last_name', formData.last_name || '');
       fd.append('profile_title', `${formData.first_name || ''} ${formData.last_name || ''}`.trim());
       fd.append('email', formData.email || '');
       fd.append('password', formData.password || '');
-      fd.append('account_type', 'videoEditor');      
+      fd.append('account_type', 'videoEditor');
       const skills: string[] = Array.isArray(formData.base_skills) ? formData.base_skills : [];
       fd.append('skills', JSON.stringify(skills));
 
@@ -77,13 +77,13 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
 
       const portfolioLinks: string[] = (formData.portfolio_links || []).filter((l: string) => !!l);
       if (portfolioLinks.length > 0) fd.append('portfolio_links', JSON.stringify(portfolioLinks));
-      
+
       if (formData.rate_amount) fd.append('rate_amount', String(formData.rate_amount));
 
       // Required fields
       fd.append('phone_number', formData.phone_number || '');
       fd.append('id_type', formData.id_type || '');
-      
+
       // Optional address fields
       if (formData.full_address) fd.append('address', formData.full_address);
       if (formData.city) fd.append('city', formData.city);
@@ -145,7 +145,7 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
 
       const respData = response.data;
       console.log('API Response:', respData);
-      
+
       if (response.status !== 200 && response.status !== 201) {
         console.error('Registration failed with status:', response.status);
         console.error('Error details:', respData);
@@ -160,7 +160,15 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
       }, 2000);
     } catch (error: any) {
       console.error('❌ Registration error:', error);
-      toast.error(error.message || 'Registration failed. Please try again.', { id: loadingToast });
+      let errorMessage = 'Registration failed. Please try again.';
+      if (error.response?.status === 409) {
+        errorMessage = 'This email or user already exists. Please login or use a different email.';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      toast.error(errorMessage, { id: loadingToast });
     }
   };
 
