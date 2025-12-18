@@ -66,27 +66,6 @@ const EmptyChat: React.FC<{ message?: string }> = ({ message = "Select a chat to
         >
           Choose a conversation from the left to continue chatting or start a new conversation.
         </Typography>
-        <Button
-          variant="contained"
-          sx={{
-            background: "#244034",
-            "&:hover": { 
-              background: "#244034",
-              transform: "translateY(-2px)",
-              boxShadow: "0 6px 20px rgba(36,64,52,0.3)",
-            },
-            borderRadius: "30px",
-            px: 4,
-            py: 1.5,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: "0.95rem",
-            boxShadow: "0 4px 14px rgba(36,64,52,0.2)",
-            transition: "all 0.2s ease",
-          }}
-        >
-          Start New Chat
-        </Button>
       </Box>
     </Box>
   );
