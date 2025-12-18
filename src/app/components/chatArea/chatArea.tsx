@@ -607,8 +607,8 @@ const ChatArea: React.FC = () => {
         return null;
       }
 
-      // Try the users profile endpoint (requires authentication but works for any user type)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${clientId}/profile`, {
+      // Try the public user info endpoint (works for any authenticated user)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${clientId}/public-info`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -616,20 +616,20 @@ const ChatArea: React.FC = () => {
       });
 
       if (!response.ok) {
-        // If the endpoint fails (e.g., not admin), just log and return null
+        // If the endpoint fails, just log and return null
         // The UI will fallback to Firebase participantDetails
-        console.log(`Could not fetch full profile for user ${clientId}, will use conversation details`);
+        console.log(`Could not fetch public info for user ${clientId}, will use conversation details`);
         return null;
       }
 
       const data = await response.json();
       if (data.success && data.data) {
-        const userData = data.data.user || data.data;
+        const userData = data.data;
         const profile: ClientProfile = {
           user_id: String(userData.user_id),
-          first_name: userData.first_name || userData.company_name || 'Client',
+          first_name: userData.first_name || userData.company_name || userData.display_name || 'Client',
           last_name: userData.last_name || '',
-          email: userData.email || '',
+          email: '',
           profile_picture: userData.profile_picture
         };
 

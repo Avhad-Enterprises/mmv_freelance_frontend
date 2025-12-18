@@ -103,7 +103,7 @@ const ChatList: React.FC<ChatListProps> = ({
           console.error("Failed to load freelancer names for chat list", err);
         }
 
-        // 2) For any remaining ids (typically clients), try the authenticated user profile endpoint
+        // 2) For any remaining ids (typically clients), try the public user info endpoint
         const token = Cookies.get("auth_token");
         if (token) {
           await Promise.all(
@@ -112,7 +112,7 @@ const ChatList: React.FC<ChatListProps> = ({
               .map(async (id) => {
                 try {
                   const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}/profile`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}/public-info`,
                     {
                       headers: {
                         Authorization: `Bearer ${token}`,
@@ -122,14 +122,13 @@ const ChatList: React.FC<ChatListProps> = ({
                   );
                   if (!res.ok) return;
                   const data = await res.json();
-                  const u = data?.data?.user || data?.data;
+                  const u = data?.data;
                   if (!u) return;
                   const displayName =
                     u.first_name ||
                     u.company_name ||
-                    (typeof u.email === "string" && u.email.includes("@")
-                      ? u.email.split("@")[0]
-                      : "") ||
+                    u.username ||
+                    u.display_name ||
                     id;
                   nameMap[id] = displayName;
                   if (
