@@ -104,11 +104,20 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                 <Link
                   href="/register"
                   className="text-primary"
-                  data-bs-dismiss="modal"
-                  onClick={() => {
-                    if (window.location.pathname === '/register') {
-                      window.location.reload();
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // Close modal properly
+                    const modalElement = document.getElementById('loginModal');
+                    if (modalElement) {
+                      const modalInstance = (window as any).bootstrap?.Modal?.getInstance(modalElement);
+                      if (modalInstance) {
+                        modalInstance.hide();
+                      }
                     }
+                    // Wait for modal to close before navigating
+                    setTimeout(() => {
+                      window.location.href = '/register';
+                    }, 300);
                   }}
                 >
                   Sign up
