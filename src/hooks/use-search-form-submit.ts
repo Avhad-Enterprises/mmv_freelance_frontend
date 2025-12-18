@@ -34,15 +34,7 @@ const useSearchFormSubmit = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const queryParams = generateQueryParams();
-
-    if (queryParams) {
-      router.push(`/job-search?${queryParams}`);
-    } else {
-      router.push(`/`);
-      setCategoryVal("");
-      setLocationVal("");
-    }
+    router.push('/freelancers');
   };
  
 

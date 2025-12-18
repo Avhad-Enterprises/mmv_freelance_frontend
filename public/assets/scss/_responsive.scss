@@ -5,8 +5,48 @@
     Theme Name   : Jobi - Responsive Job Board HTML Template
     Version      : 1.0.
     Developed by : (me@heloshape.com) / (www.me.heloshape.com)
-   
 */
+
+/* Chat area responsive helpers */
+.chat-area-container {
+  display: flex;
+  background: #EFF6F3;
+  min-height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.chat-area-container .left-sidebar {
+  width: 100%;
+  max-width: 24rem; /* 384px */
+  background: #fff;
+  border-right: 1px solid #E5E7EB;
+  display: flex;
+  flex-direction: column;
+}
+.chat-area-container .left-sidebar .conversations-list {
+  overflow-y: auto;
+}
+.chat-area-container .right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .chat-area-container {
+    flex-direction: column;
+    min-height: 400px;
+  }
+  .chat-area-container .left-sidebar {
+    max-width: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  .chat-area-container .right-panel {
+    width: 100%;
+  }
+}
 
 @media (min-width: 992px) {
   .container {padding-right: 0;padding-left: 0;}
@@ -523,12 +563,12 @@
 }
 
 @media (min-width: 992px) and (max-width: 1199px) { 
-  .dashboard-body .dashboard-header {right:15px; left: 275px;}
+  .dashboard-body { margin-left: 275px; }
   
 }
 
 @media (min-width: 768px) and (max-width: 991px) { 
-  .dashboard-body .dashboard-header {right:15px; left: 275px;}
+  .dashboard-body { margin-left: 275px; }
 
 }
 
@@ -547,15 +587,50 @@
   .dashboard-body .membership-plan-wrapper .column.border-left {border-left: none; border-top: 1px solid #254035;}
 }
 @media (max-width: 767px) { 
-  .dash-aside-navbar {transform: translateX(-100%); opacity: 0; visibility: hidden; transition: all 0.3s ease;}
+@media (max-width: 991px) {
+  .dash-aside-navbar {transform: translateX(-100%); opacity: 0; visibility: hidden; transition: all 0.3s ease; position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 90vw; z-index: 1050;}
   .dash-aside-navbar.show {transform: translateX(0); box-shadow: 15px 0 25px rgba(35,35,35,0.09); opacity: 1; visibility: visible;}
-  .dashboard-body {margin: 0; border-radius: 0;}
-  .dashboard-body .dashboard-header {left: 0; right: 0; border-bottom: 1px solid #e5e5e5; padding: 12px 15px;}
+}
+  /* keep header fixed on mobile and above sidebar */
+  .dashboard-body {margin: 0; border-radius: 0; padding-top: 64px;}
+  .dashboard-body .dashboard-header {position: fixed; top: 0; left: 0; right: 0; border-bottom: 1px solid #e5e5e5; padding: 12px 15px; z-index: 1100; background: #fff;}
+  .dash-mobile-nav-toggler {z-index: 1101;}
   .dashboard-body .dashboard-header .search-form {width: auto; height: 40px;}
   .dashboard-body .dashboard-header .job-post-btn {width: 150px; line-height: 40px; font-size: 14px;}
   .compose-mail-offcanvas {left: 15px; width: auto;}
   .dashboard-body .candidate-profile-card.list-layout .save-btn {position: static; margin-top: 10px;}
   .dashboard-body .candidate-profile-card .action-dots {position: absolute; top:10px; right: 10px;}
+}
+
+/* Small-screens: compact header actions */
+@media (max-width: 575px) {
+  /* make Post Job button compact and prevent wrapping */
+  .dashboard-body .dashboard-header .job-post-btn {
+    width: auto;
+    max-width: 110px;
+    padding: 6px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* hide role pill if space is constrained */
+  .dashboard-body .dashboard-header .user-role {
+    display: none;
+  }
+
+  /* ensure sidebar close button is easy to tap */
+  .dash-aside-navbar .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    z-index: 1150;
+    color: #244034;
+  }
 }
 
 @media (max-width: 575px) {

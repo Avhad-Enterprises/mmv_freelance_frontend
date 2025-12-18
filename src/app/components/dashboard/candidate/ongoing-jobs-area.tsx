@@ -422,14 +422,16 @@ const OngoingJobsArea = ({}: IProps) => {
                         <div className="d-flex justify-content-lg-end align-items-center gap-2">
                           <a
                             onClick={() => setSelectedJob(job)}
-                            className="profile-btn tran3s cursor-pointer"
+                            className="profile-btn tran3s ms-md-2 cursor-pointer"
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               height: '40px',
                               padding: '0 16px',
-                              lineHeight: '40px'
+                              lineHeight: '40px',
+                              whiteSpace: 'nowrap',
+                              minWidth: 'fit-content'
                             }}
                           >
                             View Details
@@ -444,6 +446,8 @@ const OngoingJobsArea = ({}: IProps) => {
                               height: '40px',
                               padding: '0 16px',
                               lineHeight: '40px',
+                              whiteSpace: 'nowrap',
+                              minWidth: 'fit-content',
                               ...(job.submission_status === 2 && {
                                 backgroundColor: '#dc3545',
                                 borderColor: '#dc3545',

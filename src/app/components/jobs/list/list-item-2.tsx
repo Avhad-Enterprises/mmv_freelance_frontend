@@ -42,7 +42,7 @@ const ListItemTwo = ({
         </div>
         <div className="right-side">
           <div className="row gx-1 align-items-center">
-            <div className="col-xl-3">
+            <div className="col-xl-4">
               <div className="position-relative">
                 <h4 className="candidate-name mb-0">
                   <Link href={`/job-details/${item.projects_task_id}`} className="tran3s">
@@ -54,9 +54,9 @@ const ListItemTwo = ({
                   </Link>
                 </h4>
 
-                <ul className="cadidate-skills style-none d-flex align-items-center">
+                <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
                   {item.skills_required && item.skills_required.slice(0, 3).map((s, i) => (
-                    <li key={i} className="text-nowrap">{s}</li>
+                    <li key={i}>{s}</li>
                   ))}
                   {item.skills_required && item.skills_required.length > 3 && (
                     <li className="more">+{item.skills_required.length - 3}</li>
@@ -72,7 +72,7 @@ const ListItemTwo = ({
               </div>
             </div>
 
-            <div className="col-xl-3 col-md-4 col-sm-6">
+            <div className="col-xl-2 col-md-4 col-sm-6">
               <div className="candidate-info">
                 <span>Type</span>
                 <div>{item.projects_type || 'Not specified'}</div>
