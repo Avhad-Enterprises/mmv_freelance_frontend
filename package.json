@@ -60,6 +60,7 @@
     "sass": "^1.63.3",
     "slick-carousel": "^1.8.1",
     "slugify": "^1.6.6",
+    "socket.io-client": "^4.8.1",
     "sweetalert": "^2.1.2",
     "sweetalert2": "^11.25.0",
     "typescript": "5.1.3",

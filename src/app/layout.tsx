@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserProvider } from "@/context/UserContext";
 import { ConsentProvider } from "@/context/ConsentContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import CookieConsentBanner from "./components/common/cookie-consent-banner";
 
 const gordita = localFont({
@@ -70,9 +71,11 @@ export default function RootLayout({
           <ConsentProvider>
             <UserProvider>
               <SidebarProvider> {/*yaha wrap kar diya */}
-                <Toaster position="top-right" />
-                {children}
-                <CookieConsentBanner />
+                <NotificationProvider>
+                  <Toaster position="top-right" />
+                  {children}
+                  <CookieConsentBanner />
+                </NotificationProvider>
               </SidebarProvider>
             </UserProvider>
           </ConsentProvider>
