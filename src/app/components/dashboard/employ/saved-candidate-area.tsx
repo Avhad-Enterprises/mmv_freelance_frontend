@@ -435,7 +435,11 @@ const SavedCandidateArea = () => {
         
         {selectedFreelancer ? (
           // Render CandidateDetailsArea if a freelancer is selected
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
+          <CandidateDetailsArea 
+            freelancer={selectedFreelancer} 
+            loading={loadingProfile} 
+            onMessage={handleMessage}
+          />
         ) : (
           // Otherwise, render the list of saved candidates
           <>
@@ -475,7 +479,6 @@ const SavedCandidateArea = () => {
                             isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
                             onViewProfile={handleViewProfile}
-                            onMessage={handleMessage}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,
