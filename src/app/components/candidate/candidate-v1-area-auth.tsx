@@ -477,7 +477,11 @@ const CandidateV1Area = () => {
         </div>
         
         {selectedFreelancer ? (
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
+          <CandidateDetailsArea 
+            freelancer={selectedFreelancer} 
+            loading={loadingProfile}
+            onMessage={() => handleStartChat(selectedFreelancer.user_id)}
+          />
         ) : (
           <>
             <div className="bg-white card-box border-20 mb-40">
@@ -527,7 +531,6 @@ const CandidateV1Area = () => {
                             isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
                             onViewProfile={handleViewProfile}
-                        onMessage={handleStartChat}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,

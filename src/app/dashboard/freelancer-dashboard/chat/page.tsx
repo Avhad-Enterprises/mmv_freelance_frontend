@@ -1,12 +1,18 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import { useMediaQuery, useTheme } from "@mui/material";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import ChatList from "@/app/dashboard/client-dashboard/messages/ChatList";
 import EmptyChat from "@/app/dashboard/client-dashboard/messages/EmptyChat";
+import InlineThreadView from "@/app/dashboard/client-dashboard/messages/InlineThreadView";
 
 export default function FreelancerChatPage() {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
@@ -41,19 +47,27 @@ export default function FreelancerChatPage() {
                 height: "100%",
               }}
             >
-              <ChatList threadBasePath="/dashboard/freelancer-dashboard/chat/thread" />
+              <ChatList 
+                threadBasePath="/dashboard/freelancer-dashboard/chat/thread"
+                onSelectConversation={isDesktop ? (id) => setSelectedConversationId(id) : undefined}
+                selectedConversationId={isDesktop ? selectedConversationId : undefined}
+              />
             </Box>
 
-            {/* Right - Empty state (desktop only) */}
+            {/* Right - Chat or Empty state (desktop only) */}
             <Box
               sx={{
                 flex: 1,
                 display: { xs: "none", md: "block" },
-                background: "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
+                background: selectedConversationId ? "#FFFFFF" : "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
                 height: "100%",
               }}
             >
-              <EmptyChat />
+              {selectedConversationId ? (
+                <InlineThreadView conversationId={selectedConversationId} />
+              ) : (
+                <EmptyChat />
+              )}
             </Box>
           </Paper>
         </div>
