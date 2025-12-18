@@ -72,10 +72,18 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
       </div>
       <div className="col-md-8">
         <input
-          type={type}
+          type={field === 'website' ? 'url' : type}
           className="form-control"
           value={(editedData[field] as string | number) || ''}
           onChange={(e) => handleInputChange(field, e.target.value)}
+          pattern={field === 'phone_number' ? '[0-9]{10}' : field === 'website' ? 'https?://.+' : undefined}
+          title={
+            field === 'phone_number'
+              ? 'Please enter a 10-digit phone number'
+              : field === 'website'
+                ? 'Please enter a valid URL (e.g., https://example.com)'
+                : undefined
+          }
           required={required}
         />
       </div>
@@ -134,7 +142,7 @@ const floatingButtonStyle = `
   }
 `;
 
-const DashboardProfileArea = ({}: IProps) => {
+const DashboardProfileArea = ({ }: IProps) => {
   const { setIsOpenSidebar } = useSidebar();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [tempChanges, setTempChanges] = useState<{ [section: string]: Partial<ProfileData> }>({});
@@ -215,16 +223,16 @@ const DashboardProfileArea = ({}: IProps) => {
       // Use the new CLIENT profile endpoint
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
         method: 'GET',
-        headers: { 
-          'Authorization': `Bearer ${authCookies.getToken()}`, 
-          'Content-Type': 'application/json' 
+        headers: {
+          'Authorization': `Bearer ${authCookies.getToken()}`,
+          'Content-Type': 'application/json'
         }
       });
-      
+
       if (!res.ok) throw new Error('Failed to fetch profile');
-      
+
       const response = await res.json();
-      
+
       if (response.success && response.data) {
         const { user, profile, userType: type } = response.data;
         setUserType(type);
@@ -248,7 +256,7 @@ const DashboardProfileArea = ({}: IProps) => {
           industry: profile?.industry,
           company_size: profile?.company_size,
           social_links: safeArray<string>(profile?.social_links),
-          
+
           // Work Preferences
           work_arrangement: profile?.work_arrangement,
           project_frequency: profile?.project_frequency,
@@ -264,7 +272,7 @@ const DashboardProfileArea = ({}: IProps) => {
           tax_id: profile?.tax_id,
           business_documents: safeArray<string>(profile?.business_documents),
         };
-        
+
         setProfileData(data);
         setEditedData(JSON.parse(JSON.stringify(data)));
 
@@ -362,6 +370,36 @@ const DashboardProfileArea = ({}: IProps) => {
       return;
     }
 
+    // Validate email if changed
+    if (editedData.email !== profileData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(editedData.email)) {
+        toast.error('Please enter a valid email address');
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Validate phone number if changed
+    if (editedData.phone_number !== profileData.phone_number) {
+      const numericPhone = editedData.phone_number.replace(/\D/g, '');
+      if (numericPhone.length !== 10) {
+        toast.error('Phone number must be exactly 10 digits');
+        setSaving(false);
+        return;
+      }
+    }
+
+    // Validate website URL if it's been changed and is not empty
+    if (editedData.website !== profileData.website && editedData.website) {
+      const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)$/;
+      if (!urlRegex.test(editedData.website)) {
+        toast.error('Please enter a valid website URL (e.g., https://example.com)');
+        setSaving(false);
+        return;
+      }
+    }
+
     setTempChanges(prev => ({
       ...prev,
       [section]: changes
@@ -381,7 +419,7 @@ const DashboardProfileArea = ({}: IProps) => {
         ...acc,
         ...sectionChanges
       }), {});
-      
+
       if (Object.keys(allChanges).length === 0) {
         toast.error("No changes to save.");
         setSaving(false);
@@ -409,9 +447,9 @@ const DashboardProfileArea = ({}: IProps) => {
       if (userType === 'CLIENT' && Object.keys(unifiedPayload).length > 0) {
         const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/clients/profile`, {
           method: 'PATCH',
-          headers: { 
-            'Authorization': `Bearer ${authCookies.getToken()}`, 
-            'Content-Type': 'application/json' 
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(unifiedPayload)
         });
@@ -441,11 +479,11 @@ const DashboardProfileArea = ({}: IProps) => {
       <div className="dashboard-body">
         <div className="position-relative">
           <DashboardHeader />
-          
+
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="main-title">My Profile</h2>
           </div>
-          
+
           {Object.keys(tempChanges).length > 0 && (
             <div style={{
               position: 'fixed',
@@ -507,16 +545,16 @@ const DashboardProfileArea = ({}: IProps) => {
                 <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("companyInfo")} editedData={editedData} handleInputChange={handleInputChange} type="url" />
 
                 {(profileData.bio || isEditModeFor("companyInfo")) && (
-                    <div className="row mb-3">
-                        <div className="col-md-4"><strong>Company Description:</strong></div>
-                        <div className="col-md-8">
-                        {isEditModeFor("companyInfo") ? (
-                            <textarea className="form-control" rows={4} value={editedData.bio || ''}
-                            onChange={(e) => handleInputChange('bio', e.target.value)}
-                            />
-                        ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
-                        </div>
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Company Description:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("companyInfo") ? (
+                        <textarea className="form-control" rows={4} value={editedData.bio || ''}
+                          onChange={(e) => handleInputChange('bio', e.target.value)}
+                        />
+                      ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
                     </div>
+                  </div>
                 )}
 
                 {(profileData.company_size || isEditModeFor("companyInfo")) && (

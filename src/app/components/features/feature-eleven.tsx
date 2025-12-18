@@ -77,7 +77,17 @@ const FeatureEleven = () => {
                 </div>
               </div>
 
-              <div className="video-post d-flex align-items-center justify-content-center mt-100 lg-mt-50 mb-50 lg-mb-30">
+              <div
+                className="video-post d-flex align-items-center justify-content-center mt-100 lg-mt-50 mb-50 lg-mb-30"
+                style={{
+                  backgroundImage: 'url(https://img.youtube.com/vi/XCHLXb1ycKE/maxresdefault.jpg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  borderRadius: '12px',
+                  minHeight: '400px',
+                  position: 'relative'
+                }}
+              >
                 <a onClick={() => setIsVideoOpen(true)} className="fancybox rounded-circle video-icon tran3s text-center cursor-pointer">
                   <i className="bi bi-play"></i>
                 </a>
@@ -94,7 +104,7 @@ const FeatureEleven = () => {
         </div>
       </section>
       {/* video modal start */}
-      <VideoPopup isVideoOpen={isVideoOpen} setIsVideoOpen={setIsVideoOpen} videoId={'-6ZbrfSRWKc'} />
+      <VideoPopup isVideoOpen={isVideoOpen} setIsVideoOpen={setIsVideoOpen} videoId={'XCHLXb1ycKE'} />
       {/* video modal end */}
     </>
   );

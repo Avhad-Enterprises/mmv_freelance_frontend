@@ -177,7 +177,7 @@ const OngoingJobArea: FC = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`,
         {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
@@ -223,17 +223,17 @@ const OngoingJobArea: FC = () => {
     try {
       const applicationsResponse = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
       const rawApplicants = applicationsResponse.data?.data || [];
-      
+
       const freelancersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
       if (!freelancersResponse.ok) throw new Error(`Failed to fetch freelancer data`);
       const freelancersData = await freelancersResponse.json();
       const freelancers = freelancersData.data || [];
-      
+
       const freelancerMap = new Map();
       freelancers.forEach((freelancer: any) => {
         freelancerMap.set(freelancer.user_id, freelancer);
       });
-      
+
       const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
         const freelancer = freelancerMap.get(app.user_id);
         return {
@@ -249,7 +249,7 @@ const OngoingJobArea: FC = () => {
           applied_date: app.created_at,
         };
       });
-      
+
       setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
@@ -364,9 +364,9 @@ const OngoingJobArea: FC = () => {
         status: newStatus,
       });
 
-      setApplicants(prev => prev.map(app => 
-        app.applied_projects_id === applicationId 
-          ? { ...app, status: newStatus } 
+      setApplicants(prev => prev.map(app =>
+        app.applied_projects_id === applicationId
+          ? { ...app, status: newStatus }
           : app
       ));
 
@@ -401,7 +401,7 @@ const OngoingJobArea: FC = () => {
   // Approve/Reject Submission
   const handleReviewSubmission = async (submissionId: number, status: 1 | 2) => {
     setReviewingSubmission(true);
-    
+
     try {
       const token = authCookies.getToken();
       if (!token) throw new Error('Authentication required');
@@ -591,13 +591,13 @@ const OngoingJobArea: FC = () => {
           <DashboardHeader />
           <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
             <h2 className="main-title m0">
-              {selectedApplicant 
-                ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` 
+              {selectedApplicant
+                ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}`
                 : selectedProjectForSubmissions
-                ? `Submissions for: ${selectedProjectForSubmissions.title}`
-                : selectedProjectForApplicants 
-                ? `Applications for: ${selectedProjectForApplicants.title}` 
-                : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
+                  ? `Submissions for: ${selectedProjectForSubmissions.title}`
+                  : selectedProjectForApplicants
+                    ? `Applications for: ${selectedProjectForApplicants.title}`
+                    : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
             </h2>
             {selectedApplicant && (
               <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
@@ -651,8 +651,8 @@ const OngoingJobArea: FC = () => {
                           <tr key={submission.submission_id} className="align-middle">
                             <td>
                               <div className="d-flex align-items-center">
-                                <img 
-                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
+                                <img
+                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'}
                                   alt={submission.freelancer_name}
                                   className="rounded-circle me-3"
                                   style={{ width: 50, height: 50, objectFit: 'cover' }}
@@ -663,9 +663,9 @@ const OngoingJobArea: FC = () => {
                                 </div>
                               </div>
                             </td>
-                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'short', 
+                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
                               day: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit'
@@ -824,8 +824,8 @@ const OngoingJobArea: FC = () => {
               <div className="modal-body">
                 {/* Freelancer Info */}
                 <div className="d-flex align-items-center mb-4 pb-3 border-bottom">
-                  <img 
-                    src={selectedSubmission.freelancer_profile_picture || 'https://via.placeholder.com/80'} 
+                  <img
+                    src={selectedSubmission.freelancer_profile_picture || 'https://via.placeholder.com/80'}
                     alt={selectedSubmission.freelancer_name}
                     className="rounded-circle me-3"
                     style={{ width: 60, height: 60, objectFit: 'cover' }}
@@ -842,9 +842,9 @@ const OngoingJobArea: FC = () => {
                   <div className="bg-light p-3 rounded">
                     {selectedSubmission.submitted_files.split(',').map((link, index) => (
                       <div key={index} className="mb-2">
-                        <a 
-                          href={link.trim()} 
-                          target="_blank" 
+                        <a
+                          href={link.trim()}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-decoration-none d-flex align-items-center"
                         >
@@ -871,9 +871,9 @@ const OngoingJobArea: FC = () => {
                   <div className="row">
                     <div className="col-md-6">
                       <label className="form-label fw-semibold">Submitted On</label>
-                      <p>{new Date(selectedSubmission.created_at).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
+                      <p>{new Date(selectedSubmission.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
@@ -893,7 +893,7 @@ const OngoingJobArea: FC = () => {
                 {/* Alert for pending submissions */}
                 {selectedSubmission.status === 0 && (
                   <div className="alert alert-info" role="alert">
-                    <strong>Action Required:</strong> Please review the submitted work and either approve or reject it. 
+                    <strong>Action Required:</strong> Please review the submitted work and either approve or reject it.
                     Approving will automatically assign this freelancer to the project.
                   </div>
                 )}
@@ -911,7 +911,7 @@ const OngoingJobArea: FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="modal-footer">
                 <button
                   type="button"
@@ -921,7 +921,7 @@ const OngoingJobArea: FC = () => {
                 >
                   Close
                 </button>
-                
+
                 {selectedSubmission.status === 0 && (
                   <>
                     <button

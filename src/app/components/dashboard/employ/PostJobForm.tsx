@@ -54,7 +54,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   const [referenceLinks, setReferenceLinks] = useState<string[]>(['']);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
-  
+
   // Bidding modal states
   const [showBiddingModal, setShowBiddingModal] = useState(false);
   const [biddingEnabled, setBiddingEnabled] = useState(false);
@@ -113,6 +113,9 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       created_by: currentUser.userId,
       is_active: 1,
       bidding_enabled: biddingEnabled, // Add bidding status to payload
+      // Ensure numeric fields are sent as numbers, not strings
+      budget: Number(pendingFormData.budget),
+      video_length: Number(pendingFormData.video_length),
     };
 
     try {
@@ -401,10 +404,10 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                     </div>
                   </div>
                   <div className="form-check form-switch">
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      role="switch" 
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      role="switch"
                       id="biddingToggle"
                       checked={biddingEnabled}
                       onChange={(e) => setBiddingEnabled(e.target.checked)}

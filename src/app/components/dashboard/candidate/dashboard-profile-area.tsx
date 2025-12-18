@@ -67,13 +67,14 @@ type ProfileData = {
 };
 
 // Component is defined outside to prevent re-creation on render
-const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange }: {
+const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange, type = 'text' }: {
   label: string;
   value?: string | number;
   field?: keyof ProfileData;
   editMode: boolean;
   editedData?: ProfileData | null;
   handleInputChange?: (field: keyof ProfileData, value: any) => void;
+  type?: string;
 }) => {
   if (!editMode) {
     if (!value) return null;
@@ -99,12 +100,18 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange 
       </div>
       <div className="col-md-8">
         <input
-          type={field === 'email' ? 'email' : field === 'phone_number' ? 'tel' : 'text'}
+          type={field === 'email' ? 'email' : field === 'phone_number' ? 'tel' : field === 'website' ? 'url' : type}
           className="form-control"
           value={(editedData[field] as string | number) || ''}
           onChange={(e) => handleInputChange(field, e.target.value)}
-          pattern={field === 'phone_number' ? '[0-9]{10}' : undefined}
-          title={field === 'phone_number' ? 'Please enter a 10-digit phone number' : undefined}
+          pattern={field === 'phone_number' ? '[0-9]{10}' : field === 'website' ? 'https?://.+' : undefined}
+          title={
+            field === 'phone_number'
+              ? 'Please enter a 10-digit phone number'
+              : field === 'website'
+                ? 'Please enter a valid URL (e.g., https://example.com)'
+                : undefined
+          }
           required={field === 'email' || field === 'phone_number'}
         />
       </div>
@@ -503,6 +510,16 @@ const DashboardProfileArea = ({ }: IProps) => {
       }
     }
 
+    // Validate website URL if it's been changed and is not empty
+    if (editedData.website !== profileData.website && editedData.website) {
+      const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)$/;
+      if (!urlRegex.test(editedData.website)) {
+        toast.error('Please enter a valid website URL (e.g., https://example.com)');
+        setSaving(false);
+        return;
+      }
+    }
+
     const changes = getChangedFields(profileData, editedData);
 
     if (Object.keys(changes).length === 0) {
@@ -643,7 +660,6 @@ const DashboardProfileArea = ({ }: IProps) => {
                 </div>
               )} */}
 
-                <InfoRow label="Username" value={displayData.username} field="username" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="First Name" value={displayData.first_name} field="first_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Last Name" value={displayData.last_name} field="last_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
