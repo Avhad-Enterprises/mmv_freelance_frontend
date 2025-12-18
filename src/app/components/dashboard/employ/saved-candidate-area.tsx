@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 // import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori"; // Removed as filters are not needed for "saved only"
@@ -9,6 +10,10 @@ import Pagination from "@/ui/pagination";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar"; // Import CandidateDetailsArea
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page"; // Import IFreelancer interface
 import { authCookies } from "@/utils/cookies";
+import { useUser } from "@/context/UserContext";
+import { db, auth } from '@/lib/firebase';
+import { ref, get, set } from 'firebase/database';
+import { signInWithCustomToken } from 'firebase/auth';
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -69,6 +74,9 @@ interface ApiCandidate {
 
 
 const SavedCandidateArea = () => {
+  const router = useRouter();
+  const { userData } = useUser();
+  
   // State variables for data and UI control
   const [allCandidates, setAllCandidates] = useState<ApiCandidate[]>([]); // Renamed to allCandidates
   const [displayedCandidates, setDisplayedCandidates] = useState<ApiCandidate[]>([]); // Holds only saved candidates
@@ -184,12 +192,14 @@ const SavedCandidateArea = () => {
         if (!response.ok) throw new Error('Failed to fetch favorites');
 
         const result = await response.json();
+        console.log('💾 Favorites API response:', result);
         if (result.data && Array.isArray(result.data)) {
           const savedIds = result.data.map((fav: any) => fav.freelancer_id);
           const favIds = result.data.reduce((acc: any, fav: any) => {
             acc[fav.freelancer_id] = fav.id;
             return acc;
           }, {});
+          console.log('💾 Saved candidate IDs:', savedIds);
           setSavedCandidates(savedIds);
           setFavoriteIds(favIds);
         }
@@ -206,12 +216,22 @@ const SavedCandidateArea = () => {
   
   // Effect to filter candidates based on saved status
   useEffect(() => {
-    if (allCandidates.length > 0 || savedCandidates.length > 0) {
+    console.log('🔍 Filtering candidates:', { 
+      allCandidatesCount: allCandidates.length, 
+      savedCandidatesCount: savedCandidates.length,
+      savedCandidateIds: savedCandidates 
+    });
+    
+    if (allCandidates.length > 0 && savedCandidates.length > 0) {
       const savedOnlyCandidates = allCandidates.filter(candidate => 
         savedCandidates.includes(candidate.user_id)
       );
+      console.log('✅ Filtered saved candidates:', savedOnlyCandidates.length, savedOnlyCandidates);
       setDisplayedCandidates(savedOnlyCandidates);
       setCurrentPage(1); // Reset pagination when candidates are filtered
+    } else if (savedCandidates.length === 0) {
+      console.log('❌ No saved candidates');
+      setDisplayedCandidates([]);
     }
   }, [allCandidates, savedCandidates]); // Rerun when allCandidates or savedCandidates change
 
@@ -294,11 +314,109 @@ const SavedCandidateArea = () => {
     setLoadingProfile(false);
   };
 
+  // --- Handler for messaging a candidate ---
+  const handleMessage = async (candidateId: number) => {
+    if (!userData) {
+      toast.error('Please sign in to message freelancers');
+      return;
+    }
+
+    try {
+      // Ensure Firebase authentication
+      if (!auth.currentUser) {
+        console.log('Authenticating with Firebase...');
+        const authToken = authCookies.getToken();
+        if (!authToken) {
+          toast.error('Authentication required. Please sign in again.');
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get Firebase authentication token');
+        }
+
+        const { data } = await response.json();
+        await signInWithCustomToken(auth, data.customToken);
+        console.log('Firebase authentication successful');
+      }
+
+      // Create or get conversation
+      const currentUserId = String(userData.user_id);
+      const otherId = String(candidateId);
+      const participants = [currentUserId, otherId].sort();
+      const conversationId = participants.join('_');
+
+      const convRef = ref(db, `conversations/${conversationId}`);
+      const convSnap = await get(convRef);
+
+      if (!convSnap.exists()) {
+        console.log('Creating new conversation...');
+
+        // Build participant details
+        const participantDetails: any = {};
+        participantDetails[currentUserId] = { 
+          firstName: userData.first_name || '', 
+          email: userData.email || '',
+          profilePicture: userData.profile_picture || null
+        };
+        
+        const candidate = allCandidates.find(c => c.user_id === candidateId);
+        if (candidate) {
+          participantDetails[otherId] = { 
+            firstName: candidate.first_name || candidate.username || '', 
+            email: `${candidate.username || 'unknown'}@example.com`,
+            profilePicture: candidate.profile_picture || null
+          };
+        }
+
+        await set(convRef, {
+          participants,
+          participantRoles: {
+            [currentUserId]: 'client',
+            [otherId]: 'freelancer',
+          },
+          participantDetails,
+          lastMessage: '',
+          lastSenderId: '',
+          updatedAt: Date.now(),
+          createdAt: Date.now(),
+        });
+        console.log('Conversation created successfully');
+        toast.success('Chat started! Redirecting...');
+      } else {
+        console.log('Opening existing conversation');
+        toast.success('Opening chat...');
+      }
+
+      // Navigate to chat
+      router.push(`/dashboard/client-dashboard/messages/thread/${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to start chat:', err);
+      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
+    }
+  };
+
   // --- Derived State for Rendering ---
   const indexOfLast = currentPage * ITEMS_PER_PAGE;
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
   const currentDisplayCandidates = displayedCandidates.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(displayedCandidates.length / ITEMS_PER_PAGE);
+  
+  console.log('📊 Rendering state:', {
+    loading,
+    loadingFavorites,
+    displayedCandidatesCount: displayedCandidates.length,
+    currentDisplayCandidatesCount: currentDisplayCandidates.length,
+    currentPage,
+    totalPages
+  });
 
   return (
     <div className="dashboard-body">
@@ -332,20 +450,44 @@ const SavedCandidateArea = () => {
                     {/* Removed sorting NiceSelect */}
                 </div>
 
-                <div className="accordion-box list-style show">
-                    {(loading || loadingFavorites) && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
-                    {error && <p className="text-danger text-center p-5">{error}</p>}
-                    
-                    {!loading && !loadingFavorites && currentDisplayCandidates.length === 0 && (
-                        <div className="text-center p-5"><h4>No saved candidates found</h4><p>You haven't added any candidates to your favorites yet.</p></div>
-                    )}
+                {/* Debug Info */}
+                <div className="bg-light p-3 mb-3 border rounded">
+                  <small>
+                    <strong>Debug:</strong> Loading: {loading ? 'Yes' : 'No'} | 
+                    LoadingFavorites: {loadingFavorites ? 'Yes' : 'No'} | 
+                    AllCandidates: {allCandidates.length} | 
+                    SavedIDs: {savedCandidates.length} | 
+                    DisplayedCandidates: {displayedCandidates.length} | 
+                    CurrentDisplay: {currentDisplayCandidates.length}
+                  </small>
+                </div>
 
-                    {!loading && !loadingFavorites && currentDisplayCandidates.map((apiCandidate) => (
+                {(loading || loadingFavorites) && (
+                  <div className="text-center p-5">
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                )}
+
+                {error && <p className="text-danger text-center p-5">{error}</p>}
+                
+                {!loading && !loadingFavorites && currentDisplayCandidates.length === 0 && (
+                    <div className="text-center p-5">
+                      <h4>No saved candidates found</h4>
+                      <p>You haven't added any candidates to your favorites yet.</p>
+                    </div>
+                )}
+
+                {!loading && !loadingFavorites && currentDisplayCandidates.length > 0 && (
+                  <div className="accordion-box list-style show">
+                    {currentDisplayCandidates.map((apiCandidate) => (
                         <CandidateListItem
                             key={apiCandidate.user_id}
-                            isSaved={savedCandidates.includes(apiCandidate.user_id)} // Will always be true here
+                            isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
                             onViewProfile={handleViewProfile}
+                            onMessage={handleMessage}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,
@@ -362,7 +504,8 @@ const SavedCandidateArea = () => {
                             }}
                         />
                     ))}
-                </div>
+                  </div>
+                )}
 
                 {totalPages > 1 && (
                     <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">

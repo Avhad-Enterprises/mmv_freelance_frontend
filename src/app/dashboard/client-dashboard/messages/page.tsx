@@ -1,12 +1,29 @@
 "use client";
 import React from "react";
+import { useUser } from "@/context/UserContext";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
+import ChatList from "./ChatList";
+import EmptyChat from "./EmptyChat";
+import Typography from "@mui/material/Typography";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
-import ChatList from "@/app/dashboard/client-dashboard/messages/ChatList";
-import EmptyChat from "@/app/dashboard/client-dashboard/messages/EmptyChat";
 
-export default function FreelancerChatPage() {
+export default function ClientMessagesPage() {
+  const { userData, isLoading } = useUser();
+
+  if (isLoading) return (
+    <div className="dashboard-body">
+      <div className="position-relative">
+        <DashboardHeader />
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 400 }}>
+          <div className="spinner-border text-success" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="dashboard-body">
       <div className="position-relative">
@@ -41,7 +58,7 @@ export default function FreelancerChatPage() {
                 height: "100%",
               }}
             >
-              <ChatList threadBasePath="/dashboard/freelancer-dashboard/chat/thread" />
+              <ChatList />
             </Box>
 
             {/* Right - Empty state (desktop only) */}
