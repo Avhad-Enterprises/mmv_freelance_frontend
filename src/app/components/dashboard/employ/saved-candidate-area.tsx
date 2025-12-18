@@ -450,18 +450,6 @@ const SavedCandidateArea = () => {
                     {/* Removed sorting NiceSelect */}
                 </div>
 
-                {/* Debug Info */}
-                <div className="bg-light p-3 mb-3 border rounded">
-                  <small>
-                    <strong>Debug:</strong> Loading: {loading ? 'Yes' : 'No'} | 
-                    LoadingFavorites: {loadingFavorites ? 'Yes' : 'No'} | 
-                    AllCandidates: {allCandidates.length} | 
-                    SavedIDs: {savedCandidates.length} | 
-                    DisplayedCandidates: {displayedCandidates.length} | 
-                    CurrentDisplay: {currentDisplayCandidates.length}
-                  </small>
-                </div>
-
                 {(loading || loadingFavorites) && (
                   <div className="text-center p-5">
                     <div className="spinner-border" role="status">

@@ -13,6 +13,35 @@ import { useEffect, useState } from 'react';
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import Box from "@mui/material/Box";
 import Cookies from 'js-cookie';
+import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
+import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
+import toast from 'react-hot-toast';
+
+// Helper function to map API candidate data to IFreelancer interface
+const mapApiCandidateToIFreelancer = (apiCandidate: any): IFreelancer => {
+  return {
+    user_id: apiCandidate.user_id,
+    first_name: apiCandidate.first_name || '',
+    last_name: apiCandidate.last_name || '',
+    username: apiCandidate.username || '',
+    email: apiCandidate.email || apiCandidate.username || '',
+    profile_picture: apiCandidate.profile_picture || null,
+    bio: apiCandidate.bio || null,
+    city: apiCandidate.city || null,
+    country: apiCandidate.country || null,
+    latitude: apiCandidate.latitude || null,
+    longitude: apiCandidate.longitude || null,
+    skills: apiCandidate.skills || [],
+    superpowers: apiCandidate.superpowers || [],
+    languages: apiCandidate.languages || [],
+    portfolio_links: apiCandidate.portfolio_links || [],
+    rate_amount: apiCandidate.rate_amount || '0.00',
+    currency: apiCandidate.currency || 'USD',
+    availability: apiCandidate.availability || 'not specified',
+    experience_level: apiCandidate.experience_level || 'not specified',
+    role_name: apiCandidate.role_name || null,
+  };
+};
 
 export default function ThreadPage() {
   const params = useParams() as { id?: string };
@@ -25,6 +54,8 @@ export default function ThreadPage() {
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
+  const [selectedFreelancer, setSelectedFreelancer] = useState<IFreelancer | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   // Firebase Authentication Effect
   useEffect(() => {
@@ -198,6 +229,42 @@ export default function ThreadPage() {
     return () => clearTimeout(timer);
   }, [conversationId, firebaseAuthenticated, userData, messages]);
 
+  // Handler for viewing freelancer profile
+  const handleViewProfile = async (user: { id?: string; firstName?: string; email?: string }) => {
+    if (!user.id) {
+      toast.error("Unable to load profile: User ID not found.");
+      return;
+    }
+
+    setLoadingProfile(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
+        { cache: 'no-cache' }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        const freelancer = (data.data || []).find(
+          (f: any) => String(f.user_id) === String(user.id)
+        );
+        
+        if (freelancer) {
+          setSelectedFreelancer(mapApiCandidateToIFreelancer(freelancer));
+        } else {
+          toast.error("Freelancer profile not found.");
+        }
+      } else {
+        toast.error("Failed to load freelancer profile.");
+      }
+    } catch (error) {
+      console.error("Error fetching freelancer profile:", error);
+      toast.error("An error occurred while loading the profile.");
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
   // Real-time listener for typing status
   useEffect(() => {
     if (!conversationId || !conversation || !userData || !firebaseAuthenticated) {
@@ -236,8 +303,20 @@ export default function ThreadPage() {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader />
-        <h2 className="main-title">Messages</h2>
+        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+          <h2 className="main-title m0">
+            {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "Messages"}
+          </h2>
+          {selectedFreelancer && (
+            <button className="dash-btn-two tran3s" onClick={() => setSelectedFreelancer(null)}>
+              ← Back to Messages
+            </button>
+          )}
+        </div>
 
+        {selectedFreelancer ? (
+          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
+        ) : (
         <div className="bg-white border-30" style={{ overflow: "hidden" }}>
             <Box
               sx={{
@@ -257,7 +336,7 @@ export default function ThreadPage() {
               <ChatHeader
                 currentUserId={String(userData.user_id)}
                 conversation={conversation}
-                onViewProfile={(user) => { setProfileModalUser(user); setShowProfileModal(true); }}
+                onViewProfile={handleViewProfile}
               />
 
               {/* Only the chat messages area scrolls; header & input stay fixed */}
@@ -312,15 +391,8 @@ export default function ThreadPage() {
               </div>
             </Box>
         </div>
+        )}
       </div>
-
-      {profileModalUser && (
-        <ProfileDetailsModal
-          open={showProfileModal}
-          userData={profileModalUser}
-          onClose={() => { setShowProfileModal(false); setProfileModalUser(null); }}
-        />
-      )}
     </div>
   );
 }
