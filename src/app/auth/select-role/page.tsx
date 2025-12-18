@@ -123,11 +123,10 @@ const RoleCard = ({ icon, title, description, onClick, selected, disabled }: Rol
 // Step One: Choose Intent
 interface StepOneProps {
     onSelect: (intent: UserIntent) => void;
-    onSkip: () => void;
     isSubmitting: boolean;
 }
 
-const StepOne = ({ onSelect, onSkip, isSubmitting }: StepOneProps) => (
+const StepOne = ({ onSelect, isSubmitting }: StepOneProps) => (
     <div className="step-container">
         <div className="step-header">
             <div className="step-indicator">
@@ -157,10 +156,6 @@ const StepOne = ({ onSelect, onSkip, isSubmitting }: StepOneProps) => (
                 disabled={isSubmitting}
             />
         </div>
-
-        <button onClick={onSkip} disabled={isSubmitting} className="skip-button" type="button">
-            {isSubmitting ? 'Processing...' : 'Skip for now — decide later'}
-        </button>
 
         <style jsx>{`
             .step-container {
@@ -239,27 +234,6 @@ const StepOne = ({ onSelect, onSkip, isSubmitting }: StepOneProps) => (
                 }
             }
             
-            .skip-button {
-                display: block;
-                width: 100%;
-                padding: 12px;
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                color: #9ca3af;
-                font-size: 14px;
-                transition: color 0.2s;
-            }
-            
-            .skip-button:hover:not(:disabled) {
-                color: #6b7280;
-                text-decoration: underline;
-            }
-            
-            .skip-button:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
         `}</style>
     </div>
 );
@@ -554,11 +528,6 @@ const SelectRoleContent = () => {
         }
     };
 
-    const handleSkip = async () => {
-        // Default to CLIENT if skipped
-        await submitRoleSelection('CLIENT');
-    };
-
     return (
         <div className="role-selection-page">
             <div className="page-content">
@@ -581,7 +550,6 @@ const SelectRoleContent = () => {
                 {step === 1 && (
                     <StepOne
                         onSelect={handleIntentSelect}
-                        onSkip={handleSkip}
                         isSubmitting={isSubmitting}
                     />
                 )}

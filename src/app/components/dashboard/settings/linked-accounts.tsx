@@ -54,7 +54,7 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [unlinkingProvider, setUnlinkingProvider] = useState<OAuthProvider | null>(null);
 
-    // Fetch linked providers on mount
+    // Fetch linked providers on mount and focus
     useEffect(() => {
         const fetchLinked = async () => {
             try {
@@ -71,6 +71,11 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
         };
 
         fetchLinked();
+
+        // Refetch on window focus (to update after OAuth popup/redirect flow)
+        const onFocus = () => fetchLinked();
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
     }, []);
 
     /**

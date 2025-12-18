@@ -12,6 +12,7 @@ interface UserData {
   profile_picture?: string | null;
   is_oauth_user?: boolean;       // Indicates user registered via OAuth
   linked_providers?: string[];    // OAuth providers linked to account ('google', 'facebook', etc.)
+  has_password?: boolean;         // Indicates if user has set a password
 }
 
 interface UserContextType {
@@ -110,7 +111,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           last_name: user?.last_name || '',
           email: user?.email || '',
           profile_picture: user?.profile_picture || null,
-          account_type: userType || user?.account_type || 'user'
+          account_type: userType || user?.account_type || 'user',
+          has_password: response.data.has_password
         };
 
         setUserData(data);
