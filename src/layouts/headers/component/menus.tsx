@@ -20,8 +20,8 @@ const Menus = () => {
                 {menu.title}
               </a>
               <ul className="dropdown-menu">
-                {menu.sub_menus.map((sub, i) => (
-                  <li key={i}>
+                {menu.sub_menus.map((sub) => (
+                  <li key={`${menu.id}-${sub.link}`}>
                     <Link href={sub.link} className="dropdown-item">
                       <span>{sub.title}</span>
                     </Link>

@@ -3,15 +3,22 @@ import { Metadata } from "next";
 import Head from "next/head";
 import localFont from 'next/font/local';
 import Script from 'next/script';
+import dynamic from 'next/dynamic';
 import { EB_Garamond } from "next/font/google";
-import BackToTopCom from "./components/common/back-to-top-com";
 import { Providers } from "@/redux/provider";
 import { Toaster } from "react-hot-toast";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserProvider } from "@/context/UserContext";
 import { ConsentProvider } from "@/context/ConsentContext";
 import { NotificationProvider } from "@/context/NotificationContext";
-import CookieConsentBanner from "./components/common/cookie-consent-banner";
+
+// Dynamic imports for components not needed on initial load
+const BackToTopCom = dynamic(() => import("./components/common/back-to-top-com"), {
+  ssr: false
+});
+const CookieConsentBanner = dynamic(() => import("./components/common/cookie-consent-banner"), {
+  ssr: false
+});
 
 const gordita = localFont({
   src: [

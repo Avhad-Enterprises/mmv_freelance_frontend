@@ -84,6 +84,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      // Set user data from token immediately (non-blocking)
+      const tokenUserData: UserData = {
+        user_id: decodedPayload.user_id || decodedPayload.sub,
+        first_name: decodedPayload.first_name || decodedPayload.name?.split(' ')[0] || '',
+        last_name: decodedPayload.last_name || decodedPayload.name?.split(' ').slice(1).join(' ') || '',
+        email: decodedPayload.email || '',
+        profile_picture: decodedPayload.profile_picture || null,
+        account_type: decodedPayload.account_type || 'user',
+        permissions: permissionsArray
+      };
+      
+      setUserData(tokenUserData);
+      const displayRoles = normalizeRoles(rolesArray);
+      setUserRoles(displayRoles);
+      setUserPermissions(permissionsArray);
+      setCurrentRole(displayRoles[0] || 'User');
+      setIsLoading(false);
+
+      // Fetch fresh data in background (non-blocking)
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
         method: 'GET',
         headers: {
@@ -94,24 +113,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!res.ok) {
-        // If API is not available, fall back to token-based user info
-        const data: UserData = {
-          user_id: decodedPayload.user_id || decodedPayload.sub,
-          first_name: decodedPayload.first_name || decodedPayload.name?.split(' ')[0] || '',
-          last_name: decodedPayload.last_name || decodedPayload.name?.split(' ').slice(1).join(' ') || '',
-          email: decodedPayload.email || '',
-          profile_picture: decodedPayload.profile_picture || null,
-          account_type: decodedPayload.account_type || 'user',
-          permissions: permissionsArray
-        };
-
-        setUserData(data);
-
-        const displayRoles = normalizeRoles(rolesArray);
-        setUserRoles(displayRoles);
-        setUserPermissions(permissionsArray);
-        setCurrentRole(displayRoles[0] || 'User');
-        setIsLoading(false);
+        // Keep using token data
         return;
       }
 
@@ -128,17 +130,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           profile_picture: user?.profile_picture || null,
           account_type: userType || user?.account_type || 'user',
           has_password: response.data.has_password,
-          permissions: permissionsArray // Still from token as API might not return it
+          permissions: permissionsArray
         };
 
         setUserData(data);
-
-        const displayRoles = normalizeRoles(rolesArray);
-        setUserRoles(displayRoles);
-        setUserPermissions(permissionsArray);
-        setCurrentRole(displayRoles[0] || 'User');
-      } else {
-        throw new Error('Invalid API response structure');
       }
     } catch (error) {
       // If API fails and we have a token, try to use token data as fallback

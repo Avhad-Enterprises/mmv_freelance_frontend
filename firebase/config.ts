@@ -17,16 +17,11 @@ if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.proj
     throw new Error('Missing required Firebase configuration. Check your environment variables.');
 }
 
-console.log("Reading Firebase Config:", firebaseConfig);
-
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getDatabase(app);
 const auth = getAuth(app);
 const appId = firebaseConfig.appId || 'default-app-id';
-
-// Enable offline persistence for Realtime Database (enabled by default)
-console.log('✅ Firebase Realtime Database initialized with offline persistence');
 
 export { db, auth, appId };
 

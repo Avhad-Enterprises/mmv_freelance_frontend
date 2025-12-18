@@ -1,12 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import Wrapper from '@/layouts/wrapper';
 import Header from '@/layouts/headers/header';
-import JobDetailsV1Area from '@/app/components/job-details/job-details-v1-area';
-import JobPortalIntro from '@/app/components/job-portal-intro/job-portal-intro';
-import RelatedJobs from '@/app/components/jobs/related-jobs';
 import FooterOne from '@/layouts/footers/footer-one';
+
+// Dynamic imports for better code splitting
+const JobDetailsV1Area = dynamic(() => import('@/app/components/job-details/job-details-v1-area'), {
+  loading: () => <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading job details...</div>
+});
+const JobPortalIntro = dynamic(() => import('@/app/components/job-portal-intro/job-portal-intro'), {
+  loading: () => <div style={{ height: '100px' }} />
+});
+const RelatedJobs = dynamic(() => import('@/app/components/jobs/related-jobs'), {
+  loading: () => <div style={{ height: '200px' }} />,
+  ssr: false
+});
 import { IJobType } from '@/types/job-data-type';
 import { makeGetRequest } from '@/utils/api';
 

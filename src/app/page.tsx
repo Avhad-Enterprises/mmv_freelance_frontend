@@ -3,18 +3,37 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
 import FooterOne from "@/layouts/footers/footer-one";
 import shape from '@/assets/images/shape/shape_24.svg';
-import PartnersSlider from "./components/partners/partners-slider";
-import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
-import { CategoryCardWrapper } from "./components/category/category-section-2";
-import FeatureTen from "./components/features/feature-ten";
-import { FaqItems } from "./components/faqs/faq-one";
-import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
-import TopCompany from "./components/top-company/top-company";
-import FeedbackOne from "./components/feedBacks/feedback-one";
+
+// Dynamic imports for better code splitting
+const PartnersSlider = dynamic(() => import("./components/partners/partners-slider"), {
+  loading: () => <div style={{ height: '100px' }} />
+});
+const HeroBannerSeven = dynamic(() => import("./components/hero-banners/hero-banner-seven"), {
+  loading: () => <div style={{ height: '500px' }} />
+});
+const CategoryCardWrapper = dynamic(() => import("./components/category/category-section-2").then(mod => ({ default: mod.CategoryCardWrapper })), {
+  loading: () => <div style={{ height: '300px' }} />
+});
+const FeatureTen = dynamic(() => import("./components/features/feature-ten"), {
+  loading: () => <div style={{ height: '200px' }} />
+});
+const FaqItems = dynamic(() => import("./components/faqs/faq-one").then(mod => ({ default: mod.FaqItems })), {
+  loading: () => <div style={{ height: '200px' }} />
+});
+const FancyBannerSeven = dynamic(() => import("./components/fancy-banner/fancy-banner-7"), {
+  loading: () => <div style={{ height: '150px' }} />
+});
+const TopCompany = dynamic(() => import("./components/top-company/top-company"), {
+  loading: () => <div style={{ height: '200px' }} />
+});
+const FeedbackOne = dynamic(() => import("./components/feedBacks/feedback-one"), {
+  loading: () => <div style={{ height: '200px' }} />
+});
 
 // Data for How It Works section
 const howItWorksData = {

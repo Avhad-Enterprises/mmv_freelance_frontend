@@ -48,6 +48,14 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Optimize page loading
+  reactStrictMode: true,
+  // Better performance for production builds
+  poweredByHeader: false,
+  // Optimize static generation
+  generateEtags: true,
+  // Compress output
+  compress: true,
 };
 
 module.exports = nextConfig;
