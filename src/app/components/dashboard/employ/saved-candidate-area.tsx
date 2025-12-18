@@ -435,7 +435,11 @@ const SavedCandidateArea = () => {
         
         {selectedFreelancer ? (
           // Render CandidateDetailsArea if a freelancer is selected
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
+          <CandidateDetailsArea 
+            freelancer={selectedFreelancer} 
+            loading={loadingProfile} 
+            onMessage={handleMessage}
+          />
         ) : (
           // Otherwise, render the list of saved candidates
           <>
@@ -448,18 +452,6 @@ const SavedCandidateArea = () => {
                         Showing <span className="text-dark fw-500">{displayedCandidates.length}</span> saved candidates
                     </div>
                     {/* Removed sorting NiceSelect */}
-                </div>
-
-                {/* Debug Info */}
-                <div className="bg-light p-3 mb-3 border rounded">
-                  <small>
-                    <strong>Debug:</strong> Loading: {loading ? 'Yes' : 'No'} | 
-                    LoadingFavorites: {loadingFavorites ? 'Yes' : 'No'} | 
-                    AllCandidates: {allCandidates.length} | 
-                    SavedIDs: {savedCandidates.length} | 
-                    DisplayedCandidates: {displayedCandidates.length} | 
-                    CurrentDisplay: {currentDisplayCandidates.length}
-                  </small>
                 </div>
 
                 {(loading || loadingFavorites) && (
@@ -487,7 +479,6 @@ const SavedCandidateArea = () => {
                             isSaved={savedCandidates.includes(apiCandidate.user_id)}
                             onToggleSave={handleToggleSave}
                             onViewProfile={handleViewProfile}
-                            onMessage={handleMessage}
                             item={{
                                 user_id: apiCandidate.user_id,
                                 username: apiCandidate.username,

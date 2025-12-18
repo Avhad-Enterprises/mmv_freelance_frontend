@@ -134,16 +134,18 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                 >
                   View Profile
                 </button>
-                {/* Chat button */}
-                <button
-                  type="button"
-                  onClick={() => onMessage?.(item.user_id)}
-                  className="chat-btn tran3s ms-2"
-                  title="Message"
-                  style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                >
-                  <i className="bi bi-chat-dots" style={{ fontSize: '18px' }}></i>
-                </button>
+                {/* Chat button - only show when onMessage is provided */}
+                {onMessage && (
+                  <button
+                    type="button"
+                    onClick={() => onMessage(item.user_id)}
+                    className="chat-btn tran3s ms-2"
+                    title="Message"
+                    style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  >
+                    <i className="bi bi-chat-dots" style={{ fontSize: '18px' }}></i>
+                  </button>
+                )}
               </div>
             </div>
           </div>
