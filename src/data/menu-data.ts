@@ -17,10 +17,10 @@ const menu_data:IMenuData[] = [
   },
   {
     id:2,
-    link:'/coming-soon',
+    link:'/job-list',
     title:'Jobs',
     sub_menus:[
-      {link:'/coming-soon',title:'Job List style -1'},
+      {link:'/job-list',title:'Job List style -1'},
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid',title:'Job Grid style -1'},
@@ -33,10 +33,10 @@ const menu_data:IMenuData[] = [
   },
   {
     id: 3,
-    link: '/coming-soon',
+    link: '/freelancers',
     title: 'Candidates',
     sub_menus: [
-      {link: '/coming-soon', title: 'Candidates'}
+      {link: '/freelancers', title: 'Candidates'}
     ]
   },
   {

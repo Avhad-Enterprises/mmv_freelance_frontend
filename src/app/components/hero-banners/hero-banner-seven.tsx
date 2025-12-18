@@ -102,21 +102,10 @@ const HeroBannerSeven = () => {
                 >
                   <form onSubmit={handleSubmit}>
                     <div className="row align-items-center">
-                      <div className="col-md-5">
+                      <div className="col-md-9">
                         <div className="input-box">
                           <div className="label">Select Superpowers</div>
                           <JobCategorySelect setCategoryVal={setCategoryVal} />
-                        </div>
-                      </div>
-                      <div className="col-md-4">
-                        <div className="input-box border-left">
-                          <div className="label">Keywords or Title</div>
-                          <input
-                            onChange={handleSearchInput}
-                            type="text"
-                            placeholder="Design, branding"
-                            className="keyword"
-                          />
                         </div>
                       </div>
                       <div className="col-md-3 sm-mb-10 sm-mt-10">

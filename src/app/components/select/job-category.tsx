@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import NiceSelect from "@/ui/nice-select";
-import slugify from "slugify";
 
 interface Category {
   category_name: string;
@@ -20,11 +19,14 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`);
         const result = await response.json();
-        const categories: Category[] = result.data || [];
+        const allCategories = result.data || [];
+        
+        // Filter only active categories to match filter component
+        const activeCategories = allCategories.filter((cat: any) => cat.is_active);
 
-        const options = categories.map((cat) => ({
-          value: slugify(cat.category_name.toLowerCase(), "-"),
-          label: cat.category_name,
+        const options = activeCategories.map((cat: any) => ({
+          value: cat.category_name.replace(/\s+/g, ' ').trim(),
+          label: cat.category_name.replace(/\s+/g, ' ').trim(),
         }));
 
         setCategoryOptions(options);
@@ -37,7 +39,7 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
   }, []);
 
   const handleCategory = (item: { value: string; label: string }) => {
-    setCategoryVal(item.value);
+    setCategoryVal(item.value.replace(/\s+/g, ' ').trim());
   };
 
   return (
