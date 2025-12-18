@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { ref, onValue, off } from "firebase/database";
+import { onAuthStateChanged } from "firebase/auth";
 
 export type ParticipantRole = "client" | "videoEditor" | "videographer" | string;
 
@@ -23,11 +24,39 @@ export function useConversations(currentUserId: string | null) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState<boolean>(false);
+
+  // Wait for Firebase authentication
+  useEffect(() => {
+    if (!auth) {
+      console.error('Firebase auth not initialized');
+      setError('Firebase authentication not available');
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthReady(!!user);
+      if (!user && currentUserId) {
+        console.warn('User not authenticated with Firebase, cannot fetch conversations');
+        setError('Please sign in to view conversations');
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [currentUserId]);
 
   useEffect(() => {
     if (!currentUserId) {
       setConversations([]);
       setLoading(false);
+      return;
+    }
+
+    // Wait for Firebase authentication before querying
+    if (!isAuthReady) {
+      console.log('Waiting for Firebase authentication...');
       return;
     }
 
@@ -131,7 +160,7 @@ export function useConversations(currentUserId: string | null) {
     return () => {
       off(conversationsRef, 'value', unsubscribe);
     };
-  }, [currentUserId]);
+  }, [currentUserId, isAuthReady]);
 
   return { conversations, loading, error } as const;
 }

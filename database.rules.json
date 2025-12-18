@@ -1,12 +1,22 @@
 {
   "rules": {
     "conversations": {
+      ".read": "auth != null",
+      ".indexOn": ["updatedAt"],
       "$conversationId": {
-        ".read": "auth != null && (data.child('participants').val().indexOf(auth.uid) !== -1 || !data.exists())",
+        ".read": "auth != null",
         ".write": "auth != null && (data.child('participants').val().indexOf(auth.uid) !== -1 || !data.exists())",
+        ".validate": "newData.hasChildren(['participants', 'lastMessage'])",
+        "participants": {
+          ".validate": "newData.isString() || (newData.hasChildren() && newData.val().indexOf(auth.uid) !== -1)"
+        },
         "messages": {
           ".read": "auth != null && root.child('conversations').child($conversationId).child('participants').val().indexOf(auth.uid) !== -1",
-          ".write": "auth != null && root.child('conversations').child($conversationId).child('participants').val().indexOf(auth.uid) !== -1"
+          ".write": "auth != null && root.child('conversations').child($conversationId).child('participants').val().indexOf(auth.uid) !== -1",
+          ".indexOn": ["timestamp"],
+          "$messageId": {
+            ".validate": "newData.hasChildren(['text', 'senderId', 'timestamp'])"
+          }
         },
         "typing": {
           "$userId": {
@@ -20,6 +30,13 @@
       "$userId": {
         ".read": "auth != null",
         ".write": "auth != null && auth.uid == $userId"
+      }
+    },
+    "userConversations": {
+      "$userId": {
+        ".read": "auth != null && auth.uid == $userId",
+        ".write": "auth != null && auth.uid == $userId",
+        ".indexOn": [".value"]
       }
     }
   }
