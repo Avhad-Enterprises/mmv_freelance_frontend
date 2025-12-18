@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import toast from 'react-hot-toast';
 import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidate-login-modal";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item"; // Using your desired item component
@@ -30,6 +31,7 @@ interface ApiCandidate {
 }
 
 const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} }) => {
+  const searchParams = useSearchParams();
   // State variables for data and UI control
   const [candidates, setCandidates] = useState<ApiCandidate[]>([]);
   const [filteredCandidates, setFilteredCandidates] = useState<ApiCandidate[]>([]);
@@ -158,6 +160,18 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
     };
     fetchFavorites();
   }, [isAuthenticated, currentUserId, userType]);
+  
+  // Effect to read URL parameters and set initial filters
+  // useEffect(() => {
+  //   const categoryParam = searchParams.get('category');
+  //   if (categoryParam) {
+  //     // Decode URL-encoded characters and trim all whitespace
+  //     const decodedCategory = decodeURIComponent(categoryParam).replace(/\s+/g, ' ').trim();
+  //     if (decodedCategory) {
+  //       setSelectedSuperpowers([decodedCategory]);
+  //     }
+  //   }
+  // }, [searchParams]);
   
   // Initialize the login modal
   useEffect(() => {
