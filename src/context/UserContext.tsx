@@ -10,6 +10,9 @@ interface UserData {
   email?: string;
   account_type: string;
   profile_picture?: string | null;
+  is_oauth_user?: boolean;       // Indicates user registered via OAuth
+  linked_providers?: string[];    // OAuth providers linked to account ('google', 'facebook', etc.)
+  has_password?: boolean;         // Indicates if user has set a password
 }
 
 interface UserContextType {
@@ -31,7 +34,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserData = async () => {
     let token: string | undefined;
-    
+
     try {
       // Get token from cookies
       token = authCookies.getToken();
@@ -48,7 +51,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       // Decode token to get roles (do this early for fallback)
       let decodedPayload: any = null;
       let rolesArray: string[] = [];
-      
+
       try {
         const tokenParts = token.split(".");
         if (tokenParts.length !== 3) {
@@ -98,24 +101,25 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const response = await res.json();
-      
+
       if (response.success && response.data) {
         const { user, userType } = response.data;
-        
+
         const data: UserData = {
           user_id: user?.user_id,
           first_name: user?.first_name || '',
           last_name: user?.last_name || '',
           email: user?.email || '',
           profile_picture: user?.profile_picture || null,
-          account_type: userType || user?.account_type || 'user'
+          account_type: userType || user?.account_type || 'user',
+          has_password: response.data.has_password
         };
 
-          setUserData(data);
+        setUserData(data);
 
-          const displayRoles = normalizeRoles(rolesArray);
-          setUserRoles(displayRoles);
-          setCurrentRole(displayRoles[0] || 'User');
+        const displayRoles = normalizeRoles(rolesArray);
+        setUserRoles(displayRoles);
+        setCurrentRole(displayRoles[0] || 'User');
       } else {
         throw new Error('Invalid API response structure');
       }
@@ -131,7 +135,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           const decodedPayload = JSON.parse(atob(base64Payload));
           const userRolesFromToken = decodedPayload.roles || decodedPayload.role || [];
           const rolesArray = Array.isArray(userRolesFromToken) ? userRolesFromToken : [userRolesFromToken];
-          
+
           const data: UserData = {
             user_id: decodedPayload.user_id || decodedPayload.sub,
             first_name: decodedPayload.first_name || decodedPayload.name?.split(' ')[0] || '',
