@@ -57,7 +57,7 @@ const Header = () => {
                     )}
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/coming-soon" className="btn-one hire-top-talents-btn">
+                    <Link href="/freelancers" className="btn-one hire-top-talents-btn">
                       Hire Top Talents
                     </Link>
                   </li>

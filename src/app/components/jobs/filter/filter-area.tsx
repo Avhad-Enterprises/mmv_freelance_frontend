@@ -60,7 +60,7 @@ const FilterArea = ({
 
         {/* Category */}
         <div className="filter-block bottom-line pb-25 mt-25">
-          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="true">Category</a>
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseCategory" role="button" aria-expanded="true">Superpowers</a>
           <div className="collapse show" id="collapseCategory">
             {/* Use dropdown filter */}
             <FilterJobCategory categories={all_categories} onChange={onCategoryChange} value={selectedCategories} />

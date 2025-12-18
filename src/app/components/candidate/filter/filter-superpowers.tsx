@@ -29,15 +29,15 @@ const FilterSuperpowers = ({ onChange, value }: Props) => {
         const data = await response.json();
         
         if (data.data && Array.isArray(data.data)) {
-          // Filter categories that are active and have editor type
-          const editorCategories = data.data
-            .filter((cat: any) => cat.category_type === 'editor' && cat.is_active)
+          // Filter categories that are active (not just editor type)
+          const activeCategories = data.data
+            .filter((cat: any) => cat.is_active)
             .map((cat: any) => ({
               id: cat.id,
-              name: cat.category_name,
+              name: cat.category_name.replace(/\s+/g, ' ').trim(),
               description: cat.description
             }));
-          setCategories(editorCategories);
+          setCategories(activeCategories);
         } else {
           throw new Error('Invalid category data received');
         }
@@ -52,9 +52,14 @@ const FilterSuperpowers = ({ onChange, value }: Props) => {
   }, []);
 
   const options = categories.map(category => ({
-    value: category.name,
-    label: category.name,
+    value: category.name.trim(),
+    label: category.name.trim(),
   }));
+
+  // Match selected values with options (trim both sides for comparison)
+  const selectedOptions = options.filter(option => 
+    value.some(v => v.trim() === option.value.trim())
+  );
 
   return (
     <div>
@@ -62,7 +67,7 @@ const FilterSuperpowers = ({ onChange, value }: Props) => {
         isMulti
         isLoading={loading}
         options={options}
-        value={options.filter(option => value.includes(option.value))}
+        value={selectedOptions}
         onChange={(selectedOptions) => {
           onChange(selectedOptions ? selectedOptions.map(option => option.value) : []);
         }}
