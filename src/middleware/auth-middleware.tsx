@@ -6,13 +6,15 @@ import { authCookies } from '@/utils/cookies';
 interface AuthMiddlewareProps {
   children: React.ReactNode;
   allowedRoles?: string[];
+  allowedPermissions?: string[];
   redirectTo?: string;
 }
 
-const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({ 
-  children, 
-  allowedRoles = ['VIDEOGRAPHER', 'VIDEO_EDITOR', 'CLIENT'], 
-  redirectTo = '/' 
+const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
+  children,
+  allowedRoles = ['VIDEOGRAPHER', 'VIDEO_EDITOR', 'CLIENT'],
+  allowedPermissions = [],
+  redirectTo = '/'
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -38,7 +40,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
           }
           const base64Payload = tokenParts[1];
           const decodedPayload = JSON.parse(atob(base64Payload));
-          
+
           // Check token expiration
           if (decodedPayload.exp && decodedPayload.exp * 1000 < Date.now()) {
             authCookies.removeToken();
@@ -50,20 +52,32 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
           // Check if user has required role
           const userRoles = decodedPayload.roles || decodedPayload.role || [];
           const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
-          
-          // Normalize roles to uppercase for comparison
+
+          // Check if user has required permissions
+          const userPermissions = decodedPayload.permissions || [];
+          const permissionsArray = Array.isArray(userPermissions) ? userPermissions : [userPermissions];
+
+          // Normalize roles to uppercase
           const normalizedUserRoles = rolesArray.map((role: string) => role.toUpperCase());
           const normalizedAllowedRoles = allowedRoles.map(role => role.toUpperCase());
-          
-          const hasAllowedRole = normalizedAllowedRoles.some(role => normalizedUserRoles.includes(role));
-          
-          if (allowedRoles.length > 0 && !hasAllowedRole) {
+
+          // Role Check
+          const hasAllowedRole = allowedRoles.length === 0 || normalizedAllowedRoles.some(role => normalizedUserRoles.includes(role));
+
+          // Permission Check
+          const hasAllowedPermission = allowedPermissions.length === 0 || allowedPermissions.every(perm => permissionsArray.includes(perm));
+
+          // Super Admin Bypass
+          const isSuperAdmin = normalizedUserRoles.includes('SUPER_ADMIN');
+
+          if (!isSuperAdmin && (!hasAllowedRole || !hasAllowedPermission)) {
+            // Redirect logic ...
             // Redirect based on role
             if (normalizedUserRoles.includes('CLIENT')) {
               router.push('/dashboard/client-dashboard');
-            } else if (normalizedUserRoles.includes('VIDEOGRAPHER') || 
-                       normalizedUserRoles.includes('VIDEO_EDITOR') ||
-                       normalizedUserRoles.includes('VIDEOEDITOR')) {
+            } else if (normalizedUserRoles.includes('VIDEOGRAPHER') ||
+              normalizedUserRoles.includes('VIDEO_EDITOR') ||
+              normalizedUserRoles.includes('VIDEOEDITOR')) {
               router.push('/dashboard/freelancer-dashboard');
             } else {
               router.push(redirectTo);
@@ -92,7 +106,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
   // Show loading spinner while checking auth
   if (isLoading) {
     return (
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -107,7 +121,7 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({
         }}
       >
         <div className="loading-spinner">
-          <div 
+          <div
             style={{
               width: '50px',
               height: '50px',
