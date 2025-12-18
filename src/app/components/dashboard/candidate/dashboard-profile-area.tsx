@@ -67,13 +67,14 @@ type ProfileData = {
 };
 
 // Component is defined outside to prevent re-creation on render
-const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange }: {
+const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange, type = 'text' }: {
   label: string;
   value?: string | number;
   field?: keyof ProfileData;
   editMode: boolean;
   editedData?: ProfileData | null;
   handleInputChange?: (field: keyof ProfileData, value: any) => void;
+  type?: string;
 }) => {
   if (!editMode) {
     if (!value) return null;
@@ -99,12 +100,18 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange 
       </div>
       <div className="col-md-8">
         <input
-          type={field === 'email' ? 'email' : field === 'phone_number' ? 'tel' : 'text'}
+          type={field === 'email' ? 'email' : field === 'phone_number' ? 'tel' : field === 'website' ? 'url' : type}
           className="form-control"
           value={(editedData[field] as string | number) || ''}
           onChange={(e) => handleInputChange(field, e.target.value)}
-          pattern={field === 'phone_number' ? '[0-9]{10}' : undefined}
-          title={field === 'phone_number' ? 'Please enter a 10-digit phone number' : undefined}
+          pattern={field === 'phone_number' ? '[0-9]{10}' : field === 'website' ? 'https?://.+' : undefined}
+          title={
+            field === 'phone_number'
+              ? 'Please enter a 10-digit phone number'
+              : field === 'website'
+                ? 'Please enter a valid URL (e.g., https://example.com)'
+                : undefined
+          }
           required={field === 'email' || field === 'phone_number'}
         />
       </div>
@@ -116,41 +123,41 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange 
 // This component now includes its own Edit/Save/Cancel buttons, controlled
 // by the parent component. This modularizes the UI and logic.
 const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSave, onCancel, isSaving }: {
-    title: string;
-    sectionKey: string;
-    children: React.ReactNode;
-    editingSection: string | null;
-    onEdit: (section: string) => void;
-    onSave: (section: string) => void;
-    onCancel: () => void;
-    isSaving: boolean;
+  title: string;
+  sectionKey: string;
+  children: React.ReactNode;
+  editingSection: string | null;
+  onEdit: (section: string) => void;
+  onSave: (section: string) => void;
+  onCancel: () => void;
+  isSaving: boolean;
 }) => {
-    const isEditingThisSection = editingSection === sectionKey;
+  const isEditingThisSection = editingSection === sectionKey;
 
-    return (
-        <div className="bg-white card-box border-20 mt-30">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="dash-title-three">{title}</h4>
-                <div>
-                    {!editingSection ? (
-                        <button className="dash-btn-two" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
-                            Edit
-                        </button>
-                    ) : isEditingThisSection && (
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-success" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onSave(sectionKey)} disabled={isSaving}>
-                                {isSaving ? 'Saving Draft...' : 'Save Draft'}
-                            </button>
-                            <button className="btn btn-secondary" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={onCancel} disabled={isSaving}>
-                                Cancel
-                            </button>
-                        </div>
-                    )}
-                </div>
+  return (
+    <div className="bg-white card-box border-20 mt-30">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h4 className="dash-title-three">{title}</h4>
+        <div>
+          {!editingSection ? (
+            <button className="dash-btn-two" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
+              Edit
+            </button>
+          ) : isEditingThisSection && (
+            <div className="d-flex gap-2">
+              <button className="btn btn-success" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onSave(sectionKey)} disabled={isSaving}>
+                {isSaving ? 'Saving Draft...' : 'Save Draft'}
+              </button>
+              <button className="btn btn-secondary" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={onCancel} disabled={isSaving}>
+                Cancel
+              </button>
             </div>
-            {children}
+          )}
         </div>
-    );
+      </div>
+      {children}
+    </div>
+  );
 };
 
 
@@ -168,16 +175,16 @@ const floatingButtonStyle = `
   }
 `;
 
-const DashboardProfileArea = ({}: IProps) => {
+const DashboardProfileArea = ({ }: IProps) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [tempChanges, setTempChanges] = useState<{ [section: string]: Partial<ProfileData> }>({});
-  
+
   // Compute the displayed data by merging profile data with temporary changes
   const displayData = useMemo(() => {
     if (!profileData) return null;
-    
+
     // Combine all temporary changes
     const allChanges = Object.values(tempChanges).reduce((acc, sectionChanges) => ({
       ...acc,
@@ -236,7 +243,7 @@ const DashboardProfileArea = ({}: IProps) => {
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`);
         if (!response.ok) throw new Error('Network response was not ok');
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
@@ -257,7 +264,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/skills`)
 
   // Fetch superpowers/categories from API
   useEffect(() => {
-fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -430,10 +437,10 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
     if (field === 'phone_number') {
       value = value.replace(/\D/g, '').slice(0, 10); // Limit to 10 digits
     }
-    
+
     setEditedData(prev => prev ? { ...prev, [field]: value } : null);
   }, []);
-  
+
   const handleArrayChange = useCallback((field: keyof ProfileData, value: string[]) => {
     setEditedData(prev => prev ? { ...prev, [field]: value } : null);
   }, []);
@@ -467,18 +474,18 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
   // This function compares the original and edited data objects and returns
   // an object containing only the key-value pairs that have been modified.
   const getChangedFields = (original: ProfileData, edited: ProfileData): Partial<ProfileData> => {
-      const changes: Partial<ProfileData> = {};
-      (Object.keys(edited) as Array<keyof ProfileData>).forEach(key => {
-          const originalValue = original[key];
-          const editedValue = edited[key];
+    const changes: Partial<ProfileData> = {};
+    (Object.keys(edited) as Array<keyof ProfileData>).forEach(key => {
+      const originalValue = original[key];
+      const editedValue = edited[key];
 
-          if (!_.isEqual(originalValue, editedValue)) {
-              (changes as any)[key] = editedValue;
-          }
-      });
-      return changes;
+      if (!_.isEqual(originalValue, editedValue)) {
+        (changes as any)[key] = editedValue;
+      }
+    });
+    return changes;
   };
-  
+
   // ## REFACTOR 4: GENERIC, DYNAMIC SAVE HANDLER ##
   // This single function handles saving for any section. It determines which fields
   // have changed and constructs lean payloads for the API calls.
@@ -503,86 +510,96 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
       }
     }
 
-    const changes = getChangedFields(profileData, editedData);
-    
-    if (Object.keys(changes).length === 0) {
-        toast.success("No changes to save as draft.");
-        setEditingSection(null);
+    // Validate website URL if it's been changed and is not empty
+    if (editedData.website !== profileData.website && editedData.website) {
+      const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)$/;
+      if (!urlRegex.test(editedData.website)) {
+        toast.error('Please enter a valid website URL (e.g., https://example.com)');
         setSaving(false);
         return;
+      }
+    }
+
+    const changes = getChangedFields(profileData, editedData);
+
+    if (Object.keys(changes).length === 0) {
+      toast.success("No changes to save as draft.");
+      setEditingSection(null);
+      setSaving(false);
+      return;
     }
 
     // Store changes temporarily
     setTempChanges(prev => ({
-        ...prev,
-        [section]: changes
+      ...prev,
+      [section]: changes
     }));
 
     toast.success("Changes saved as draft!");
     setEditingSection(null);
     setSaving(false);
-};
+  };
 
   const saveAllChanges = async () => {
     if (!profileData) return;
     setSaving(true);
 
     try {
-        // Combine all temporary changes
-        const allChanges = Object.values(tempChanges).reduce((acc, sectionChanges) => ({
-            ...acc,
-            ...sectionChanges
-        }), {});
+      // Combine all temporary changes
+      const allChanges = Object.values(tempChanges).reduce((acc, sectionChanges) => ({
+        ...acc,
+        ...sectionChanges
+      }), {});
 
-        // Combine all changes into a single unified payload for video editors
-        const unifiedPayload: { [key: string]: any } = {};
+      // Combine all changes into a single unified payload for video editors
+      const unifiedPayload: { [key: string]: any } = {};
 
-        // Populate unified payload with all changes
-        for (const key in allChanges) {
-            const typedKey = key as keyof ProfileData;
-            unifiedPayload[typedKey] = allChanges[typedKey];
+      // Populate unified payload with all changes
+      for (const key in allChanges) {
+        const typedKey = key as keyof ProfileData;
+        unifiedPayload[typedKey] = allChanges[typedKey];
+      }
+
+      // Handle special field mappings
+      // Phone number field is already phone_number, no mapping needed
+      // The API expects phone_number field
+
+      if (unifiedPayload.country) {
+        unifiedPayload.country = Country.getCountryByCode(unifiedPayload.country)?.name || '';
+      }
+      if (unifiedPayload.state) {
+        unifiedPayload.state = State.getStateByCodeAndCountry(unifiedPayload.state, profileData.country)?.name || '';
+      }
+
+      // Make unified API call based on user type
+      let endpoint = '';
+      if (userType === 'VIDEO_EDITOR') {
+        endpoint = 'videoeditors/profile';
+      } else if (userType === 'VIDEOGRAPHER') {
+        endpoint = 'videographers/profile';
+      }
+
+      if (endpoint && Object.keys(unifiedPayload).length > 0) {
+        const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${endpoint}`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(unifiedPayload)
+        });
+        if (!profileRes.ok) {
+          const errorBody = await profileRes.json();
+          throw new Error(errorBody.message || 'Failed to update profile data');
         }
+      }
 
-        // Handle special field mappings
-        // Phone number field is already phone_number, no mapping needed
-        // The API expects phone_number field
-
-        if (unifiedPayload.country) {
-            unifiedPayload.country = Country.getCountryByCode(unifiedPayload.country)?.name || '';
-        }
-        if (unifiedPayload.state) {
-            unifiedPayload.state = State.getStateByCodeAndCountry(unifiedPayload.state, profileData.country)?.name || '';
-        }
-
-        // Make unified API call based on user type
-        let endpoint = '';
-        if (userType === 'VIDEO_EDITOR') {
-            endpoint = 'videoeditors/profile';
-        } else if (userType === 'VIDEOGRAPHER') {
-            endpoint = 'videographers/profile';
-        }
-
-        if (endpoint && Object.keys(unifiedPayload).length > 0) {
-            const profileRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/${endpoint}`, {
-                method: 'PATCH',
-                headers: { 'Authorization': `Bearer ${authCookies.getToken()}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify(unifiedPayload)
-            });
-            if (!profileRes.ok) {
-                const errorBody = await profileRes.json();
-                throw new Error(errorBody.message || 'Failed to update profile data');
-            }
-        }
-
-        toast.success("All changes saved successfully!");
-        setTempChanges({}); // Clear temporary changes
-        await fetchUserProfile();
+      toast.success("All changes saved successfully!");
+      setTempChanges({}); // Clear temporary changes
+      await fetchUserProfile();
 
     } catch (err: any) {
-        console.error("Failed to save all changes:", err);
-        toast.error(err.message || "Failed to save changes");
+      console.error("Failed to save all changes:", err);
+      toast.error(err.message || "Failed to save changes");
     } finally {
-        setSaving(false);
+      setSaving(false);
     }
   };
 
@@ -592,265 +609,143 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
     <>
       <style dangerouslySetInnerHTML={{ __html: floatingButtonStyle }} />
       <div className="dashboard-body">
-      <div className="position-relative">
-        {/* header start */}
-        <DashboardHeader />
-        {/* header end */}
-        
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="main-title">My Profile</h2>
-        </div>
-        {Object.keys(tempChanges).length > 0 && (
-          <div style={{
-            position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
-            zIndex: 1000,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            borderRadius: '8px',
-            animation: 'slideUp 0.3s ease-out'
-          }}>
-            <button 
-              className="dash-btn-two btn-lg" 
-              onClick={saveAllChanges}
-              disabled={saving}
-              style={{ 
-                minWidth: '200px', 
-                padding: '12px 24px',
-                fontSize: '1.1rem',
-                fontWeight: 'bold'
-              }}
-            >
-              {saving ? 'Saving All Changes...' : 'Save All Changes'}
-            </button>
-          </div>
-        )}
-        
-        {loading && (
-          <div className="text-center py-5">
-            <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
-          </div>
-        )}
+        <div className="position-relative">
+          {/* header start */}
+          <DashboardHeader />
+          {/* header end */}
 
-        {!loading && profileData && editedData && displayData && (
-          <>
-            <InfoSection title="Basic Information" sectionKey="basicInfo" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              {/* {!isEditModeFor("basicInfo") && userType && (
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="main-title">My Profile</h2>
+          </div>
+          {Object.keys(tempChanges).length > 0 && (
+            <div style={{
+              position: 'fixed',
+              bottom: '2rem',
+              right: '2rem',
+              zIndex: 1000,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              borderRadius: '8px',
+              animation: 'slideUp 0.3s ease-out'
+            }}>
+              <button
+                className="dash-btn-two btn-lg"
+                onClick={saveAllChanges}
+                disabled={saving}
+                style={{
+                  minWidth: '200px',
+                  padding: '12px 24px',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold'
+                }}
+              >
+                {saving ? 'Saving All Changes...' : 'Save All Changes'}
+              </button>
+            </div>
+          )}
+
+          {loading && (
+            <div className="text-center py-5">
+              <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
+            </div>
+          )}
+
+          {!loading && profileData && editedData && displayData && (
+            <>
+              <InfoSection title="Basic Information" sectionKey="basicInfo" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                {/* {!isEditModeFor("basicInfo") && userType && (
                 <div className="mb-4">
                   <span className="badge bg-primary" style={{ fontSize: '14px', padding: '8px 16px' }}>
                     {userType.replace(/_/g, ' ')}
                   </span>
                 </div>
               )} */}
-              
-              <InfoRow label="First Name" value={displayData.first_name} field="first_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
-              <InfoRow label="Last Name" value={displayData.last_name} field="last_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange}/>
-              <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
-              <InfoRow label="Phone Number" value={displayData.phone_number} field="phone_number" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
 
-              {(profileData.website || isEditModeFor("basicInfo")) && (
-                <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
-              )}
+                <InfoRow label="First Name" value={displayData.first_name} field="first_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+                <InfoRow label="Last Name" value={displayData.last_name} field="last_name" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+                <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+                <InfoRow label="Phone Number" value={displayData.phone_number} field="phone_number" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
 
-              {(profileData.profile_title || isEditModeFor("basicInfo")) && (
-                <InfoRow label="Profile Title" value={displayData.profile_title} field="profile_title" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
-              )}
+                {(profileData.website || isEditModeFor("basicInfo")) && (
+                  <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+                )}
 
-              {(profileData.availability || isEditModeFor("basicInfo")) && (
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>Availability:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("basicInfo") ? (
-                      <select className="form-select" value={editedData.availability || ''} onChange={(e) => handleInputChange('availability', e.target.value)}>
-                        <option value="">Select availability</option>
-                        {availabilityOptions.map(option => (
-                          <option key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}</option>
-                        ))}
-                      </select>
-                    ) : (displayData.availability)}
-                  </div>
-                </div>
-              )}
+                {(profileData.profile_title || isEditModeFor("basicInfo")) && (
+                  <InfoRow label="Profile Title" value={displayData.profile_title} field="profile_title" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
+                )}
 
-              {(profileData.experience_level || isEditModeFor("basicInfo")) && (
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>Experience Level:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("basicInfo") ? (
-                      <select className="form-select" value={editedData.experience_level || ''} onChange={(e) => handleInputChange('experience_level', e.target.value)}>
-                        <option value="">Select experience level</option>
-                        {experienceLevels.map(level => (
-                          <option key={level} value={level}>{level.charAt(0).toUpperCase() + level.slice(1)}</option>
-                        ))}
-                      </select>
-                    ) : (displayData.experience_level)}
-                  </div>
-                </div>
-              )}
-
-              {(profileData.bio || isEditModeFor("basicInfo")) && (
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>Bio:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("basicInfo") ? (
-                      <textarea className="form-control" rows={4} value={editedData.bio || ''}
-                        onChange={(e) => {
-                          handleInputChange('bio', e.target.value);
-                          handleInputChange('short_description', e.target.value);
-                        }}
-                      />
-                    ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
-                  </div>
-                </div>
-              )}
-            </InfoSection>
-            
-            <InfoSection title="Skills & Expertise" sectionKey="skills" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              <div className="row mb-3">
-                <div className="col-md-4"><strong>Skills:</strong></div>
-                <div className="col-md-8">
-                  {isEditModeFor("skills") ? (
-                    <div>
-                      <select className="form-select" disabled={isLoadingSkills} onChange={(e) => {
-                          const skill = e.target.value;
-                          if (skill && !editedData.skills.includes(skill)) {
-                              handleArrayChange('skills', [...editedData.skills, skill]);
-                          }
-                      }}>
-                          <option value="">Add a skill...</option>
-                          {allSkills.map(skill => (<option key={skill} value={skill}>{skill}</option>))}
-                      </select>
-                      <div className="d-flex flex-wrap gap-2 mt-2">
-                        {editedData.skills.map((skill, idx) => (
-                          <span key={idx} className="badge bg-secondary d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                            {skill}
-                            <button
-                              type="button"
-                              className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
-                              style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                              onClick={() => handleArrayChange('skills', editedData.skills.filter((_, i) => i !== idx))}
-                              aria-label={`Remove ${skill}`}
-                              title={`Remove ${skill}`}
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
+                {(profileData.availability || isEditModeFor("basicInfo")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Availability:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("basicInfo") ? (
+                        <select className="form-select" value={editedData.availability || ''} onChange={(e) => handleInputChange('availability', e.target.value)}>
+                          <option value="">Select availability</option>
+                          {availabilityOptions.map(option => (
+                            <option key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}</option>
+                          ))}
+                        </select>
+                      ) : (displayData.availability)}
                     </div>
-                  ) : (
-                    <div className="d-flex flex-wrap gap-2">
-                      {displayData.skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-secondary">{skill}</span>))}
+                  </div>
+                )}
+
+                {(profileData.experience_level || isEditModeFor("basicInfo")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Experience Level:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("basicInfo") ? (
+                        <select className="form-select" value={editedData.experience_level || ''} onChange={(e) => handleInputChange('experience_level', e.target.value)}>
+                          <option value="">Select experience level</option>
+                          {experienceLevels.map(level => (
+                            <option key={level} value={level}>{level.charAt(0).toUpperCase() + level.slice(1)}</option>
+                          ))}
+                        </select>
+                      ) : (displayData.experience_level)}
                     </div>
-                  )}
-                </div>
-              </div>
-              {(profileData.superpowers || isEditModeFor("skills")) && (
+                  </div>
+                )}
+
+                {(profileData.bio || isEditModeFor("basicInfo")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Bio:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("basicInfo") ? (
+                        <textarea className="form-control" rows={4} value={editedData.bio || ''}
+                          onChange={(e) => {
+                            handleInputChange('bio', e.target.value);
+                            handleInputChange('short_description', e.target.value);
+                          }}
+                        />
+                      ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
+                    </div>
+                  </div>
+                )}
+              </InfoSection>
+
+              <InfoSection title="Skills & Expertise" sectionKey="skills" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
                 <div className="row mb-3">
-                  <div className="col-md-4"><strong>Superpowers:</strong></div>
+                  <div className="col-md-4"><strong>Skills:</strong></div>
                   <div className="col-md-8">
                     {isEditModeFor("skills") ? (
                       <div>
-                        <select className="form-select" disabled={isLoadingSuperpowers}
-                            onChange={(e) => {
-                                const superpower = e.target.value;
-                                if (superpower && !(editedData.superpowers || []).includes(superpower)) {
-                                    handleArrayChange('superpowers', [...(editedData.superpowers || []), superpower]);
-                                }
-                            }}>
-                            <option value="">Add a superpower...</option>
-                            {allSuperpowers.map(power => (<option key={power} value={power}>{power}</option>))}
+                        <select className="form-select" disabled={isLoadingSkills} onChange={(e) => {
+                          const skill = e.target.value;
+                          if (skill && !editedData.skills.includes(skill)) {
+                            handleArrayChange('skills', [...editedData.skills, skill]);
+                          }
+                        }}>
+                          <option value="">Add a skill...</option>
+                          {allSkills.map(skill => (<option key={skill} value={skill}>{skill}</option>))}
                         </select>
                         <div className="d-flex flex-wrap gap-2 mt-2">
-                          {(editedData.superpowers || []).map((power, idx) => (
-                            <span key={idx} className="badge bg-success d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                              {power}
+                          {editedData.skills.map((skill, idx) => (
+                            <span key={idx} className="badge bg-secondary d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                              {skill}
                               <button
                                 type="button"
                                 className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
                                 style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                onClick={() => handleArrayChange('superpowers', (editedData.superpowers || []).filter((_, i) => i !== idx))}
-                                aria-label={`Remove ${power}`}
-                                title={`Remove ${power}`}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="d-flex flex-wrap gap-2">
-                        {(displayData.superpowers || []).map((power: string, idx: number) => (<span key={idx} className="badge bg-success">{power}</span>))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              {(profileData.languages || isEditModeFor("skills")) && (
-                  <div className="row mb-3">
-                      <div className="col-md-4"><strong>Languages:</strong></div>
-                      <div className="col-md-8">
-                          {isEditModeFor("skills") ? (
-                              <div>
-                                  <select className="form-select"
-                                      onChange={(e) => {
-                                          const lang = e.target.value;
-                                          if (lang && !(editedData.languages || []).includes(lang)) {
-                                              handleArrayChange('languages', [...(editedData.languages || []), lang]);
-                                          }
-                                      }}>
-                                      <option value="">Add a language...</option>
-                                      {availableLanguages.map(lang => (<option key={lang} value={lang}>{lang}</option>))}
-                                  </select>
-                                  <div className="d-flex flex-wrap gap-2 mt-2">
-                                      {(editedData.languages || []).map((lang, idx) => (
-                                          <span key={idx} className="badge bg-info text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                                              {lang}
-                                              <button
-                                                type="button"
-                                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
-                                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                                onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
-                                                aria-label={`Remove ${lang}`}
-                                                title={`Remove ${lang}`}
-                                              >
-                                                ×
-                                              </button>
-                                          </span>
-                                      ))}
-                                  </div>
-                              </div>
-                          ) : ((displayData.languages || []).join(', '))}
-                      </div>
-                  </div>
-              )}
-              {(profileData.base_skills?.length || isEditModeFor("skills")) && (
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("skills") ? (
-                      <div>
-                        <input type="text" className="form-control" placeholder="Add equipment or base skill (e.g., Canon EOS R5)"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              const value = (e.target as HTMLInputElement).value.trim();
-                              if (value && !(editedData.base_skills || []).includes(value)) {
-                                handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
-                                (e.target as HTMLInputElement).value = '';
-                              }
-                            }
-                          }} />
-                        <div className="d-flex flex-wrap gap-2 mt-2">
-                          {(editedData.base_skills || []).map((skill, idx) => (
-                            <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                              {skill}
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
-                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
+                                onClick={() => handleArrayChange('skills', editedData.skills.filter((_, i) => i !== idx))}
                                 aria-label={`Remove ${skill}`}
                                 title={`Remove ${skill}`}
                               >
@@ -862,210 +757,332 @@ fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`)
                       </div>
                     ) : (
                       <div className="d-flex flex-wrap gap-2">
-                        {(displayData.base_skills || []).map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>))}
+                        {displayData.skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-secondary">{skill}</span>))}
                       </div>
                     )}
                   </div>
                 </div>
+                {(profileData.superpowers || isEditModeFor("skills")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Superpowers:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("skills") ? (
+                        <div>
+                          <select className="form-select" disabled={isLoadingSuperpowers}
+                            onChange={(e) => {
+                              const superpower = e.target.value;
+                              if (superpower && !(editedData.superpowers || []).includes(superpower)) {
+                                handleArrayChange('superpowers', [...(editedData.superpowers || []), superpower]);
+                              }
+                            }}>
+                            <option value="">Add a superpower...</option>
+                            {allSuperpowers.map(power => (<option key={power} value={power}>{power}</option>))}
+                          </select>
+                          <div className="d-flex flex-wrap gap-2 mt-2">
+                            {(editedData.superpowers || []).map((power, idx) => (
+                              <span key={idx} className="badge bg-success d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                                {power}
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                  onClick={() => handleArrayChange('superpowers', (editedData.superpowers || []).filter((_, i) => i !== idx))}
+                                  aria-label={`Remove ${power}`}
+                                  title={`Remove ${power}`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="d-flex flex-wrap gap-2">
+                          {(displayData.superpowers || []).map((power: string, idx: number) => (<span key={idx} className="badge bg-success">{power}</span>))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {(profileData.languages || isEditModeFor("skills")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Languages:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("skills") ? (
+                        <div>
+                          <select className="form-select"
+                            onChange={(e) => {
+                              const lang = e.target.value;
+                              if (lang && !(editedData.languages || []).includes(lang)) {
+                                handleArrayChange('languages', [...(editedData.languages || []), lang]);
+                              }
+                            }}>
+                            <option value="">Add a language...</option>
+                            {availableLanguages.map(lang => (<option key={lang} value={lang}>{lang}</option>))}
+                          </select>
+                          <div className="d-flex flex-wrap gap-2 mt-2">
+                            {(editedData.languages || []).map((lang, idx) => (
+                              <span key={idx} className="badge bg-info text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                                {lang}
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                  onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
+                                  aria-label={`Remove ${lang}`}
+                                  title={`Remove ${lang}`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : ((displayData.languages || []).join(', '))}
+                    </div>
+                  </div>
+                )}
+                {(profileData.base_skills?.length || isEditModeFor("skills")) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("skills") ? (
+                        <div>
+                          <input type="text" className="form-control" placeholder="Add equipment or base skill (e.g., Canon EOS R5)"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const value = (e.target as HTMLInputElement).value.trim();
+                                if (value && !(editedData.base_skills || []).includes(value)) {
+                                  handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
+                                  (e.target as HTMLInputElement).value = '';
+                                }
+                              }
+                            }} />
+                          <div className="d-flex flex-wrap gap-2 mt-2">
+                            {(editedData.base_skills || []).map((skill, idx) => (
+                              <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                                {skill}
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                  onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
+                                  aria-label={`Remove ${skill}`}
+                                  title={`Remove ${skill}`}
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="d-flex flex-wrap gap-2">
+                          {(displayData.base_skills || []).map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </InfoSection>
+
+              {(profileData.rate_amount || isEditModeFor("rates")) && (
+                <InfoSection title="Services & Rates" sectionKey="rates" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>Hourly Rate:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("rates") ? (
+                        <div className="input-group">
+                          <span className="input-group-text">₹</span>
+                          <input type="number" className="form-control" value={editedData.rate_amount || ''}
+                            onChange={(e) => handleInputChange('rate_amount', parseFloat(e.target.value) || 0)} />
+                          <span className="input-group-text">/hr</span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#244034' }}>
+                          ₹ {displayData.rate_amount}/hr
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {(profileData.work_type || isEditModeFor("rates")) && (
+                    <div className="row mb-3">
+                      <div className="col-md-4"><strong>Work Type:</strong></div>
+                      <div className="col-md-8">
+                        {isEditModeFor("rates") ? (
+                          <select className="form-select" value={editedData.work_type || ''} onChange={(e) => handleInputChange('work_type', e.target.value)}>
+                            <option value="">Select work type</option>
+                            <option value="remote">Remote</option>
+                            <option value="onsite">On-site</option>
+                            <option value="hybrid">Hybrid</option>
+                          </select>
+                        ) : (displayData.work_type)}
+                      </div>
+                    </div>
+                  )}
+
+                  {(profileData.hours_per_week || isEditModeFor("rates")) && (
+                    <div className="row mb-3">
+                      <div className="col-md-4"><strong>Hours per Week:</strong></div>
+                      <div className="col-md-8">
+                        {isEditModeFor("rates") ? (
+                          <select className="form-select" value={editedData.hours_per_week || ''} onChange={(e) => handleInputChange('hours_per_week', e.target.value)}>
+                            <option value="">Select hours per week</option>
+                            <option value="10_20">10-20 hours</option>
+                            <option value="20_30">20-30 hours</option>
+                            <option value="30_40">30-40 hours</option>
+                            <option value="full_time">Full time</option>
+                          </select>
+                        ) : (displayData.hours_per_week)}
+                      </div>
+                    </div>
+                  )}
+                </InfoSection>
               )}
-            </InfoSection>
 
-            {(profileData.rate_amount || isEditModeFor("rates")) && (
-              <InfoSection title="Services & Rates" sectionKey="rates" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+              {(profileData.portfolio_links?.length || isEditModeFor("portfolio")) && (
+                <InfoSection title="Portfolio" sectionKey="portfolio" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                  {isEditModeFor("portfolio") ? (
+                    <div>
+                      {(editedData.portfolio_links || []).map((link, index) => (
+                        <div key={index} className="input-group mb-3">
+                          <input type="url" className="form-control" value={link} placeholder="https://example.com"
+                            onChange={(e) => updatePortfolioLink(index, e.target.value)} />
+                          <button className="btn btn-outline-danger" type="button" onClick={() => removePortfolioLink(index)}>Remove</button>
+                        </div>
+                      ))}
+                      <button className="btn btn-outline-primary" type="button" onClick={addPortfolioLink}>+ Add Portfolio Link</button>
+                    </div>
+                  ) : (
+                    (displayData.portfolio_links || []).map((link: string, index: number) => (
+                      <div key={index} className="mb-2"><a href={link} target="_blank" rel="noopener noreferrer">View Link {index + 1}</a></div>
+                    ))
+                  )}
+                </InfoSection>
+              )}
+
+              {(
+                (profileData.hire_count !== undefined && profileData.hire_count > 0) ||
+                (profileData.total_earnings !== undefined && profileData.total_earnings > 0) ||
+                (profileData.time_spent !== undefined && profileData.time_spent > 0) ||
+                (profileData.projects_completed && profileData.projects_completed.length > 0) ||
+                (profileData.projects_applied && profileData.projects_applied.length > 0)
+              ) && (
+                  <InfoSection title="Statistics" sectionKey="statistics" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                    <div className="row">
+                      {(profileData.hire_count !== undefined && profileData.hire_count > 0) && (
+                        <div className="col-md-6 mb-3">
+                          <div className="text-center p-3 bg-light rounded">
+                            <h3 className="text-primary mb-1">{displayData.hire_count}</h3>
+                            <p className="mb-0 text-muted">Total Hires</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {(profileData.total_earnings !== undefined && profileData.total_earnings > 0) && (
+                        <div className="col-md-6 mb-3">
+                          <div className="text-center p-3 bg-success rounded text-white">
+                            <h3 className="mb-1">₹{displayData.total_earnings?.toLocaleString()}</h3>
+                            <p className="mb-0">Total Earnings</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {(profileData.time_spent !== undefined && profileData.time_spent > 0) && (
+                        <div className="col-md-6 mb-3">
+                          <div className="text-center p-3 bg-info rounded text-white">
+                            <h3 className="mb-1">{Math.round((displayData.time_spent || 0) / 60)}h</h3>
+                            <p className="mb-0">Time Spent</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {(profileData.projects_completed && profileData.projects_completed.length > 0) && (
+                        <div className="col-md-6 mb-3">
+                          <div className="text-center p-3 bg-warning rounded">
+                            <h3 className="text-dark mb-1">{displayData.projects_completed?.length}</h3>
+                            <p className="mb-0 text-dark">Projects Completed</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {(profileData.projects_applied && profileData.projects_applied.length > 0) && (
+                        <div className="col-md-6 mb-3">
+                          <div className="text-center p-3 bg-secondary rounded text-white">
+                            <h3 className="mb-1">{displayData.projects_applied?.length}</h3>
+                            <p className="mb-0">Projects Applied</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </InfoSection>
+                )}
+
+              <InfoSection title="Address & Location" sectionKey="address" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                <InfoRow label="Address" value={profileData.address} field="address" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+
                 <div className="row mb-3">
-                  <div className="col-md-4"><strong>Hourly Rate:</strong></div>
+                  <div className="col-md-4"><strong>Country:</strong></div>
                   <div className="col-md-8">
-                    {isEditModeFor("rates") ? (
-                      <div className="input-group">
-                        <span className="input-group-text">₹</span>
-                        <input type="number" className="form-control" value={editedData.rate_amount || ''}
-                          onChange={(e) => handleInputChange('rate_amount', parseFloat(e.target.value) || 0)} />
-                        <span className="input-group-text">/hr</span>
-                      </div>
-                    ) : (
-                      <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#244034' }}>
-                        ₹ {displayData.rate_amount}/hr
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {(profileData.work_type || isEditModeFor("rates")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Work Type:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("rates") ? (
-                        <select className="form-select" value={editedData.work_type || ''} onChange={(e) => handleInputChange('work_type', e.target.value)}>
-                          <option value="">Select work type</option>
-                          <option value="remote">Remote</option>
-                          <option value="onsite">On-site</option>
-                          <option value="hybrid">Hybrid</option>
-                        </select>
-                      ) : (displayData.work_type)}
-                    </div>
-                  </div>
-                )}
-
-                {(profileData.hours_per_week || isEditModeFor("rates")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Hours per Week:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("rates") ? (
-                        <select className="form-select" value={editedData.hours_per_week || ''} onChange={(e) => handleInputChange('hours_per_week', e.target.value)}>
-                          <option value="">Select hours per week</option>
-                          <option value="10_20">10-20 hours</option>
-                          <option value="20_30">20-30 hours</option>
-                          <option value="30_40">30-40 hours</option>
-                          <option value="full_time">Full time</option>
-                        </select>
-                      ) : (displayData.hours_per_week)}
-                    </div>
-                  </div>
-                )}
-              </InfoSection>
-            )}
-
-            {(profileData.portfolio_links?.length || isEditModeFor("portfolio")) && (
-              <InfoSection title="Portfolio" sectionKey="portfolio" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                {isEditModeFor("portfolio") ? (
-                  <div>
-                    {(editedData.portfolio_links || []).map((link, index) => (
-                      <div key={index} className="input-group mb-3">
-                        <input type="url" className="form-control" value={link} placeholder="https://example.com"
-                          onChange={(e) => updatePortfolioLink(index, e.target.value)} />
-                        <button className="btn btn-outline-danger" type="button" onClick={() => removePortfolioLink(index)}>Remove</button>
-                      </div>
-                    ))}
-                    <button className="btn btn-outline-primary" type="button" onClick={addPortfolioLink}>+ Add Portfolio Link</button>
-                  </div>
-                ) : (
-                  (displayData.portfolio_links || []).map((link: string, index: number) => (
-                    <div key={index} className="mb-2"><a href={link} target="_blank" rel="noopener noreferrer">View Link {index + 1}</a></div>
-                  ))
-                )}
-              </InfoSection>
-            )}
-
-            {(
-              (profileData.hire_count !== undefined && profileData.hire_count > 0) ||
-              (profileData.total_earnings !== undefined && profileData.total_earnings > 0) ||
-              (profileData.time_spent !== undefined && profileData.time_spent > 0) ||
-              (profileData.projects_completed && profileData.projects_completed.length > 0) ||
-              (profileData.projects_applied && profileData.projects_applied.length > 0)
-            ) && (
-              <InfoSection title="Statistics" sectionKey="statistics" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                <div className="row">
-                  {(profileData.hire_count !== undefined && profileData.hire_count > 0) && (
-                    <div className="col-md-6 mb-3">
-                      <div className="text-center p-3 bg-light rounded">
-                        <h3 className="text-primary mb-1">{displayData.hire_count}</h3>
-                        <p className="mb-0 text-muted">Total Hires</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {(profileData.total_earnings !== undefined && profileData.total_earnings > 0) && (
-                    <div className="col-md-6 mb-3">
-                      <div className="text-center p-3 bg-success rounded text-white">
-                        <h3 className="mb-1">₹{displayData.total_earnings?.toLocaleString()}</h3>
-                        <p className="mb-0">Total Earnings</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {(profileData.time_spent !== undefined && profileData.time_spent > 0) && (
-                    <div className="col-md-6 mb-3">
-                      <div className="text-center p-3 bg-info rounded text-white">
-                        <h3 className="mb-1">{Math.round((displayData.time_spent || 0) / 60)}h</h3>
-                        <p className="mb-0">Time Spent</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {(profileData.projects_completed && profileData.projects_completed.length > 0) && (
-                    <div className="col-md-6 mb-3">
-                      <div className="text-center p-3 bg-warning rounded">
-                        <h3 className="text-dark mb-1">{displayData.projects_completed?.length}</h3>
-                        <p className="mb-0 text-dark">Projects Completed</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {(profileData.projects_applied && profileData.projects_applied.length > 0) && (
-                    <div className="col-md-6 mb-3">
-                      <div className="text-center p-3 bg-secondary rounded text-white">
-                        <h3 className="mb-1">{displayData.projects_applied?.length}</h3>
-                        <p className="mb-0">Projects Applied</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </InfoSection>
-            )}
-
-            <InfoSection title="Address & Location" sectionKey="address" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-              <InfoRow label="Address" value={profileData.address} field="address" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
-              
-              <div className="row mb-3">
-                <div className="col-md-4"><strong>Country:</strong></div>
-                <div className="col-md-8">
-                  {isEditModeFor("address") ? (
-                    <select className="form-select" value={editedData.country || ''} onChange={(e) => {
+                    {isEditModeFor("address") ? (
+                      <select className="form-select" value={editedData.country || ''} onChange={(e) => {
                         handleInputChange('country', e.target.value);
                         setSelectedCountryCode(e.target.value);
                         handleInputChange('state', '');
                         handleInputChange('city', '');
-                    }}>
-                      <option value="">Select Country</option>
-                      {countries.map(country => (
+                      }}>
+                        <option value="">Select Country</option>
+                        {countries.map(country => (
                           <option key={country.isoCode} value={country.isoCode}>{country.name}</option>
-                      ))}
-                    </select>
-                  ) : (Country.getCountryByCode(displayData.country)?.name)}
+                        ))}
+                      </select>
+                    ) : (Country.getCountryByCode(displayData.country)?.name)}
+                  </div>
                 </div>
-              </div>
 
-              {(isEditModeFor("address") || displayData.state) && (
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>State:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("address") ? (
-                      <select className="form-select" value={editedData.state || ''} onChange={(e) => {
+                {(isEditModeFor("address") || displayData.state) && (
+                  <div className="row mb-3">
+                    <div className="col-md-4"><strong>State:</strong></div>
+                    <div className="col-md-8">
+                      {isEditModeFor("address") ? (
+                        <select className="form-select" value={editedData.state || ''} onChange={(e) => {
                           handleInputChange('state', e.target.value);
                           setSelectedStateCode(e.target.value);
                           handleInputChange('city', '');
-                      }} disabled={!editedData.country}>
-                        <option value="">Select State</option>
-                        {states.map(state => (
+                        }} disabled={!editedData.country}>
+                          <option value="">Select State</option>
+                          {states.map(state => (
                             <option key={state.isoCode} value={state.isoCode}>{state.name}</option>
+                          ))}
+                        </select>
+                      ) : (State.getStateByCodeAndCountry(displayData.state, displayData.country)?.name)}
+                    </div>
+                  </div>
+                )}
+
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>City:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("address") ? (
+                      <select className="form-select" value={editedData.city || ''} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!editedData.state}>
+                        <option value="">Select City</option>
+                        {cities.map(city => (
+                          <option key={city.name} value={city.name}>{city.name}</option>
                         ))}
                       </select>
-                    ) : (State.getStateByCodeAndCountry(displayData.state, displayData.country)?.name)}
+                    ) : (displayData.city)}
                   </div>
                 </div>
-              )}
 
-              <div className="row mb-3">
-                <div className="col-md-4"><strong>City:</strong></div>
-                <div className="col-md-8">
-                  {isEditModeFor("address") ? (
-                    <select className="form-select" value={editedData.city || ''} onChange={(e) => handleInputChange('city', e.target.value)} disabled={!editedData.state}>
-                      <option value="">Select City</option>
-                      {cities.map(city => (
-                          <option key={city.name} value={city.name}>{city.name}</option>
-                      ))}
-                    </select>
-                  ) : (displayData.city)}
-                </div>
-              </div>
-              
-              <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
-            </InfoSection>
+                <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
+              </InfoSection>
 
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };
