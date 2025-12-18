@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import Box from "@mui/material/Box";
 import Cookies from 'js-cookie';
-import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
+import { IFreelancer } from "@/interfaces/freelancer";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import toast from 'react-hot-toast';
 
@@ -40,6 +40,25 @@ const mapApiCandidateToIFreelancer = (apiCandidate: any): IFreelancer => {
     availability: apiCandidate.availability || 'not specified',
     experience_level: apiCandidate.experience_level || 'not specified',
     role_name: apiCandidate.role_name || null,
+    profile_title: apiCandidate.profile_title || null,
+    short_description: apiCandidate.short_description || null,
+    kyc_verified: apiCandidate.kyc_verified || false,
+    aadhaar_verification: apiCandidate.aadhaar_verification || false,
+    hire_count: apiCandidate.hire_count || 0,
+    review_id: apiCandidate.review_id || 0,
+    total_earnings: apiCandidate.total_earnings || 0,
+    time_spent: apiCandidate.time_spent || 0,
+    youtube_videos: apiCandidate.youtube_videos || [],
+    experience: apiCandidate.experience || [],
+    education: apiCandidate.education || [],
+    previous_works: apiCandidate.previous_works || [],
+    certification: apiCandidate.certification || [],
+    services: apiCandidate.services || [],
+    created_at: apiCandidate.created_at || '',
+    updated_at: apiCandidate.updated_at || '',
+    freelancer_id: apiCandidate.freelancer_id || apiCandidate.user_id || 0,
+    work_type: apiCandidate.work_type || null,
+    hours_per_week: apiCandidate.hours_per_week || null,
   };
 };
 

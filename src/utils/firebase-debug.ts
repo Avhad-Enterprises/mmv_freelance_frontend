@@ -1,7 +1,7 @@
 // Firebase Authentication Debugging Utility
 // Use this to verify Firebase setup and authentication flow
 
-import { auth } from '../firebase';
+import { auth } from '@/lib/firebase';
 import axios from 'axios';
 
 export const debugFirebaseAuth = async () => {
@@ -58,19 +58,19 @@ export const debugFirebaseAuth = async () => {
       const idToken = await userCredential.user.getIdToken();
       console.log('  ID Token:', idToken.substring(0, 30) + '...');
 
-      // 5. Test Firestore Access
-      console.log('\n5️⃣ Testing Firestore Access:');
+      // 5. Test Realtime Database Access
+      console.log('\n5️⃣ Testing Realtime Database Access:');
       try {
-        const { collection, getDocs } = await import('firebase/firestore');
-        const { db } = await import('../firebase');
+        const { ref, get } = await import('firebase/database');
+        const { db } = await import('@/lib/firebase');
         
-        const conversationsRef = collection(db, 'conversations');
-        const snapshot = await getDocs(conversationsRef);
+        const conversationsRef = ref(db, 'conversations');
+        const snapshot = await get(conversationsRef);
         
-        console.log('  ✅ Firestore Access Successful');
-        console.log('  Conversations Count:', snapshot.size);
+        console.log('  ✅ Realtime Database Access Successful');
+        console.log('  Conversations Exist:', snapshot.exists());
       } catch (error: any) {
-        console.error('  ❌ Firestore Error:', error.message);
+        console.error('  ❌ Realtime Database Error:', error.message);
         console.error('  Error Code:', error.code);
       }
     }
