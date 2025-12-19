@@ -101,8 +101,7 @@ Global route protection is configured in `src/middleware/auth-middleware.tsx`. U
 
 ## 6. Permission Reference
 
-Common permissions you might use:
-
+### Project Permissions
 | Permission | Description |
 | :--- | :--- |
 | `projects.view` | View job listings |
@@ -112,4 +111,74 @@ Common permissions you might use:
 | `applications.view` | View received/sent applications |
 | `profile.update` | Edit profile |
 
-*For a full list of available permissions, refer to the Backend API Documentation.*
+### Credit Permissions (Freelancers)
+| Permission | Description |
+| :--- | :--- |
+| `credits.view_own` | View own credit balance |
+| `credits.view_packages` | View available credit packages |
+| `credits.purchase` | Purchase credits via Razorpay |
+| `credits.view_history` | View credit transaction history |
+| `credits.request_refund` | Request refund for eligible applications |
+
+### Credit Permissions (Admin)
+| Permission | Description |
+| :--- | :--- |
+| `credits.admin.view_all` | View all users' credit transactions |
+| `credits.admin.adjust` | Add/deduct credits & update settings |
+| `credits.admin.analytics` | View credit system analytics |
+| `credits.admin.refund` | Process bulk refunds |
+| `credits.admin.export` | Export transactions as CSV |
+
+---
+
+## 7. Credit System Integration Examples
+
+### Protect Credits Page
+```tsx
+// src/app/dashboard/freelancer-dashboard/credits/page.tsx
+'use client';
+import PermissionGuard from "@/components/auth/PermissionGuard";
+import CreditsArea from "@/app/components/credits/CreditsArea";
+
+const CreditsPage = () => {
+  return (
+    <PermissionGuard 
+      permission="credits.view_own" 
+      fallback={<AccessDenied message="Credits are only available for freelancers" />}
+    >
+      <CreditsArea />
+    </PermissionGuard>
+  );
+};
+```
+
+### Protect Purchase Button
+```tsx
+import PermissionGuard from "@/components/auth/PermissionGuard";
+
+<PermissionGuard permission="credits.purchase">
+  <button onClick={handlePurchase}>Buy Credits</button>
+</PermissionGuard>
+```
+
+### Check Credits Before Project Application
+```tsx
+import { useUser } from "@/context/UserContext";
+
+const ApplyButton = () => {
+  const { userPermissions } = useUser();
+
+  const handleApply = () => {
+    if (!userPermissions.includes('credits.purchase')) {
+      toast.error("You need to be a freelancer to apply");
+      return;
+    }
+    // Show credit check modal, then apply
+  };
+
+  return <button onClick={handleApply}>Apply Now</button>;
+};
+```
+
+*For a full list of available permissions, refer to the [Permissions Cheatsheet](./permissions-cheatsheet.md).*
+
