@@ -1,5 +1,5 @@
 "use client";
-import React, { ComponentProps, useState, useMemo } from "react";
+import React, { ComponentProps, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -17,6 +17,8 @@ import { Search, Plus } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { useConversations } from "@/hooks/useConversations";
 import Cookies from "js-cookie";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
 
 type ChatListProps = {
   /** Base path for thread page, e.g. "/dashboard/client-dashboard/messages/thread" */
@@ -58,6 +60,59 @@ const ChatList: React.FC<ChatListProps> = ({
     Record<string, string>
   >({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
+
+  // Firebase authentication - required for useConversations hook to work
+  useEffect(() => {
+    if (!auth) {
+      console.error("Firebase auth not initialized");
+      return;
+    }
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setFirebaseAuthenticated(true);
+        return;
+      }
+
+      setFirebaseAuthenticated(false);
+
+      // Try to authenticate with custom token
+      const authToken = Cookies.get("auth_token");
+      if (!authToken) {
+        console.warn("No auth token found, cannot authenticate with Firebase");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch Firebase custom token");
+          return;
+        }
+
+        const data = await response.json();
+        if (data.success && data.data?.customToken) {
+          await signInWithCustomToken(auth, data.data.customToken);
+          setFirebaseAuthenticated(true);
+          console.log("✅ Firebase authenticated successfully for ChatList");
+        }
+      } catch (error) {
+        console.error("Firebase authentication error in ChatList:", error);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
