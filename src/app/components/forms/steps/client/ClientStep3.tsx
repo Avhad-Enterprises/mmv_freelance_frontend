@@ -408,14 +408,11 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                         }
                       }
                       const fileArray = Array.from(files);
-                      console.log(`📄 Business documents selected: ${fileArray.length} file(s)`, fileArray.map(f => f.name));
                       toast.success(`${fileArray.length} business document${fileArray.length > 1 ? 's' : ''} selected successfully`);
-                      console.log('🔄 About to set state. Files array:', fileArray, 'Length:', fileArray.length);
                       setSelectedBusinessDocuments(fileArray);
                       setValue("business_document", files);
                       clearErrors("business_document");
                     } else {
-                      console.log('⚠️ No files selected');
                       setSelectedBusinessDocuments([]);
                       setValue("business_document", null);
                     }
@@ -495,7 +492,6 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               
               {/* Display list of selected files */}
               {(() => {
-                console.log('🖼️ Rendering file list. selectedBusinessDocuments:', selectedBusinessDocuments, 'Length:', selectedBusinessDocuments.length, 'Should show:', selectedBusinessDocuments.length > 0);
                 return null;
               })()}
               {selectedBusinessDocuments.length > 0 ? (

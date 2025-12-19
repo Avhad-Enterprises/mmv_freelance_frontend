@@ -18,7 +18,7 @@ const Pagination = ({ handlePageClick, pageCount }: IProps) => {
       activeClassName="active"
       nextLabel={
         <span className="d-flex align-items-center">
-          Last <Image src={icon} alt="icon" className="ms-2" />
+          Next <Image src={icon} alt="icon" className="ms-2" />
         </span>
       }
       onPageChange={handlePageClick}

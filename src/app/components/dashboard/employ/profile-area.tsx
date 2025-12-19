@@ -31,7 +31,7 @@ type ProfileData = {
   social_links?: string[];
   company_size?: string;
   tax_id?: string;
-  business_documents?: string[];
+  business_document_urls?: string[];
   work_arrangement?: string;
   project_frequency?: string;
   hiring_preferences?: string;
@@ -85,6 +85,7 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
                 : undefined
           }
           required={required}
+          disabled={field === 'email'}
         />
       </div>
     </div>
@@ -270,7 +271,7 @@ const DashboardProfileArea = ({ }: IProps) => {
           country: countryObj?.isoCode || "",
           pincode: user.pincode || "",
           tax_id: profile?.tax_id,
-          business_documents: safeArray<string>(profile?.business_documents),
+          business_document_urls: safeArray<string>(profile?.business_document_urls),
         };
 
         setProfileData(data);
@@ -724,21 +725,101 @@ const DashboardProfileArea = ({ }: IProps) => {
                 <InfoRow label="Zip/Pin Code" value={displayData.pincode} field="pincode" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Tax ID" value={displayData.tax_id} field="tax_id" editMode={isEditModeFor("address")} editedData={editedData} handleInputChange={handleInputChange} />
 
-                {(profileData.business_documents || isEditModeFor("address")) && (
+                {(profileData.business_document_urls || isEditModeFor("address")) && (
                   <div className="row mb-3">
                     <div className="col-md-4"><strong>Business Documents:</strong></div>
                     <div className="col-md-8">
                       {isEditModeFor("address") ? (
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={(editedData.business_documents || []).join(', ')}
-                          onChange={(e) => handleInputChange('business_documents', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                          placeholder="document1.pdf, document2.pdf"
-                        />
+                        <div>
+                          <div className="mb-2">
+                            {(editedData.business_document_urls || []).map((docUrl: string, idx: number) => (
+                              <div key={idx} className="d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
+                                <a href={docUrl} target="_blank" rel="noopener noreferrer" className="text-truncate" style={{ maxWidth: '80%' }}>
+                                  {docUrl.split('/').pop()}
+                                </a>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={() => {
+                                    const newDocs = (editedData.business_document_urls || []).filter((_: string, i: number) => i !== idx);
+                                    handleInputChange('business_document_urls', newDocs);
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <input
+                            type="file"
+                            className="form-control"
+                            accept=".pdf,.doc,.docx,.txt"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+
+                              if (file.size > 10 * 1024 * 1024) {
+                                toast.error("File size greater than 10MB");
+                                return;
+                              }
+
+                              const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+                              if (!allowedTypes.includes(file.type)) {
+                                toast.error("Invalid file type. Please upload PDF, DOC, DOCX or TXT");
+                                return;
+                              }
+
+                              try {
+                                const reader = new FileReader();
+                                reader.readAsDataURL(file);
+                                reader.onload = async () => {
+                                  const base64String = reader.result as string;
+                                  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/files/uploadtoaws`, {
+                                    method: 'POST',
+                                    headers: {
+                                      'Authorization': `Bearer ${authCookies.getToken()}`,
+                                      'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                      filename: file.name,
+                                      base64String: base64String
+                                    })
+                                  });
+
+                                  if (!response.ok) throw new Error('Upload failed');
+
+                                  const result = await response.json();
+                                  // API returns { message: string, fileUrl: string }
+                                  if (result.fileUrl) {
+                                    const newDocs = [...(editedData.business_document_urls || []), result.fileUrl];
+                                    handleInputChange('business_document_urls', newDocs);
+                                    toast.success("Document uploaded successfully");
+                                  } else {
+                                    throw new Error(result.message || 'Upload failed');
+                                  }
+                                };
+                                reader.onerror = () => {
+                                  toast.error("Error reading file");
+                                };
+                              } catch (err) {
+                                console.error(err);
+                                toast.error("Failed to upload document");
+                              }
+                              // Reset input
+                              e.target.value = '';
+                            }}
+                          />
+                          <small className="text-muted d-block mt-1">Upload PDF, DOC, DOCX, TXT (Max 10MB)</small>
+                        </div>
                       ) : (
-                        displayData.business_documents && displayData.business_documents.length > 0
-                          ? displayData.business_documents.join(', ')
+                        displayData.business_document_urls && displayData.business_document_urls.length > 0
+                          ? (
+                            <ul className="list-unstyled mb-0">
+                              {displayData.business_document_urls.map((doc: string, i: number) => (
+                                <li key={i}><a href={doc} target="_blank" rel="noopener noreferrer">{doc.split('/').pop()}</a></li>
+                              ))}
+                            </ul>
+                          )
                           : 'No documents provided'
                       )}
                     </div>

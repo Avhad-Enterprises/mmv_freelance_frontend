@@ -260,11 +260,8 @@ const ChatArea: React.FC = () => {
     // Monitor Firebase auth state
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        console.log('✅ Firebase user already authenticated:', firebaseUser.uid);
         setFirebaseAuthenticated(true);
       } else {
-        console.log('⚠️ No Firebase user, attempting to sign in with custom token');
-        
         // Get custom token from backend
         try {
           const authToken = Cookies.get('auth_token');
@@ -289,7 +286,6 @@ const ChatArea: React.FC = () => {
           if (data.success && data.data?.customToken) {
             // Sign in to Firebase with custom token
             await signInWithCustomToken(auth, data.data.customToken);
-            console.log('✅ Signed in to Firebase successfully');
             setFirebaseAuthenticated(true);
           } else {
             throw new Error('Invalid response from Firebase token endpoint');
@@ -339,12 +335,10 @@ const ChatArea: React.FC = () => {
   useEffect(() => {
     // Monitor browser online/offline status
     const handleOnline = () => {
-      console.log('🌐 Browser is online');
       if (isMountedRef.current) setIsOnline(true);
     };
     
     const handleOffline = () => {
-      console.log('📵 Browser is offline');
       if (isMountedRef.current) {
         setIsOnline(false);
         setIsConnected(false);
@@ -373,7 +367,6 @@ const ChatArea: React.FC = () => {
       connectedRef,
       (snapshot) => {
         const connected = snapshot.val() === true;
-        console.log(connected ? '🔥 Realtime Database connected' : '⚠️ Realtime Database disconnected');
         if (isMountedRef.current) setIsConnected(connected);
       },
       () => {
@@ -390,7 +383,6 @@ const ChatArea: React.FC = () => {
     isMountedRef.current = true;
     
     return () => {
-      console.log('ChatArea unmounting - cleaning up all subscriptions');
       isMountedRef.current = false;
       
       // Unsubscribe from all active listeners
@@ -477,19 +469,16 @@ const ChatArea: React.FC = () => {
   // ---------------- SUBSCRIBE TO CONVERSATIONS (REALTIME DATABASE) ----------------
   useEffect(() => {
     if (!currentUser?.user_id || !db) {
-      console.log('Waiting for user or Realtime Database initialization...');
       return;
     }
     
     // Cleanup any existing subscription before creating a new one
     if (conversationsUnsubscribeRef.current) {
-      console.log('Cleaning up previous conversations listener');
       conversationsUnsubscribeRef.current();
       conversationsUnsubscribeRef.current = null;
     }
 
     const userId = String(currentUser.user_id);
-    console.log(`Setting up real-time listener for editor conversations (userId: ${userId})`);
     
     if (isMountedRef.current) {
       setIsLoading(true);
@@ -504,13 +493,11 @@ const ChatArea: React.FC = () => {
       (snapshot) => {
         // Check if component is still mounted before updating state
         if (!isMountedRef.current) {
-          console.log('Component unmounted, skipping conversation update');
           return;
         }
         
         const data = snapshot.val();
         if (!data) {
-          console.log('No conversations found');
           if (isMountedRef.current) {
             setConversations([]);
             setIsLoading(false);
@@ -542,8 +529,6 @@ const ChatArea: React.FC = () => {
           }
         });
         
-        console.log(`Received ${convos.length} conversations from Realtime Database`);
-        
         // Sort client-side by updatedAt or lastMessageTime (most recent first)
         convos.sort((a, b) => {
           const timeA = a.updatedAt || a.lastMessageTime || 0;
@@ -557,7 +542,7 @@ const ChatArea: React.FC = () => {
         }
         
         if (convos.length === 0) {
-          console.log('No conversations found for this editor');
+          // No conversations found
         }
       },
       (err) => {
@@ -574,7 +559,6 @@ const ChatArea: React.FC = () => {
 
     // Cleanup listener on unmount or when dependencies change
     return () => {
-      console.log('Cleaning up Realtime Database conversation listener');
       if (conversationsUnsubscribeRef.current) {
         conversationsUnsubscribeRef.current();
         conversationsUnsubscribeRef.current = null;
@@ -618,7 +602,6 @@ const ChatArea: React.FC = () => {
       if (!response.ok) {
         // If the endpoint fails, just log and return null
         // The UI will fallback to Firebase participantDetails
-        console.log(`Could not fetch public info for user ${clientId}, will use conversation details`);
         return null;
       }
 
@@ -633,8 +616,6 @@ const ChatArea: React.FC = () => {
           profile_picture: userData.profile_picture
         };
 
-        console.log(`✅ Fetched profile for user ${clientId}:`, profile);
-
         // Cache the profile (only if component is still mounted)
         if (isMountedRef.current) {
           profileCacheRef.current.set(clientId, profile);
@@ -646,7 +627,6 @@ const ChatArea: React.FC = () => {
 
       return null;
     } catch (error) {
-      console.log(`Could not fetch profile for user ${clientId}, will use conversation details`);
       return null;
     } finally {
       // Remove from loading set (only if component is still mounted)
@@ -709,12 +689,9 @@ const ChatArea: React.FC = () => {
     
     // Cleanup previous messages listener before creating new one
     if (messagesUnsubscribeRef.current) {
-      console.log('Cleaning up previous messages listener before creating new one');
       messagesUnsubscribeRef.current();
       messagesUnsubscribeRef.current = null;
     }
-
-    console.log(`Setting up real-time message listener for conversation: ${selectedConversation.id}`);
 
     const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
     // Query for the most recent messages
@@ -725,13 +702,11 @@ const ChatArea: React.FC = () => {
       (snapshot) => {
         // Check if component is still mounted before updating state
         if (!isMountedRef.current) {
-          console.log('Component unmounted, skipping message update');
           return;
         }
         
         const data = snapshot.val();
         if (!data) {
-          console.log(`No messages found for conversation ${selectedConversation.id}`);
           if (isMountedRef.current) {
             setMessages([]);
             setHasMoreMessages(false);
@@ -758,8 +733,6 @@ const ChatArea: React.FC = () => {
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return timeA - timeB; // Oldest first
         });
-        
-        console.log(`Received ${msgs.length} messages (limited to ${MESSAGES_PER_PAGE}) for conversation ${selectedConversation.id}`);
         
         if (isMountedRef.current) {
           setMessages(msgs);
@@ -827,7 +800,6 @@ const ChatArea: React.FC = () => {
               
               if (Object.keys(updates).length > 0) {
                 await update(messageRef, updates);
-                console.log(`📩 Updated message ${messageId} status:`, updates);
               }
             } catch (err) {
               // non-fatal
@@ -848,7 +820,6 @@ const ChatArea: React.FC = () => {
     messagesUnsubscribeRef.current = () => off(messagesRef, 'value', unsubscribe);
 
     return () => {
-      console.log(`Cleaning up message listener for conversation: ${selectedConversation.id}`);
       if (messagesUnsubscribeRef.current) {
         messagesUnsubscribeRef.current();
         messagesUnsubscribeRef.current = null;
@@ -875,7 +846,6 @@ const ChatArea: React.FC = () => {
     
     // Cleanup previous typing listener before creating new one
     if (typingUnsubscribeRef.current) {
-      console.log('Cleaning up previous typing listener before creating new one');
       typingUnsubscribeRef.current();
       typingUnsubscribeRef.current = null;
     }
@@ -887,7 +857,6 @@ const ChatArea: React.FC = () => {
       (snapshot) => {
         // Check if component is still mounted before updating state
         if (!isMountedRef.current) {
-          console.log('Component unmounted, skipping typing status update');
           return;
         }
         
@@ -925,7 +894,6 @@ const ChatArea: React.FC = () => {
     typingUnsubscribeRef.current = () => off(convRef, 'value', unsubscribe);
 
     return () => {
-      console.log(`Cleaning up typing listener for conversation: ${selectedConversation.id}`);
       if (typingUnsubscribeRef.current) {
         typingUnsubscribeRef.current();
         typingUnsubscribeRef.current = null;
@@ -938,7 +906,6 @@ const ChatArea: React.FC = () => {
     // Pagination with Realtime Database is handled differently
     // For now, we're loading the last N messages only
     // This can be enhanced with query cursors if needed
-    console.log('Load more messages not yet implemented for Realtime Database');
     return;
   };
 
@@ -1355,15 +1322,6 @@ const ChatArea: React.FC = () => {
             // Fallback to Firebase participant details if profile not loaded
             const fallbackDetails = clientId ? convo.participantDetails?.[clientId] : null;
             
-            // Debug log to see what data we have
-            if (clientId && !clientProfile) {
-              console.log(`Conversation ${convo.id} participant details:`, {
-                clientId,
-                participantDetails: convo.participantDetails,
-                fallbackDetails
-              });
-            }
-            
             // Determine display name with multiple fallbacks. Treat generic placeholders like "User name" as invalid.
             let displayName = 'Unknown User';
             if (clientProfile) {
@@ -1588,8 +1546,6 @@ const ChatArea: React.FC = () => {
                         lastMessageRead: true, // Mark as read since user just participated
                       });
 
-                      console.log('✅ Message sent successfully:', newMessageRef.key);
-                      
                       // Remove from pending messages after successful send
                       setTimeout(() => {
                         pendingMessagesRef.current.delete(tempId);
@@ -1637,7 +1593,6 @@ const ChatArea: React.FC = () => {
                               lastMessageRead: true, // Mark as read since user just participated
                             });
                             
-                            console.log('✅ Message retry successful');
                             pendingMessagesRef.current.delete(tempId);
                             if (isMountedRef.current) {
                               setPendingMessages(new Map(pendingMessagesRef.current));

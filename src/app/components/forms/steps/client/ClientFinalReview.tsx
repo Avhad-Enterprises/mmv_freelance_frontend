@@ -29,8 +29,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       return;
     }
 
-    console.log("Initial formData received by Review component:", formData);
-
     const loadingToast = toast.loading("Submitting registration...");
     try {
       const formDataToSend = new FormData();
@@ -88,56 +86,37 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       formDataToSend.append("privacy_policy_accepted", String(privacyAccepted));
 
       // Business Documents (Multiple files support)
-      console.log('📄 Business documents data:', formData.business_document);
       if (formData.business_document) {
         if (Array.isArray(formData.business_document)) {
           // Array of files (new format)
-          console.log(`📤 Uploading ${formData.business_document.length} business document(s) from array`);
           for (let i = 0; i < formData.business_document.length; i++) {
             const file = formData.business_document[i];
             if (file instanceof File && file.size > 0 && file.name !== "Unknown.pdf" && file.name !== "blob") {
               formDataToSend.append("business_document", file); // Singular field name!
-              console.log(`✅ Business document ${i + 1} attached: ${file.name} (${file.size} bytes)`);
             }
           }
         } else if (formData.business_document instanceof FileList) {
           // Multiple files - use same field name for all (as per API docs)
-          console.log(`📤 Uploading ${formData.business_document.length} business document(s) from FileList`);
           for (let i = 0; i < formData.business_document.length; i++) {
             const file = formData.business_document[i];
             if (file.size > 0 && file.name !== "Unknown.pdf" && file.name !== "blob") {
               formDataToSend.append("business_document", file); // Singular field name!
-              console.log(`✅ Business document ${i + 1} attached: ${file.name} (${file.size} bytes)`);
             }
           }
         } else if (formData.business_document instanceof File && formData.business_document.size > 0) {
           // Single file (backward compatibility)
           if (formData.business_document.name !== "Unknown.pdf" && formData.business_document.name !== "blob") {
             formDataToSend.append("business_document", formData.business_document); // Singular field name!
-            console.log(`✅ Business document attached: ${formData.business_document.name} (${formData.business_document.size} bytes)`);
           } else {
             console.warn("⚠️ Invalid business document detected, skipping upload");
           }
         }
-      } else {
-        console.log('📄 No business documents to upload');
       }
 
       // Profile photo upload
       if (formData.profile_photo) {
         formDataToSend.append("profile_picture", formData.profile_photo as File);
       }
-
-      // Debug: Log all form data being sent
-      console.log("=== CLIENT REGISTRATION PAYLOAD ===");
-      for (let [key, value] of formDataToSend.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-      console.log("====================================");
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/client`, {
         method: "POST",
@@ -148,7 +127,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
       });
 
       const data = await response.json();
-      console.log('API Response:', data);
       
       if (!response.ok) {
         console.error('Registration failed:', data);
@@ -157,7 +135,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
 
       // Registration successful - show success message and redirect
       toast.success("Registration completed successfully!", { id: loadingToast });
-      console.log('✅ Registration successful!');
       setTimeout(() => {
         window.location.href = '/?login=true';
       }, 2000);
@@ -200,11 +177,6 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
   };
   
   // Add Business Documents section only if files exist
-  console.log('🔍 Final Review - Business Documents:', formData.business_document);
-  console.log('🔍 Final Review - Is Array?', Array.isArray(formData.business_document));
-  console.log('🔍 Final Review - Is FileList?', formData.business_document instanceof FileList);
-  console.log('🔍 Final Review - Is File?', formData.business_document instanceof File);
-  
   if (formData.business_document && 
       ((Array.isArray(formData.business_document) && formData.business_document.length > 0) ||
        (formData.business_document instanceof FileList && formData.business_document.length > 0) || 
@@ -215,12 +187,9 @@ const ClientFinalReview: React.FC<Props> = ({ formData, prevStep, handleRegister
         Array.from(formData.business_document as FileList).map((file: File) => file.name).join(", ") : 
         (formData.business_document as File).name;
     
-    console.log('📋 Adding Business Documents section with files:', fileNames);
     sections["Business Documents"] = {
       files: fileNames
     };
-  } else {
-    console.log('⚠️ No business documents to display in Final Review');
   }
 
   return (

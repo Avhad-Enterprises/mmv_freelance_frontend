@@ -56,7 +56,6 @@ export function useConversations(currentUserId: string | null) {
 
     // Wait for Firebase authentication before querying
     if (!isAuthReady) {
-      console.log('Waiting for Firebase authentication...');
       return;
     }
 

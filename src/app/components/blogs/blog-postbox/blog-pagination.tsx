@@ -39,7 +39,7 @@ const BlogPagination = ({
             onClick={() => onPageChange(totalPages)}
             className="d-flex align-items-center"
           >
-            Last <Image src={icon} alt="icon" className="ms-2" />
+            Next <Image src={icon} alt="icon" className="ms-2" />
           </button>
         </li>
       )}

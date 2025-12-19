@@ -104,7 +104,6 @@ const ChatList: React.FC<ChatListProps> = ({
         if (data.success && data.data?.customToken) {
           await signInWithCustomToken(auth, data.data.customToken);
           setFirebaseAuthenticated(true);
-          console.log("✅ Firebase authenticated successfully for ChatList");
         }
       } catch (error) {
         console.error("Firebase authentication error in ChatList:", error);

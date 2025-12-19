@@ -62,7 +62,6 @@ const EmployAside = ({}: IProps) => {
         : "Loading...";
     
     const profilePictureUrl = userData?.profile_picture || null;
-    console.log('Current profile picture URL in employ aside:', profilePictureUrl);
 
     // Check for unread messages
     const hasUnreadMessages = conversations.some(convo => 
@@ -84,17 +83,11 @@ const EmployAside = ({}: IProps) => {
     };
 
     const handleProfilePicUpdate = () => {
-        console.log('Profile picture update triggered');
-        console.log('Current profile picture URL before update:', profilePictureUrl);
         // Update the cache-busting key to force image refresh
         setProfilePicKey(Date.now());
-        console.log('New cache busting key:', Date.now());
         // Add a small delay to ensure the API has processed the upload
         setTimeout(() => {
-            console.log('Refreshing user data after profile picture update');
-            refreshUserData().then(() => {
-                console.log('User data refreshed, new profile picture URL:', userData?.profile_picture);
-            });
+            refreshUserData();
         }, 1500); // Increased delay
     };
 

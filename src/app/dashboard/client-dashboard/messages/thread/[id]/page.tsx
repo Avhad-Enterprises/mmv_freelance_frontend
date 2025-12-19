@@ -80,10 +80,8 @@ export default function ThreadPage() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        console.log('✅ Firebase user authenticated:', user.uid);
         setFirebaseAuthenticated(true);
       } else {
-        console.log('⚠️ No Firebase user, attempting authentication...');
         setFirebaseAuthenticated(false);
 
         // Try to authenticate with custom token
@@ -101,7 +99,6 @@ export default function ThreadPage() {
               const data = await response.json();
               if (data.success && data.data?.customToken) {
                 await signInWithCustomToken(auth, data.data.customToken);
-                console.log('✅ Firebase authentication successful via custom token');
               }
             }
           } catch (error) {
@@ -210,13 +207,6 @@ export default function ThreadPage() {
         (msg.deliveryStatus !== 'read' || !msg.isRead)
     );
 
-    console.log('📬 Checking for unread messages:', {
-      currentUserId,
-      totalMessages: messages.length,
-      unreadCount: unreadMessages.length,
-      unreadIds: unreadMessages.map(m => m.id)
-    });
-
     if (unreadMessages.length === 0) return;
 
     // Mark each unread message as read
@@ -235,8 +225,6 @@ export default function ThreadPage() {
 
         const dbRef = ref(db);
         await update(dbRef, updates);
-
-        console.log(`✅ Marked ${unreadMessages.length} messages as read`);
       } catch (error) {
         console.error('Failed to mark messages as read:', error);
       }

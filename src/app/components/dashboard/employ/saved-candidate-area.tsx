@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 // import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori"; // Removed as filters are not needed for "saved only"
 import Pagination from "@/ui/pagination";
 // import NiceSelect from "@/ui/nice-select"; // Removed as sorting is not needed for "saved only"
@@ -94,6 +95,7 @@ const SavedCandidateArea = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 6;
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Helper function to format currency
   const formatCurrency = (amountStr: string, currencyCode: string) => {
@@ -193,14 +195,12 @@ const SavedCandidateArea = () => {
         if (!response.ok) throw new Error('Failed to fetch favorites');
 
         const result = await response.json();
-        console.log('💾 Favorites API response:', result);
         if (result.data && Array.isArray(result.data)) {
           const savedIds = result.data.map((fav: any) => fav.freelancer_id);
           const favIds = result.data.reduce((acc: any, fav: any) => {
             acc[fav.freelancer_id] = fav.id;
             return acc;
           }, {});
-          console.log('💾 Saved candidate IDs:', savedIds);
           setSavedCandidates(savedIds);
           setFavoriteIds(favIds);
         }
@@ -215,26 +215,36 @@ const SavedCandidateArea = () => {
     fetchFavorites();
   }, []);
 
-  // Effect to filter candidates based on saved status
+  // Effect to filter candidates based on saved status and search query
   useEffect(() => {
-    console.log('🔍 Filtering candidates:', {
-      allCandidatesCount: allCandidates.length,
-      savedCandidatesCount: savedCandidates.length,
-      savedCandidateIds: savedCandidates
-    });
-
     if (allCandidates.length > 0 && savedCandidates.length > 0) {
-      const savedOnlyCandidates = allCandidates.filter(candidate =>
+      let savedOnlyCandidates = allCandidates.filter(candidate =>
         savedCandidates.includes(candidate.user_id)
       );
-      console.log('✅ Filtered saved candidates:', savedOnlyCandidates.length, savedOnlyCandidates);
+      
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        savedOnlyCandidates = savedOnlyCandidates.filter(c => 
+          c.first_name?.toLowerCase().includes(query) ||
+          c.last_name?.toLowerCase().includes(query) ||
+          c.username?.toLowerCase().includes(query) ||
+          c.profile_title?.toLowerCase().includes(query) ||
+          c.bio?.toLowerCase().includes(query) ||
+          c.short_description?.toLowerCase().includes(query) ||
+          c.skills?.some(skill => skill.toLowerCase().includes(query)) ||
+          c.superpowers?.some(sp => sp.toLowerCase().includes(query)) ||
+          c.city?.toLowerCase().includes(query) ||
+          c.country?.toLowerCase().includes(query)
+        );
+      }
+      
       setDisplayedCandidates(savedOnlyCandidates);
       setCurrentPage(1); // Reset pagination when candidates are filtered
     } else if (savedCandidates.length === 0) {
-      console.log('❌ No saved candidates');
       setDisplayedCandidates([]);
     }
-  }, [allCandidates, savedCandidates]); // Rerun when allCandidates or savedCandidates change
+  }, [allCandidates, savedCandidates, searchQuery]); // Rerun when allCandidates, savedCandidates, or searchQuery change
 
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
@@ -325,7 +335,6 @@ const SavedCandidateArea = () => {
     try {
       // Ensure Firebase authentication
       if (!auth.currentUser) {
-        console.log('Authenticating with Firebase...');
         const authToken = authCookies.getToken();
         if (!authToken) {
           toast.error('Authentication required. Please sign in again.');
@@ -345,7 +354,6 @@ const SavedCandidateArea = () => {
 
         const { data } = await response.json();
         await signInWithCustomToken(auth, data.customToken);
-        console.log('Firebase authentication successful');
       }
 
       // Create or get conversation
@@ -358,8 +366,6 @@ const SavedCandidateArea = () => {
       const convSnap = await get(convRef);
 
       if (!convSnap.exists()) {
-        console.log('Creating new conversation...');
-
         // Build participant details
         const participantDetails: any = {};
         participantDetails[currentUserId] = {
@@ -389,10 +395,8 @@ const SavedCandidateArea = () => {
           updatedAt: Date.now(),
           createdAt: Date.now(),
         });
-        console.log('Conversation created successfully');
         toast.success('Chat started! Redirecting...');
       } else {
-        console.log('Opening existing conversation');
         toast.success('Opening chat...');
       }
 
@@ -409,15 +413,6 @@ const SavedCandidateArea = () => {
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
   const currentDisplayCandidates = displayedCandidates.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(displayedCandidates.length / ITEMS_PER_PAGE);
-
-  console.log('📊 Rendering state:', {
-    loading,
-    loadingFavorites,
-    displayedCandidatesCount: displayedCandidates.length,
-    currentDisplayCandidatesCount: currentDisplayCandidates.length,
-    currentPage,
-    totalPages
-  });
 
   return (
     <div className="dashboard-body">
@@ -443,8 +438,11 @@ const SavedCandidateArea = () => {
           />
         ) : (
           // Otherwise, render the list of saved candidates
-          <>
-            {/* Removed CandidateV1FilterArea */}
+          <>            <DashboardSearchBar 
+              placeholder="Search saved candidates by name, skills, location..."
+              onSearch={setSearchQuery}
+            />
+                        {/* Removed CandidateV1FilterArea */}
             {/* Removed Filter and Sort UI as only saved candidates are shown */}
 
             <div className="candidate-profile-area">

@@ -119,8 +119,6 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                 throw new Error('No image URL returned from upload');
             }
 
-            console.log('Uploaded image URL:', imageUrl);
-
             // Step 3: Update profile with the image URL
             const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
                 method: 'PATCH',
@@ -139,7 +137,6 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
             }
 
             const updateData = await updateResponse.json();
-            console.log('Profile update response:', updateData);
 
             // Update the preview to show the new image URL
             setPreviewUrl(imageUrl);

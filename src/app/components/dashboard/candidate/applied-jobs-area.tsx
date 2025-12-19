@@ -4,11 +4,13 @@ import useDecodedToken from '@/hooks/useDecodedToken';
 import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
+import DashboardSearchBar from '../common/DashboardSearchBar';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
 import { IJobType } from '@/types/job-data-type';
 
-// Status Mapping
+// Status Mapping for Applications (applied_projects.status)
+// 0 = Pending, 1 = Approved/Ongoing, 2 = Completed, 3 = Rejected
 const statusMap: Record<number, { text: string; className: string }> = {
   0: { text: 'Pending', className: 'bg-warning' },
   1: { text: 'Ongoing', className: 'bg-info' },
@@ -18,7 +20,7 @@ const statusMap: Record<number, { text: string; className: string }> = {
 
 // Job Interface - Aligned with IJobType
 interface IJob extends IJobType {
-  status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
+  status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected'; // Application Status
 }
 
 type IProps = {};
@@ -34,6 +36,7 @@ const AppliedJobsArea = ({}: IProps) => {
     'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'
   >('All');
   const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -103,11 +106,38 @@ const AppliedJobsArea = ({}: IProps) => {
     status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All'
   ) => {
     setSelectedStatus(status);
-    if (status === 'All') {
-      setFilteredJobs(jobs);
-    } else {
-      setFilteredJobs(jobs.filter((job) => job.status === status));
+    applyFilters(status, searchQuery);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    applyFilters(selectedStatus, query);
+  };
+
+  const applyFilters = (
+    status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected' | 'All',
+    query: string
+  ) => {
+    let filtered = jobs;
+    
+    // Apply status filter
+    if (status !== 'All') {
+      filtered = filtered.filter((job) => job.status === status);
     }
+    
+    // Apply search filter
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter((job) =>
+        job.project_title?.toLowerCase().includes(lowerQuery) ||
+        job.category?.toLowerCase().includes(lowerQuery) ||
+        job.projects_type?.toLowerCase().includes(lowerQuery) ||
+        job.project_description?.toLowerCase().includes(lowerQuery) ||
+        job.skills_required?.some(skill => skill.toLowerCase().includes(lowerQuery))
+      );
+    }
+    
+    setFilteredJobs(filtered);
   };
 
   if (selectedJob) {
@@ -127,9 +157,14 @@ const AppliedJobsArea = ({}: IProps) => {
           <h2 className="main-title mb-0">Applied Jobs</h2>
         </div>
         
+        <DashboardSearchBar 
+          placeholder="Search applied jobs by title, category, skills..."
+          onSearch={handleSearch}
+        />
+        
         {/* Improved Filter Section */}
         <div className="mb-4">
-          <label className="form-label fw-semibold mb-2">Filter by Status:</label>
+          <label className="form-label fw-semibold mb-2">Filter by Application Status:</label>
           <div className="d-flex flex-wrap gap-2">
             {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
               <button
@@ -218,11 +253,9 @@ const AppliedJobsArea = ({}: IProps) => {
                       </div>
                       <div className="col-lg-2 col-md-4 col-sm-6">
                         <div className="candidate-info">
-                          <span>Status</span>
+                          <span>Application Status</span>
                           <div>
-                            <span
-                              className={`badge rounded-pill ${statusInfo.className}`}
-                            >
+                            <span className={`fw-bold ${statusInfo.className.replace('bg-', 'text-')}`}>
                               {job.status}
                             </span>
                           </div>

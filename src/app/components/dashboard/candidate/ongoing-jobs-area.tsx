@@ -4,6 +4,7 @@ import useDecodedToken from '@/hooks/useDecodedToken';
 import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
+import DashboardSearchBar from '../common/DashboardSearchBar';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
 
@@ -44,6 +45,7 @@ const OngoingJobsArea = ({ }: IProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<IJob | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Submission Modal State
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -65,6 +67,9 @@ const OngoingJobsArea = ({ }: IProps) => {
           return;
         }
 
+        // Clear localStorage cache for completed projects to ensure fresh data
+        // (Projects with approved submissions should not appear in ongoing jobs)
+        
         // Fetch applications
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
@@ -84,6 +89,7 @@ const OngoingJobsArea = ({ }: IProps) => {
           throw new Error(resData?.message || 'Failed to fetch applications: Data not found');
         }
 
+        // Application Status mapping: 0=Pending, 1=Approved/Ongoing, 2=Completed, 3=Rejected
         const statusMap: Record<number, string> = {
           0: 'Pending',
           1: 'Ongoing',
@@ -331,6 +337,11 @@ const OngoingJobsArea = ({ }: IProps) => {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="main-title mb-0">Ongoing Projects</h2>
           </div>
+          
+          <DashboardSearchBar 
+            placeholder="Search ongoing jobs by title, category..."
+            onSearch={(query) => setSearchQuery(query)}
+          />
         </div>
 
         <div className="job-post-item-wrapper mt-4">
@@ -346,7 +357,19 @@ const OngoingJobsArea = ({ }: IProps) => {
               </p>
             </div>
           ) : (
-            jobs.map((job) => (
+            jobs
+              .filter((job) => {
+                if (!searchQuery.trim()) return true;
+                const query = searchQuery.toLowerCase();
+                return (
+                  job.project_title.toLowerCase().includes(query) ||
+                  job.category.toLowerCase().includes(query) ||
+                  job.projects_type.toLowerCase().includes(query) ||
+                  job.project_description?.toLowerCase().includes(query) ||
+                  job.skills_required?.some(skill => skill.toLowerCase().includes(query))
+                );
+              })
+              .map((job) => (
               <div
                 key={job.projects_task_id}
                 className="candidate-profile-card list-layout mb-25"
@@ -413,7 +436,13 @@ const OngoingJobsArea = ({ }: IProps) => {
                       </div>
                       <div className="col-lg-2 col-md-4 col-sm-6">
                         <div className="candidate-info">
-                          <span>Type</span>
+                          <span>Application Status</span>
+                          <div>{job.status || 'N/A'}</div>
+                        </div>
+                      </div>
+                      <div className="col-lg-2 col-md-4 col-sm-6">
+                        <div className="candidate-info">
+                          <span>Project Type</span>
                           <div>{job.projects_type || 'N/A'}</div>
                         </div>
                       </div>

@@ -14,6 +14,7 @@ import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
+import DashboardSearchBar from "@/app/components/dashboard/common/DashboardSearchBar";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -92,6 +93,7 @@ const CandidateV1Area = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedSuperpowers, setSelectedSuperpowers] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -169,7 +171,6 @@ const CandidateV1Area = () => {
     // Ensure Firebase authentication before creating conversation
     try {
       if (!auth.currentUser) {
-        console.log('Authenticating with Firebase...');
         const authToken = authCookies.getToken();
         if (!authToken) {
           toast.error('Authentication required. Please sign in again.');
@@ -190,7 +191,6 @@ const CandidateV1Area = () => {
         const data = await response.json();
         if (data.success && data.data?.customToken) {
           await signInWithCustomToken(auth, data.data.customToken);
-          console.log('✅ Firebase authentication successful');
         } else {
           throw new Error('Invalid Firebase token response');
         }
@@ -207,14 +207,10 @@ const CandidateV1Area = () => {
     const conversationId = participants.join('_');
 
     try {
-      console.log('Creating/opening conversation:', { currentUserId, otherId, conversationId });
-
       const convRef = ref(db, `conversations/${conversationId}`);
       const convSnap = await get(convRef);
 
       if (!convSnap.exists()) {
-        console.log('Conversation does not exist, creating new one');
-
         // Build participantDetails from local state and current user
         const participantDetails: any = {};
         participantDetails[currentUserId] = {
@@ -243,10 +239,8 @@ const CandidateV1Area = () => {
           updatedAt: Date.now(),
           createdAt: Date.now(),
         });
-        console.log('Conversation created successfully');
         toast.success('Chat started! Redirecting...');
       } else {
-        console.log('Conversation already exists');
         toast.success('Opening chat...');
       }
 
@@ -325,7 +319,7 @@ const CandidateV1Area = () => {
   // Effect to automatically apply filters when selections change
   useEffect(() => {
     applyFilters();
-  }, [selectedSkills, selectedLocations, selectedSuperpowers]);
+  }, [selectedSkills, selectedLocations, selectedSuperpowers, searchQuery]);
 
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
@@ -390,6 +384,23 @@ const CandidateV1Area = () => {
 
   const applyFilters = () => {
     let filtered = [...candidates];
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        c.first_name?.toLowerCase().includes(query) ||
+        c.last_name?.toLowerCase().includes(query) ||
+        c.username?.toLowerCase().includes(query) ||
+        c.profile_title?.toLowerCase().includes(query) ||
+        c.bio?.toLowerCase().includes(query) ||
+        c.short_description?.toLowerCase().includes(query) ||
+        c.skills?.some(skill => skill.toLowerCase().includes(query)) ||
+        c.superpowers?.some(sp => sp.toLowerCase().includes(query)) ||
+        c.city?.toLowerCase().includes(query) ||
+        c.country?.toLowerCase().includes(query)
+      );
+    }
 
     if (selectedSkills.length > 0) {
       filtered = filtered.filter(c =>
@@ -417,6 +428,7 @@ const CandidateV1Area = () => {
     setSelectedSkills([]);
     setSelectedLocations([]);
     setSelectedSuperpowers([]);
+    setSearchQuery("");
     setFilteredCandidates(candidates);
     setCurrentPage(1);
   };
@@ -484,6 +496,11 @@ const CandidateV1Area = () => {
           />
         ) : (
           <>
+            <DashboardSearchBar 
+              placeholder="Search candidates by name, skills, location..."
+              onSearch={setSearchQuery}
+            />
+            
             <div className="bg-white card-box border-20 mb-40">
               <CandidateV1FilterArea
                 onSkillChange={setSelectedSkills}

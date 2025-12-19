@@ -13,6 +13,7 @@ export type NewProjectPayload = {
   deadline: string;
   project_description: string;
   budget: number;
+  currency?: string;
   tags?: string;
   skills_required: string[];
   reference_links: string[];

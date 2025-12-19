@@ -1,5 +1,27 @@
 'use client';
 
+/**
+ * My Jobs Area for Clients
+ * 
+ * This component displays all jobs posted by the client and their applications.
+ * 
+ * Status Systems in the Application:
+ * 
+ * 1. PROJECT TASK STATUS (projects_tasks table):
+ *    - 0: Pending (awaiting freelancer assignment)
+ *    - 1: Assigned/In Progress (freelancer is working on it)
+ *    - 2: Completed (project finished)
+ * 
+ * 2. APPLICATION STATUS (applied_projects table):
+ *    - 0: Pending (waiting for client review)
+ *    - 1: Approved (client approved the application)
+ *    - 2: Completed (work completed)
+ *    - 3: Rejected (client rejected the application)
+ * 
+ * Note: This page shows PROJECT TASK STATUS in the jobs list.
+ *       When viewing applications, it shows APPLICATION STATUS.
+ */
+
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
@@ -343,12 +365,23 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     }
   };
 
-  const getStatusInfo = (status: Applicant['status'] | number) => {
+  // Application Status Info - used when viewing applicants for a job
+  const getApplicationStatusInfo = (status: Applicant['status'] | number) => {
     switch (status) {
       case 0: return { text: "Pending", className: "text-warning" };
       case 1: return { text: "Approved", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
       case 3: return { text: "Rejected", className: "text-danger" };
+      default: return { text: "Unknown", className: "text-secondary" };
+    }
+  };
+
+  // Project Task Status Info - used in the jobs list
+  const getProjectStatusInfo = (status: number) => {
+    switch (status) {
+      case 0: return { text: "Awaiting Assignment", className: "text-warning" };
+      case 1: return { text: "In Progress", className: "text-success" };
+      case 2: return { text: "Completed", className: "text-info" };
       default: return { text: "Unknown", className: "text-secondary" };
     }
   };
@@ -536,7 +569,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
             onViewProfile={handleViewProfile}
             onToggleSave={handleToggleSave}
             onUpdateApplicantStatus={handleUpdateApplicantStatus}
-            getStatusInfo={getStatusInfo}
+            getStatusInfo={getApplicationStatusInfo}
             onOpenChat={handleOpenChat}
           />
         ) : (
@@ -550,7 +583,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
                 loading={loading}
                 error={error}
                 onViewApplicants={handleViewApplicantsClick}
-                getStatusInfo={getStatusInfo}
+                getStatusInfo={getProjectStatusInfo}
               />
             )}
           </>

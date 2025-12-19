@@ -5,12 +5,7 @@ import localFont from 'next/font/local';
 import Script from 'next/script';
 import { EB_Garamond } from "next/font/google";
 import BackToTopCom from "./components/common/back-to-top-com";
-import { Providers } from "@/redux/provider";
-import { Toaster } from "react-hot-toast";
-import { SidebarProvider } from "@/context/SidebarContext";
-import { UserProvider } from "@/context/UserContext";
-import { ConsentProvider } from "@/context/ConsentContext";
-import { NotificationProvider } from "@/context/NotificationContext";
+import { ClientProviders } from "@/components/providers/ClientProviders";
 import CookieConsentBanner from "./components/common/cookie-consent-banner";
 
 const gordita = localFont({
@@ -67,19 +62,10 @@ export default function RootLayout({
         <Head>
           <title>MMV</title>
         </Head>
-        <Providers>
-          <ConsentProvider>
-            <UserProvider>
-              <SidebarProvider> {/*yaha wrap kar diya */}
-                <NotificationProvider>
-                  <Toaster position="top-right" />
-                  {children}
-                  <CookieConsentBanner />
-                </NotificationProvider>
-              </SidebarProvider>
-            </UserProvider>
-          </ConsentProvider>
-        </Providers>
+        <ClientProviders>
+          {children}
+          <CookieConsentBanner />
+        </ClientProviders>
         <BackToTopCom />
         <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" />
       </body>
