@@ -54,3 +54,30 @@ This system is "Zero-Latency" because the frontend **does not need to query the 
 2.  **Backend**: Assign it to roles in `seed-role-permissions.ts`.
 3.  **Backend**: Run `npm run seed:rbac`.
 4.  **Frontend**: Use it in `<PermissionGuard permission="new_feature.use" />`.
+
+### Example: Credit Permissions Already Added
+
+The following credit permissions have been added to the backend:
+
+**Freelancer Permissions** (in `seed-permissions.ts`):
+```typescript
+{ name: 'credits.view_own', description: 'View own credit balance' },
+{ name: 'credits.view_packages', description: 'View credit packages' },
+{ name: 'credits.purchase', description: 'Purchase credits' },
+{ name: 'credits.view_history', description: 'View credit history' },
+{ name: 'credits.request_refund', description: 'Request credit refund' },
+```
+
+**Admin Permissions**:
+```typescript
+{ name: 'credits.admin.view_all', description: 'View all credit transactions' },
+{ name: 'credits.admin.adjust', description: 'Adjust user credits' },
+{ name: 'credits.admin.analytics', description: 'View credit analytics' },
+{ name: 'credits.admin.refund', description: 'Process refunds' },
+{ name: 'credits.admin.export', description: 'Export transactions' },
+```
+
+**Role Assignments** (in `seed-role-permissions.ts`):
+- `VIDEOGRAPHER` & `VIDEO_EDITOR`: All `credits.*` (non-admin) permissions
+- `ADMIN`: All `credits.admin.*` permissions
+
