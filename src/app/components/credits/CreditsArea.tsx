@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header-minus";
 import { useCredits } from "@/hooks/useCredits";
 import { CreditPackage } from "@/types/credits";
@@ -9,6 +9,7 @@ import {
     PackageSelector,
     PurchaseModal,
     TransactionHistory,
+    TransactionHistoryRef,
     HowCreditsWork,
 } from "@/app/components/credits";
 import toast from "react-hot-toast";
@@ -22,6 +23,9 @@ const CreditsArea: React.FC = () => {
     const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
     const [showPurchaseModal, setShowPurchaseModal] = useState(false);
     const [purchaseProcessing, setPurchaseProcessing] = useState(false);
+
+    // Ref for transaction history to trigger refresh
+    const transactionHistoryRef = useRef<TransactionHistoryRef>(null);
 
     // Fetch balance and packages
     const { balance, packages, loading, error, refreshBalance } = useCredits();
@@ -43,6 +47,8 @@ const CreditsArea: React.FC = () => {
     // Handle successful purchase
     const handlePurchaseSuccess = async () => {
         await refreshBalance();
+        // Refresh transaction history to show the new purchase
+        await transactionHistoryRef.current?.refetch();
         setSelectedPackage(null);
         setPurchaseProcessing(false);
     };
@@ -170,7 +176,7 @@ const CreditsArea: React.FC = () => {
                 {/* Transaction History (Compact View) */}
                 <div className="row mb-20">
                     <div className="col-12">
-                        <TransactionHistory initialPageSize={5} showFilters={true} compact={false} />
+                        <TransactionHistory ref={transactionHistoryRef} initialPageSize={5} showFilters={true} compact={false} />
                     </div>
                 </div>
 
