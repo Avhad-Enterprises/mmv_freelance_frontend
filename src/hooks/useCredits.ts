@@ -43,6 +43,7 @@ interface UseCreditsHistoryReturn {
     fetchHistory: (params?: HistoryParams) => Promise<void>;
     setPage: (page: number) => void;
     setFilter: (type: string) => void;
+    refetch: () => Promise<void>; // Force refresh the history
 }
 
 /**
@@ -175,6 +176,12 @@ export function useCreditsHistory(
         setCurrentPage(1); // Reset to first page when filter changes
     }, []);
 
+    // Force refresh the history (useful after purchase/deduction)
+    const refetch = useCallback(async () => {
+        setCurrentPage(1); // Reset to first page
+        await fetchHistory({ page: 1, limit: initialPageSize, type: filterType || undefined });
+    }, [fetchHistory, initialPageSize, filterType]);
+
     // Fetch on mount and when page/filter changes
     useEffect(() => {
         fetchHistory();
@@ -188,6 +195,7 @@ export function useCreditsHistory(
         fetchHistory,
         setPage,
         setFilter,
+        refetch,
     };
 }
 
