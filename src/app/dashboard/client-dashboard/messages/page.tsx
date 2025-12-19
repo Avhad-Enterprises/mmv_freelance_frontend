@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -14,7 +15,16 @@ export default function ClientMessagesPage() {
   const { userData, isLoading } = useUser();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const searchParams = useSearchParams();
+  const conversationIdFromUrl = searchParams.get('conversationId');
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
+  // Auto-select conversation from URL query param
+  useEffect(() => {
+    if (conversationIdFromUrl) {
+      setSelectedConversationId(conversationIdFromUrl);
+    }
+  }, [conversationIdFromUrl]);
 
   if (isLoading) return (
     <div className="dashboard-body">
@@ -63,7 +73,7 @@ export default function ClientMessagesPage() {
                 height: "100%",
               }}
             >
-              <ChatList 
+              <ChatList
                 onSelectConversation={isDesktop ? (id) => setSelectedConversationId(id) : undefined}
                 selectedConversationId={isDesktop ? selectedConversationId : undefined}
               />

@@ -29,7 +29,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         setFirebaseAuthenticated(true);
       } else {
         setFirebaseAuthenticated(false);
-        
+
         // Try to authenticate with custom token
         const authToken = Cookies.get('auth_token');
         if (authToken) {
@@ -80,7 +80,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
                   conv.participantDetails = conv.participantDetails || {};
                   conv.participantDetails[otherId] = {
                     firstName: found.first_name || (found.username || '').split('@')[0],
-                    email: `${found.username || 'unknown'}@example.com`,
+                    email: '',
                   };
                 }
               }
@@ -102,7 +102,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
   useEffect(() => {
     if (!conversationId || !firebaseAuthenticated) return;
     setIsLoadingMessages(true);
-    
+
     const messagesRef = ref(db, `conversations/${conversationId}/messages`);
 
     const unsub = onValue(messagesRef, (snap) => {
@@ -136,30 +136,30 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
     const unreadMessages = messages.filter(
       (msg) => msg.senderId !== String(userData.user_id) && !msg.isRead
     );
-    
+
     if (unreadMessages.length === 0) return;
-    
+
     const markAsRead = async () => {
       try {
         const updates: { [key: string]: any } = {};
-        
+
         unreadMessages.forEach((msg) => {
           updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] = true;
           updates[`conversations/${conversationId}/messages/${msg.id}/deliveryStatus`] = 'read';
           updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] = Date.now();
         });
-        
+
         updates[`conversations/${conversationId}/lastMessageRead`] = true;
-        
+
         const dbRef = ref(db);
         await update(dbRef, updates);
       } catch (error) {
         console.error('Failed to mark messages as read:', error);
       }
     };
-    
+
     const timer = setTimeout(markAsRead, 300);
-    
+
     return () => clearTimeout(timer);
   }, [conversationId, firebaseAuthenticated, userData, messages]);
 
@@ -177,7 +177,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
     }
 
     const typingRef = ref(db, `conversations/${conversationId}/typing/${otherId}`);
-    
+
     const unsub = onValue(
       typingRef,
       (snap) => {
@@ -202,10 +202,10 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
   };
 
   if (isLoading || !userData) return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       height: '100%',
       bgcolor: '#FFFFFF',
     }}>
@@ -214,10 +214,10 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
   );
 
   if (!firebaseAuthenticated) return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       height: '100%',
       bgcolor: '#FFFFFF',
     }}>
@@ -251,10 +251,10 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
           overflow: "hidden",
         }}
       >
-        <ChatBody 
-          messages={messages} 
-          currentUserId={String(userData.user_id)} 
-          isOtherUserTyping={isOtherUserTyping} 
+        <ChatBody
+          messages={messages}
+          currentUserId={String(userData.user_id)}
+          isOtherUserTyping={isOtherUserTyping}
         />
         <ChatInput
           conversationId={conversationId}

@@ -69,7 +69,7 @@ interface ApiCandidate {
   payment_method: any;
   bank_account_info: any;
   role_name: string | null;
-  experience: any; 
+  experience: any;
 }
 
 
@@ -129,7 +129,7 @@ const CandidateV1Area = () => {
       languages: apiCandidate.languages || [],
       city: apiCandidate.city || null,
       country: apiCandidate.country || null,
-      email: `${apiCandidate.username || 'unknown'}@example.com`,
+      email: '',
       rate_amount: apiCandidate.rate_amount || "0.00",
       currency: apiCandidate.currency || "USD",
       availability: apiCandidate.availability || "not specified",
@@ -208,25 +208,25 @@ const CandidateV1Area = () => {
 
     try {
       console.log('Creating/opening conversation:', { currentUserId, otherId, conversationId });
-      
+
       const convRef = ref(db, `conversations/${conversationId}`);
       const convSnap = await get(convRef);
-      
+
       if (!convSnap.exists()) {
         console.log('Conversation does not exist, creating new one');
 
         // Build participantDetails from local state and current user
         const participantDetails: any = {};
-        participantDetails[currentUserId] = { 
-          firstName: userData.first_name || '', 
+        participantDetails[currentUserId] = {
+          firstName: userData.first_name || '',
           email: userData.email || '',
           profilePicture: userData.profile_picture || null
         };
         const otherCandidate = candidates.find(c => String(c.user_id) === otherId);
         if (otherCandidate) {
-          participantDetails[otherId] = { 
-            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`, 
-            email: `${otherCandidate.username || 'unknown'}@example.com`,
+          participantDetails[otherId] = {
+            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`,
+            email: '',
             profilePicture: otherCandidate.profile_picture || null
           };
         }
@@ -251,7 +251,7 @@ const CandidateV1Area = () => {
       }
 
       // Redirect to the thread page to show the conversation
-      router.push(`/dashboard/client-dashboard/messages/thread/${conversationId}`);
+      router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
     } catch (err: any) {
       console.error('Failed to start chat:', err);
       console.error('Error details:', {
@@ -270,7 +270,7 @@ const CandidateV1Area = () => {
         setLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
-        
+
         const responseData = await response.json();
         const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
         setCandidates(candidatesData);
@@ -321,66 +321,66 @@ const CandidateV1Area = () => {
     };
     fetchFavorites();
   }, []);
-  
+
   // Effect to automatically apply filters when selections change
   useEffect(() => {
     applyFilters();
   }, [selectedSkills, selectedLocations, selectedSuperpowers]);
-  
+
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
     const token = authCookies.getToken();
     if (!token) {
-        toast.error("Please log in to save candidates.");
-        return;
+      toast.error("Please log in to save candidates.");
+      return;
     }
 
     const isCurrentlySaved = savedCandidates.includes(candidateId);
-    
+
     try {
-        if (isCurrentlySaved) {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+      if (isCurrentlySaved) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) throw new Error("Failed to remove from favorites");
+        if (!response.ok) throw new Error("Failed to remove from favorites");
 
-            setSavedCandidates(prev => prev.filter(id => id !== candidateId));
-            setFavoriteIds(prev => {
-                const newFavs = { ...prev };
-                delete newFavs[candidateId];
-                return newFavs;
-            });
-            toast.success('Removed from favorites!');
-        } else {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+        setSavedCandidates(prev => prev.filter(id => id !== candidateId));
+        setFavoriteIds(prev => {
+          const newFavs = { ...prev };
+          delete newFavs[candidateId];
+          return newFavs;
+        });
+        toast.success('Removed from favorites!');
+      } else {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to add to favorites");
-            }
-            
-            const result = await response.json();
-
-            setSavedCandidates(prev => [...prev, candidateId]);
-            setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
-            toast.success('Added to favorites!');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add to favorites");
         }
+
+        const result = await response.json();
+
+        setSavedCandidates(prev => [...prev, candidateId]);
+        setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
+        toast.success('Added to favorites!');
+      }
     } catch (err: any) {
-        console.error("Error toggling favorite:", err);
-        toast.error(err.message || "An unexpected error occurred.");
+      console.error("Error toggling favorite:", err);
+      toast.error(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -390,25 +390,25 @@ const CandidateV1Area = () => {
 
   const applyFilters = () => {
     let filtered = [...candidates];
-    
+
     if (selectedSkills.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         selectedSkills.every(skill => c.skills?.includes(skill))
       );
     }
 
     if (selectedSuperpowers.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         selectedSuperpowers.every(superpower => c.superpowers?.includes(superpower))
       );
     }
-    
+
     if (selectedLocations.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.city && c.country && selectedLocations.includes(`${c.city}, ${c.country}`)
       );
     }
-    
+
     setFilteredCandidates(filtered);
     setCurrentPage(1);
   };
@@ -432,7 +432,7 @@ const CandidateV1Area = () => {
         sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
         break;
       default:
-        applyFilters(); 
+        applyFilters();
         return;
     }
     setFilteredCandidates(sorted);
@@ -475,92 +475,92 @@ const CandidateV1Area = () => {
             </button>
           )}
         </div>
-        
+
         {selectedFreelancer ? (
-          <CandidateDetailsArea 
-            freelancer={selectedFreelancer} 
+          <CandidateDetailsArea
+            freelancer={selectedFreelancer}
             loading={loadingProfile}
             onMessage={() => handleStartChat(selectedFreelancer.user_id)}
           />
         ) : (
           <>
             <div className="bg-white card-box border-20 mb-40">
-                <CandidateV1FilterArea
-                  onSkillChange={setSelectedSkills}
-                  onLocationChange={setSelectedLocations}
-                  onSuperpowerChange={setSelectedSuperpowers}
-                  skills={allSkills}
-                  locations={allLocations}
-                  superpowers={allSuperpowers}
-                  selectedSkills={selectedSkills}
-                  selectedLocations={selectedLocations}
-                  selectedSuperpowers={selectedSuperpowers}
-                  onClearFilters={clearFilters}
-                />
+              <CandidateV1FilterArea
+                onSkillChange={setSelectedSkills}
+                onLocationChange={setSelectedLocations}
+                onSuperpowerChange={setSelectedSuperpowers}
+                skills={allSkills}
+                locations={allLocations}
+                superpowers={allSuperpowers}
+                selectedSkills={selectedSkills}
+                selectedLocations={selectedLocations}
+                selectedSuperpowers={selectedSuperpowers}
+                onClearFilters={clearFilters}
+              />
             </div>
 
             <div className="candidate-profile-area">
-                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                    <div className="total-job-found">
-                        All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
-                    </div>
-                    <div className="d-flex align-items-center">
-                        <div className="short-filter d-flex align-items-center">
-                            <div className="text-dark fw-500 me-2">Sort:</div>
-                            <NiceSelect
-                                options={[
-                                    { value: "", label: "Budget Sort" },
-                                    { value: "price-low-to-high", label: "Low to High" },
-                                    { value: "price-high-to-low", label: "High to Low" },
-                                ]}
-                                defaultCurrent={0}
-                                onChange={(item) => handleSort(item.value)}
-                                name="Budget Sort"
-                            />
-                        </div>
-                    </div>
+              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                <div className="total-job-found">
+                  All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
                 </div>
-
-                <div className="accordion-box list-style show">
-                    {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
-                    {error && <p className="text-danger text-center p-5">{error}</p>}
-                    
-                    {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
-                      <CandidateListItem
-                            key={apiCandidate.user_id}
-                            isSaved={savedCandidates.includes(apiCandidate.user_id)}
-                            onToggleSave={handleToggleSave}
-                            onViewProfile={handleViewProfile}
-                            item={{
-                                user_id: apiCandidate.user_id,
-                                username: apiCandidate.username,
-                                first_name: apiCandidate.first_name,
-                                last_name: apiCandidate.last_name,
-                                profile_picture: apiCandidate.profile_picture || undefined,
-                                city: apiCandidate.city || '',
-                                country: apiCandidate.country || '',
-                                skill: apiCandidate.skills,
-                                post: apiCandidate.profile_title || 'Freelancer',
-                                budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
-                                location: '', 
-                                total_earnings: apiCandidate.total_earnings,
-                            }}
-                        />
-                    ))}
-
-                    {!loading && currentDisplayCandidates.length === 0 && (
-                        <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
-                    )}
+                <div className="d-flex align-items-center">
+                  <div className="short-filter d-flex align-items-center">
+                    <div className="text-dark fw-500 me-2">Sort:</div>
+                    <NiceSelect
+                      options={[
+                        { value: "", label: "Budget Sort" },
+                        { value: "price-low-to-high", label: "Low to High" },
+                        { value: "price-high-to-low", label: "High to Low" },
+                      ]}
+                      defaultCurrent={0}
+                      onChange={(item) => handleSort(item.value)}
+                      name="Budget Sort"
+                    />
+                  </div>
                 </div>
+              </div>
 
-                {totalPages > 1 && (
-                    <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
-                        <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                            Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
-                        </p>
-                        <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
-                    </div>
+              <div className="accordion-box list-style show">
+                {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+                {error && <p className="text-danger text-center p-5">{error}</p>}
+
+                {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
+                  <CandidateListItem
+                    key={apiCandidate.user_id}
+                    isSaved={savedCandidates.includes(apiCandidate.user_id)}
+                    onToggleSave={handleToggleSave}
+                    onViewProfile={handleViewProfile}
+                    item={{
+                      user_id: apiCandidate.user_id,
+                      username: apiCandidate.username,
+                      first_name: apiCandidate.first_name,
+                      last_name: apiCandidate.last_name,
+                      profile_picture: apiCandidate.profile_picture || undefined,
+                      city: apiCandidate.city || '',
+                      country: apiCandidate.country || '',
+                      skill: apiCandidate.skills,
+                      post: apiCandidate.profile_title || 'Freelancer',
+                      budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
+                      location: '',
+                      total_earnings: apiCandidate.total_earnings,
+                    }}
+                  />
+                ))}
+
+                {!loading && currentDisplayCandidates.length === 0 && (
+                  <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
                 )}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                  <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                    Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
+                  </p>
+                  <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
+                </div>
+              )}
             </div>
           </>
         )}

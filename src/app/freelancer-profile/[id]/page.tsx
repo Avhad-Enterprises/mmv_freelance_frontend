@@ -155,7 +155,7 @@ const DynamicCandidateProfilePage = () => {
               languages: foundRawFreelancer.languages || [],
               city: foundRawFreelancer.city || null,
               country: foundRawFreelancer.country || null,
-              email: `${foundRawFreelancer.username || 'unknown'}@example.com`,
+              email: '',
               rate_amount: foundRawFreelancer.rate_amount || "0.00",
               currency: foundRawFreelancer.currency || "USD",
               availability: foundRawFreelancer.availability || "not specified",
@@ -202,14 +202,14 @@ const DynamicCandidateProfilePage = () => {
         <Header />
 
         {error && (
-            <div className="container text-center pt-80 pb-80">
-                <h2 className="text-danger">An Error Occurred</h2>
-                <p>{error}</p>
-            </div>
+          <div className="container text-center pt-80 pb-80">
+            <h2 className="text-danger">An Error Occurred</h2>
+            <p>{error}</p>
+          </div>
         )}
 
         {!error && (
-            <CandidateDetailsArea freelancer={freelancer} loading={loading} />
+          <CandidateDetailsArea freelancer={freelancer} loading={loading} />
         )}
 
         <JobPortalIntro top_border={true} />

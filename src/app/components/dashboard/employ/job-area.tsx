@@ -167,39 +167,39 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       // Fetch applications
       const applicationsResponse = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
       const rawApplicants = applicationsResponse.data?.data || [];
-      
+
       // Fetch all freelancers to get profile pictures and additional data
       const freelancersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
       if (!freelancersResponse.ok) throw new Error(`Failed to fetch freelancer data`);
       const freelancersData = await freelancersResponse.json();
       const freelancers = freelancersData.data || [];
-      
+
       // Create a map of user_id to freelancer data for quick lookup
       const freelancerMap = new Map();
       freelancers.forEach((freelancer: any) => {
         freelancerMap.set(freelancer.user_id, freelancer);
       });
-      
+
       // Map API response to match Applicant interface, enriched with freelancer data
       const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
-  const freelancer = freelancerMap.get(app.user_id);
-  return {
-    applied_projects_id: app.applied_projects_id,
-    user_id: app.user_id,
-    first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
-    last_name: app.applicant?.last_name || freelancer?.last_name || '',
-    email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
-    profile_picture: freelancer?.profile_picture || '',
-    status: app.status,
-    bio: freelancer?.bio || freelancer?.short_description || null,
-    skills: freelancer?.skills || [],
-    applied_date: app.created_at,
-    bid_amount: parseFloat(app.bid_amount) || 0,
-    bid_message: app.bid_message || '',
-  };
-});
+        const freelancer = freelancerMap.get(app.user_id);
+        return {
+          applied_projects_id: app.applied_projects_id,
+          user_id: app.user_id,
+          first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
+          last_name: app.applicant?.last_name || freelancer?.last_name || '',
+          email: app.applicant?.email || freelancer?.email || '',
+          profile_picture: freelancer?.profile_picture || '',
+          status: app.status,
+          bio: freelancer?.bio || freelancer?.short_description || null,
+          skills: freelancer?.skills || [],
+          applied_date: app.created_at,
+          bid_amount: parseFloat(app.bid_amount) || 0,
+          bid_message: app.bid_message || '',
+        };
+      });
 
-      
+
       setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
@@ -318,9 +318,9 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       });
 
       // Update local state immediately after successful API call
-      setApplicants(prev => prev.map(app => 
-        app.applied_projects_id === applicationId 
-          ? { ...app, status: newStatus } 
+      setApplicants(prev => prev.map(app =>
+        app.applied_projects_id === applicationId
+          ? { ...app, status: newStatus }
           : app
       ));
 
@@ -426,7 +426,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           languages: foundFreelancer.languages || [],
           city: foundFreelancer.city || null,
           country: foundFreelancer.country || null,
-          email: `${foundFreelancer.username || 'unknown'}@example.com`,
+          email: foundFreelancer.email || '',
           rate_amount: foundFreelancer.rate_amount || "0.00",
           currency: foundFreelancer.currency || "USD",
           availability: foundFreelancer.availability || "not specified",
@@ -486,9 +486,9 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       isPending: applicant.status === 0,
       maxMessages: applicant.status === 0 ? 10 : -1, // -1 means unlimited
     };
-    
+
     sessionStorage.setItem('chatRestriction', JSON.stringify(chatRestriction));
-    
+
     // Navigate to chat page
     router.push('/dashboard/client-dashboard/submit-job');
   };

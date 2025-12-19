@@ -54,7 +54,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
   const [selectedBidMessage, setSelectedBidMessage] = useState<{ name: string; message: string; amount: number } | null>(null);
   const bidMessageModalRef = useRef<any>(null);
 
-  // Initialize Bootstrap modals
+  // Initialize Bootstrap modals and fix z-index
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const bootstrap = require('bootstrap');
@@ -67,6 +67,31 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
       if (bidModalElement) {
         bidMessageModalRef.current = new bootstrap.Modal(bidModalElement);
       }
+
+      // Fix for modal backdrop issue
+      const style = document.createElement('style');
+      style.innerHTML = `
+        #approveConfirmationModal.modal.show,
+        #bidMessageModal.modal.show {
+          z-index: 99999 !important;
+        }
+        #approveConfirmationModal ~ .modal-backdrop,
+        #bidMessageModal ~ .modal-backdrop,
+        .modal-backdrop.show {
+          z-index: 99998 !important;
+          background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+        body.modal-open {
+          overflow: hidden !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      return () => {
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
+      };
     }
   }, []);
 

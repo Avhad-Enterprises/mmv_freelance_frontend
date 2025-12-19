@@ -85,7 +85,7 @@ export default function ThreadPage() {
       } else {
         console.log('⚠️ No Firebase user, attempting authentication...');
         setFirebaseAuthenticated(false);
-        
+
         // Try to authenticate with custom token
         const authToken = Cookies.get('auth_token');
         if (authToken) {
@@ -136,7 +136,7 @@ export default function ThreadPage() {
                   conv.participantDetails = conv.participantDetails || {};
                   conv.participantDetails[otherId] = {
                     firstName: found.first_name || (found.username || '').split('@')[0],
-                    email: `${found.username || 'unknown'}@example.com`,
+                    email: '',
                   };
                 }
               }
@@ -160,7 +160,7 @@ export default function ThreadPage() {
   useEffect(() => {
     if (!conversationId || !firebaseAuthenticated) return;
     setIsLoadingMessages(true);
-    
+
     const messagesRef = ref(db, `conversations/${conversationId}/messages`);
 
     const unsub = onValue(messagesRef, (snap) => {
@@ -170,7 +170,7 @@ export default function ThreadPage() {
         setIsLoadingMessages(false);
         return;
       }
-      
+
       const msgs: LocalMessage[] = Object.entries(data).map(([id, msg]: [string, any]) => {
         return {
           id,
@@ -186,7 +186,7 @@ export default function ThreadPage() {
         const bTime = typeof b.createdAt === 'number' ? b.createdAt : 0;
         return aTime - bTime;
       });
-      
+
       setMessages(msgs);
       setIsLoadingMessages(false);
     }, (err) => {
@@ -200,51 +200,51 @@ export default function ThreadPage() {
   // Mark messages as read when receiver views them
   useEffect(() => {
     if (!conversationId || !firebaseAuthenticated || !userData || messages.length === 0) return;
-    
+
     const currentUserId = String(userData.user_id);
-    
+
     // Find unread messages sent by the other person (not by current user)
     // Convert senderId to string for comparison
     const unreadMessages = messages.filter(
-      (msg) => String(msg.senderId) !== currentUserId && 
-               (msg.deliveryStatus !== 'read' || !msg.isRead)
+      (msg) => String(msg.senderId) !== currentUserId &&
+        (msg.deliveryStatus !== 'read' || !msg.isRead)
     );
-    
+
     console.log('📬 Checking for unread messages:', {
       currentUserId,
       totalMessages: messages.length,
       unreadCount: unreadMessages.length,
       unreadIds: unreadMessages.map(m => m.id)
     });
-    
+
     if (unreadMessages.length === 0) return;
-    
+
     // Mark each unread message as read
     const markAsRead = async () => {
       try {
         const updates: { [key: string]: any } = {};
-        
+
         unreadMessages.forEach((msg) => {
           updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] = true;
           updates[`conversations/${conversationId}/messages/${msg.id}/deliveryStatus`] = 'read';
           updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] = Date.now();
         });
-        
+
         // Also update the conversation's lastMessageRead status
         updates[`conversations/${conversationId}/lastMessageRead`] = true;
-        
+
         const dbRef = ref(db);
         await update(dbRef, updates);
-        
+
         console.log(`✅ Marked ${unreadMessages.length} messages as read`);
       } catch (error) {
         console.error('Failed to mark messages as read:', error);
       }
     };
-    
+
     // Small delay to ensure user has actually viewed the messages
     const timer = setTimeout(markAsRead, 300);
-    
+
     return () => clearTimeout(timer);
   }, [conversationId, firebaseAuthenticated, userData, messages]);
 
@@ -261,13 +261,13 @@ export default function ThreadPage() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
         { cache: 'no-cache' }
       );
-      
+
       if (response.ok) {
         const data = await response.json();
         const freelancer = (data.data || []).find(
           (f: any) => String(f.user_id) === String(user.id)
         );
-        
+
         if (freelancer) {
           setSelectedFreelancer(mapApiCandidateToIFreelancer(freelancer));
         } else {
@@ -298,7 +298,7 @@ export default function ThreadPage() {
     }
 
     const typingRef = ref(db, `conversations/${conversationId}/typing/${otherId}`);
-    
+
     const unsub = onValue(
       typingRef,
       (snap) => {
@@ -336,7 +336,7 @@ export default function ThreadPage() {
         {selectedFreelancer ? (
           <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
         ) : (
-        <div className="bg-white border-30" style={{ overflow: "hidden" }}>
+          <div className="bg-white border-30" style={{ overflow: "hidden" }}>
             <Box
               sx={{
                 display: "flex",
@@ -409,7 +409,7 @@ export default function ThreadPage() {
                 />
               </div>
             </Box>
-        </div>
+          </div>
         )}
       </div>
     </div>

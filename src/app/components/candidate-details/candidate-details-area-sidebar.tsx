@@ -26,7 +26,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
     languages = [],
     city = null,
     country = null,
-    email = "email@example.com",
+    email = "",
     rate_amount = "0.00",
     currency = "USD",
     first_name = "",
@@ -108,7 +108,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
           <div className="row">
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
-                
+
                 <div className="inner-card border-style mb-65 lg-mb-40">
                   <h3 className="title">Bio</h3>
                   <p>{bio}</p>
@@ -198,13 +198,13 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
                       {profile_picture && profile_picture.trim() !== '' ? (
-                        <img 
-                          src={profile_picture} 
-                          alt="avatar" 
-                          width={85} 
-                          height={85} 
-                          className="lazy-img rounded-circle w-100" 
-                          style={{ objectFit: 'cover', width: '85px', height: '85px' }} 
+                        <img
+                          src={profile_picture}
+                          alt="avatar"
+                          width={85}
+                          height={85}
+                          className="lazy-img rounded-circle w-100"
+                          style={{ objectFit: 'cover', width: '85px', height: '85px' }}
                         />
                       ) : (
                         <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />

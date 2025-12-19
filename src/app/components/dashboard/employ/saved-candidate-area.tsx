@@ -21,6 +21,7 @@ interface ApiCandidate {
   first_name: string;
   last_name: string;
   username: string;
+  email?: string; // Email from API
   profile_picture: string | null;
   bio: string | null; // Added bio for mapping
   address: string | null;
@@ -69,14 +70,14 @@ interface ApiCandidate {
   payment_method: any;
   bank_account_info: any;
   role_name: string | null;
-  experience: any; 
+  experience: any;
 }
 
 
 const SavedCandidateArea = () => {
   const router = useRouter();
   const { userData } = useUser();
-  
+
   // State variables for data and UI control
   const [allCandidates, setAllCandidates] = useState<ApiCandidate[]>([]); // Renamed to allCandidates
   const [displayedCandidates, setDisplayedCandidates] = useState<ApiCandidate[]>([]); // Holds only saved candidates
@@ -126,7 +127,7 @@ const SavedCandidateArea = () => {
       languages: apiCandidate.languages || [],
       city: apiCandidate.city || null,
       country: apiCandidate.country || null,
-      email: `${apiCandidate.username || 'unknown'}@example.com`, // Assuming email derived from username
+      email: apiCandidate.email || '',
       rate_amount: apiCandidate.rate_amount || "0.00",
       currency: apiCandidate.currency || "USD",
       availability: apiCandidate.availability || "not specified",
@@ -161,7 +162,7 @@ const SavedCandidateArea = () => {
         setLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
-        
+
         const responseData = await response.json();
         const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
         setAllCandidates(candidatesData); // Store all candidates
@@ -213,17 +214,17 @@ const SavedCandidateArea = () => {
     };
     fetchFavorites();
   }, []);
-  
+
   // Effect to filter candidates based on saved status
   useEffect(() => {
-    console.log('🔍 Filtering candidates:', { 
-      allCandidatesCount: allCandidates.length, 
+    console.log('🔍 Filtering candidates:', {
+      allCandidatesCount: allCandidates.length,
       savedCandidatesCount: savedCandidates.length,
-      savedCandidateIds: savedCandidates 
+      savedCandidateIds: savedCandidates
     });
-    
+
     if (allCandidates.length > 0 && savedCandidates.length > 0) {
-      const savedOnlyCandidates = allCandidates.filter(candidate => 
+      const savedOnlyCandidates = allCandidates.filter(candidate =>
         savedCandidates.includes(candidate.user_id)
       );
       console.log('✅ Filtered saved candidates:', savedOnlyCandidates.length, savedOnlyCandidates);
@@ -239,60 +240,60 @@ const SavedCandidateArea = () => {
   const handleToggleSave = async (candidateId: number) => {
     const token = authCookies.getToken();
     if (!token) {
-        toast.error("Please log in to save candidates.");
-        return;
+      toast.error("Please log in to save candidates.");
+      return;
     }
 
     const isCurrentlySaved = savedCandidates.includes(candidateId);
-    
+
     try {
-        if (isCurrentlySaved) {
-            // --- REMOVE from favorites ---
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+      if (isCurrentlySaved) {
+        // --- REMOVE from favorites ---
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) throw new Error("Failed to remove from favorites");
+        if (!response.ok) throw new Error("Failed to remove from favorites");
 
-            // Update state immutably
-            setSavedCandidates(prev => prev.filter(id => id !== candidateId));
-            setFavoriteIds(prev => {
-                const newFavs = { ...prev };
-                delete newFavs[candidateId];
-                return newFavs;
-            });
-            toast.success('Removed from favorites!');
-        } else {
-            // --- ADD to favorites ---
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+        // Update state immutably
+        setSavedCandidates(prev => prev.filter(id => id !== candidateId));
+        setFavoriteIds(prev => {
+          const newFavs = { ...prev };
+          delete newFavs[candidateId];
+          return newFavs;
+        });
+        toast.success('Removed from favorites!');
+      } else {
+        // --- ADD to favorites ---
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to add to favorites");
-            }
-            
-            const result = await response.json();
-
-            // Update state immutably
-            setSavedCandidates(prev => [...prev, candidateId]);
-            setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
-            toast.success('Added to favorites!');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add to favorites");
         }
+
+        const result = await response.json();
+
+        // Update state immutably
+        setSavedCandidates(prev => [...prev, candidateId]);
+        setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
+        toast.success('Added to favorites!');
+      }
     } catch (err: any) {
-        console.error("Error toggling favorite:", err);
-        toast.error(err.message || "An unexpected error occurred.");
+      console.error("Error toggling favorite:", err);
+      toast.error(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -304,7 +305,7 @@ const SavedCandidateArea = () => {
   const handleViewProfile = (candidateId: number) => {
     setLoadingProfile(true);
     // Find in allCandidates to ensure we have the full data
-    const candidate = allCandidates.find(c => c.user_id === candidateId); 
+    const candidate = allCandidates.find(c => c.user_id === candidateId);
     if (candidate) {
       setSelectedFreelancer(mapApiCandidateToIFreelancer(candidate));
     } else {
@@ -361,17 +362,17 @@ const SavedCandidateArea = () => {
 
         // Build participant details
         const participantDetails: any = {};
-        participantDetails[currentUserId] = { 
-          firstName: userData.first_name || '', 
+        participantDetails[currentUserId] = {
+          firstName: userData.first_name || '',
           email: userData.email || '',
           profilePicture: userData.profile_picture || null
         };
-        
+
         const candidate = allCandidates.find(c => c.user_id === candidateId);
         if (candidate) {
-          participantDetails[otherId] = { 
-            firstName: candidate.first_name || candidate.username || '', 
-            email: `${candidate.username || 'unknown'}@example.com`,
+          participantDetails[otherId] = {
+            firstName: candidate.first_name || candidate.username || '',
+            email: candidate.email || '',
             profilePicture: candidate.profile_picture || null
           };
         }
@@ -396,7 +397,7 @@ const SavedCandidateArea = () => {
       }
 
       // Navigate to chat
-      router.push(`/dashboard/client-dashboard/messages/thread/${conversationId}`);
+      router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
     } catch (err: any) {
       console.error('Failed to start chat:', err);
       toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
@@ -408,7 +409,7 @@ const SavedCandidateArea = () => {
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
   const currentDisplayCandidates = displayedCandidates.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(displayedCandidates.length / ITEMS_PER_PAGE);
-  
+
   console.log('📊 Rendering state:', {
     loading,
     loadingFavorites,
@@ -432,12 +433,12 @@ const SavedCandidateArea = () => {
             </button>
           )}
         </div>
-        
+
         {selectedFreelancer ? (
           // Render CandidateDetailsArea if a freelancer is selected
-          <CandidateDetailsArea 
-            freelancer={selectedFreelancer} 
-            loading={loadingProfile} 
+          <CandidateDetailsArea
+            freelancer={selectedFreelancer}
+            loading={loadingProfile}
             onMessage={handleMessage}
           />
         ) : (
@@ -447,65 +448,65 @@ const SavedCandidateArea = () => {
             {/* Removed Filter and Sort UI as only saved candidates are shown */}
 
             <div className="candidate-profile-area">
-                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                    <div className="total-job-found">
-                        Showing <span className="text-dark fw-500">{displayedCandidates.length}</span> saved candidates
-                    </div>
-                    {/* Removed sorting NiceSelect */}
+              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                <div className="total-job-found">
+                  Showing <span className="text-dark fw-500">{displayedCandidates.length}</span> saved candidates
                 </div>
+                {/* Removed sorting NiceSelect */}
+              </div>
 
-                {(loading || loadingFavorites) && (
-                  <div className="text-center p-5">
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
+              {(loading || loadingFavorites) && (
+                <div className="text-center p-5">
+                  <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
                   </div>
-                )}
+                </div>
+              )}
 
-                {error && <p className="text-danger text-center p-5">{error}</p>}
-                
-                {!loading && !loadingFavorites && currentDisplayCandidates.length === 0 && (
-                    <div className="text-center p-5">
-                      <h4>No saved candidates found</h4>
-                      <p>You haven't added any candidates to your favorites yet.</p>
-                    </div>
-                )}
+              {error && <p className="text-danger text-center p-5">{error}</p>}
 
-                {!loading && !loadingFavorites && currentDisplayCandidates.length > 0 && (
-                  <div className="accordion-box list-style show">
-                    {currentDisplayCandidates.map((apiCandidate) => (
-                        <CandidateListItem
-                            key={apiCandidate.user_id}
-                            isSaved={savedCandidates.includes(apiCandidate.user_id)}
-                            onToggleSave={handleToggleSave}
-                            onViewProfile={handleViewProfile}
-                            item={{
-                                user_id: apiCandidate.user_id,
-                                username: apiCandidate.username,
-                                first_name: apiCandidate.first_name,
-                                last_name: apiCandidate.last_name,
-                                profile_picture: apiCandidate.profile_picture || undefined,
-                                city: apiCandidate.city || '',
-                                country: apiCandidate.country || '',
-                                skill: apiCandidate.skills,
-                                post: apiCandidate.profile_title || 'Freelancer',
-                                budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
-                                location: '', 
-                                total_earnings: apiCandidate.total_earnings,
-                            }}
-                        />
-                    ))}
-                  </div>
-                )}
+              {!loading && !loadingFavorites && currentDisplayCandidates.length === 0 && (
+                <div className="text-center p-5">
+                  <h4>No saved candidates found</h4>
+                  <p>You haven't added any candidates to your favorites yet.</p>
+                </div>
+              )}
 
-                {totalPages > 1 && (
-                    <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
-                        <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                            Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, displayedCandidates.length)}</span> of <span className="text-dark fw-500">{displayedCandidates.length}</span>
-                        </p>
-                        <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
-                    </div>
-                )}
+              {!loading && !loadingFavorites && currentDisplayCandidates.length > 0 && (
+                <div className="accordion-box list-style show">
+                  {currentDisplayCandidates.map((apiCandidate) => (
+                    <CandidateListItem
+                      key={apiCandidate.user_id}
+                      isSaved={savedCandidates.includes(apiCandidate.user_id)}
+                      onToggleSave={handleToggleSave}
+                      onViewProfile={handleViewProfile}
+                      item={{
+                        user_id: apiCandidate.user_id,
+                        username: apiCandidate.username,
+                        first_name: apiCandidate.first_name,
+                        last_name: apiCandidate.last_name,
+                        profile_picture: apiCandidate.profile_picture || undefined,
+                        city: apiCandidate.city || '',
+                        country: apiCandidate.country || '',
+                        skill: apiCandidate.skills,
+                        post: apiCandidate.profile_title || 'Freelancer',
+                        budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
+                        location: '',
+                        total_earnings: apiCandidate.total_earnings,
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                  <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                    Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, displayedCandidates.length)}</span> of <span className="text-dark fw-500">{displayedCandidates.length}</span>
+                  </p>
+                  <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
+                </div>
+              )}
             </div>
           </>
         )}
