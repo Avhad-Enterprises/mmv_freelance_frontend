@@ -6,7 +6,10 @@ import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { authCookies } from "@/utils/cookies";
-import BiddingModal from './bidding-modal'; // Import BiddingModal component
+import BiddingModal from './bidding-modal';
+import { InsufficientCreditsModal } from '@/app/components/credits';
+import { creditsService } from '@/services/credits.service';
+import { CreditBalance } from '@/types/credits';
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -35,6 +38,11 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
+
+  // Credit state
+  const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
+  const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+  const [checkingCredits, setCheckingCredits] = useState(false);
 
   useEffect(() => {
     const token = authCookies.getToken();
@@ -70,7 +78,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       console.error('Error fetching user data:', error);
     }
   };
-  
+
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job.projects_task_id) return;
     try {
@@ -83,13 +91,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
 
       // Check if already applied to this specific project using the correct API
       const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
-      
+
       if (appliedRes.data?.success && appliedRes.data?.data) {
         // Find if user has applied to THIS specific project
         const applicationForThisProject = appliedRes.data.data.find(
           (app: any) => app.projects_task_id === job.projects_task_id
         );
-        
+
         if (applicationForThisProject) {
           setIsApplied(true);
           setApplicationId(applicationForThisProject.applied_projects_id);
@@ -110,7 +118,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     }
   };
 
-  const handleApplyClick = () => {
+  const handleApplyClick = async () => {
     if (!isLoggedIn) {
       applyLoginModalRef.current?.show();
       return;
@@ -124,11 +132,34 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     if (isApplied && applicationId) {
       handleWithdrawApplication();
     } else {
-      // Check if bidding is enabled
-      if (job.bidding_enabled) {
-        setShowBiddingModal(true);
-      } else {
-        handleApplySubmit();
+      // Check credits before allowing application
+      setCheckingCredits(true);
+      try {
+        const balance = await creditsService.getBalance();
+        setCreditBalance(balance);
+
+        if (balance.credits_balance < 1) {
+          // Not enough credits - show modal
+          setShowInsufficientCreditsModal(true);
+          return;
+        }
+
+        // Has credits - proceed with application
+        if (job.bidding_enabled) {
+          setShowBiddingModal(true);
+        } else {
+          handleApplySubmit();
+        }
+      } catch (error: any) {
+        console.error("Error checking credits:", error);
+        // If credit check fails, try to proceed anyway (backend will reject if no credits)
+        if (job.bidding_enabled) {
+          setShowBiddingModal(true);
+        } else {
+          handleApplySubmit();
+        }
+      } finally {
+        setCheckingCredits(false);
       }
     }
   };
@@ -138,7 +169,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -166,13 +197,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       setIsApplying(false);
     }
   };
-  
+
   const handleApplySubmit = async () => {
     if (!userId) {
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -207,7 +238,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     setIsApplying(true);
     try {
       const response = await makeDeleteRequest(`api/v1/applications/withdraw/${applicationId}`, {});
-      
+
       if (response.data?.message || response.status === 200) {
         toast.success('Application withdrawn successfully!');
         setIsApplied(false);
@@ -270,14 +301,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       <div className="dashboard-body" style={{ backgroundColor: '#f0f5f3', minHeight: '100vh' }}>
         <div className="position-relative">
           <DashboardHeader />
-          
+
           <section className="job-details pt-50 pb-50">
             <div className="container-fluid">
               <div className="row">
                 {/* Left Side: Details - Green Background */}
                 <div className="col-xxl-9 col-xl-8">
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
-                    
+
                     <button onClick={onBack} className="btn-two mb-20">
                       &larr; Back to Jobs
                     </button>
@@ -286,7 +317,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       Posted on: {job.created_at?.slice(0, 10)}
                     </div>
                     <h3 className="post-title">{job.project_title}</h3>
-                    
+
                     <div className="post-block border-style mt-50 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
@@ -386,13 +417,24 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                           <a key={idx} href="#">{tag}</a>
                         ))}
                       </div>
-                      
-                      <button 
-                        className="btn-one w-100 mt-25" 
+
+                      <button
+                        className="btn-one w-100 mt-25"
                         onClick={handleApplyClick}
-                        disabled={isApplying || userRole === 'CLIENT'}
+                        disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
+                        {checkingCredits ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" />
+                            Checking credits...
+                          </>
+                        ) : isApplying ? (
+                          isApplied ? 'Withdrawing...' : 'Applying...'
+                        ) : isApplied ? (
+                          <>✅ Applied<br />Click To Withdraw</>
+                        ) : (
+                          'Apply Now'
+                        )}
                       </button>
 
                       <button
@@ -401,12 +443,12 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         disabled={isSaving}
                       >
                         {isSaving ? (
-                            'Saving...'
+                          'Saving...'
                         ) : (
-                            <>
-                                <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
-                                {isSaved ? 'Saved' : 'Save Job'}
-                            </>
+                          <>
+                            <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
+                            {isSaved ? 'Saved' : 'Save Job'}
+                          </>
                         )}
                       </button>
                     </div>
@@ -419,7 +461,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       </div>
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
-      
+
       {showBiddingModal && (
         <BiddingModal
           originalBudget={job.budget || 0}
@@ -429,6 +471,19 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
           isSubmitting={isApplying}
         />
       )}
+
+      {/* Insufficient Credits Modal */}
+      <InsufficientCreditsModal
+        isOpen={showInsufficientCreditsModal}
+        onClose={() => setShowInsufficientCreditsModal(false)}
+        requiredCredits={1}
+        currentBalance={creditBalance?.credits_balance || 0}
+        onBuyCredits={() => {
+          setShowInsufficientCreditsModal(false);
+          // Navigate to credits page
+          window.location.href = '/dashboard/freelancer-dashboard/credits';
+        }}
+      />
     </>
   );
 };

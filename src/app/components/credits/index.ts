@@ -3,6 +3,7 @@
  * @module components/credits
  */
 
+export { default as CreditsArea } from "./CreditsArea";
 export { default as CreditStats } from "./CreditStats";
 export { default as PackageSelector } from "./PackageSelector";
 export { default as PurchaseModal } from "./PurchaseModal";
