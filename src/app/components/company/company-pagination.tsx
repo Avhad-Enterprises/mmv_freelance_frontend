@@ -20,7 +20,7 @@ const CompanyPagination = () => {
       <li>....</li>
       <li className="ms-2">
         <a href="#" className="d-flex align-items-center">
-          Last
+          Next
           <Image src={last_icon} alt="last_icon" className="ms-2" />
         </a>
       </li>

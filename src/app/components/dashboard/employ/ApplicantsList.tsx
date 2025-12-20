@@ -252,7 +252,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                     <i className="bi bi-file-text me-2"></i>View Proposal
                                   </button>
                                 </li>
-                                {applicant.status !== 1 && applicant.status !== 3 && (
+                                {applicant.status !== 1 && applicant.status !== 2 && applicant.status !== 3 && (
                                   <li>
                                     <button
                                       className="dropdown-item"

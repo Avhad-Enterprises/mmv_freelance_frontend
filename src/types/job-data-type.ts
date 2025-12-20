@@ -8,6 +8,7 @@ export interface IJobType {
   deadline?: string; // ISO date string
   project_description?: string;
   budget?: number;
+  currency?: string;
   tags?: string[];
   skills_required?: string[];
   reference_links?: string[];
@@ -30,6 +31,22 @@ export interface IJobType {
   deleted_by?: number | null;
   deleted_at?: string | null;
   bidding_enabled?:boolean;
+
+  // Client information (from API joins)
+  client_user_id?: number;
+  client_first_name?: string;
+  client_last_name?: string;
+  client_profile_picture?: string;
+  client_company_name?: string;
+  client_industry?: string;
+
+  // Freelancer information (from API joins)
+  freelancer_user_id?: number;
+  freelancer_first_name?: string;
+  freelancer_last_name?: string;
+  freelancer_profile_picture?: string;
+  freelancer_profile_title?: string;
+  freelancer_experience_level?: string;
 
 
 

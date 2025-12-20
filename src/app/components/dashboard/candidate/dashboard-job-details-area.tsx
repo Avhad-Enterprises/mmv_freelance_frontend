@@ -342,14 +342,31 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                 {/* Right Side: Metadata - White Island */}
                 <div className="col-xxl-3 col-xl-4">
                   <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50 bg-white rounded-3 p-4" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                    <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize fw-500">
-                      {job.project_title}
+                    <div className="text-center mb-3">
+                      <div className="text-md text-dark text-center mt-15 mb-10 text-capitalize fw-500">
+                        {job.project_title}
+                      </div>
+                      <div className="text-sm text-muted mb-3">
+                        Posted by: <span className="fw-500 text-dark">
+                          {job.client_first_name && job.client_last_name 
+                            ? `${job.client_first_name} ${job.client_last_name}`
+                            : job.client_company_name 
+                              ? job.client_company_name
+                              : 'Anonymous Client'
+                          }
+                        </span>
+                      </div>
+                      {job.client_company_name && (
+                        <div className="text-xs text-muted">
+                          Company: {job.client_company_name}
+                        </div>
+                      )}
                     </div>
                     <div className="border-top mt-40 pt-40">
                       <ul className="job-meta-data row style-none">
                         <li className="col-6">
                           <span>Budget</span>
-                          <div>${job.budget?.toLocaleString()}</div>
+                          <div>{job.currency ? `${job.currency} ${job.budget?.toLocaleString()}` : `$${job.budget?.toLocaleString()}`}</div>
                         </li>
                         <li className="col-6">
                           <span>Deadline</span>

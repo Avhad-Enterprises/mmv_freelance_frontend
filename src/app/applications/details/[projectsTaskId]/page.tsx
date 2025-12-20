@@ -52,8 +52,6 @@ export default function ApplicationDetailsPage({
         payload
       );
 
-      console.log("Status update response:", response);
-
       setApplications((prev) =>
         prev.map((app) =>
           app.applied_projects_id === applicationId

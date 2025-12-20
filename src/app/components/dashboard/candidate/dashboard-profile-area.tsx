@@ -113,6 +113,7 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
                 : undefined
           }
           required={field === 'email' || field === 'phone_number'}
+          disabled={field === 'email'}
         />
       </div>
     </div>

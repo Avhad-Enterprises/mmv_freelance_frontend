@@ -151,13 +151,6 @@ export default function FreelancerThreadPage() {
                (msg.deliveryStatus !== 'read' || !msg.isRead)
     );
     
-    console.log('📬 Checking for unread messages:', {
-      currentUserId,
-      totalMessages: messages.length,
-      unreadCount: unreadMessages.length,
-      unreadIds: unreadMessages.map(m => m.id)
-    });
-    
     if (unreadMessages.length === 0) return;
     
     // Mark each unread message as read
@@ -176,8 +169,6 @@ export default function FreelancerThreadPage() {
         
         const dbRef = ref(db);
         await update(dbRef, updates);
-        
-        console.log(`✅ Marked ${unreadMessages.length} messages as read`);
       } catch (error) {
         console.error('Failed to mark messages as read:', error);
       }

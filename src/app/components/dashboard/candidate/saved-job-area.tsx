@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "./dashboard-header-minus";
 import DashboardJobDetailsArea from "./dashboard-job-details-area";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 import { useAppSelector, useAppDispatch } from "@/redux/hook";
 import { IJobType } from "@/types/job-data-type";
 import { makeGetRequest, makeDeleteRequest, makePostRequest } from "@/utils/api";
@@ -18,6 +19,7 @@ const SavedJobArea = () => {
   // State for this component
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Get saved jobs directly from the Redux store
   const { wishlist: savedJobs } = useAppSelector((state) => state.wishlist);
@@ -77,6 +79,19 @@ const SavedJobArea = () => {
   // --- Reusable UI Components for List View ---
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
+    // Check if this job matches search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matches = 
+        item.project_title?.toLowerCase().includes(query) ||
+        item.category?.toLowerCase().includes(query) ||
+        item.projects_type?.toLowerCase().includes(query) ||
+        item.project_description?.toLowerCase().includes(query) ||
+        item.skills_required?.some(skill => skill.toLowerCase().includes(query));
+      
+      if (!matches) return null;
+    }
+    
     return (
       <div className={`candidate-profile-card list-layout mb-25`}>
         <div className="d-flex">
@@ -201,6 +216,11 @@ const SavedJobArea = () => {
         <div className="position-relative">
           <DashboardHeader />
           <h2 className="main-title mb-30">Saved Jobs</h2>
+
+          <DashboardSearchBar 
+            placeholder="Search saved jobs by title, category, type..."
+            onSearch={setSearchQuery}
+          />
 
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">

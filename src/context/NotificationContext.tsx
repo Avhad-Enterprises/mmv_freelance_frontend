@@ -65,7 +65,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
 
         // Connection events
         socket.on('connect', () => {
-            console.log('✅ Socket connected:', socket.id);
+            // Socket connected successfully
         });
 
         socket.on('connect_error', (err) => {
@@ -79,12 +79,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         // --- B. Real-time Listeners ---
         // Listen for 'new_notification' event from backend
         socket.on('new_notification', (payload: any) => {
-            console.log('New notification received:', payload);
-
             // Play sound (optional)
             try {
                 const audio = new Audio('/assets/dashboard/sound/notification.mp3'); // Ensure this file exists or use a CDN
-                audio.play().catch(e => console.log('Audio play failed', e));
+                audio.play().catch(e => {
+                    // Ignore audio errors
+                });
             } catch (e) {
                 // Ignore audio errors
             }
@@ -149,7 +149,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
         return () => {
             if (socket) {
                 socket.disconnect();
-                console.log('Socket disconnected');
             }
         };
     }, [userData?.user_id, API_URL]);

@@ -312,7 +312,6 @@ const MultiStepRegisterForm: React.FC<MultiStepRegisterFormProps> = ({ accountTy
 
   const handleRegister = async <T extends AllFormData>(data: T) => {
     try {
-      console.log("Form submitted:", data);
       setTimeout(() => {
         router.push("/?login=true");
       }, 2000);

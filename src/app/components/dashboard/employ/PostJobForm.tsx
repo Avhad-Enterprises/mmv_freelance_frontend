@@ -14,7 +14,7 @@ interface IProps {
 // Initial form data matching the API payload structure
 const initialFormData: NewProjectPayload = {
   project_title: '',
-  project_category: 'Video Editing',
+  project_category: '',
   deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   project_description: '',
   budget: 500,
@@ -22,7 +22,7 @@ const initialFormData: NewProjectPayload = {
   skills_required: [],
   reference_links: [],
   additional_notes: '',
-  projects_type: 'Video Editing',
+  projects_type: '',
   project_format: 'MP4',
   audio_voiceover: 'None',
   audio_description: 'Client will provide licensed background music.',
@@ -59,6 +59,44 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   const [showBiddingModal, setShowBiddingModal] = useState(false);
   const [biddingEnabled, setBiddingEnabled] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<any>(null);
+
+  // New states for dynamic data
+  const [categories, setCategories] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [currency, setCurrency] = useState<string>('USD');
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // Fetch categories and skills from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingData(true);
+        
+        // Fetch categories
+        const categoriesResponse = await makeGetRequest('api/v1/categories');
+        if (categoriesResponse.data?.data) {
+          const activeCategories = categoriesResponse.data.data
+            .filter((cat: any) => cat.is_active)
+            .map((cat: any) => cat.category_name);
+          setCategories(activeCategories);
+        }
+
+        // Fetch skills
+        const skillsResponse = await makeGetRequest('api/v1/skills');
+        if (skillsResponse.data?.data) {
+          const skillNames = skillsResponse.data.data.map((skill: any) => skill.skill_name);
+          setSkills(skillNames);
+        }
+      } catch (err) {
+        console.error('Error fetching categories/skills:', err);
+        toast.error('Failed to load categories and skills');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -113,6 +151,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       created_by: currentUser.userId,
       is_active: 1,
       bidding_enabled: biddingEnabled, // Add bidding status to payload
+      currency: currency, // Add currency to payload
       // Ensure numeric fields are sent as numbers, not strings
       budget: Number(pendingFormData.budget),
       video_length: Number(pendingFormData.video_length),
@@ -197,10 +236,12 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
                 <label>Project Category*</label>
-                <select className="form-control" {...register("project_category", { required: "Category is required" })}>
-                  <option value="Video Editing">Video Editing</option>
-                  <option value="Animation">Animation</option>
-                  <option value="Motion Graphics">Motion Graphics</option>
+                <select className="form-control" {...register("project_category", { required: "Category is required" })}
+                  disabled={isLoadingData}>
+                  <option value="">Select category</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
                 </select>
                 {errors.project_category && <div className="error">{String(errors.project_category.message)}</div>}
               </div>
@@ -219,15 +260,64 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
 
             {/* Budget & Deadline */}
             <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Budget ($)*</label>
-                <input type="number" placeholder="Enter budget amount" className="form-control"
-                  {...register("budget", {
-                    required: "Budget is required",
-                    min: { value: 1, message: "Budget must be greater than 0" }
-                  })}
-                />
-                {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+              <div className="row">
+                <div className="col-md-7">
+                  <div className="input-group-meta position-relative mb-25">
+                    <label>Budget*</label>
+                    <input type="number" placeholder="Enter amount" className="form-control"
+                      {...register("budget", {
+                        required: "Budget is required",
+                        min: { value: 1, message: "Budget must be greater than 0" }
+                      })}
+                    />
+                    {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="input-group-meta position-relative mb-25">
+                    <label>Currency*</label>
+                    <select 
+                      className="form-control" 
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                    >
+                      <option value="INR">INR ₹</option>
+                      <option value="USD">USD $</option>
+                      <option value="EUR">EUR €</option>
+                      <option value="GBP">GBP £</option>
+                      <option value="JPY">JPY ¥</option>
+                      <option value="AUD">AUD $</option>
+                      <option value="CAD">CAD $</option>
+                      <option value="CHF">CHF Fr</option>
+                      <option value="CNY">CNY ¥</option>
+                      <option value="SEK">SEK kr</option>
+                      <option value="NZD">NZD $</option>
+                      <option value="MXN">MXN $</option>
+                      <option value="SGD">SGD $</option>
+                      <option value="HKD">HKD $</option>
+                      <option value="NOK">NOK kr</option>
+                      <option value="KRW">KRW ₩</option>
+                      <option value="TRY">TRY ₺</option>
+                      <option value="RUB">RUB ₽</option>
+                      <option value="BRL">BRL R$</option>
+                      <option value="ZAR">ZAR R</option>
+                      <option value="DKK">DKK kr</option>
+                      <option value="PLN">PLN zł</option>
+                      <option value="THB">THB ฿</option>
+                      <option value="IDR">IDR Rp</option>
+                      <option value="HUF">HUF Ft</option>
+                      <option value="CZK">CZK Kč</option>
+                      <option value="ILS">ILS ₪</option>
+                      <option value="CLP">CLP $</option>
+                      <option value="PHP">PHP ₱</option>
+                      <option value="AED">AED د.إ</option>
+                      <option value="COP">COP $</option>
+                      <option value="SAR">SAR ﷼</option>
+                      <option value="MYR">MYR RM</option>
+                      <option value="RON">RON lei</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="col-md-6">
@@ -273,7 +363,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-12">
               <MultipleSelectionField
                 label="Skills Required*"
-                options={["Video Editing", "Color Grading", "Sound Design", "Motion Graphics", "Animation", "VFX", "Adobe Premiere Pro", "Adobe After Effects", "Final Cut Pro", "DaVinci Resolve", "Avid Media Composer", "Cinema 4D", "Blender", "Adobe Audition"]}
+                options={skills}
                 selectedItems={selectedSkills}
                 onChange={(skills) => { setSelectedSkills(skills); setValue('skills_required', skills, { shouldValidate: true }); }}
                 required={true}

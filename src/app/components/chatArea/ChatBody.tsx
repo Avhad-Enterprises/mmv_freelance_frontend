@@ -16,9 +16,6 @@ export type LocalMessage = {
 const MessageStatus = ({ status, isSender }: { status?: string; isSender: boolean }) => {
   if (!isSender) return null; // Only show status for sender's messages
   
-  // Debug log to verify status is being received
-  console.log('📊 MessageStatus:', { status, isSender });
-  
   const getStatusIcon = () => {
     switch (status) {
       case 'sending':
@@ -252,18 +249,9 @@ export default function ChatBody({ messages, currentUserId, isOtherUserTyping, h
               // Fallback: if isRead is true, show as read; otherwise show as sent
               displayStatus = m.isRead ? 'read' : 'sent';
             }
-            
             // Debug log to help diagnose status issues
             if (isSender) {
-              console.log('🔍 Message status debug:', {
-                messageId: m.id,
-                senderId: m.senderId,
-                currentUserId,
-                isSender,
-                originalDeliveryStatus: m.deliveryStatus,
-                isRead: m.isRead,
-                displayStatus
-              });
+              // Message status debugging removed
             }
             
             return (

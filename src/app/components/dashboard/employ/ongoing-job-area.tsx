@@ -6,6 +6,7 @@ import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from "../candidate/dashboard-header";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
@@ -54,6 +55,7 @@ const OngoingJobArea: FC = () => {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectForApplicants, setSelectedProjectForApplicants] = useState<ProjectSummary | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [applicantsLoading, setApplicantsLoading] = useState(false);
@@ -101,7 +103,11 @@ const OngoingJobArea: FC = () => {
       const projectsResponse = await makeGetRequest(`api/v1/projects-tasks/client/${clientId}`);
       const createdProjects = projectsResponse.data?.data || [];
 
-      const processedData: ProjectSummary[] = createdProjects.map((p: any) => ({
+      // Filter to show only ongoing projects (status 1 = Assigned/In Progress)
+      // Status 0 = Pending/Awaiting Assignment, Status 2 = Completed
+      const ongoingProjects = createdProjects.filter((p: any) => p.status === 1);
+
+      const processedData: ProjectSummary[] = ongoingProjects.map((p: any) => ({
         project_id: p.projects_task_id,
         title: p.project_title,
         date_created: p.created_at,
@@ -432,12 +438,26 @@ const OngoingJobArea: FC = () => {
             : sub
         ));
 
-        toast.success(status === 1 ? '✅ Submission approved! Freelancer has been assigned.' : '❌ Submission rejected.');
-        handleCloseSubmissionModal();
-
-        // Refresh projects list if approved
         if (status === 1) {
+          // Approved - project is now completed
+          toast.success('✅ Submission approved! Project marked as completed.');
+          handleCloseSubmissionModal();
+          
+          // Remove the completed project from ongoing projects list immediately
+          if (selectedProjectForSubmissions) {
+            setProjects(prev => prev.filter(p => p.project_id !== selectedProjectForSubmissions.project_id));
+          }
+          
+          // Also clear the submissions view
+          setSelectedProjectForSubmissions(null);
+          setSubmissions([]);
+          
+          // Refresh to get latest data from server
           fetchClientData();
+        } else {
+          // Rejected
+          toast.success('❌ Submission rejected. Freelancer can resubmit.');
+          handleCloseSubmissionModal();
         }
       }
     } catch (error: any) {
@@ -448,12 +468,23 @@ const OngoingJobArea: FC = () => {
     }
   };
 
-  const getStatusInfo = (status: Applicant['status'] | number) => {
+  // Application Status Info - for viewing applicants
+  const getApplicationStatusInfo = (status: Applicant['status'] | number) => {
     switch (status) {
       case 0: return { text: "Pending", className: "text-warning" };
       case 1: return { text: "Approved", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
       case 3: return { text: "Rejected", className: "text-danger" };
+      default: return { text: "Unknown", className: "text-secondary" };
+    }
+  };
+
+  // Project Task Status Info - for ongoing projects list
+  const getProjectStatusInfo = (status: number) => {
+    switch (status) {
+      case 0: return { text: "Awaiting Assignment", className: "text-warning" };
+      case 1: return { text: "In Progress", className: "text-success" };
+      case 2: return { text: "Completed", className: "text-info" };
       default: return { text: "Unknown", className: "text-secondary" };
     }
   };
@@ -640,7 +671,7 @@ const OngoingJobArea: FC = () => {
                       <tr>
                         <th style={{ width: '30%' }}>Freelancer</th>
                         <th>Submitted On</th>
-                        <th>Status</th>
+                        <th>Submission Status</th>
                         <th className="text-end">Action</th>
                       </tr>
                     </thead>
@@ -710,7 +741,7 @@ const OngoingJobArea: FC = () => {
               onViewProfile={handleViewProfile}
               onToggleSave={handleToggleSave}
               onUpdateApplicantStatus={handleUpdateApplicantStatus}
-              getStatusInfo={getStatusInfo}
+              getStatusInfo={getApplicationStatusInfo}
               onOpenChat={handleOpenChat}
             />
           ) : (
@@ -718,7 +749,13 @@ const OngoingJobArea: FC = () => {
               {isPostingJob ? (
                 <PostJobForm onBackToList={handleReturnToList} />
               ) : (
-                <div className="bg-white card-box border-20">
+                <>
+                  <DashboardSearchBar 
+                    placeholder="Search ongoing projects by title, category..."
+                    onSearch={setSearchQuery}
+                  />
+                  
+                  <div className="bg-white card-box border-20">
                   <div className="table-responsive">
                     <table className="table job-alert-table">
                       <thead>
@@ -727,7 +764,7 @@ const OngoingJobArea: FC = () => {
                           <th>Category</th>
                           <th>Budget</th>
                           <th>Date Created</th>
-                          <th>Status</th>
+                          <th>Project Status</th>
                           <th className="text-end">Action</th>
                         </tr>
                       </thead>
@@ -756,8 +793,17 @@ const OngoingJobArea: FC = () => {
                             </td>
                           </tr>
                         )}
-                        {!loading && !error && projects.map((project) => {
-                          const statusInfo = getStatusInfo(project.status);
+                        {!loading && !error && projects
+                          .filter((project) => {
+                            if (!searchQuery.trim()) return true;
+                            const query = searchQuery.toLowerCase();
+                            return (
+                              project.title.toLowerCase().includes(query) ||
+                              project.category.toLowerCase().includes(query)
+                            );
+                          })
+                          .map((project) => {
+                          const statusInfo = getProjectStatusInfo(project.status);
                           return (
                             <tr key={project.project_id} className="align-middle">
                               <td>
@@ -801,6 +847,7 @@ const OngoingJobArea: FC = () => {
                     </table>
                   </div>
                 </div>
+              </>
               )}
             </>
           )}

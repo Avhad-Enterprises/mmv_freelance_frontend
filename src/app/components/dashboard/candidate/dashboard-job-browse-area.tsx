@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "./dashboard-header-minus";
 import DashboardJobDetailsArea from "./dashboard-job-details-area";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 import Link from "next/link";
 import { useAppSelector, useAppDispatch } from "@/redux/hook";
 import { IJobType } from "@/types/job-data-type";
@@ -76,11 +77,11 @@ const DashboardJobBrowseArea = () => {
           try {
             const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
             const savedProjectIds = savedProjectsRes.data.data.map((p: any) => p.projects_task_id);
-            
-            const savedJobs = jobsData.filter((job: IJobType) => 
+
+            const savedJobs = jobsData.filter((job: IJobType) =>
               job.projects_task_id !== undefined && savedProjectIds.includes(job.projects_task_id)
             );
-            
+
             dispatch(set_wishlist(savedJobs));
           } catch (error) {
             console.error("Error fetching saved projects:", error);
@@ -106,7 +107,7 @@ const DashboardJobBrowseArea = () => {
 
     if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
-        item.skills_required?.some(jobSkill => 
+        item.skills_required?.some(jobSkill =>
           jobSkill && selectedSkills.includes(jobSkill)
         )
       );
@@ -240,14 +241,13 @@ const DashboardJobBrowseArea = () => {
           </div>
           <div className="right-side">
             <div className="row gx-2 align-items-center mb-2">
-              <div className="col-lg-4">
+              <div className="col-lg-3">
                 <div className="position-relative">
                   <h4 className="candidate-name mb-0">
                     <a onClick={() => setSelectedJob(item)} className="tran3s cursor-pointer">
                       {item.project_title
-                        ? `${item.project_title.slice(0, 22)}${
-                            item.project_title.length > 22 ? ".." : ""
-                          }`
+                        ? `${item.project_title.slice(0, 22)}${item.project_title.length > 22 ? ".." : ""
+                        }`
                         : ""}
                     </a>
                   </h4>
@@ -256,7 +256,7 @@ const DashboardJobBrowseArea = () => {
               <div className="col-lg-2 col-md-4 col-sm-6">
                 <div className="candidate-info">
                   <span>Budget</span>
-                  <div>${item.budget ?? 0}</div>
+                  <div>{item.currency ? `${item.currency} ${item.budget ?? 0}` : `$${item.budget ?? 0}`}</div>
                 </div>
               </div>
               <div className="col-lg-2 col-md-4 col-sm-6">
@@ -267,33 +267,18 @@ const DashboardJobBrowseArea = () => {
               </div>
               <div className="col-lg-2 col-md-4 col-sm-6">
                 <div className="candidate-info">
-                  <span>Pricing</span>
+                  <span>Client</span>
                   <div>
-                    {item.bidding_enabled ? (
-                      <span className="badge" style={{ 
-                        backgroundColor: '#D2F34C', 
-                        color: '#244034',
-                        fontSize: '11px',
-                        padding: '4px 10px',
-                        fontWeight: '500'
-                      }}>
-                        <i className="bi bi-gavel me-1"></i>Bidding
-                      </span>
-                    ) : (
-                      <span className="badge" style={{ 
-                        backgroundColor: '#6c757d', 
-                        color: 'white',
-                        fontSize: '11px',
-                        padding: '4px 10px',
-                        fontWeight: '500'
-                      }}>
-                        <i className="bi bi-cash-stack me-1"></i>Fixed
-                      </span>
-                    )}
+                    {item.client_first_name && item.client_last_name 
+                      ? `${item.client_first_name} ${item.client_last_name}`
+                      : item.client_company_name 
+                        ? item.client_company_name
+                        : 'Anonymous'
+                    }
                   </div>
                 </div>
               </div>
-              <div className="col-lg-2 col-md-4">
+              <div className="col-lg-3 col-md-4">
                 <div className="d-flex justify-content-lg-end align-items-center">
                   <button
                     type="button"
@@ -377,12 +362,12 @@ const DashboardJobBrowseArea = () => {
               <li key={i} className="text-nowrap">{s}</li>
             ))}
           </ul>
-          
+
           {/* Bidding Badge */}
           <div className="mb-3">
             {item.bidding_enabled ? (
-              <span className="badge" style={{ 
-                backgroundColor: '#D2F34C', 
+              <span className="badge" style={{
+                backgroundColor: '#D2F34C',
                 color: '#244034',
                 fontSize: '11px',
                 padding: '4px 10px',
@@ -391,8 +376,8 @@ const DashboardJobBrowseArea = () => {
                 <i className="bi bi-gavel me-1"></i>Bidding
               </span>
             ) : (
-              <span className="badge" style={{ 
-                backgroundColor: '#6c757d', 
+              <span className="badge" style={{
+                backgroundColor: '#6c757d',
                 color: 'white',
                 fontSize: '11px',
                 padding: '4px 10px',
@@ -406,12 +391,24 @@ const DashboardJobBrowseArea = () => {
 
         <div className="candidate-info text-center mb-3">
           <span>Budget</span>
-          <div>${budget ?? 0}</div>
+          <div>{item.currency ? `${item.currency} ${budget ?? 0}` : `$${budget ?? 0}`}</div>
         </div>
 
         <div className="candidate-info text-center mb-3">
           <span>Type</span>
           <div>{projects_type || 'Not specified'}</div>
+        </div>
+
+        <div className="candidate-info text-center mb-3">
+          <span>Client</span>
+          <div className="text-xs">
+            {item.client_first_name && item.client_last_name 
+              ? `${item.client_first_name} ${item.client_last_name}`
+              : item.client_company_name 
+                ? item.client_company_name
+                : 'Anonymous'
+            }
+          </div>
         </div>
 
         <div className="d-flex justify-content-center">
@@ -438,6 +435,28 @@ const DashboardJobBrowseArea = () => {
         <div className="position-relative">
           <DashboardHeader />
           <h2 className="main-title mb-30">Browse Projects</h2>
+          
+          <DashboardSearchBar 
+            placeholder="Search jobs by title, description, skills..."
+            onSearch={(query) => {
+              if (query.trim()) {
+                const filtered = all_jobs.filter(job =>
+                  job.project_title?.toLowerCase().includes(query.toLowerCase()) ||
+                  job.project_description?.toLowerCase().includes(query.toLowerCase()) ||
+                  job.skills_required?.some(skill => skill.toLowerCase().includes(query.toLowerCase()))
+                );
+                setFilterItems(filtered);
+                setCurrentItems(filtered.slice(0, itemsPerPage));
+                setPageCount(Math.ceil(filtered.length / itemsPerPage));
+                setItemOffset(0);
+              } else {
+                const endOffset = itemsPerPage;
+                setCurrentItems(all_jobs.slice(0, endOffset));
+                setPageCount(Math.ceil(all_jobs.length / itemsPerPage));
+                setItemOffset(0);
+              }
+            }}
+          />
 
           {/* Horizontal Filter Area - Matching Client Candidate Filter Style */}
           <div className="bg-white card-box border-20 mb-30">
@@ -520,43 +539,43 @@ const DashboardJobBrowseArea = () => {
               {hasSelections && (
                 <div className="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
                   {biddingFilter !== "all" && (
-                    <div 
-                      className="btn-eight fw-500 d-flex align-items-center" 
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
                       style={{ backgroundColor: '#00BF58', color: 'white' }}
                     >
                       <span style={{ color: 'white' }}>{biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}</span>
-                      <button 
-                        onClick={() => setBiddingFilter("all")} 
-                        className="btn-close ms-2" 
+                      <button
+                        onClick={() => setBiddingFilter("all")}
+                        className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
                       ></button>
                     </div>
                   )}
                   {shortValue && (
-                    <div 
-                      className="btn-eight fw-500 d-flex align-items-center" 
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
                       style={{ backgroundColor: '#FF6B35', color: 'white' }}
                     >
                       <span style={{ color: 'white' }}>{shortValue === "price-low-to-high" ? "Price: Low to High" : "Price: High to Low"}</span>
-                      <button 
-                        onClick={() => setShortValue("")} 
-                        className="btn-close ms-2" 
+                      <button
+                        onClick={() => setShortValue("")}
+                        className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
                       ></button>
                     </div>
                   )}
                   {selectedSkills.map(skill => (
-                    <div 
-                      key={skill} 
-                      className="btn-eight fw-500 d-flex align-items-center" 
+                    <div
+                      key={skill}
+                      className="btn-eight fw-500 d-flex align-items-center"
                       style={{ backgroundColor: '#00BF58', color: 'white' }}
                     >
                       <span style={{ color: 'white' }}>{skill}</span>
-                      <button 
-                        onClick={() => handleRemoveSkill(skill)} 
-                        className="btn-close ms-2" 
+                      <button
+                        onClick={() => handleRemoveSkill(skill)}
+                        className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
                       ></button>
@@ -662,7 +681,7 @@ const DashboardJobBrowseArea = () => {
           </div>
         </div>
       </div>
-      <SaveJobLoginModal onLoginSuccess={() => {}} />
+      <SaveJobLoginModal onLoginSuccess={() => { }} />
     </>
   );
 };

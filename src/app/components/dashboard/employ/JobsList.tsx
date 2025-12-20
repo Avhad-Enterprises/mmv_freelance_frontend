@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState, useMemo } from "react";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 
 export interface ProjectSummary {
   project_id: string;
@@ -7,7 +8,7 @@ export interface ProjectSummary {
   date_created: string;
   category: string;
   budget: number;
-  status: number;
+  status: number; // Project Task Status: 0=Pending, 1=In Progress, 2=Completed
 }
 
 interface JobsListProps {
@@ -25,9 +26,32 @@ const JobsList: React.FC<JobsListProps> = ({
   onViewApplicants,
   getStatusInfo
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter projects based on search query
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return projects;
+    
+    const query = searchQuery.toLowerCase();
+    return projects.filter(project => 
+      project.title.toLowerCase().includes(query) ||
+      project.category.toLowerCase().includes(query) ||
+      project.budget.toString().includes(query)
+    );
+  }, [projects, searchQuery]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
   return (
-    <div className="bg-white card-box border-20">
-      <div className="table-responsive">
+    <>
+      <DashboardSearchBar 
+        placeholder="Search jobs by title, category, or budget..."
+        onSearch={handleSearch}
+      />
+      <div className="bg-white card-box border-20">
+        <div className="table-responsive">
         <table className="table job-alert-table">
           <thead>
             <tr>
@@ -35,7 +59,7 @@ const JobsList: React.FC<JobsListProps> = ({
               <th>Category</th>
               <th>Budget</th>
               <th>Date Created</th>
-              <th>Status</th>
+              <th>Project Status</th>
               <th className="text-end">Action</th>
             </tr>
           </thead>
@@ -43,8 +67,9 @@ const JobsList: React.FC<JobsListProps> = ({
             {loading && <tr><td colSpan={6} className="text-center">Loading...</td></tr>}
             {error && <tr><td colSpan={6} className="text-center text-danger">{error}</td></tr>}
             {!loading && projects.length === 0 && <tr><td colSpan={6} className="text-center">No jobs found. Post one to get started!</td></tr>}
+            {!loading && projects.length > 0 && filteredProjects.length === 0 && <tr><td colSpan={6} className="text-center">No jobs match your search.</td></tr>}
 
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <tr key={project.project_id} className="align-middle">
                 <td>{project.title}</td>
                 <td>{project.category}</td>
@@ -78,6 +103,7 @@ const JobsList: React.FC<JobsListProps> = ({
         </table>
       </div>
     </div>
+    </>
   );
 };
 
