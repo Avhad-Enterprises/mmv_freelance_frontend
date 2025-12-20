@@ -319,7 +319,7 @@ const HomeSix = () => {
 
         {/* top company start */}
         <TopCompany />
-        <FeedbackOne/>
+        <FeedbackOne />
 
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
@@ -335,13 +335,13 @@ const HomeSix = () => {
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
               <div className="btn-eight fw-500">Don't find the answer? We can help.
-              <Link href="/faq">Click here</Link>
+                <Link href="/faq">Click here</Link>
               </div>
             </div>
           </div>
         </section>
 
-        <FancyBannerSeven/>
+        <FancyBannerSeven />
 
         {/* footer start */}
         <FooterOne />

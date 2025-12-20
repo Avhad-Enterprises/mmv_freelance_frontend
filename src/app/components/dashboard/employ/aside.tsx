@@ -47,24 +47,24 @@ type IProps = {
     // No props needed, using context
 };
 
-const EmployAside = ({}: IProps) => {
+const EmployAside = ({ }: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
     const currentUserId = userData?.user_id ? String(userData.user_id) : null;
     const { conversations } = useConversations(currentUserId);
-    
+
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
-    
-    const fullName = userData 
+
+    const fullName = userData
         ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
         : "Loading...";
-    
+
     const profilePictureUrl = userData?.profile_picture || null;
 
     // Check for unread messages
-    const hasUnreadMessages = conversations.some(convo => 
+    const hasUnreadMessages = conversations.some(convo =>
         convo.lastSenderId !== currentUserId && !convo.lastMessageRead
     );
 
@@ -106,7 +106,7 @@ const EmployAside = ({}: IProps) => {
 
     return (
         <>
-            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
+            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`} style={{ zIndex: 9999 }}>
                 <div className="position-relative">
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
@@ -136,7 +136,7 @@ const EmployAside = ({}: IProps) => {
                                 color: 'white',
                                 cursor: 'pointer'
                             }} onClick={openProfilePicModal}>
-                               {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
+                                {profilePictureUrl && profilePictureUrl.trim() !== '' ? (
                                     <AuthenticatedImage
                                         src={`${profilePictureUrl}?t=${profilePicKey}`}
                                         alt="Profile Picture"
@@ -152,18 +152,18 @@ const EmployAside = ({}: IProps) => {
                             </div>
                             {/* Edit overlay */}
                             <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
-                                 style={{
-                                     width: '28px',
-                                     height: '28px',
-                                     backgroundColor: '#D2F34C',
-                                     cursor: 'pointer',
-                                     border: '3px solid white',
-                                     zIndex: 10,
-                                     fontSize: '14px',
-                                     boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                                     transform: 'translate(25%, -25%)'
-                                 }}
-                                 onClick={openProfilePicModal}>
+                                style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    backgroundColor: '#D2F34C',
+                                    cursor: 'pointer',
+                                    border: '3px solid white',
+                                    zIndex: 10,
+                                    fontSize: '14px',
+                                    boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                                    transform: 'translate(25%, -25%)'
+                                }}
+                                onClick={openProfilePicModal}>
                                 <i className="bi bi-pencil-fill" style={{ color: '#244034', fontSize: '12px', fontWeight: 'bold' }}></i>
                             </div>
                         </div>
@@ -217,7 +217,7 @@ const EmployAside = ({}: IProps) => {
                                 const isActive = pathname === item.link;
                                 const isMessagesItem = item.id === 10; // Messages item
                                 const showNotification = isMessagesItem && hasUnreadMessages;
-                                
+
                                 return (
                                     <li key={item.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
                                         <Link
@@ -272,7 +272,7 @@ const EmployAside = ({}: IProps) => {
                         </ul>
                     </nav>
 
-                    
+
                 </div>
             </aside>
 

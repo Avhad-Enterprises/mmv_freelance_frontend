@@ -47,32 +47,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
     <header className="dashboard-header">
       <div className="d-flex align-items-center justify-content-between">
         {/* Left side - User Role */}
-        <div className="user-role" style={{
-          fontSize: '14px',
-          color: '#244034',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          padding: '8px 16px',
-          backgroundColor: '#EFF6F3',
-          borderRadius: '15px',
-          border: '2px solid #31795A',
-          whiteSpace: 'nowrap',
-          minWidth: 'fit-content',
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
-        }}>
-          {currentRole || 'Loading...'}
-        </div>
-
-        {/* Right side - Search, Notifications, Post Job */}
         <div className="d-flex align-items-center">
-          {/* Mobile Sidebar Toggle */}
+          {/* Mobile Sidebar Toggle - Moved to Left */}
           <button
             onClick={handleOpenSidebar}
             className="dash-mobile-nav-toggler d-block d-md-none me-3"
           >
             <span></span>
           </button>
+
+          {/* Left side - User Role (Hidden on mobile) */}
+          <div className="user-role d-none d-md-block" style={{
+            fontSize: '14px',
+            color: '#244034',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            padding: '8px 16px',
+            backgroundColor: '#EFF6F3',
+            borderRadius: '15px',
+            border: '2px solid #31795A',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+          }}>
+            {currentRole || 'Loading...'}
+          </div>
+        </div>
+
+        {/* Right side - Search, Notifications, Post Job */}
+        <div className="d-flex align-items-center">
+          {/* Mobile Sidebar Toggle */}
+
 
           {/* Search Form - Commented out as it's not working */}
           {/*

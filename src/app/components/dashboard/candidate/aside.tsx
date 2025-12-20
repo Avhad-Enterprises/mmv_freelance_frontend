@@ -36,9 +36,9 @@ const nav_data = [
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Job" },
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
     { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
-    { id: 9 , icon : nav_9 ,icon_active: nav_9, link : "/dashboard/freelancer-dashboard/ongoing-jobs" , title : "Ongoing Projects" },
-    { id: 11 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/credits" , title : "Credits" },
-    { id: 10 , icon : nav_8 ,icon_active: nav_8, link : "/dashboard/freelancer-dashboard/chat" , title : "Messages" },
+    { id: 9, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
+    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Credits" },
+    { id: 10, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/chat", title: "Messages" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ];
 
@@ -46,24 +46,24 @@ type IProps = {
     // No props needed, using context
 };
 
-const CandidateAside = ({}: IProps) => {
+const CandidateAside = ({ }: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
     const currentUserId = userData?.user_id ? String(userData.user_id) : null;
     const { conversations } = useConversations(currentUserId);
-    
+
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
-    
-    const fullName = userData 
+
+    const fullName = userData
         ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || "User"
         : "Loading...";
-    
+
     const profilePictureUrl = userData?.profile_picture || null;
 
     // Check for unread messages
-    const hasUnreadMessages = conversations.some(convo => 
+    const hasUnreadMessages = conversations.some(convo =>
         convo.lastSenderId !== currentUserId && !convo.lastMessageRead
     );
 
@@ -117,7 +117,7 @@ const CandidateAside = ({}: IProps) => {
                     }
                 }
             `}</style>
-            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`}>
+            <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`} style={{ zIndex: 9999 }}>
                 <div className="position-relative" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
                     {/* Logo + Close Button */}
                     <div className="logo text-md-center d-md-block d-flex align-items-center justify-content-between">
@@ -163,18 +163,18 @@ const CandidateAside = ({}: IProps) => {
                             </div>
                             {/* Edit overlay */}
                             <div className="position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
-                                 style={{
-                                     width: '28px',
-                                     height: '28px',
-                                     backgroundColor: '#D2F34C',
-                                     cursor: 'pointer',
-                                     border: '3px solid white',
-                                     zIndex: 10,
-                                     fontSize: '14px',
-                                     boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
-                                     transform: 'translate(25%, -25%)'
-                                 }}
-                                 onClick={openProfilePicModal}>
+                                style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    backgroundColor: '#D2F34C',
+                                    cursor: 'pointer',
+                                    border: '3px solid white',
+                                    zIndex: 10,
+                                    fontSize: '14px',
+                                    boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                                    transform: 'translate(25%, -25%)'
+                                }}
+                                onClick={openProfilePicModal}>
                                 <i className="bi bi-pencil-fill" style={{ color: '#244034', fontSize: '12px', fontWeight: 'bold' }}></i>
                             </div>
                         </div>
@@ -222,7 +222,7 @@ const CandidateAside = ({}: IProps) => {
                                 const isActive = pathname === m.link;
                                 const isChatItem = m.id === 10; // Chat item
                                 const showNotification = isChatItem && hasUnreadMessages;
-                                
+
                                 return (
                                     <li key={m.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
                                         <Link href={m.link} className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}>
@@ -258,7 +258,7 @@ const CandidateAside = ({}: IProps) => {
                         </ul>
                     </nav>
 
-                  
+
 
                 </div>
             </aside>
