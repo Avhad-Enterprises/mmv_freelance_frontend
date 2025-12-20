@@ -63,10 +63,10 @@ export function CardItem({
 
 // props type
 type IProps = {
-    // No props needed, using context
+  // No props needed, using context
 };
 
-const DashboardArea = ({}: IProps) => {
+const DashboardArea = ({ }: IProps) => {
   const decoded = useDecodedToken();
   const [applications, setApplications] = useState<ApplicationItem[]>([]);
   const [savedJobsCount, setSavedJobsCount] = useState<number>(0);
@@ -87,7 +87,7 @@ const DashboardArea = ({}: IProps) => {
         setLoading(false);
         return;
       }
-      
+
       // Fetch profile completion only once
       if (!profileFetchedRef.current) {
         try {
@@ -101,39 +101,40 @@ const DashboardArea = ({}: IProps) => {
           profileFetchedRef.current = true; // Mark as fetched even on error to prevent retries
         }
       }
-      
+
       try {
         const token = authCookies.getToken();
-        
+
         // Fetch applications
         const applicationsRes = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
           {
-            headers: { 
+            headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             },
             cache: 'no-cache'
           }
         );
-        
+
         if (applicationsRes.ok) {
           const applicationsData = await applicationsRes.json();
           const apps = applicationsData.data || [];
           setApplications(apps);
-          
+
           // Calculate metrics
+          // Status mapping: 0=Pending, 1=Approved/In Progress, 2=Completed, 3=Rejected
           const totalApplied = apps.length;
-          const pending = apps.filter((app: ApplicationItem) => 
-            String(app.status || '').toLowerCase() === 'pending' || String(app.status || '').toLowerCase() === 'applied'
+          const pending = apps.filter((app: ApplicationItem) =>
+            Number(app.status) === 0
           ).length;
-          const accepted = apps.filter((app: ApplicationItem) => 
-            String(app.status || '').toLowerCase() === 'accepted' || String(app.status || '').toLowerCase() === 'approved'
+          const accepted = apps.filter((app: ApplicationItem) =>
+            Number(app.status) === 1
           ).length;
-          const rejected = apps.filter((app: ApplicationItem) => 
-            String(app.status || '').toLowerCase() === 'rejected'
+          const rejected = apps.filter((app: ApplicationItem) =>
+            Number(app.status) === 3
           ).length;
-          
+
           setMetrics({ totalApplied, pending, accepted, rejected });
         }
 
@@ -195,19 +196,19 @@ const DashboardArea = ({}: IProps) => {
         ) : (
           <>
             <div className="row">
-              <CardItem 
-                img={icon_1} 
-                title="Total Applied" 
+              <CardItem
+                img={icon_1}
+                title="Total Applied"
                 value={`${metrics.totalApplied}`}
               />
-              <CardItem 
-                img={icon_2} 
-                title="Pending" 
+              <CardItem
+                img={icon_2}
+                title="Pending"
                 value={`${metrics.pending}`}
               />
-              <CardItem 
-                img={icon_4} 
-                title="Accepted" 
+              <CardItem
+                img={icon_4}
+                title="Accepted"
                 value={`${metrics.accepted}`}
               />
             </div>
@@ -245,8 +246,8 @@ const DashboardArea = ({}: IProps) => {
                         )}
                       </div>
                       <div className="col-lg-4 text-lg-end">
-                        <Link 
-                          href="/dashboard/freelancer-dashboard/profile" 
+                        <Link
+                          href="/dashboard/freelancer-dashboard/profile"
                           className="dash-btn-two"
                         >
                           Go to My Profile

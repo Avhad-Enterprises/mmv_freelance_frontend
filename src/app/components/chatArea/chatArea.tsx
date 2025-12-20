@@ -35,7 +35,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useUser } from '@/context/UserContext';
 import {
-  ref, onValue, set, push, get, query, orderByChild, 
+  ref, onValue, set, push, get, query, orderByChild,
   limitToLast, endBefore, onDisconnect, serverTimestamp as rtdbServerTimestamp,
   update, off
 } from "firebase/database";
@@ -188,6 +188,7 @@ interface UserData {
   user_id: string;
   first_name: string;
   email: string;
+  role?: string; // Add role field
 }
 
 interface ClientProfile {
@@ -201,6 +202,7 @@ interface ClientProfile {
 // ---------------- COMPONENT ----------------
 const ChatArea: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null); // Track user role
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [newChatUserId, setNewChatUserId] = useState<string>("");
@@ -215,29 +217,29 @@ const ChatArea: React.FC = () => {
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  
+
   // Pagination state
   const [hasMoreMessages, setHasMoreMessages] = useState<boolean>(false);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [oldestMessageTimestamp, setOldestMessageTimestamp] = useState<number | null>(null);
-  
+
   // Connection state monitoring
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [isConnected, setIsConnected] = useState<boolean>(true);
-  
+
   // Optimistic message updates
   const [pendingMessages, setPendingMessages] = useState<Map<string, LocalMessage>>(new Map());
   const pendingMessagesRef = useRef<Map<string, LocalMessage>>(new Map());
-  
+
   // Client profile cache
   const [clientProfiles, setClientProfiles] = useState<Map<string, ClientProfile>>(new Map());
   const [loadingProfiles, setLoadingProfiles] = useState<Set<string>>(new Set());
   const profileCacheRef = useRef<Map<string, ClientProfile>>(new Map());
   const loadingProfilesRef = useRef<Set<string>>(new Set());
-  
+
   // Memory leak prevention: Track component mount state
   const isMountedRef = useRef<boolean>(true);
-  
+
   // Track active subscriptions for cleanup
   const conversationsUnsubscribeRef = useRef<(() => void) | null>(null);
   const messagesUnsubscribeRef = useRef<(() => void) | null>(null);
@@ -246,10 +248,10 @@ const ChatArea: React.FC = () => {
 
   // Use shared Firebase db instance (same as client thread page)
   const db = sharedDb;
-  
+
   // State to track Firebase authentication
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState<boolean>(false);
-  
+
   // ---------------- FIREBASE AUTHENTICATION ----------------
   useEffect(() => {
     if (!auth) {
@@ -300,18 +302,18 @@ const ChatArea: React.FC = () => {
 
     return () => unsubscribeAuth();
   }, []);
-  
+
   // ---------------- ERROR HANDLING HELPERS ----------------
   const showError = (message: string, type: 'error' | 'warning' | 'info' = 'error', autoDismiss = true) => {
     setError(message);
     setErrorType(type);
     setShowErrorToast(true);
-    
+
     // Clear any existing timeout
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
     }
-    
+
     // Auto-dismiss after 5 seconds for errors, 3 seconds for info/warning
     if (autoDismiss) {
       const dismissTime = type === 'error' ? 5000 : 3000;
@@ -322,7 +324,7 @@ const ChatArea: React.FC = () => {
       }, dismissTime);
     }
   };
-  
+
   const dismissError = () => {
     setShowErrorToast(false);
     if (errorTimeoutRef.current) {
@@ -330,37 +332,37 @@ const ChatArea: React.FC = () => {
       errorTimeoutRef.current = null;
     }
   };
-  
+
   // ---------------- CONNECTION STATE MONITORING ----------------
   useEffect(() => {
     // Monitor browser online/offline status
     const handleOnline = () => {
       if (isMountedRef.current) setIsOnline(true);
     };
-    
+
     const handleOffline = () => {
       if (isMountedRef.current) {
         setIsOnline(false);
         setIsConnected(false);
       }
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     // Initial state
     setIsOnline(navigator.onLine);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-  
+
   // Monitor Realtime Database connection state
   useEffect(() => {
     if (!db) return;
-    
+
     // Listen to Firebase Realtime Database connection status
     const connectedRef = ref(db, '.info/connected');
     const unsubscribe = onValue(
@@ -374,37 +376,58 @@ const ChatArea: React.FC = () => {
         if (isMountedRef.current) setIsConnected(false);
       }
     );
-    
+
     return () => off(connectedRef, 'value', unsubscribe);
   }, [db]);
-  
+
   // ---------------- CLEANUP ON UNMOUNT ----------------
   useEffect(() => {
     isMountedRef.current = true;
-    
+
+    // Create AbortController for all fetch requests
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     return () => {
       isMountedRef.current = false;
-      
+
       // Unsubscribe from all active listeners
       if (conversationsUnsubscribeRef.current) {
-        conversationsUnsubscribeRef.current();
-        conversationsUnsubscribeRef.current = null;
+        try {
+          conversationsUnsubscribeRef.current();
+        } catch (error) {
+          console.error('Error unsubscribing from conversations:', error);
+        } finally {
+          conversationsUnsubscribeRef.current = null;
+        }
       }
+
       if (messagesUnsubscribeRef.current) {
-        messagesUnsubscribeRef.current();
-        messagesUnsubscribeRef.current = null;
+        try {
+          messagesUnsubscribeRef.current();
+        } catch (error) {
+          console.error('Error unsubscribing from messages:', error);
+        } finally {
+          messagesUnsubscribeRef.current = null;
+        }
       }
+
       if (typingUnsubscribeRef.current) {
-        typingUnsubscribeRef.current();
-        typingUnsubscribeRef.current = null;
+        try {
+          typingUnsubscribeRef.current();
+        } catch (error) {
+          console.error('Error unsubscribing from typing:', error);
+        } finally {
+          typingUnsubscribeRef.current = null;
+        }
       }
-      
+
       // Clear error timeout
       if (errorTimeoutRef.current) {
         clearTimeout(errorTimeoutRef.current);
         errorTimeoutRef.current = null;
       }
-      
+
       // Abort any pending fetch requests
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -429,7 +452,8 @@ const ChatArea: React.FC = () => {
         }
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          signal: abortControllerRef.current?.signal  // Add abort signal
         });
 
         if (!response.ok) throw new Error('Failed to fetch user data');
@@ -439,12 +463,14 @@ const ChatArea: React.FC = () => {
           const userData: UserData = {
             user_id: String(data.data.user.user_id),
             first_name: data.data.user.first_name,
-            email: data.data.user.email
+            email: data.data.user.email,
+            role: data.data.user.role // Extract user role
           };
-          
+
           // Only update state if component is still mounted
           if (isMountedRef.current) {
             setCurrentUser(userData);
+            setUserRole(data.data.user.role || null); // Store user role
           }
 
           const userRef = ref(db, `users/${userData.user_id}`);
@@ -471,7 +497,7 @@ const ChatArea: React.FC = () => {
     if (!currentUser?.user_id || !db) {
       return;
     }
-    
+
     // Cleanup any existing subscription before creating a new one
     if (conversationsUnsubscribeRef.current) {
       conversationsUnsubscribeRef.current();
@@ -479,7 +505,7 @@ const ChatArea: React.FC = () => {
     }
 
     const userId = String(currentUser.user_id);
-    
+
     if (isMountedRef.current) {
       setIsLoading(true);
       setError(null);
@@ -495,7 +521,7 @@ const ChatArea: React.FC = () => {
         if (!isMountedRef.current) {
           return;
         }
-        
+
         const data = snapshot.val();
         if (!data) {
           if (isMountedRef.current) {
@@ -504,17 +530,17 @@ const ChatArea: React.FC = () => {
           }
           return;
         }
-        
+
         // Filter conversations where current user is a participant
         const convos: Conversation[] = [];
         Object.keys(data).forEach(conversationId => {
           const convoData = data[conversationId];
           const participants = convoData.participants || [];
-          
+
           // Check if current user is a participant
           if (participants.includes(userId)) {
             const isLastMessageFromOther = convoData.lastSenderId && convoData.lastSenderId !== userId;
-            
+
             convos.push({
               id: conversationId,
               participants: participants,
@@ -528,19 +554,19 @@ const ChatArea: React.FC = () => {
             });
           }
         });
-        
+
         // Sort client-side by updatedAt or lastMessageTime (most recent first)
         convos.sort((a, b) => {
           const timeA = a.updatedAt || a.lastMessageTime || 0;
           const timeB = b.updatedAt || b.lastMessageTime || 0;
           return timeB - timeA;
         });
-        
+
         if (isMountedRef.current) {
           setConversations(convos);
           setIsLoading(false);
         }
-        
+
         if (convos.length === 0) {
           // No conversations found
         }
@@ -553,7 +579,7 @@ const ChatArea: React.FC = () => {
         }
       }
     );
-    
+
     // Store unsubscribe function for cleanup
     conversationsUnsubscribeRef.current = () => off(conversationsRef, 'value', unsubscribe);
 
@@ -596,7 +622,8 @@ const ChatArea: React.FC = () => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        signal: abortControllerRef.current?.signal  // Add abort signal
       });
 
       if (!response.ok) {
@@ -648,26 +675,37 @@ const ChatArea: React.FC = () => {
     };
 
     const fetchAllProfiles = async () => {
-      const fetchPromises = conversations.map(convo => {
+      // Only fetch profiles we don't have yet
+      const clientIdsToFetch: string[] = [];
+
+      conversations.forEach(convo => {
         const clientId = convo.participants.find(p => p !== currentUser.user_id);
         const fallback = clientId ? convo.participantDetails?.[clientId] : null;
 
-        // Fetch if we don't have a cached profile OR if the stored participant name looks like a placeholder
-        if (clientId && (!profileCacheRef.current.has(clientId) && !loadingProfilesRef.current.has(clientId))) {
-          return fetchClientProfile(clientId);
-        }
+        // Fetch if:
+        // 1. We don't have a cached profile AND
+        // 2. Not currently loading AND
+        // 3. Either no fallback OR fallback name looks like placeholder
+        if (clientId &&
+          !profileCacheRef.current.has(clientId) &&
+          !loadingProfilesRef.current.has(clientId)) {
 
-        if (clientId && fallback && isPlaceholderName(fallback.firstName)) {
-          return fetchClientProfile(clientId);
+          if (!fallback || isPlaceholderName(fallback.firstName)) {
+            clientIdsToFetch.push(clientId);
+          }
         }
-
-        return Promise.resolve(null);
       });
 
-      await Promise.all(fetchPromises);
+      // Only make API calls if there are new profiles to fetch
+      if (clientIdsToFetch.length > 0) {
+        await Promise.all(clientIdsToFetch.map(id => fetchClientProfile(id)));
+      }
     };
 
-    fetchAllProfiles();
+    // Debounce to avoid rapid-fire fetches on conversation list updates
+    const timeoutId = setTimeout(fetchAllProfiles, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [conversations, currentUser]);
 
   // Real-time listener for messages when a conversation is selected
@@ -686,7 +724,7 @@ const ChatArea: React.FC = () => {
       }
       return;
     }
-    
+
     // Cleanup previous messages listener before creating new one
     if (messagesUnsubscribeRef.current) {
       messagesUnsubscribeRef.current();
@@ -704,7 +742,7 @@ const ChatArea: React.FC = () => {
         if (!isMountedRef.current) {
           return;
         }
-        
+
         const data = snapshot.val();
         if (!data) {
           if (isMountedRef.current) {
@@ -714,7 +752,7 @@ const ChatArea: React.FC = () => {
           }
           return;
         }
-        
+
         // Convert object to array and sort by createdAt
         const msgs: LocalMessage[] = Object.keys(data).map((messageId) => {
           const messageData = data[messageId];
@@ -733,47 +771,50 @@ const ChatArea: React.FC = () => {
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return timeA - timeB; // Oldest first
         });
-        
+
         if (isMountedRef.current) {
           setMessages(msgs);
-          
+
           // Remove any pending messages that have been confirmed
           const updatedPending = new Map(pendingMessagesRef.current);
           let hasChanges = false;
-          
+
           updatedPending.forEach((msg, tempId) => {
             // Check if this pending message now exists in confirmed messages
             const isConfirmed = msgs.some(m => {
               if (!m.text || !msg.text || !m.senderId || !msg.senderId) return false;
               if (m.text !== msg.text || m.senderId !== msg.senderId) return false;
               if (!m.createdAt || !msg.createdAt) return false;
-              
+
               // Helper to safely get timestamp
               const getTime = (timestamp: Date | number): number => {
                 return timestamp instanceof Date ? timestamp.getTime() : Number(timestamp);
               };
-              
+
               return Math.abs(getTime(m.createdAt) - getTime(msg.createdAt)) < 5000;
             });
-            
+
             if (isConfirmed) {
               updatedPending.delete(tempId);
               hasChanges = true;
             }
           });
-          
+
           if (hasChanges) {
             pendingMessagesRef.current = updatedPending;
             setPendingMessages(new Map(updatedPending));
           }
-          
-          // For now, disable pagination (can be added later if needed)
-          setHasMoreMessages(false);
-          
+
+          // Check if there might be more messages (pagination)
+          // If we got exactly MESSAGES_PER_PAGE, there might be more
+          setHasMoreMessages(msgs.length >= MESSAGES_PER_PAGE);
+
           // Track the oldest message timestamp for pagination
           if (msgs.length > 0) {
             const oldestMsg = msgs[0];
             setOldestMessageTimestamp(oldestMsg.createdAt ? new Date(oldestMsg.createdAt).getTime() : null);
+          } else {
+            setOldestMessageTimestamp(null);
           }
         }
 
@@ -785,19 +826,19 @@ const ChatArea: React.FC = () => {
             try {
               const messageRef = ref(db, `conversations/${selectedConversation.id}/messages/${messageId}`);
               const updates: any = {};
-              
+
               // Update delivery status to 'delivered' if not already delivered/read
               if (!messageData.deliveryStatus || messageData.deliveryStatus === 'sent') {
                 updates.deliveryStatus = 'delivered';
               }
-              
+
               // Mark as read if user is viewing the conversation
               if (!messageData.isRead) {
                 updates.isRead = true;
                 updates.deliveryStatus = 'read';
                 updates.readAt = Date.now();
               }
-              
+
               if (Object.keys(updates).length > 0) {
                 await update(messageRef, updates);
               }
@@ -815,7 +856,7 @@ const ChatArea: React.FC = () => {
         }
       }
     );
-    
+
     // Store unsubscribe function for cleanup
     messagesUnsubscribeRef.current = () => off(messagesRef, 'value', unsubscribe);
 
@@ -843,7 +884,7 @@ const ChatArea: React.FC = () => {
       }
       return;
     }
-    
+
     // Cleanup previous typing listener before creating new one
     if (typingUnsubscribeRef.current) {
       typingUnsubscribeRef.current();
@@ -851,7 +892,7 @@ const ChatArea: React.FC = () => {
     }
 
     const convRef = ref(db, `conversations/${selectedConversation.id}`);
-    
+
     const unsubscribe = onValue(
       convRef,
       (snapshot) => {
@@ -859,7 +900,7 @@ const ChatArea: React.FC = () => {
         if (!isMountedRef.current) {
           return;
         }
-        
+
         const data = snapshot.val();
         if (!data) {
           if (isMountedRef.current) {
@@ -889,7 +930,7 @@ const ChatArea: React.FC = () => {
         }
       }
     );
-    
+
     // Store unsubscribe function for cleanup
     typingUnsubscribeRef.current = () => off(convRef, 'value', unsubscribe);
 
@@ -903,10 +944,69 @@ const ChatArea: React.FC = () => {
 
   // ---------------- LOAD MORE MESSAGES ----------------
   const loadMoreMessages = async () => {
-    // Pagination with Realtime Database is handled differently
-    // For now, we're loading the last N messages only
-    // This can be enhanced with query cursors if needed
-    return;
+    if (!selectedConversation?.id || !db || isLoadingMore || !hasMoreMessages || !oldestMessageTimestamp) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
+      // Query for older messages before the oldest timestamp
+      const olderMessagesQuery = query(
+        messagesRef,
+        orderByChild('createdAt'),
+        endBefore(oldestMessageTimestamp),
+        limitToLast(MESSAGES_PER_PAGE)
+      );
+
+      const snapshot = await get(olderMessagesQuery);
+      const data = snapshot.val();
+
+      if (data && isMountedRef.current) {
+        const olderMsgs: LocalMessage[] = Object.keys(data).map((messageId) => {
+          const messageData = data[messageId];
+          return {
+            id: messageId,
+            senderId: messageData.senderId || '',
+            receiverId: messageData.receiverId || '',
+            text: messageData.text || '',
+            createdAt: messageData.createdAt ? new Date(messageData.createdAt) : null,
+            isRead: !!messageData.isRead,
+            deliveryStatus: messageData.deliveryStatus || (messageData.isRead ? 'read' : 'sent'),
+          } as LocalMessage;
+        }).sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return timeA - timeB;
+        });
+
+        // Prepend older messages to existing ones
+        setMessages(prev => [...olderMsgs, ...prev]);
+
+        // Update pagination state
+        if (olderMsgs.length > 0) {
+          const newOldest = olderMsgs[0];
+          setOldestMessageTimestamp(newOldest.createdAt ? new Date(newOldest.createdAt).getTime() : null);
+          setHasMoreMessages(olderMsgs.length >= MESSAGES_PER_PAGE);
+        } else {
+          setHasMoreMessages(false);
+        }
+      } else {
+        if (isMountedRef.current) {
+          setHasMoreMessages(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error);
+      if (isMountedRef.current) {
+        showError('Failed to load older messages', 'error');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoadingMore(false);
+      }
+    }
   };
 
   // ---------------- HANDLERS ----------------
@@ -952,10 +1052,10 @@ const ChatArea: React.FC = () => {
 
       const targetUserRef = ref(db, `users/${targetUserId}`);
       const targetUserSnapshot = await get(targetUserRef);
-      let targetUserData: { email: string; firstName: string; profilePicture?: string } = { 
-        email: 'Unknown', 
-        firstName: `User ${targetUserId}`, 
-        profilePicture: undefined 
+      let targetUserData: { email: string; firstName: string; profilePicture?: string } = {
+        email: 'Unknown',
+        firstName: `User ${targetUserId}`,
+        profilePicture: undefined
       };
       if (targetUserSnapshot.exists()) {
         const data = targetUserSnapshot.val();
@@ -967,8 +1067,8 @@ const ChatArea: React.FC = () => {
       }
 
       const participantDetails = {
-        [currentUser.user_id]: { 
-          email: currentUser.email, 
+        [currentUser.user_id]: {
+          email: currentUser.email,
           firstName: currentUser.first_name,
           profilePicture: undefined
         },
@@ -1098,7 +1198,7 @@ const ChatArea: React.FC = () => {
           }}>
             {errorType === 'error' ? '❌' : errorType === 'warning' ? '⚠️' : 'ℹ️'}
           </div>
-          
+
           {/* Content */}
           <div style={{ flex: 1 }}>
             <div style={{
@@ -1117,7 +1217,7 @@ const ChatArea: React.FC = () => {
               {error}
             </div>
           </div>
-          
+
           {/* Dismiss Button */}
           <button
             onClick={dismissError}
@@ -1138,662 +1238,662 @@ const ChatArea: React.FC = () => {
           </button>
         </div>
       )}
-      
-    <div className="chat-shell">
-      {/* LEFT SIDEBAR */}
-      <div 
-        className="chat-sidebar"
-        style={{
-          width: '340px',
-          borderRight: '1px solid rgba(49,121,90,0.1)',
-          display: 'flex',
-          flexDirection: 'column',
-          background: '#FFFFFF',
-          height: '100%',
-          minHeight: 0,
-          overflow: 'hidden',
-          borderRadius: '30px 0 0 30px'
-        }}
-      >
-        {/* SIDEBAR HEADER */}
-        <div style={{ 
-          padding: '1.25rem', 
-          background: '#244034',
-          borderRadius: '30px 0 0 0'
-        }}>
-          <div style={{ marginBottom: '0.75rem' }}>
-            <h3 style={{ 
-              margin: 0, 
-              color: 'white', 
-              fontWeight: 700, 
-              fontSize: '1.25rem',
-              fontFamily: 'var(--gorditas-font), inherit'
-            }}>
-              Messages
-            </h3>
-            <p style={{ 
-              margin: '4px 0 0 0', 
-              color: 'rgba(255,255,255,0.75)', 
-              fontSize: '0.85rem' 
-            }}>
-              {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              className="chat-search-input"
-              placeholder="Search conversations..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem 0.75rem 2.75rem',
-                borderRadius: '30px',
-                border: '1px solid rgba(255,255,255,0.2)',
-                background: 'rgba(255,255,255,0.15)',
-                fontSize: '0.9rem',
-                color: 'white',
-                outline: 'none',
-                transition: 'all 0.2s ease'
-              }}
-            />
-            <MessageCircle 
-              style={{ 
-                position: 'absolute', 
-                left: '0.9rem', 
-                top: '50%', 
-                transform: 'translateY(-50%)', 
-                width: '18px', 
-                height: '18px', 
-                color: 'rgba(255,255,255,0.7)' 
-              }} 
-            />
-            <button
-              onClick={() => setShowNewChatModal(true)}
-              style={{
-                position: 'absolute',
-                right: '0.5rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: '#D2F34C',
-                border: 'none',
-                color: '#244034',
-                cursor: 'pointer',
-                padding: '6px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-              aria-label="New Chat"
-              onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'}
-              onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
-            >
-              <Plus size={18} />
-            </button>
-          </div>
-        </div>
 
-        {/* CONVERSATIONS LIST */}
-        <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, background: '#FFFFFF' }}>
-          {isLoading && conversations.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
-              <div style={{ 
-                width: '40px', 
-                height: '40px', 
-                border: '3px solid #E9F7EF', 
-                borderTopColor: '#31795A', 
-                borderRadius: '50%', 
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto 1rem'
-              }} />
-              <p>Loading conversations...</p>
-            </div>
-          ) : conversations.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
-              <div style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: '50%',
-                background: '#244034',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1rem',
-                border: '2px solid #31795A20'
+      <div className="chat-shell">
+        {/* LEFT SIDEBAR */}
+        <div
+          className="chat-sidebar"
+          style={{
+            width: '340px',
+            borderRight: '1px solid rgba(49,121,90,0.1)',
+            display: 'flex',
+            flexDirection: 'column',
+            background: '#FFFFFF',
+            height: '100%',
+            minHeight: 0,
+            overflow: 'hidden',
+            borderRadius: '30px 0 0 30px'
+          }}
+        >
+          {/* SIDEBAR HEADER */}
+          <div style={{
+            padding: '1.25rem',
+            background: '#244034',
+            borderRadius: '30px 0 0 0'
+          }}>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <h3 style={{
+                margin: 0,
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1.25rem',
+                fontFamily: 'var(--gorditas-font), inherit'
               }}>
-                <MessageCircle style={{ width: '36px', height: '36px', color: '#31795A' }} />
-              </div>
-              <p style={{ fontSize: '15px', margin: 0, fontWeight: 500, color: '#244034' }}>No conversations yet</p>
-              <p style={{ fontSize: '13px', margin: '0.5rem 0 0 0', color: '#9CA3AF' }}>Start a new chat to begin messaging</p>
+                Messages
+              </h3>
+              <p style={{
+                margin: '4px 0 0 0',
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: '0.85rem'
+              }}>
+                {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+              </p>
             </div>
-          ) : (() => {
-            // Filter conversations based on search query
-            const filteredConversations = searchQuery.trim() 
-              ? conversations.filter(convo => {
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                className="chat-search-input"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem 0.75rem 2.75rem',
+                  borderRadius: '30px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  background: 'rgba(255,255,255,0.15)',
+                  fontSize: '0.9rem',
+                  color: 'white',
+                  outline: 'none',
+                  transition: 'all 0.2s ease'
+                }}
+              />
+              <MessageCircle
+                style={{
+                  position: 'absolute',
+                  left: '0.9rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '18px',
+                  height: '18px',
+                  color: 'rgba(255,255,255,0.7)'
+                }}
+              />
+              <button
+                onClick={() => setShowNewChatModal(true)}
+                style={{
+                  position: 'absolute',
+                  right: '0.5rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: '#D2F34C',
+                  border: 'none',
+                  color: '#244034',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                aria-label="New Chat"
+                onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)'}
+                onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(-50%) scale(1)'}
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+          </div>
+
+          {/* CONVERSATIONS LIST */}
+          <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, background: '#FFFFFF' }}>
+            {isLoading && conversations.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid #E9F7EF',
+                  borderTopColor: '#31795A',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto 1rem'
+                }} />
+                <p>Loading conversations...</p>
+              </div>
+            ) : conversations.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: '#244034',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem',
+                  border: '2px solid #31795A20'
+                }}>
+                  <MessageCircle style={{ width: '36px', height: '36px', color: '#31795A' }} />
+                </div>
+                <p style={{ fontSize: '15px', margin: 0, fontWeight: 500, color: '#244034' }}>No conversations yet</p>
+                <p style={{ fontSize: '13px', margin: '0.5rem 0 0 0', color: '#9CA3AF' }}>Start a new chat to begin messaging</p>
+              </div>
+            ) : (() => {
+              // Filter conversations based on search query
+              const filteredConversations = searchQuery.trim()
+                ? conversations.filter(convo => {
                   const clientId = convo.participants.find(p => p !== currentUser?.user_id);
                   const clientProfile = clientId ? clientProfiles.get(clientId) : null;
                   const fallbackDetails = clientId ? convo.participantDetails?.[clientId] : null;
-                  
+
                   let displayName = '';
                   if (clientProfile) {
                     displayName = `${clientProfile.first_name} ${clientProfile.last_name || ''}`.trim();
                   } else if (fallbackDetails) {
                     displayName = fallbackDetails.firstName || fallbackDetails.email?.split('@')[0] || '';
                   }
-                  
+
                   const query = searchQuery.toLowerCase();
-                  return displayName.toLowerCase().includes(query) || 
-                         (convo.lastMessage || '').toLowerCase().includes(query);
+                  return displayName.toLowerCase().includes(query) ||
+                    (convo.lastMessage || '').toLowerCase().includes(query);
                 })
-              : conversations;
-            
-            if (filteredConversations.length === 0 && searchQuery.trim()) {
-              return (
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
-                  <p style={{ fontSize: '14px', margin: 0 }}>No matching conversations</p>
-                  <button
-                    onClick={() => setSearchQuery('')}
+                : conversations;
+
+              if (filteredConversations.length === 0 && searchQuery.trim()) {
+                return (
+                  <div style={{ padding: '2rem', textAlign: 'center', color: '#6B7280' }}>
+                    <p style={{ fontSize: '14px', margin: 0 }}>No matching conversations</p>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#31795A',
+                        cursor: 'pointer',
+                        fontSize: '13px',
+                        marginTop: '0.5rem',
+                        textDecoration: 'underline'
+                      }}
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                );
+              }
+
+              return filteredConversations.map(convo => {
+                const clientId = convo.participants.find(p => p !== currentUser?.user_id);
+                const clientProfile = clientId ? clientProfiles.get(clientId) : null;
+                const isLoadingProfile = clientId ? loadingProfiles.has(clientId) : false;
+                const isSelected = selectedConversation?.id === convo.id;
+
+                // Fallback to Firebase participant details if profile not loaded
+                const fallbackDetails = clientId ? convo.participantDetails?.[clientId] : null;
+
+                // Determine display name with multiple fallbacks. Treat generic placeholders like "User name" as invalid.
+                let displayName = 'Unknown User';
+                if (clientProfile) {
+                  displayName = `${clientProfile.first_name}${clientProfile.last_name ? ' ' + clientProfile.last_name : ''}`;
+                } else if (fallbackDetails) {
+                  // Try different possible field names, but ignore placeholder values
+                  const fbFirst = (fallbackDetails.firstName || (fallbackDetails as any).first_name || '').toString().trim();
+                  const isInvalidPlaceholder = !fbFirst || /^user\s*name$/i.test(fbFirst) || /^user\s*\d+$/i.test(fbFirst);
+                  if (!isInvalidPlaceholder) {
+                    displayName = fbFirst;
+                  } else if (fallbackDetails.email) {
+                    displayName = fallbackDetails.email.split('@')[0];
+                  } else {
+                    displayName = 'Client';
+                  }
+                }
+
+                const displayInitial = displayName.charAt(0).toUpperCase();
+                // Use profile picture from API or fallback to Firebase participantDetails
+                const profilePicture = clientProfile?.profile_picture || fallbackDetails?.profilePicture;
+
+                return (
+                  <div
+                    key={convo.id}
+                    onClick={() => setSelectedConversation(convo)}
                     style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#31795A',
+                      padding: '1rem 1.25rem',
+                      background: isSelected ? '#E9F7EF' : '#FFFFFF',
                       cursor: 'pointer',
-                      fontSize: '13px',
-                      marginTop: '0.5rem',
-                      textDecoration: 'underline'
+                      borderBottom: '1px solid #F0F5F3',
+                      transition: 'all 0.2s ease',
+                      borderLeft: isSelected ? '4px solid #31795A' : '4px solid transparent'
+                    }}
+                    onMouseOver={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = '#F8FBF9';
+                    }}
+                    onMouseOut={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = '#FFFFFF';
                     }}
                   >
-                    Clear search
-                  </button>
-                </div>
-              );
-            }
-            
-            return filteredConversations.map(convo => {
-            const clientId = convo.participants.find(p => p !== currentUser?.user_id);
-            const clientProfile = clientId ? clientProfiles.get(clientId) : null;
-            const isLoadingProfile = clientId ? loadingProfiles.has(clientId) : false;
-            const isSelected = selectedConversation?.id === convo.id;
-            
-            // Fallback to Firebase participant details if profile not loaded
-            const fallbackDetails = clientId ? convo.participantDetails?.[clientId] : null;
-            
-            // Determine display name with multiple fallbacks. Treat generic placeholders like "User name" as invalid.
-            let displayName = 'Unknown User';
-            if (clientProfile) {
-              displayName = `${clientProfile.first_name}${clientProfile.last_name ? ' ' + clientProfile.last_name : ''}`;
-            } else if (fallbackDetails) {
-              // Try different possible field names, but ignore placeholder values
-              const fbFirst = (fallbackDetails.firstName || (fallbackDetails as any).first_name || '').toString().trim();
-              const isInvalidPlaceholder = !fbFirst || /^user\s*name$/i.test(fbFirst) || /^user\s*\d+$/i.test(fbFirst);
-              if (!isInvalidPlaceholder) {
-                displayName = fbFirst;
-              } else if (fallbackDetails.email) {
-                displayName = fallbackDetails.email.split('@')[0];
-              } else {
-                displayName = 'Client';
-              }
-            }
-            
-            const displayInitial = displayName.charAt(0).toUpperCase();
-            // Use profile picture from API or fallback to Firebase participantDetails
-            const profilePicture = clientProfile?.profile_picture || fallbackDetails?.profilePicture;
-
-            return (
-              <div
-                key={convo.id}
-                onClick={() => setSelectedConversation(convo)}
-                style={{
-                  padding: '1rem 1.25rem',
-                  background: isSelected ? '#E9F7EF' : '#FFFFFF',
-                  cursor: 'pointer',
-                  borderBottom: '1px solid #F0F5F3',
-                  transition: 'all 0.2s ease',
-                  borderLeft: isSelected ? '4px solid #31795A' : '4px solid transparent'
-                }}
-                onMouseOver={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = '#F8FBF9';
-                }}
-                onMouseOut={(e) => {
-                  if (!isSelected) e.currentTarget.style.background = '#FFFFFF';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-                  {/* Profile Picture or Avatar */}
-                  <div style={{ 
-                    width: '50px', 
-                    height: '50px', 
-                    borderRadius: '50%', 
-                    background: profilePicture ? 'transparent' : '#244034', 
-                    color: 'white', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    fontSize: '20px',
-                    fontWeight: 600,
-                    flexShrink: 0,
-                    boxShadow: '0 2px 8px rgba(36,64,52,0.15)',
-                    transition: 'transform 0.2s ease'
-                  }}>
-                    {isLoadingProfile ? (
-                      <div style={{ 
-                        width: '20px', 
-                        height: '20px', 
-                        border: '2px solid rgba(255,255,255,0.3)', 
-                        borderTopColor: 'white', 
-                        borderRadius: '50%', 
-                        animation: 'spin 1s linear infinite' 
-                      }} />
-                    ) : profilePicture ? (
-                      <AuthenticatedImage
-                        src={profilePicture} 
-                        alt={displayName}
-                        width={48}
-                        height={48}
-                        style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          objectFit: 'cover',
-                          borderRadius: '50%'
-                        }}
-                        unoptimized
-                        fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23244034'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='20' fill='white' font-weight='600'%3E{displayInitial}%3C/text%3E%3C/svg%3E"
-                      />
-                    ) : (
-                      displayInitial
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                      {/* Profile Picture or Avatar */}
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        background: profilePicture ? 'transparent' : '#244034',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        fontSize: '20px',
+                        fontWeight: 600,
+                        flexShrink: 0,
+                        boxShadow: '0 2px 8px rgba(36,64,52,0.15)',
+                        transition: 'transform 0.2s ease'
+                      }}>
+                        {isLoadingProfile ? (
+                          <div style={{
+                            width: '20px',
+                            height: '20px',
+                            border: '2px solid rgba(255,255,255,0.3)',
+                            borderTopColor: 'white',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                          }} />
+                        ) : profilePicture ? (
+                          <AuthenticatedImage
+                            src={profilePicture}
+                            alt={displayName}
+                            width={48}
+                            height={48}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: '50%'
+                            }}
+                            unoptimized
+                            fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='%23244034'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='20' fill='white' font-weight='600'%3E{displayInitial}%3C/text%3E%3C/svg%3E"
+                          />
+                        ) : (
+                          displayInitial
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={{
+                          margin: 0,
+                          fontWeight: 600,
+                          fontSize: '0.95rem',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          color: '#244034'
+                        }}>
+                          {displayName}
+                        </h3>
+                        <p style={{
+                          margin: '3px 0 0 0',
+                          color: '#6B7280',
+                          fontSize: '0.85rem',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {convo.lastMessage || 'No messages yet'}
+                        </p>
+                        <span style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>
+                          {formatTime(convo.updatedAt || convo.lastMessageTime)}
+                        </span>
+                      </div>
+                      {convo.hasUnread && (
+                        <div style={{
+                          width: '10px',
+                          height: '10px',
+                          borderRadius: '50%',
+                          background: '#244034',
+                          flexShrink: 0,
+                          boxShadow: '0 2px 6px rgba(49,121,90,0.3)'
+                        }} />
+                      )}
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ 
-                      margin: 0, 
-                      fontWeight: 600, 
-                      fontSize: '0.95rem',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      color: '#244034'
-                    }}>
-                      {displayName}
-                    </h3>
-                    <p style={{ 
-                      margin: '3px 0 0 0', 
-                      color: '#6B7280', 
-                      fontSize: '0.85rem',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      {convo.lastMessage || 'No messages yet'}
-                    </p>
-                    <span style={{ fontSize: '0.75rem', color: '#9CA3AF' }}>
-                      {formatTime(convo.updatedAt || convo.lastMessageTime)}
-                    </span>
-                  </div>
-                  {convo.hasUnread && (
-                    <div style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: '#244034',
-                      flexShrink: 0,
-                      boxShadow: '0 2px 6px rgba(49,121,90,0.3)'
-                    }} />
-                  )}
-                </div>
-              </div>
-            );
-          })})()}
+                );
+              })
+            })()}
+          </div>
         </div>
-      </div>
 
-      {/* RIGHT CHAT PANEL */}
-      <div 
-        className={`chat-main ${selectedConversation ? 'active' : ''}`}
-        style={{ 
-          flex: 1, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          minHeight: 0, 
-          overflow: 'hidden', 
-          background: 'linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)',
-          borderRadius: '0 30px 30px 0'
-        }}
-      >
-        {selectedConversation ? (
-          <>
-            {/* Header */}
-            <ChatHeader
-              currentUserId={currentUser?.user_id}
-              conversation={selectedConversation}
-              onViewProfile={(user) => { setProfileModalUser(user); setShowProfileModal(true); }}
-              onBack={() => setSelectedConversation(null)}
-            />
+        {/* RIGHT CHAT PANEL */}
+        <div
+          className={`chat-main ${selectedConversation ? 'active' : ''}`}
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+            overflow: 'hidden',
+            background: 'linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)',
+            borderRadius: '0 30px 30px 0'
+          }}
+        >
+          {selectedConversation ? (
+            <>
+              {/* Header */}
+              <ChatHeader
+                currentUserId={currentUser?.user_id}
+                conversation={selectedConversation}
+                onBack={() => setSelectedConversation(null)}
+              />
 
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-              {/* header placeholder (handled by ChatHeader) */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+                {/* header placeholder (handled by ChatHeader) */}
 
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-                <ChatBody 
-                  messages={messages} 
-                  currentUserId={String(currentUser?.user_id)} 
-                  isOtherUserTyping={isOtherUserTyping}
-                  hasMoreMessages={hasMoreMessages}
-                  isLoadingMore={isLoadingMore}
-                  onLoadMore={loadMoreMessages}
-                  pendingMessages={Array.from(pendingMessages.values())}
-                  isOnline={isOnline}
-                  isConnected={isConnected}
-                />
-                <ChatInput
-                  conversationId={selectedConversation?.id}
-                  currentUserId={String(currentUser?.user_id)}
-                  onSend={async (text) => {
-                    if (!selectedConversation || !currentUser) return showError('Please select a conversation first', 'warning');
-                    if (!db) return showError('Chat service is temporarily unavailable', 'error');
-                    
-                    const senderId = String(currentUser.user_id);
-                    const otherId = selectedConversation.participants.find(p => p !== currentUser.user_id) as string | undefined;
-                    if (!otherId) return showError('Unable to identify the recipient. Please try selecting the conversation again.', 'error');
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+                  <ChatBody
+                    messages={messages}
+                    currentUserId={String(currentUser?.user_id)}
+                    isOtherUserTyping={isOtherUserTyping}
+                    hasMoreMessages={hasMoreMessages}
+                    isLoadingMore={isLoadingMore}
+                    onLoadMore={loadMoreMessages}
+                    pendingMessages={Array.from(pendingMessages.values())}
+                    isOnline={isOnline}
+                    isConnected={isConnected}
+                  />
+                  <ChatInput
+                    conversationId={selectedConversation?.id}
+                    currentUserId={String(currentUser?.user_id)}
+                    onSend={async (text) => {
+                      if (!selectedConversation || !currentUser) return showError('Please select a conversation first', 'warning');
+                      if (!db) return showError('Chat service is temporarily unavailable', 'error');
 
-                    const trimmed = text.trim();
-                    if (!trimmed) return;
+                      const senderId = String(currentUser.user_id);
+                      const otherId = selectedConversation.participants.find(p => p !== currentUser.user_id) as string | undefined;
+                      if (!otherId) return showError('Unable to identify the recipient. Please try selecting the conversation again.', 'error');
 
-                    // Generate temporary ID for optimistic update
-                    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                    
-                    // Create optimistic message
-                    const optimisticMessage: LocalMessage = {
-                      id: tempId,
-                      senderId,
-                      receiverId: otherId,
-                      text: trimmed,
-                      createdAt: new Date(),
-                      isRead: false,
-                      deliveryStatus: 'sent',
-                    };
-                    
-                    // Add to pending messages immediately (optimistic UI)
-                    pendingMessagesRef.current.set(tempId, optimisticMessage);
-                    if (isMountedRef.current) {
-                      setPendingMessages(new Map(pendingMessagesRef.current));
-                    }
+                      const trimmed = text.trim();
+                      if (!trimmed) return;
 
-                    try {
-                      // Write message to Realtime Database
-                      const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
-                      const newMessageRef = push(messagesRef);
-                      await set(newMessageRef, {
+                      // Generate temporary ID for optimistic update
+                      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+                      // Create optimistic message
+                      const optimisticMessage: LocalMessage = {
+                        id: tempId,
                         senderId,
                         receiverId: otherId,
                         text: trimmed,
-                        createdAt: Date.now(),
+                        createdAt: new Date(),
                         isRead: false,
                         deliveryStatus: 'sent',
-                      });
+                      };
 
-                      // Update conversation metadata
-                      const conversationRef = ref(db, `conversations/${selectedConversation.id}`);
-                      await update(conversationRef, {
-                        lastMessage: trimmed,
-                        updatedAt: Date.now(),
-                        lastSenderId: senderId,
-                        lastMessageRead: true, // Mark as read since user just participated
-                      });
-
-                      // Remove from pending messages after successful send
-                      setTimeout(() => {
-                        pendingMessagesRef.current.delete(tempId);
-                        if (isMountedRef.current) {
-                          setPendingMessages(new Map(pendingMessagesRef.current));
-                        }
-                      }, 500); // Small delay to allow Realtime Database listener to confirm
-                      
-                    } catch (err: any) {
-                      console.error('❌ Send message failed:', err);
-                      
-                      // Mark message as failed but keep it visible
-                      const failedMessage = { ...optimisticMessage, failed: true };
-                      pendingMessagesRef.current.set(tempId, failedMessage);
+                      // Add to pending messages immediately (optimistic UI)
+                      pendingMessagesRef.current.set(tempId, optimisticMessage);
                       if (isMountedRef.current) {
                         setPendingMessages(new Map(pendingMessagesRef.current));
-                        showError(
-                          isOnline 
-                            ? "Message failed to send. Retrying automatically..." 
-                            : "You're offline. Message will be sent when connection is restored.",
-                          'warning'
-                        );
                       }
-                      
-                      // Auto-retry after 2 seconds if online
-                      if (isOnline && isConnected) {
-                        setTimeout(async () => {
-                          try {
-                            const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
-                            const newMessageRef = push(messagesRef);
-                            await set(newMessageRef, {
-                              senderId,
-                              receiverId: otherId,
-                              text: trimmed,
-                              createdAt: Date.now(),
-                              isRead: false,
-                              deliveryStatus: 'sent',
-                            });
-                            
-                            const conversationRef = ref(db, `conversations/${selectedConversation.id}`);
-                            await update(conversationRef, {
-                              lastMessage: trimmed,
-                              updatedAt: Date.now(),
-                              lastSenderId: senderId,
-                              lastMessageRead: true, // Mark as read since user just participated
-                            });
-                            
-                            pendingMessagesRef.current.delete(tempId);
-                            if (isMountedRef.current) {
-                              setPendingMessages(new Map(pendingMessagesRef.current));
-                            }
-                          } catch (retryErr) {
-                            console.error('❌ Message retry failed:', retryErr);
+
+                      try {
+                        // Write message to Realtime Database
+                        const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
+                        const newMessageRef = push(messagesRef);
+                        await set(newMessageRef, {
+                          senderId,
+                          receiverId: otherId,
+                          text: trimmed,
+                          createdAt: Date.now(),
+                          isRead: false,
+                          deliveryStatus: 'sent',
+                        });
+
+                        // Update conversation metadata
+                        const conversationRef = ref(db, `conversations/${selectedConversation.id}`);
+                        await update(conversationRef, {
+                          lastMessage: trimmed,
+                          updatedAt: Date.now(),
+                          lastSenderId: senderId,
+                          lastMessageRead: true, // Mark as read since user just participated
+                        });
+
+                        // Remove from pending messages after successful send
+                        setTimeout(() => {
+                          pendingMessagesRef.current.delete(tempId);
+                          if (isMountedRef.current) {
+                            setPendingMessages(new Map(pendingMessagesRef.current));
                           }
-                        }, 2000);
+                        }, 500); // Small delay to allow Realtime Database listener to confirm
+
+                      } catch (err: any) {
+                        console.error('❌ Send message failed:', err);
+
+                        // Mark message as failed but keep it visible
+                        const failedMessage = { ...optimisticMessage, failed: true };
+                        pendingMessagesRef.current.set(tempId, failedMessage);
+                        if (isMountedRef.current) {
+                          setPendingMessages(new Map(pendingMessagesRef.current));
+                          showError(
+                            isOnline
+                              ? "Message failed to send. Retrying automatically..."
+                              : "You're offline. Message will be sent when connection is restored.",
+                            'warning'
+                          );
+                        }
+
+                        // Auto-retry after 2 seconds if online
+                        if (isOnline && isConnected) {
+                          setTimeout(async () => {
+                            try {
+                              const messagesRef = ref(db, `conversations/${selectedConversation.id}/messages`);
+                              const newMessageRef = push(messagesRef);
+                              await set(newMessageRef, {
+                                senderId,
+                                receiverId: otherId,
+                                text: trimmed,
+                                createdAt: Date.now(),
+                                isRead: false,
+                                deliveryStatus: 'sent',
+                              });
+
+                              const conversationRef = ref(db, `conversations/${selectedConversation.id}`);
+                              await update(conversationRef, {
+                                lastMessage: trimmed,
+                                updatedAt: Date.now(),
+                                lastSenderId: senderId,
+                                lastMessageRead: true, // Mark as read since user just participated
+                              });
+
+                              pendingMessagesRef.current.delete(tempId);
+                              if (isMountedRef.current) {
+                                setPendingMessages(new Map(pendingMessagesRef.current));
+                              }
+                            } catch (retryErr) {
+                              console.error('❌ Message retry failed:', retryErr);
+                            }
+                          }, 2000);
+                        }
                       }
-                    }
-                  }}
-                  disabled={!selectedConversation}
-                />
+                    }}
+                    disabled={!selectedConversation}
+                  />
+                </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <div style={{ 
-            flex: 1, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            background: 'linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)',
-            borderRadius: '0 30px 30px 0'
-          }}>
-            <div style={{ 
-              textAlign: 'center', 
-              maxWidth: 480, 
-              padding: '32px',
-              background: '#FFFFFF',
-              borderRadius: '30px',
-              boxShadow: '0 10px 40px rgba(36,64,52,0.08)',
-              border: '1px solid rgba(49,121,90,0.1)'
+            </>
+          ) : (
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)',
+              borderRadius: '0 30px 30px 0'
             }}>
               <div style={{
-                width: '100px',
-                height: '100px',
-                borderRadius: '50%',
-                background: '#244034',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1.5rem',
-                border: '2px solid #31795A20'
+                textAlign: 'center',
+                maxWidth: 480,
+                padding: '32px',
+                background: '#FFFFFF',
+                borderRadius: '30px',
+                boxShadow: '0 10px 40px rgba(36,64,52,0.08)',
+                border: '1px solid rgba(49,121,90,0.1)'
               }}>
-                <MessageCircle style={{ width: '48px', height: '48px', color: '#31795A', strokeWidth: 1.5 }} />
-              </div>
-              <h2 style={{ 
-                marginTop: 0, 
-                marginBottom: 8, 
-                color: '#244034', 
-                fontWeight: 600,
-                fontFamily: 'var(--eb_garamond-font), serif',
-                fontSize: '1.75rem'
-              }}>
-                Welcome to Messages
-              </h2>
-              <p style={{ 
-                margin: '0 0 1.5rem 0', 
-                color: '#6B7280',
-                lineHeight: 1.6
-              }}>
-                Select a conversation from the sidebar to start chatting, or begin a new conversation.
-              </p>
-              <button
-                onClick={() => setShowNewChatModal(true)}
-                style={{
+                <div style={{
+                  width: '100px',
+                  height: '100px',
+                  borderRadius: '50%',
                   background: '#244034',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.875rem 2rem',
-                  borderRadius: '30px',
-                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.5rem',
+                  border: '2px solid #31795A20'
+                }}>
+                  <MessageCircle style={{ width: '48px', height: '48px', color: '#31795A', strokeWidth: 1.5 }} />
+                </div>
+                <h2 style={{
+                  marginTop: 0,
+                  marginBottom: 8,
+                  color: '#244034',
                   fontWeight: 600,
-                  fontSize: '0.95rem',
-                  boxShadow: '0 4px 14px rgba(36,64,52,0.2)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(36,64,52,0.3)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(36,64,52,0.2)';
-                }}
-              >
+                  fontFamily: 'var(--eb_garamond-font), serif',
+                  fontSize: '1.75rem'
+                }}>
+                  Welcome to Messages
+                </h2>
+                <p style={{
+                  margin: '0 0 1.5rem 0',
+                  color: '#6B7280',
+                  lineHeight: 1.6
+                }}>
+                  Select a conversation from the sidebar to start chatting, or begin a new conversation.
+                </p>
+                <button
+                  onClick={() => setShowNewChatModal(true)}
+                  style={{
+                    background: '#244034',
+                    color: 'white',
+                    border: 'none',
+                    padding: '0.875rem 2rem',
+                    borderRadius: '30px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    boxShadow: '0 4px 14px rgba(36,64,52,0.2)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(36,64,52,0.3)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 14px rgba(36,64,52,0.2)';
+                  }}
+                >
+                  Start New Chat
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* NEW CHAT MODAL */}
+        {showNewChatModal && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(36,64,52,0.6)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            animation: 'fadeIn 0.2s ease'
+          }}>
+            <div style={{
+              background: 'white',
+              padding: '2rem',
+              borderRadius: '30px',
+              width: '90%',
+              maxWidth: '420px',
+              boxShadow: '0 20px 60px rgba(36,64,52,0.2)'
+            }}>
+              <h3 style={{
+                margin: '0 0 0.5rem 0',
+                color: '#244034',
+                fontFamily: 'var(--eb_garamond-font), serif',
+                fontSize: '1.5rem'
+              }}>
                 Start New Chat
-              </button>
+              </h3>
+              <p style={{
+                margin: '0 0 1.5rem 0',
+                color: '#6B7280',
+                fontSize: '0.9rem'
+              }}>
+                Enter the user ID to start a conversation
+              </p>
+              <input
+                type="text"
+                value={newChatUserId}
+                onChange={(e) => setNewChatUserId(e.target.value)}
+                placeholder="Enter User ID"
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  border: '2px solid #E9F7EF',
+                  borderRadius: '15px',
+                  marginBottom: '1rem',
+                  fontSize: '0.95rem',
+                  transition: 'border-color 0.2s ease',
+                  outline: 'none'
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = '#31795A'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#E9F7EF'}
+              />
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  onClick={() => { setShowNewChatModal(false); dismissError(); }}
+                  style={{
+                    flex: 1,
+                    background: '#F0F5F3',
+                    border: 'none',
+                    borderRadius: '15px',
+                    padding: '0.875rem',
+                    color: '#244034',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = '#E9F7EF'}
+                  onMouseOut={(e) => e.currentTarget.style.background = '#F0F5F3'}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleStartNewChat}
+                  disabled={!newChatUserId.trim()}
+                  style={{
+                    flex: 1,
+                    background: newChatUserId.trim()
+                      ? '#244034'
+                      : '#D1D5DB',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '15px',
+                    padding: '0.875rem',
+                    fontWeight: 600,
+                    cursor: newChatUserId.trim() ? 'pointer' : 'not-allowed',
+                    transition: 'all 0.2s ease',
+                    boxShadow: newChatUserId.trim() ? '0 4px 14px rgba(36,64,52,0.2)' : 'none'
+                  }}
+                >
+                  Start Chat
+                </button>
+              </div>
             </div>
           </div>
         )}
+
+        {/* PROFILE DETAILS MODAL */}
+        {profileModalUser && (
+          <ProfileDetailsModal
+            open={showProfileModal}
+            userData={profileModalUser}
+            onClose={() => { setShowProfileModal(false); setProfileModalUser(null); }}
+          />
+        )}
       </div>
-
-      {/* NEW CHAT MODAL */}
-      {showNewChatModal && (
-        <div style={{ 
-          position: 'fixed', 
-          inset: 0, 
-          background: 'rgba(36,64,52,0.6)', 
-          backdropFilter: 'blur(4px)',
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          zIndex: 1000,
-          animation: 'fadeIn 0.2s ease'
-        }}>
-          <div style={{ 
-            background: 'white', 
-            padding: '2rem', 
-            borderRadius: '30px', 
-            width: '90%', 
-            maxWidth: '420px',
-            boxShadow: '0 20px 60px rgba(36,64,52,0.2)'
-          }}>
-            <h3 style={{ 
-              margin: '0 0 0.5rem 0',
-              color: '#244034',
-              fontFamily: 'var(--eb_garamond-font), serif',
-              fontSize: '1.5rem'
-            }}>
-              Start New Chat
-            </h3>
-            <p style={{ 
-              margin: '0 0 1.5rem 0',
-              color: '#6B7280',
-              fontSize: '0.9rem'
-            }}>
-              Enter the user ID to start a conversation
-            </p>
-            <input
-              type="text"
-              value={newChatUserId}
-              onChange={(e) => setNewChatUserId(e.target.value)}
-              placeholder="Enter User ID"
-              style={{ 
-                width: '100%', 
-                padding: '0.875rem 1rem', 
-                border: '2px solid #E9F7EF', 
-                borderRadius: '15px', 
-                marginBottom: '1rem',
-                fontSize: '0.95rem',
-                transition: 'border-color 0.2s ease',
-                outline: 'none'
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = '#31795A'}
-              onBlur={(e) => e.currentTarget.style.borderColor = '#E9F7EF'}
-            />
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button
-                onClick={() => { setShowNewChatModal(false); dismissError(); }}
-                style={{ 
-                  flex: 1, 
-                  background: '#F0F5F3', 
-                  border: 'none', 
-                  borderRadius: '15px', 
-                  padding: '0.875rem',
-                  color: '#244034',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#E9F7EF'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#F0F5F3'}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleStartNewChat}
-                disabled={!newChatUserId.trim()}
-                style={{
-                  flex: 1,
-                  background: newChatUserId.trim() 
-                    ? '#244034' 
-                    : '#D1D5DB',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '15px',
-                  padding: '0.875rem',
-                  fontWeight: 600,
-                  cursor: newChatUserId.trim() ? 'pointer' : 'not-allowed',
-                  transition: 'all 0.2s ease',
-                  boxShadow: newChatUserId.trim() ? '0 4px 14px rgba(36,64,52,0.2)' : 'none'
-                }}
-              >
-                Start Chat
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PROFILE DETAILS MODAL */}
-      {profileModalUser && (
-        <ProfileDetailsModal
-          open={showProfileModal}
-          userData={profileModalUser}
-          onClose={() => { setShowProfileModal(false); setProfileModalUser(null); }}
-        />
-      )}
-    </div>
     </>
   );
 };

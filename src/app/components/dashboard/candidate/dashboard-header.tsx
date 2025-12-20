@@ -124,11 +124,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
             <ul className="dropdown-menu" aria-labelledby="notification-dropdown">
               <li>
                 <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2">
-                  <h4>Notifications</h4>
+                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Notifications</h4>
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      style={{ fontSize: '12px', color: '#31795A', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                      style={{
+                        fontSize: '12px',
+                        color: '#fff',
+                        background: '#31795A',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontWeight: '500',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#244034'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#31795A'}
                     >
                       Mark all as read
                     </button>

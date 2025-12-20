@@ -14,11 +14,10 @@ interface ConversationShape {
 interface Props {
   currentUserId?: string | null;
   conversation?: ConversationShape | null;
-  onViewProfile: (userData: { id?: string; firstName?: string; email?: string }) => void;
   onBack?: () => void;
 }
 
-export default function ChatHeader({ currentUserId, conversation, onViewProfile, onBack }: Props) {
+export default function ChatHeader({ currentUserId, conversation, onBack }: Props) {
   const router = useRouter();
   const otherId = conversation?.participants?.find((p) => p !== currentUserId) || null;
   const otherDetails = otherId ? conversation?.participantDetails?.[otherId] : null;
@@ -133,12 +132,12 @@ export default function ChatHeader({ currentUserId, conversation, onViewProfile,
   const displayEmail = emailCandidate;
 
   return (
-    <div style={{ 
-      padding: '1rem 1.25rem', 
-      borderBottom: '1px solid rgba(49,121,90,0.1)', 
-      background: '#244034', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      padding: '1rem 1.25rem',
+      borderBottom: '1px solid rgba(49,121,90,0.1)',
+      background: '#244034',
+      display: 'flex',
+      alignItems: 'center',
       justifyContent: 'space-between',
       position: 'sticky',
       top: 0,
@@ -157,14 +156,14 @@ export default function ChatHeader({ currentUserId, conversation, onViewProfile,
               router.back();
             }
           }}
-          style={{ 
-            background: 'rgba(255,255,255,0.1)', 
-            border: 'none', 
-            color: 'rgba(255,255,255,0.95)', 
-            cursor: 'pointer', 
-            padding: '8px', 
-            display: 'flex', 
-            alignItems: 'center', 
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            color: 'rgba(255,255,255,0.95)',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '50%',
             transition: 'all 0.2s ease'
@@ -174,18 +173,18 @@ export default function ChatHeader({ currentUserId, conversation, onViewProfile,
           aria-label="Back to messages"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div style={{ 
-          width: 44, 
-          height: 44, 
-          borderRadius: '50%', 
-          background: 'rgba(255,255,255,0.15)', 
-          color: '#fff', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
+        <div style={{
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.15)',
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           fontWeight: 700,
           fontSize: '1.1rem',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -194,46 +193,14 @@ export default function ChatHeader({ currentUserId, conversation, onViewProfile,
         </div>
         <div>
           <div style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '1rem' }}>{displayFirstName}</div>
-          <div style={{ 
-            fontSize: '0.8rem', 
+          <div style={{
+            fontSize: '0.8rem',
             color: isTyping ? '#D2F34C' : 'rgba(255,255,255,0.7)',
             fontWeight: isTyping ? 500 : 400
           }}>
             {isTyping ? '● Typing...' : displayEmail}
           </div>
         </div>
-      </div>
-
-      <div>
-        <button
-          onClick={() => {
-            if (!otherId) return;
-            onViewProfile({ id: otherId, email: displayEmail, firstName: displayFirstName });
-          }}
-          style={{
-            background: '#D2F34C',
-            border: 'none',
-            color: '#244034',
-            cursor: 'pointer',
-            padding: '10px 18px',
-            borderRadius: '30px',
-            fontWeight: 600,
-            fontSize: '0.85rem',
-            boxShadow: '0 2px 10px rgba(210,243,76,0.3)',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 4px 14px rgba(210,243,76,0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 10px rgba(210,243,76,0.3)';
-          }}
-          aria-label="View Profile"
-        >
-          View Profile
-        </button>
       </div>
     </div>
   );
