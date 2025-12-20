@@ -47,32 +47,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
     <header className="dashboard-header">
       <div className="d-flex align-items-center justify-content-between">
         {/* Left side - User Role */}
-        <div className="user-role" style={{
-          fontSize: '14px',
-          color: '#244034',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          padding: '8px 16px',
-          backgroundColor: '#EFF6F3',
-          borderRadius: '15px',
-          border: '2px solid #31795A',
-          whiteSpace: 'nowrap',
-          minWidth: 'fit-content',
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
-        }}>
-          {currentRole || 'Loading...'}
-        </div>
-
-        {/* Right side - Search, Notifications, Post Job */}
         <div className="d-flex align-items-center">
-          {/* Mobile Sidebar Toggle */}
+          {/* Mobile Sidebar Toggle - Moved to Left */}
           <button
             onClick={handleOpenSidebar}
             className="dash-mobile-nav-toggler d-block d-md-none me-3"
           >
             <span></span>
           </button>
+
+          {/* Left side - User Role (Hidden on mobile) */}
+          <div className="user-role d-none d-md-block" style={{
+            fontSize: '14px',
+            color: '#244034',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            padding: '8px 16px',
+            backgroundColor: '#EFF6F3',
+            borderRadius: '15px',
+            border: '2px solid #31795A',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+          }}>
+            {currentRole || 'Loading...'}
+          </div>
+        </div>
+
+        {/* Right side - Search, Notifications, Post Job */}
+        <div className="d-flex align-items-center">
+          {/* Mobile Sidebar Toggle */}
+
 
           {/* Search Form - Commented out as it's not working */}
           {/*
@@ -124,11 +130,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
             <ul className="dropdown-menu" aria-labelledby="notification-dropdown">
               <li>
                 <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2">
-                  <h4>Notifications</h4>
+                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Notifications</h4>
                   {unreadCount > 0 && (
                     <button
                       onClick={() => markAllAsRead()}
-                      style={{ fontSize: '12px', color: '#31795A', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                      style={{
+                        fontSize: '12px',
+                        color: '#fff',
+                        background: '#31795A',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontWeight: '500',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#244034'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#31795A'}
                     >
                       Mark all as read
                     </button>

@@ -141,42 +141,42 @@ export default function FreelancerThreadPage() {
   // Mark messages as read when receiver views them
   useEffect(() => {
     if (!conversationId || !firebaseAuthenticated || !userData || messages.length === 0) return;
-    
+
     const currentUserId = String(userData.user_id);
-    
+
     // Find unread messages sent by the other person (not by current user)
     // Convert senderId to string for comparison
     const unreadMessages = messages.filter(
-      (msg) => String(msg.senderId) !== currentUserId && 
-               (msg.deliveryStatus !== 'read' || !msg.isRead)
+      (msg) => String(msg.senderId) !== currentUserId &&
+        (msg.deliveryStatus !== 'read' || !msg.isRead)
     );
-    
+
     if (unreadMessages.length === 0) return;
-    
+
     // Mark each unread message as read
     const markAsRead = async () => {
       try {
         const updates: { [key: string]: any } = {};
-        
+
         unreadMessages.forEach((msg) => {
           updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] = true;
           updates[`conversations/${conversationId}/messages/${msg.id}/deliveryStatus`] = 'read';
           updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] = Date.now();
         });
-        
+
         // Also update the conversation's lastMessageRead status
         updates[`conversations/${conversationId}/lastMessageRead`] = true;
-        
+
         const dbRef = ref(db);
         await update(dbRef, updates);
       } catch (error) {
         console.error('Failed to mark messages as read:', error);
       }
     };
-    
+
     // Small delay to ensure user has actually viewed the messages
     const timer = setTimeout(markAsRead, 300);
-    
+
     return () => clearTimeout(timer);
   }, [conversationId, firebaseAuthenticated, userData, messages]);
 
@@ -217,71 +217,67 @@ export default function FreelancerThreadPage() {
         <h2 className="main-title">Messages</h2>
 
         <div className="bg-white border-30" style={{ overflow: "hidden" }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: { xs: "calc(100vh - 200px)", md: "calc(100vh - 240px)" },
-                minHeight: { xs: 520, md: 560 },
-                background: "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
-                borderRadius: "30px",
-                overflow: "hidden",
-                boxShadow: "0 4px 20px rgba(36,64,52,0.08)",
-                border: "1px solid rgba(49,121,90,0.12)",
-                fontFamily:
-                  "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
-              }}
-            >
-              <ChatHeader
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: { xs: "calc(100vh - 200px)", md: "calc(100vh - 240px)" },
+              minHeight: { xs: 520, md: 560 },
+              background: "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
+              borderRadius: "30px",
+              overflow: "hidden",
+              boxShadow: "0 4px 20px rgba(36,64,52,0.08)",
+              border: "1px solid rgba(49,121,90,0.12)",
+              fontFamily:
+                "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+            }}
+          >
+            <ChatHeader
+              currentUserId={String(userData.user_id)}
+              conversation={conversation}
+              onBack={() => router.push("/dashboard/freelancer-dashboard/chat")}
+            />
+
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+              <ChatBody messages={messages} currentUserId={String(userData.user_id)} isOtherUserTyping={isOtherUserTyping} />
+              <ChatInput
+                conversationId={conversationId}
                 currentUserId={String(userData.user_id)}
-                conversation={conversation}
-                onViewProfile={(user) => {
-                  setProfileModalUser(user);
-                  setShowProfileModal(true);
+                onSend={async (text) => {
+                  if (!conversationId || !conversation || !userData) return;
+                  const senderId = String(userData.user_id);
+                  const otherId = conversation.participants?.find((p: string) => p !== senderId);
+                  if (!otherId) return;
+
+                  const trimmed = text.trim();
+                  if (!trimmed) return;
+
+                  try {
+                    const messagesRef = ref(db, `conversations/${conversationId}/messages`);
+                    const newMessageRef = push(messagesRef);
+                    await set(newMessageRef, {
+                      senderId,
+                      receiverId: otherId,
+                      text: trimmed,
+                      createdAt: Date.now(),
+                      isRead: false,
+                      deliveryStatus: 'sent', // Initial status: sent (single tick)
+                    });
+
+                    const convRef = ref(db, `conversations/${conversationId}`);
+                    await update(convRef, {
+                      lastMessage: trimmed,
+                      updatedAt: Date.now(),
+                      lastSenderId: senderId,
+                      lastMessageRead: false,
+                    });
+                  } catch (err) {
+                    console.error("Send message failed:", err);
+                  }
                 }}
-                onBack={() => router.push("/dashboard/freelancer-dashboard/chat")}
               />
-
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-                <ChatBody messages={messages} currentUserId={String(userData.user_id)} isOtherUserTyping={isOtherUserTyping} />
-                <ChatInput
-                  conversationId={conversationId}
-                  currentUserId={String(userData.user_id)}
-                  onSend={async (text) => {
-                    if (!conversationId || !conversation || !userData) return;
-                    const senderId = String(userData.user_id);
-                    const otherId = conversation.participants?.find((p: string) => p !== senderId);
-                    if (!otherId) return;
-
-                    const trimmed = text.trim();
-                    if (!trimmed) return;
-
-                    try {
-                      const messagesRef = ref(db, `conversations/${conversationId}/messages`);
-                      const newMessageRef = push(messagesRef);
-                      await set(newMessageRef, {
-                        senderId,
-                        receiverId: otherId,
-                        text: trimmed,
-                        createdAt: Date.now(),
-                        isRead: false,
-                        deliveryStatus: 'sent', // Initial status: sent (single tick)
-                      });
-
-                      const convRef = ref(db, `conversations/${conversationId}`);
-                      await update(convRef, {
-                        lastMessage: trimmed,
-                        updatedAt: Date.now(),
-                        lastSenderId: senderId,
-                        lastMessageRead: false,
-                      });
-                    } catch (err) {
-                      console.error("Send message failed:", err);
-                    }
-                  }}
-                />
-              </div>
-            </Box>
+            </div>
+          </Box>
         </div>
       </div>
 

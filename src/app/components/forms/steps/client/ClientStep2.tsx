@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import MultipleSelectionField from "../MultipleSelectionField"; // Assuming this path is correct
+import { validateURL } from '@/utils/validation';
 
 type Props = {
   formData: any;
@@ -10,10 +11,10 @@ type Props = {
 };
 
 const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors }, 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
     setValue,
     trigger
   } = useForm({
@@ -89,8 +90,19 @@ const ClientStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               type="text"
               placeholder="https://your-website.com"
               className="form-control mb-2"
-              {...register("website")}
+              {...register("website", {
+                validate: (value) => {
+                  if (!value || !value.trim()) return true; // Empty is okay
+                  const validation = validateURL(value, { allowEmpty: true });
+                  return validation.isValid || validation.error;
+                }
+              })}
             />
+            {errors.website && (
+              <div className="error" style={{ color: 'red', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                {String(errors.website.message)}
+              </div>
+            )}
             <input
               type="text"
               placeholder="Social media links"

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { makePostRequest, makeGetRequest } from '@/utils/api';
 import type { NewProjectPayload } from '@/types/project';
 import MultipleSelectionField from './MultipleSelectionField';
+import { validateURL } from '@/utils/validation';
 
 interface IProps {
   onBackToList: () => void;
@@ -52,6 +53,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   const [currentUser, setCurrentUser] = useState<{ userId: number; clientId: number } | null>(null);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [referenceLinks, setReferenceLinks] = useState<string[]>(['']);
+  const [referenceLinkErrors, setReferenceLinkErrors] = useState<(string | undefined)[]>([undefined]);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
 
@@ -71,7 +73,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     const fetchData = async () => {
       try {
         setIsLoadingData(true);
-        
+
         // Fetch categories
         const categoriesResponse = await makeGetRequest('api/v1/categories');
         if (categoriesResponse.data?.data) {
@@ -139,13 +141,33 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       ? pendingFormData.url.trim()
       : `${generateSlug(pendingFormData.project_title)}-${Date.now()}`;
 
-    const validReferenceLinks = referenceLinks.filter(link => link.trim() !== '');
+    // Validate reference links
+    const nonEmptyLinks = referenceLinks.filter(link => link.trim() !== '');
+    const invalidLinks: string[] = [];
+    const validLinks: string[] = [];
+
+    nonEmptyLinks.forEach((link, index) => {
+      const validation = validateURL(link, { allowEmpty: false });
+      if (!validation.isValid) {
+        invalidLinks.push(`Reference link ${index + 1}: ${validation.error}`);
+      } else {
+        validLinks.push(validation.normalizedURL || link);
+      }
+    });
+
+    if (invalidLinks.length > 0) {
+      setError(invalidLinks.join('; '));
+      toast.error('Please fix invalid reference links');
+      setLoading(false);
+      setPendingFormData(null);
+      return;
+    }
 
     const payload = {
       ...pendingFormData,
       url: finalUrl,
       skills_required: selectedSkills,
-      reference_links: validReferenceLinks,
+      reference_links: validLinks,
       tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
@@ -186,15 +208,31 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   };
 
   // Handlers for Reference Links
-  const addReferenceLink = () => setReferenceLinks([...referenceLinks, '']);
+  const addReferenceLink = () => {
+    setReferenceLinks([...referenceLinks, '']);
+    setReferenceLinkErrors([...referenceLinkErrors, undefined]);
+  };
+
   const updateReferenceLink = (index: number, value: string) => {
     const newLinks = [...referenceLinks];
     newLinks[index] = value;
     setReferenceLinks(newLinks);
+
+    // Validate URL on change
+    const newErrors = [...referenceLinkErrors];
+    if (value.trim()) {
+      const validation = validateURL(value, { allowEmpty: false });
+      newErrors[index] = validation.isValid ? undefined : validation.error;
+    } else {
+      newErrors[index] = undefined; // Empty is okay for reference links
+    }
+    setReferenceLinkErrors(newErrors);
   };
+
   const removeReferenceLink = (index: number) => {
     if (referenceLinks.length > 1) {
       setReferenceLinks(referenceLinks.filter((_, i) => i !== index));
+      setReferenceLinkErrors(referenceLinkErrors.filter((_, i) => i !== index));
     }
   };
 
@@ -276,8 +314,8 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                 <div className="col-md-5">
                   <div className="input-group-meta position-relative mb-25">
                     <label>Currency*</label>
-                    <select 
-                      className="form-control" 
+                    <select
+                      className="form-control"
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
                     >
@@ -429,9 +467,20 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
               <div className="input-group-meta position-relative mb-25">
                 <label>Reference Links</label>
                 {referenceLinks.map((link, index) => (
-                  <div key={index} className="d-flex align-items-center mb-10">
-                    <input type="url" placeholder="https://example.com/reference1" className="form-control" value={link} onChange={(e) => updateReferenceLink(index, e.target.value)} />
-                    {referenceLinks.length > 1 && <button type="button" className="btn btn-outline-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                  <div key={index} className="mb-10">
+                    <div className="d-flex align-items-center">
+                      <input
+                        type="url"
+                        placeholder="https://example.com/reference1"
+                        className={`form-control ${referenceLinkErrors[index] ? 'is-invalid' : ''}`}
+                        value={link}
+                        onChange={(e) => updateReferenceLink(index, e.target.value)}
+                      />
+                      {referenceLinks.length > 1 && <button type="button" className="btn btn-outline-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                    </div>
+                    {referenceLinkErrors[index] && (
+                      <small className="text-danger d-block mt-1">{referenceLinkErrors[index]}</small>
+                    )}
                   </div>
                 ))}
                 <button type="button" className="dash-btn-two mt-2" style={{ minWidth: 'auto', lineHeight: '35px', padding: '0 15px', fontSize: '14px' }} onClick={addReferenceLink}>+ Add Another Link</button>

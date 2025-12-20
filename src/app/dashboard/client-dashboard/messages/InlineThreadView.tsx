@@ -239,7 +239,6 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
       <ChatHeader
         currentUserId={String(userData.user_id)}
         conversation={conversation}
-        onViewProfile={handleViewProfile}
       />
 
       <div

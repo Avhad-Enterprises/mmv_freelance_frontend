@@ -37,6 +37,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
 
   // Credit state
@@ -101,9 +102,11 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
         if (applicationForThisProject) {
           setIsApplied(true);
           setApplicationId(applicationForThisProject.applied_projects_id);
+          setApplicationStatus(applicationForThisProject.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
@@ -232,6 +235,17 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const handleWithdrawApplication = async () => {
     if (!applicationId) {
       toast.error('Application ID not found.');
+      return;
+    }
+
+    // Check if application is already approved (status = 1)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an approved project. Please contact support if you have concerns.');
+      return;
+    }
+
+    // Confirm withdrawal
+    if (!confirm('Are you sure you want to withdraw your application?')) {
       return;
     }
 
@@ -379,9 +393,9 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       </div>
                       <div className="text-sm text-muted mb-3">
                         Posted by: <span className="fw-500 text-dark">
-                          {job.client_first_name && job.client_last_name 
+                          {job.client_first_name && job.client_last_name
                             ? `${job.client_first_name} ${job.client_last_name}`
-                            : job.client_company_name 
+                            : job.client_company_name
                               ? job.client_company_name
                               : 'Anonymous Client'
                           }
@@ -423,18 +437,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         onClick={handleApplyClick}
                         disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
                       >
-                        {checkingCredits ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" />
-                            Checking credits...
-                          </>
-                        ) : isApplying ? (
-                          isApplied ? 'Withdrawing...' : 'Applying...'
-                        ) : isApplied ? (
-                          <>✅ Applied<br />Click To Withdraw</>
-                        ) : (
-                          'Apply Now'
-                        )}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
                       </button>
 
                       <button

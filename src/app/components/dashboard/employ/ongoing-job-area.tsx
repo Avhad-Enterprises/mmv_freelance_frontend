@@ -341,13 +341,13 @@ const OngoingJobArea: FC = () => {
 
     if (newStatus === 1) {
       if (currentProject.status === 1) {
-        toast.error("❌ Only one applicant can be assigned to this project.");
+        toast.error("Only one applicant can be assigned to this project.");
         return;
       }
     }
     if (newStatus === 2) {
       if (currentProject.status === 2) {
-        toast.error("❌ This project is already marked as completed.");
+        toast.error("This project is already marked as completed.");
         return;
       }
     }
@@ -382,14 +382,14 @@ const OngoingJobArea: FC = () => {
         });
       }
 
-      toast.success("✅ Applicant and project updated successfully!");
+      toast.success("Applicant and project updated successfully!");
     } catch (err: any) {
       console.error("Failed to update applicant/project:", err);
       if (newProjectStatus !== null) {
         setProjects(originalProjects);
       }
       const message = err.response?.data?.message || err.message || "Failed to update applicant/project.";
-      toast.error(`❌ ${message}`);
+      toast.error(`${message}`);
     }
   };
 
@@ -440,23 +440,23 @@ const OngoingJobArea: FC = () => {
 
         if (status === 1) {
           // Approved - project is now completed
-          toast.success('✅ Submission approved! Project marked as completed.');
+          toast.success('Submission approved! Project marked as completed.');
           handleCloseSubmissionModal();
-          
+
           // Remove the completed project from ongoing projects list immediately
           if (selectedProjectForSubmissions) {
             setProjects(prev => prev.filter(p => p.project_id !== selectedProjectForSubmissions.project_id));
           }
-          
+
           // Also clear the submissions view
           setSelectedProjectForSubmissions(null);
           setSubmissions([]);
-          
+
           // Refresh to get latest data from server
           fetchClientData();
         } else {
           // Rejected
-          toast.success('❌ Submission rejected. Freelancer can resubmit.');
+          toast.success('Submission rejected. Freelancer can resubmit.');
           handleCloseSubmissionModal();
         }
       }
@@ -750,104 +750,104 @@ const OngoingJobArea: FC = () => {
                 <PostJobForm onBackToList={handleReturnToList} />
               ) : (
                 <>
-                  <DashboardSearchBar 
+                  <DashboardSearchBar
                     placeholder="Search ongoing projects by title, category..."
                     onSearch={setSearchQuery}
                   />
-                  
+
                   <div className="bg-white card-box border-20">
-                  <div className="table-responsive">
-                    <table className="table job-alert-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '30%' }}>Title</th>
-                          <th>Category</th>
-                          <th>Budget</th>
-                          <th>Date Created</th>
-                          <th>Project Status</th>
-                          <th className="text-end">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="border-0">
-                        {loading && (
+                    <div className="table-responsive">
+                      <table className="table job-alert-table">
+                        <thead>
                           <tr>
-                            <td colSpan={6} className="text-center py-5">
-                              <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                              </div>
-                            </td>
+                            <th style={{ width: '30%' }}>Title</th>
+                            <th>Category</th>
+                            <th>Budget</th>
+                            <th>Date Created</th>
+                            <th>Project Status</th>
+                            <th className="text-end">Action</th>
                           </tr>
-                        )}
-                        {error && (
-                          <tr>
-                            <td colSpan={6} className="text-center text-danger py-4">
-                              {error}
-                            </td>
-                          </tr>
-                        )}
-                        {!loading && !error && projects.length === 0 && (
-                          <tr>
-                            <td colSpan={6} className="text-center py-5">
-                              <h5>No Ongoing Projects</h5>
-                              <p className="text-muted mb-0">You don't have any ongoing projects at the moment.</p>
-                            </td>
-                          </tr>
-                        )}
-                        {!loading && !error && projects
-                          .filter((project) => {
-                            if (!searchQuery.trim()) return true;
-                            const query = searchQuery.toLowerCase();
-                            return (
-                              project.title.toLowerCase().includes(query) ||
-                              project.category.toLowerCase().includes(query)
-                            );
-                          })
-                          .map((project) => {
-                          const statusInfo = getProjectStatusInfo(project.status);
-                          return (
-                            <tr key={project.project_id} className="align-middle">
-                              <td>
-                                <div className="job-name fw-500">{project.title}</div>
-                              </td>
-                              <td>{project.category}</td>
-                              <td>₹{project.budget?.toLocaleString() ?? 0}</td>
-                              <td>
-                                {new Date(project.date_created).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
-                              </td>
-                              <td>
-                                <span className={`fw-bold ${statusInfo.className}`}>
-                                  {statusInfo.text}
-                                </span>
-                              </td>
-                              <td className="text-end">
-                                <button
-                                  className="btn"
-                                  onClick={() => handleViewSubmissionsClick(project)}
-                                  style={{
-                                    backgroundColor: '#31795A',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '6px 12px',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    fontWeight: '500'
-                                  }}
-                                >
-                                  View Submissions
-                                </button>
+                        </thead>
+                        <tbody className="border-0">
+                          {loading && (
+                            <tr>
+                              <td colSpan={6} className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
                               </td>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                          )}
+                          {error && (
+                            <tr>
+                              <td colSpan={6} className="text-center text-danger py-4">
+                                {error}
+                              </td>
+                            </tr>
+                          )}
+                          {!loading && !error && projects.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="text-center py-5">
+                                <h5>No Ongoing Projects</h5>
+                                <p className="text-muted mb-0">You don't have any ongoing projects at the moment.</p>
+                              </td>
+                            </tr>
+                          )}
+                          {!loading && !error && projects
+                            .filter((project) => {
+                              if (!searchQuery.trim()) return true;
+                              const query = searchQuery.toLowerCase();
+                              return (
+                                project.title.toLowerCase().includes(query) ||
+                                project.category.toLowerCase().includes(query)
+                              );
+                            })
+                            .map((project) => {
+                              const statusInfo = getProjectStatusInfo(project.status);
+                              return (
+                                <tr key={project.project_id} className="align-middle">
+                                  <td>
+                                    <div className="job-name fw-500">{project.title}</div>
+                                  </td>
+                                  <td>{project.category}</td>
+                                  <td>₹{project.budget?.toLocaleString() ?? 0}</td>
+                                  <td>
+                                    {new Date(project.date_created).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })}
+                                  </td>
+                                  <td>
+                                    <span className={`fw-bold ${statusInfo.className}`}>
+                                      {statusInfo.text}
+                                    </span>
+                                  </td>
+                                  <td className="text-end">
+                                    <button
+                                      className="btn"
+                                      onClick={() => handleViewSubmissionsClick(project)}
+                                      style={{
+                                        backgroundColor: '#31795A',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '14px',
+                                        fontWeight: '500'
+                                      }}
+                                    >
+                                      View Submissions
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-              </>
+                </>
               )}
             </>
           )}

@@ -307,14 +307,14 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     if (newStatus === 1) {
       // Check if project is already assigned
       if (currentProject.status === 1) {
-        toast.error("❌ Only one applicant can be assigned to this project.");
+        toast.error("Only one applicant can be assigned to this project.");
         return;
       }
     }
     if (newStatus === 2) {
       // Check if project is already completed
       if (currentProject.status === 2) {
-        toast.error("❌ This project is already marked as completed.");
+        toast.error("This project is already marked as completed.");
         return;
       }
     }
@@ -353,7 +353,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         });
       }
 
-      toast.success("✅ Applicant and project updated successfully!");
+      toast.success("Applicant and project updated successfully!");
     } catch (err: any) {
       console.error("Failed to update applicant/project:", err);
       // Revert project status on error
@@ -361,7 +361,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         setProjects(originalProjects);
       }
       const message = err.response?.data?.message || err.message || "Failed to update applicant/project.";
-      toast.error(`❌ ${message}`);
+      toast.error(`${message}`);
     }
   };
 

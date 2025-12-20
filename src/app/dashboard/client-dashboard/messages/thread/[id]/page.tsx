@@ -343,7 +343,6 @@ export default function ThreadPage() {
               <ChatHeader
                 currentUserId={String(userData.user_id)}
                 conversation={conversation}
-                onViewProfile={handleViewProfile}
               />
 
               {/* Only the chat messages area scrolls; header & input stay fixed */}
