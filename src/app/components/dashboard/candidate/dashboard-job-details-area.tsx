@@ -6,7 +6,10 @@ import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { authCookies } from "@/utils/cookies";
-import BiddingModal from './bidding-modal'; // Import BiddingModal component
+import BiddingModal from './bidding-modal';
+import { InsufficientCreditsModal } from '@/app/components/credits';
+import { creditsService } from '@/services/credits.service';
+import { CreditBalance } from '@/types/credits';
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -36,6 +39,11 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
+
+  // Credit state
+  const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
+  const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+  const [checkingCredits, setCheckingCredits] = useState(false);
 
   useEffect(() => {
     const token = authCookies.getToken();
@@ -113,7 +121,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     }
   };
 
-  const handleApplyClick = () => {
+  const handleApplyClick = async () => {
     if (!isLoggedIn) {
       applyLoginModalRef.current?.show();
       return;
@@ -127,11 +135,34 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     if (isApplied && applicationId) {
       handleWithdrawApplication();
     } else {
-      // Check if bidding is enabled
-      if (job.bidding_enabled) {
-        setShowBiddingModal(true);
-      } else {
-        handleApplySubmit();
+      // Check credits before allowing application
+      setCheckingCredits(true);
+      try {
+        const balance = await creditsService.getBalance();
+        setCreditBalance(balance);
+
+        if (balance.credits_balance < 1) {
+          // Not enough credits - show modal
+          setShowInsufficientCreditsModal(true);
+          return;
+        }
+
+        // Has credits - proceed with application
+        if (job.bidding_enabled) {
+          setShowBiddingModal(true);
+        } else {
+          handleApplySubmit();
+        }
+      } catch (error: any) {
+        console.error("Error checking credits:", error);
+        // If credit check fails, try to proceed anyway (backend will reject if no credits)
+        if (job.bidding_enabled) {
+          setShowBiddingModal(true);
+        } else {
+          handleApplySubmit();
+        }
+      } finally {
+        setCheckingCredits(false);
       }
     }
   };
@@ -404,7 +435,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       <button
                         className="btn-one w-100 mt-25"
                         onClick={handleApplyClick}
-                        disabled={isApplying || userRole === 'CLIENT'}
+                        disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
                       >
                         {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
                       </button>
@@ -443,6 +474,19 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
           isSubmitting={isApplying}
         />
       )}
+
+      {/* Insufficient Credits Modal */}
+      <InsufficientCreditsModal
+        isOpen={showInsufficientCreditsModal}
+        onClose={() => setShowInsufficientCreditsModal(false)}
+        requiredCredits={1}
+        currentBalance={creditBalance?.credits_balance || 0}
+        onBuyCredits={() => {
+          setShowInsufficientCreditsModal(false);
+          // Navigate to credits page
+          window.location.href = '/dashboard/freelancer-dashboard/credits';
+        }}
+      />
     </>
   );
 };
