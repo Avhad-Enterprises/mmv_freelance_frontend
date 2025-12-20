@@ -34,6 +34,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       console.error('Error fetching user data:', error);
     }
   };
-  
+
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job.projects_task_id) return;
     try {
@@ -83,19 +84,21 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
 
       // Check if already applied to this specific project using the correct API
       const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
-      
+
       if (appliedRes.data?.success && appliedRes.data?.data) {
         // Find if user has applied to THIS specific project
         const applicationForThisProject = appliedRes.data.data.find(
           (app: any) => app.projects_task_id === job.projects_task_id
         );
-        
+
         if (applicationForThisProject) {
           setIsApplied(true);
           setApplicationId(applicationForThisProject.applied_projects_id);
+          setApplicationStatus(applicationForThisProject.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
@@ -138,7 +141,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -166,13 +169,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       setIsApplying(false);
     }
   };
-  
+
   const handleApplySubmit = async () => {
     if (!userId) {
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -204,10 +207,21 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       return;
     }
 
+    // Check if application is already approved (status = 1)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an approved project. Please contact support if you have concerns.');
+      return;
+    }
+
+    // Confirm withdrawal
+    if (!confirm('Are you sure you want to withdraw your application?')) {
+      return;
+    }
+
     setIsApplying(true);
     try {
       const response = await makeDeleteRequest(`api/v1/applications/withdraw/${applicationId}`, {});
-      
+
       if (response.data?.message || response.status === 200) {
         toast.success('Application withdrawn successfully!');
         setIsApplied(false);
@@ -270,14 +284,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       <div className="dashboard-body" style={{ backgroundColor: '#f0f5f3', minHeight: '100vh' }}>
         <div className="position-relative">
           <DashboardHeader />
-          
+
           <section className="job-details pt-50 pb-50">
             <div className="container-fluid">
               <div className="row">
                 {/* Left Side: Details - Green Background */}
                 <div className="col-xxl-9 col-xl-8">
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
-                    
+
                     <button onClick={onBack} className="btn-two mb-20">
                       &larr; Back to Jobs
                     </button>
@@ -286,7 +300,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       Posted on: {job.created_at?.slice(0, 10)}
                     </div>
                     <h3 className="post-title">{job.project_title}</h3>
-                    
+
                     <div className="post-block border-style mt-50 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
@@ -348,9 +362,9 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       </div>
                       <div className="text-sm text-muted mb-3">
                         Posted by: <span className="fw-500 text-dark">
-                          {job.client_first_name && job.client_last_name 
+                          {job.client_first_name && job.client_last_name
                             ? `${job.client_first_name} ${job.client_last_name}`
-                            : job.client_company_name 
+                            : job.client_company_name
                               ? job.client_company_name
                               : 'Anonymous Client'
                           }
@@ -386,13 +400,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                           <a key={idx} href="#">{tag}</a>
                         ))}
                       </div>
-                      
-                      <button 
-                        className="btn-one w-100 mt-25" 
+
+                      <button
+                        className="btn-one w-100 mt-25"
                         onClick={handleApplyClick}
                         disabled={isApplying || userRole === 'CLIENT'}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
                       </button>
 
                       <button
@@ -401,12 +415,12 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         disabled={isSaving}
                       >
                         {isSaving ? (
-                            'Saving...'
+                          'Saving...'
                         ) : (
-                            <>
-                                <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
-                                {isSaved ? 'Saved' : 'Save Job'}
-                            </>
+                          <>
+                            <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
+                            {isSaved ? 'Saved' : 'Save Job'}
+                          </>
                         )}
                       </button>
                     </div>
@@ -419,7 +433,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       </div>
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
-      
+
       {showBiddingModal && (
         <BiddingModal
           originalBudget={job.budget || 0}
