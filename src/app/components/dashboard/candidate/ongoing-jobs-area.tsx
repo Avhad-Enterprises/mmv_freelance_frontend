@@ -7,6 +7,7 @@ import DashboardJobDetailsArea from './dashboard-job-details-area';
 import DashboardSearchBar from '../common/DashboardSearchBar';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
 import { authCookies } from "@/utils/cookies";
+import { validateURL } from '@/utils/validation';
 
 // Job Interface with submission status
 interface IJob {
@@ -69,7 +70,7 @@ const OngoingJobsArea = ({ }: IProps) => {
 
         // Clear localStorage cache for completed projects to ensure fresh data
         // (Projects with approved submissions should not appear in ongoing jobs)
-        
+
         // Fetch applications
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/my-applications`,
@@ -201,6 +202,11 @@ const OngoingJobsArea = ({ }: IProps) => {
     const newLinks = [...submissionLinks];
     newLinks[index] = value;
     setSubmissionLinks(newLinks);
+
+    // Clear error when user starts typing
+    if (submitError && value.trim()) {
+      setSubmitError(null);
+    }
   };
 
   const handleSubmitProject = async () => {
@@ -209,10 +215,28 @@ const OngoingJobsArea = ({ }: IProps) => {
       return;
     }
 
-    // Validate at least one link
-    const validLinks = submissionLinks.filter(link => link.trim() !== '');
-    if (validLinks.length === 0) {
+    // Validate at least one link and check URL format
+    const nonEmptyLinks = submissionLinks.filter(link => link.trim() !== '');
+    if (nonEmptyLinks.length === 0) {
       setSubmitError('Please provide at least one submission link');
+      return;
+    }
+
+    // Validate URL format for each link
+    const invalidLinks: string[] = [];
+    const validLinks: string[] = [];
+
+    nonEmptyLinks.forEach((link, index) => {
+      const validation = validateURL(link, { allowEmpty: false });
+      if (!validation.isValid) {
+        invalidLinks.push(`Link ${index + 1}: ${validation.error}`);
+      } else {
+        validLinks.push(validation.normalizedURL || link);
+      }
+    });
+
+    if (invalidLinks.length > 0) {
+      setSubmitError(invalidLinks.join('; '));
       return;
     }
 
@@ -337,8 +361,8 @@ const OngoingJobsArea = ({ }: IProps) => {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="main-title mb-0">Ongoing Projects</h2>
           </div>
-          
-          <DashboardSearchBar 
+
+          <DashboardSearchBar
             placeholder="Search ongoing jobs by title, category..."
             onSearch={(query) => setSearchQuery(query)}
           />
@@ -370,159 +394,159 @@ const OngoingJobsArea = ({ }: IProps) => {
                 );
               })
               .map((job) => (
-              <div
-                key={job.projects_task_id}
-                className="candidate-profile-card list-layout mb-25"
-              >
-                <div className="d-flex">
-                  <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
-                    <a
-                      onClick={() => setSelectedJob(job)}
-                      className="rounded-circle cursor-pointer"
-                    >
-                      <div
-                        className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
-                        style={{
-                          width: 80,
-                          height: 80,
-                          fontSize: '28px',
-                          fontWeight: 'bold',
-                          backgroundColor: getCategoryColor(job.category),
-                          color: getCategoryTextColor(job.category),
-                        }}
+                <div
+                  key={job.projects_task_id}
+                  className="candidate-profile-card list-layout mb-25"
+                >
+                  <div className="d-flex">
+                    <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
+                      <a
+                        onClick={() => setSelectedJob(job)}
+                        className="rounded-circle cursor-pointer"
                       >
-                        {getCategoryIcon(job.category)}
-                      </div>
-                    </a>
-                  </div>
-                  <div className="right-side">
-                    <div className="row gx-2 align-items-center mb-2">
-                      <div className="col-lg-3">
-                        <div className="position-relative">
-                          <h4 className="candidate-name mb-0">
+                        <div
+                          className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
+                          style={{
+                            width: 80,
+                            height: 80,
+                            fontSize: '28px',
+                            fontWeight: 'bold',
+                            backgroundColor: getCategoryColor(job.category),
+                            color: getCategoryTextColor(job.category),
+                          }}
+                        >
+                          {getCategoryIcon(job.category)}
+                        </div>
+                      </a>
+                    </div>
+                    <div className="right-side">
+                      <div className="row gx-2 align-items-center mb-2">
+                        <div className="col-lg-3">
+                          <div className="position-relative">
+                            <h4 className="candidate-name mb-0">
+                              <a
+                                onClick={() => setSelectedJob(job)}
+                                className="tran3s cursor-pointer"
+                              >
+                                {job.project_title
+                                  ? `${job.project_title.slice(0, 22)}${job.project_title.length > 22 ? ".." : ""
+                                  }`
+                                  : "Untitled Project"}
+                              </a>
+                            </h4>
+                            {getSubmissionStatusBadge(job)}
+                            {job.submission_status === 2 && (
+                              <small className="text-danger fw-semibold d-block mt-1">
+                                ⚠️ Submission rejected. Please resubmit.
+                              </small>
+                            )}
+                          </div>
+                        </div>
+                        <div className="col-lg-2 col-md-4 col-sm-6">
+                          <div className="candidate-info">
+                            <span>Budget</span>
+                            <div>₹{job.budget?.toLocaleString() ?? 0}</div>
+                          </div>
+                        </div>
+                        <div className="col-lg-2 col-md-4 col-sm-6">
+                          <div className="candidate-info">
+                            <span>Deadline</span>
+                            <div>
+                              {job.deadline
+                                ? new Date(job.deadline).toLocaleDateString()
+                                : 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-lg-2 col-md-4 col-sm-6">
+                          <div className="candidate-info">
+                            <span>Application Status</span>
+                            <div>{job.status || 'N/A'}</div>
+                          </div>
+                        </div>
+                        <div className="col-lg-2 col-md-4 col-sm-6">
+                          <div className="candidate-info">
+                            <span>Project Type</span>
+                            <div>{job.projects_type || 'N/A'}</div>
+                          </div>
+                        </div>
+                        <div className="col-lg-3 col-md-4">
+                          <div className="d-flex justify-content-lg-end align-items-center gap-2">
                             <a
                               onClick={() => setSelectedJob(job)}
-                              className="tran3s cursor-pointer"
+                              className="profile-btn tran3s ms-md-2 cursor-pointer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '40px',
+                                padding: '0 16px',
+                                lineHeight: '40px',
+                                whiteSpace: 'nowrap',
+                                minWidth: 'fit-content'
+                              }}
                             >
-                              {job.project_title
-                                ? `${job.project_title.slice(0, 22)}${job.project_title.length > 22 ? ".." : ""
-                                }`
-                                : "Untitled Project"}
+                              View Details
                             </a>
-                          </h4>
-                          {getSubmissionStatusBadge(job)}
-                          {job.submission_status === 2 && (
-                            <small className="text-danger fw-semibold d-block mt-1">
-                              ⚠️ Submission rejected. Please resubmit.
-                            </small>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div className="candidate-info">
-                          <span>Budget</span>
-                          <div>₹{job.budget?.toLocaleString() ?? 0}</div>
-                        </div>
-                      </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div className="candidate-info">
-                          <span>Deadline</span>
-                          <div>
-                            {job.deadline
-                              ? new Date(job.deadline).toLocaleDateString()
-                              : 'N/A'}
+                            <button
+                              onClick={() => handleOpenSubmitModal(job)}
+                              className="profile-btn tran3s"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                height: '40px',
+                                padding: '0 16px',
+                                lineHeight: '40px',
+                                whiteSpace: 'nowrap',
+                                minWidth: 'fit-content',
+                                ...(job.submission_status === 2 && {
+                                  backgroundColor: '#dc3545',
+                                  borderColor: '#dc3545',
+                                  color: '#ffffff'
+                                }),
+                                ...(job.submission_status === 0 && {
+                                  backgroundColor: '#6c757d',
+                                  borderColor: '#6c757d',
+                                  opacity: 0.7,
+                                  cursor: 'not-allowed'
+                                }),
+                                ...(job.submission_status === 1 && {
+                                  backgroundColor: '#198754',
+                                  borderColor: '#198754',
+                                  opacity: 0.7,
+                                  cursor: 'not-allowed'
+                                })
+                              }}
+                              disabled={isSubmitButtonDisabled(job)}
+                            >
+                              {getSubmitButtonText(job)}
+                            </button>
                           </div>
                         </div>
                       </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div className="candidate-info">
-                          <span>Application Status</span>
-                          <div>{job.status || 'N/A'}</div>
+                      <div className="row">
+                        <div className="col-12">
+                          <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                            {job.skills_required &&
+                              job.skills_required.slice(0, 5).map((s, i) => (
+                                <li key={i}>
+                                  {s}
+                                </li>
+                              ))}
+                            {job.skills_required &&
+                              job.skills_required.length > 5 && (
+                                <li className="more">
+                                  +{job.skills_required.length - 5}
+                                </li>
+                              )}
+                          </ul>
                         </div>
-                      </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div className="candidate-info">
-                          <span>Project Type</span>
-                          <div>{job.projects_type || 'N/A'}</div>
-                        </div>
-                      </div>
-                      <div className="col-lg-3 col-md-4">
-                        <div className="d-flex justify-content-lg-end align-items-center gap-2">
-                          <a
-                            onClick={() => setSelectedJob(job)}
-                            className="profile-btn tran3s ms-md-2 cursor-pointer"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '40px',
-                              padding: '0 16px',
-                              lineHeight: '40px',
-                              whiteSpace: 'nowrap',
-                              minWidth: 'fit-content'
-                            }}
-                          >
-                            View Details
-                          </a>
-                          <button
-                            onClick={() => handleOpenSubmitModal(job)}
-                            className="profile-btn tran3s"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              height: '40px',
-                              padding: '0 16px',
-                              lineHeight: '40px',
-                              whiteSpace: 'nowrap',
-                              minWidth: 'fit-content',
-                              ...(job.submission_status === 2 && {
-                                backgroundColor: '#dc3545',
-                                borderColor: '#dc3545',
-                                color: '#ffffff'
-                              }),
-                              ...(job.submission_status === 0 && {
-                                backgroundColor: '#6c757d',
-                                borderColor: '#6c757d',
-                                opacity: 0.7,
-                                cursor: 'not-allowed'
-                              }),
-                              ...(job.submission_status === 1 && {
-                                backgroundColor: '#198754',
-                                borderColor: '#198754',
-                                opacity: 0.7,
-                                cursor: 'not-allowed'
-                              })
-                            }}
-                            disabled={isSubmitButtonDisabled(job)}
-                          >
-                            {getSubmitButtonText(job)}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="row">
-                      <div className="col-12">
-                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
-                          {job.skills_required &&
-                            job.skills_required.slice(0, 5).map((s, i) => (
-                              <li key={i}>
-                                {s}
-                              </li>
-                            ))}
-                          {job.skills_required &&
-                            job.skills_required.length > 5 && (
-                              <li className="more">
-                                +{job.skills_required.length - 5}
-                              </li>
-                            )}
-                        </ul>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))
+              ))
           )}
         </div>
       </div>
