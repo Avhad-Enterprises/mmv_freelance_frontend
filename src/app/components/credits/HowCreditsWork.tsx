@@ -131,7 +131,7 @@ const HowCreditsWork: React.FC = () => {
 
                     {/* Key Points */}
                     <div className="row mt-25">
-                        <div className="col-md-4">
+                        <div className="col-md-4 col-6">
                             <div className="d-flex align-items-center">
                                 <span
                                     className="d-flex align-items-center justify-content-center me-2"
@@ -150,7 +150,7 @@ const HowCreditsWork: React.FC = () => {
                                 </span>
                             </div>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-4 col-6">
                             <div className="d-flex align-items-center">
                                 <span
                                     className="d-flex align-items-center justify-content-center me-2"
@@ -169,7 +169,7 @@ const HowCreditsWork: React.FC = () => {
                                 </span>
                             </div>
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-4 col-6">
                             <div className="d-flex align-items-center">
                                 <span
                                     className="d-flex align-items-center justify-content-center me-2"

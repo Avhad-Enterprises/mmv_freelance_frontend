@@ -77,13 +77,14 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
   type?: string;
 }) => {
   if (!editMode) {
-    if (!value) return null;
     return (
       <div className="row mb-3">
         <div className="col-md-4">
           <strong>{label}:</strong>
         </div>
-        <div className="col-md-8">{value}</div>
+        <div className="col-md-8">
+          {value || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>}
+        </div>
       </div>
     );
   }
@@ -666,61 +667,51 @@ const DashboardProfileArea = ({ }: IProps) => {
                 <InfoRow label="Email" value={displayData.email} field="email" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
                 <InfoRow label="Phone Number" value={displayData.phone_number} field="phone_number" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
 
-                {(profileData.website || isEditModeFor("basicInfo")) && (
-                  <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
-                )}
+                <InfoRow label="Website" value={displayData.website} field="website" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
 
-                {(profileData.profile_title || isEditModeFor("basicInfo")) && (
-                  <InfoRow label="Profile Title" value={displayData.profile_title} field="profile_title" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
-                )}
+                <InfoRow label="Profile Title" value={displayData.profile_title} field="profile_title" editMode={isEditModeFor("basicInfo")} editedData={editedData} handleInputChange={handleInputChange} />
 
-                {(profileData.availability || isEditModeFor("basicInfo")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Availability:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("basicInfo") ? (
-                        <select className="form-select" value={editedData.availability || ''} onChange={(e) => handleInputChange('availability', e.target.value)}>
-                          <option value="">Select availability</option>
-                          {availabilityOptions.map(option => (
-                            <option key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}</option>
-                          ))}
-                        </select>
-                      ) : (displayData.availability)}
-                    </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Availability:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("basicInfo") ? (
+                      <select className="form-select" value={editedData.availability || ''} onChange={(e) => handleInputChange('availability', e.target.value)}>
+                        <option value="">Select availability</option>
+                        {availabilityOptions.map(option => (
+                          <option key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1).replace('-', ' ')}</option>
+                        ))}
+                      </select>
+                    ) : (displayData.availability || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
-                )}
+                </div>
 
-                {(profileData.experience_level || isEditModeFor("basicInfo")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Experience Level:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("basicInfo") ? (
-                        <select className="form-select" value={editedData.experience_level || ''} onChange={(e) => handleInputChange('experience_level', e.target.value)}>
-                          <option value="">Select experience level</option>
-                          {experienceLevels.map(level => (
-                            <option key={level} value={level}>{level.charAt(0).toUpperCase() + level.slice(1)}</option>
-                          ))}
-                        </select>
-                      ) : (displayData.experience_level)}
-                    </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Experience Level:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("basicInfo") ? (
+                      <select className="form-select" value={editedData.experience_level || ''} onChange={(e) => handleInputChange('experience_level', e.target.value)}>
+                        <option value="">Select experience level</option>
+                        {experienceLevels.map(level => (
+                          <option key={level} value={level}>{level.charAt(0).toUpperCase() + level.slice(1)}</option>
+                        ))}
+                      </select>
+                    ) : (displayData.experience_level || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
-                )}
+                </div>
 
-                {(profileData.bio || isEditModeFor("basicInfo")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Bio:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("basicInfo") ? (
-                        <textarea className="form-control" rows={4} value={editedData.bio || ''}
-                          onChange={(e) => {
-                            handleInputChange('bio', e.target.value);
-                            handleInputChange('short_description', e.target.value);
-                          }}
-                        />
-                      ) : (<p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p>)}
-                    </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Bio:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("basicInfo") ? (
+                      <textarea className="form-control" rows={4} value={editedData.bio || ''}
+                        onChange={(e) => {
+                          handleInputChange('bio', e.target.value);
+                          handleInputChange('short_description', e.target.value);
+                        }}
+                      />
+                    ) : (displayData.bio ? <p style={{ whiteSpace: 'pre-wrap' }}>{displayData.bio}</p> : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
-                )}
+                </div>
               </InfoSection>
 
               <InfoSection title="Skills & Expertise" sectionKey="skills" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
@@ -758,211 +749,203 @@ const DashboardProfileArea = ({ }: IProps) => {
                       </div>
                     ) : (
                       <div className="d-flex flex-wrap gap-2">
-                        {displayData.skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-secondary">{skill}</span>))}
+                        {(displayData.skills && displayData.skills.length > 0) ? displayData.skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-secondary">{skill}</span>)) : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>}
                       </div>
                     )}
                   </div>
                 </div>
-                {(profileData.superpowers || isEditModeFor("skills")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Superpowers:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("skills") ? (
-                        <div>
-                          <select className="form-select" disabled={isLoadingSuperpowers}
-                            onChange={(e) => {
-                              const superpower = e.target.value;
-                              if (superpower && !(editedData.superpowers || []).includes(superpower)) {
-                                handleArrayChange('superpowers', [...(editedData.superpowers || []), superpower]);
-                              }
-                            }}>
-                            <option value="">Add a superpower...</option>
-                            {allSuperpowers.map(power => (<option key={power} value={power}>{power}</option>))}
-                          </select>
-                          <div className="d-flex flex-wrap gap-2 mt-2">
-                            {(editedData.superpowers || []).map((power, idx) => (
-                              <span key={idx} className="badge bg-success d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                                {power}
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
-                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                  onClick={() => handleArrayChange('superpowers', (editedData.superpowers || []).filter((_, i) => i !== idx))}
-                                  aria-label={`Remove ${power}`}
-                                  title={`Remove ${power}`}
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Superpowers:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("skills") ? (
+                      <div>
+                        <select className="form-select" disabled={isLoadingSuperpowers}
+                          onChange={(e) => {
+                            const superpower = e.target.value;
+                            if (superpower && !(editedData.superpowers || []).includes(superpower)) {
+                              handleArrayChange('superpowers', [...(editedData.superpowers || []), superpower]);
+                            }
+                          }}>
+                          <option value="">Add a superpower...</option>
+                          {allSuperpowers.map(power => (<option key={power} value={power}>{power}</option>))}
+                        </select>
+                        <div className="d-flex flex-wrap gap-2 mt-2">
+                          {(editedData.superpowers || []).map((power, idx) => (
+                            <span key={idx} className="badge bg-success d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                              {power}
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-link text-white p-0 m-0 fw-bold"
+                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                onClick={() => handleArrayChange('superpowers', (editedData.superpowers || []).filter((_, i) => i !== idx))}
+                                aria-label={`Remove ${power}`}
+                                title={`Remove ${power}`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
                         </div>
-                      ) : (
+                      </div>
+                    ) : (
+                      <div className="d-flex flex-wrap gap-2">
+                        {(displayData.superpowers && displayData.superpowers.length > 0) ? displayData.superpowers.map((power: string, idx: number) => (<span key={idx} className="badge bg-success">{power}</span>)) : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Languages:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("skills") ? (
+                      <div>
+                        <select className="form-select"
+                          onChange={(e) => {
+                            const lang = e.target.value;
+                            if (lang && !(editedData.languages || []).includes(lang)) {
+                              handleArrayChange('languages', [...(editedData.languages || []), lang]);
+                            }
+                          }}>
+                          <option value="">Add a language...</option>
+                          {availableLanguages.map(lang => (<option key={lang} value={lang}>{lang}</option>))}
+                        </select>
+                        <div className="d-flex flex-wrap gap-2 mt-2">
+                          {(editedData.languages || []).map((lang, idx) => (
+                            <span key={idx} className="badge bg-info text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                              {lang}
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
+                                aria-label={`Remove ${lang}`}
+                                title={`Remove ${lang}`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : ((displayData.languages && displayData.languages.length > 0) ? (displayData.languages || []).join(', ') : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
+                  </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("skills") ? (
+                      <div>
+                        <input type="text" className="form-control mb-2" placeholder="Enter skill and press Enter"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              const value = e.currentTarget.value.trim();
+                              if (value && !(editedData.base_skills || []).includes(value)) {
+                                handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
+                                e.currentTarget.value = '';
+                              }
+                            }
+                          }} />
                         <div className="d-flex flex-wrap gap-2">
-                          {(displayData.superpowers || []).map((power: string, idx: number) => (<span key={idx} className="badge bg-success">{power}</span>))}
+                          {(editedData.base_skills || []).map((skill, idx) => (
+                            <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
+                              {skill}
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
+                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
+                                onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
+                                aria-label={`Remove ${skill}`}
+                                title={`Remove ${skill}`}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="d-flex flex-wrap gap-2">
+                        {(displayData.base_skills && displayData.base_skills.length > 0) ? displayData.base_skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>)) : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>}
+                      </div>
+                    )}
                   </div>
-                )}
-                {(profileData.languages || isEditModeFor("skills")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Languages:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("skills") ? (
-                        <div>
-                          <select className="form-select"
-                            onChange={(e) => {
-                              const lang = e.target.value;
-                              if (lang && !(editedData.languages || []).includes(lang)) {
-                                handleArrayChange('languages', [...(editedData.languages || []), lang]);
-                              }
-                            }}>
-                            <option value="">Add a language...</option>
-                            {availableLanguages.map(lang => (<option key={lang} value={lang}>{lang}</option>))}
-                          </select>
-                          <div className="d-flex flex-wrap gap-2 mt-2">
-                            {(editedData.languages || []).map((lang, idx) => (
-                              <span key={idx} className="badge bg-info text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                                {lang}
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
-                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                  onClick={() => handleArrayChange('languages', (editedData.languages || []).filter((_, i) => i !== idx))}
-                                  aria-label={`Remove ${lang}`}
-                                  title={`Remove ${lang}`}
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ) : ((displayData.languages || []).join(', '))}
-                    </div>
-                  </div>
-                )}
-                {(profileData.base_skills?.length || isEditModeFor("skills")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("skills") ? (
-                        <div>
-                          <input type="text" className="form-control" placeholder="Add equipment or base skill (e.g., Canon EOS R5)"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                const value = (e.target as HTMLInputElement).value.trim();
-                                if (value && !(editedData.base_skills || []).includes(value)) {
-                                  handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
-                                  (e.target as HTMLInputElement).value = '';
-                                }
-                              }
-                            }} />
-                          <div className="d-flex flex-wrap gap-2 mt-2">
-                            {(editedData.base_skills || []).map((skill, idx) => (
-                              <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                                {skill}
-                                <button
-                                  type="button"
-                                  className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
-                                  style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                  onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
-                                  aria-label={`Remove ${skill}`}
-                                  title={`Remove ${skill}`}
-                                >
-                                  ×
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="d-flex flex-wrap gap-2">
-                          {(displayData.base_skills || []).map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                </div>
               </InfoSection>
 
-              {(profileData.rate_amount || isEditModeFor("rates")) && (
-                <InfoSection title="Services & Rates" sectionKey="rates" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Hourly Rate:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("rates") ? (
-                        <div className="input-group">
-                          <span className="input-group-text">₹</span>
-                          <input type="number" className="form-control" value={editedData.rate_amount || ''}
-                            onChange={(e) => handleInputChange('rate_amount', parseFloat(e.target.value) || 0)} />
-                          <span className="input-group-text">/hr</span>
-                        </div>
-                      ) : (
+              <InfoSection title="Services & Rates" sectionKey="rates" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Hourly Rate:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("rates") ? (
+                      <div className="input-group">
+                        <span className="input-group-text">₹</span>
+                        <input type="number" className="form-control" value={editedData.rate_amount || ''}
+                          onChange={(e) => handleInputChange('rate_amount', parseFloat(e.target.value) || 0)} />
+                        <span className="input-group-text">/hr</span>
+                      </div>
+                    ) : (
+                      displayData.rate_amount ? (
                         <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#244034' }}>
                           ₹ {displayData.rate_amount}/hr
                         </span>
-                      )}
-                    </div>
+                      ) : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>
+                    )}
                   </div>
+                </div>
 
-                  {(profileData.work_type || isEditModeFor("rates")) && (
-                    <div className="row mb-3">
-                      <div className="col-md-4"><strong>Work Type:</strong></div>
-                      <div className="col-md-8">
-                        {isEditModeFor("rates") ? (
-                          <select className="form-select" value={editedData.work_type || ''} onChange={(e) => handleInputChange('work_type', e.target.value)}>
-                            <option value="">Select work type</option>
-                            <option value="remote">Remote</option>
-                            <option value="onsite">On-site</option>
-                            <option value="hybrid">Hybrid</option>
-                          </select>
-                        ) : (displayData.work_type)}
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Work Type:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("rates") ? (
+                      <select className="form-select" value={editedData.work_type || ''} onChange={(e) => handleInputChange('work_type', e.target.value)}>
+                        <option value="">Select work type</option>
+                        <option value="remote">Remote</option>
+                        <option value="onsite">On-site</option>
+                        <option value="hybrid">Hybrid</option>
+                      </select>
+                    ) : (displayData.work_type || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>Hours per Week:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("rates") ? (
+                      <select className="form-select" value={editedData.hours_per_week || ''} onChange={(e) => handleInputChange('hours_per_week', e.target.value)}>
+                        <option value="">Select hours per week</option>
+                        <option value="10_20">10-20 hours</option>
+                        <option value="20_30">20-30 hours</option>
+                        <option value="30_40">30-40 hours</option>
+                        <option value="full_time">Full time</option>
+                      </select>
+                    ) : (displayData.hours_per_week || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
+                  </div>
+                </div>
+              </InfoSection>
+
+              <InfoSection title="Portfolio" sectionKey="portfolio" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
+                {isEditModeFor("portfolio") ? (
+                  <div>
+                    {(editedData.portfolio_links || []).map((link, index) => (
+                      <div key={index} className="input-group mb-3">
+                        <input type="url" className="form-control" value={link} placeholder="https://example.com"
+                          onChange={(e) => updatePortfolioLink(index, e.target.value)} />
+                        <button className="btn btn-outline-danger" type="button" onClick={() => removePortfolioLink(index)}>Remove</button>
                       </div>
-                    </div>
-                  )}
-
-                  {(profileData.hours_per_week || isEditModeFor("rates")) && (
-                    <div className="row mb-3">
-                      <div className="col-md-4"><strong>Hours per Week:</strong></div>
-                      <div className="col-md-8">
-                        {isEditModeFor("rates") ? (
-                          <select className="form-select" value={editedData.hours_per_week || ''} onChange={(e) => handleInputChange('hours_per_week', e.target.value)}>
-                            <option value="">Select hours per week</option>
-                            <option value="10_20">10-20 hours</option>
-                            <option value="20_30">20-30 hours</option>
-                            <option value="30_40">30-40 hours</option>
-                            <option value="full_time">Full time</option>
-                          </select>
-                        ) : (displayData.hours_per_week)}
-                      </div>
-                    </div>
-                  )}
-                </InfoSection>
-              )}
-
-              {(profileData.portfolio_links?.length || isEditModeFor("portfolio")) && (
-                <InfoSection title="Portfolio" sectionKey="portfolio" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>
-                  {isEditModeFor("portfolio") ? (
-                    <div>
-                      {(editedData.portfolio_links || []).map((link, index) => (
-                        <div key={index} className="input-group mb-3">
-                          <input type="url" className="form-control" value={link} placeholder="https://example.com"
-                            onChange={(e) => updatePortfolioLink(index, e.target.value)} />
-                          <button className="btn btn-outline-danger" type="button" onClick={() => removePortfolioLink(index)}>Remove</button>
-                        </div>
-                      ))}
-                      <button className="btn btn-outline-primary" type="button" onClick={addPortfolioLink}>+ Add Portfolio Link</button>
-                    </div>
-                  ) : (
+                    ))}
+                    <button className="btn btn-outline-primary" type="button" onClick={addPortfolioLink}>+ Add Portfolio Link</button>
+                  </div>
+                ) : (
+                  (displayData.portfolio_links && displayData.portfolio_links.length > 0) ? (
                     (displayData.portfolio_links || []).map((link: string, index: number) => (
                       <div key={index} className="mb-2"><a href={link} target="_blank" rel="noopener noreferrer">View Link {index + 1}</a></div>
                     ))
-                  )}
-                </InfoSection>
-              )}
+                  ) : (
+                    <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>
+                  )
+                )}
+              </InfoSection>
 
               {(
                 (profileData.hire_count !== undefined && profileData.hire_count > 0) ||
@@ -1039,29 +1022,27 @@ const DashboardProfileArea = ({ }: IProps) => {
                           <option key={country.isoCode} value={country.isoCode}>{country.name}</option>
                         ))}
                       </select>
-                    ) : (Country.getCountryByCode(displayData.country)?.name)}
+                    ) : (Country.getCountryByCode(displayData.country)?.name || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
                 </div>
 
-                {(isEditModeFor("address") || displayData.state) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>State:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("address") ? (
-                        <select className="form-select" value={editedData.state || ''} onChange={(e) => {
-                          handleInputChange('state', e.target.value);
-                          setSelectedStateCode(e.target.value);
-                          handleInputChange('city', '');
-                        }} disabled={!editedData.country}>
-                          <option value="">Select State</option>
-                          {states.map(state => (
-                            <option key={state.isoCode} value={state.isoCode}>{state.name}</option>
-                          ))}
-                        </select>
-                      ) : (State.getStateByCodeAndCountry(displayData.state, displayData.country)?.name)}
-                    </div>
+                <div className="row mb-3">
+                  <div className="col-md-4"><strong>State:</strong></div>
+                  <div className="col-md-8">
+                    {isEditModeFor("address") ? (
+                      <select className="form-select" value={editedData.state || ''} onChange={(e) => {
+                        handleInputChange('state', e.target.value);
+                        setSelectedStateCode(e.target.value);
+                        handleInputChange('city', '');
+                      }} disabled={!editedData.country}>
+                        <option value="">Select State</option>
+                        {states.map(state => (
+                          <option key={state.isoCode} value={state.isoCode}>{state.name}</option>
+                        ))}
+                      </select>
+                    ) : (State.getStateByCodeAndCountry(displayData.state, displayData.country)?.name || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
-                )}
+                </div>
 
                 <div className="row mb-3">
                   <div className="col-md-4"><strong>City:</strong></div>
@@ -1073,7 +1054,7 @@ const DashboardProfileArea = ({ }: IProps) => {
                           <option key={city.name} value={city.name}>{city.name}</option>
                         ))}
                       </select>
-                    ) : (displayData.city)}
+                    ) : (displayData.city || <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
                 </div>
 

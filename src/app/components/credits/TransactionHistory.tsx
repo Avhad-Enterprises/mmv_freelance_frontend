@@ -301,15 +301,17 @@ const TransactionHistory = forwardRef<TransactionHistoryRef, TransactionHistoryP
 
                                 <nav>
                                     <ul className="pagination pagination-sm mb-0">
-                                        <li className={`page-item ${pagination.page === 1 ? "disabled" : ""}`}>
-                                            <button
-                                                className="page-link"
-                                                onClick={() => setPage(pagination.page - 1)}
-                                                disabled={pagination.page === 1}
-                                            >
-                                                Previous
-                                            </button>
-                                        </li>
+                                        {/* Previous - Only show if not on first page */}
+                                        {pagination.page > 1 && (
+                                            <li className="page-item">
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setPage(pagination.page - 1)}
+                                                >
+                                                    Previous
+                                                </button>
+                                            </li>
+                                        )}
 
                                         {[...Array(Math.min(5, pagination.totalPages))].map((_, idx) => {
                                             let pageNum: number;
@@ -345,18 +347,17 @@ const TransactionHistory = forwardRef<TransactionHistoryRef, TransactionHistoryP
                                             );
                                         })}
 
-                                        <li
-                                            className={`page-item ${pagination.page === pagination.totalPages ? "disabled" : ""
-                                                }`}
-                                        >
-                                            <button
-                                                className="page-link"
-                                                onClick={() => setPage(pagination.page + 1)}
-                                                disabled={pagination.page === pagination.totalPages}
-                                            >
-                                                Next
-                                            </button>
-                                        </li>
+                                        {/* Next - Only show if not on last page */}
+                                        {pagination.page < pagination.totalPages && (
+                                            <li className="page-item">
+                                                <button
+                                                    className="page-link"
+                                                    onClick={() => setPage(pagination.page + 1)}
+                                                >
+                                                    Next
+                                                </button>
+                                            </li>
+                                        )}
                                     </ul>
                                 </nav>
                             </div>

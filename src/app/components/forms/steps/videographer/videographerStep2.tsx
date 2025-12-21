@@ -269,14 +269,14 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
               disabled={isLoadingSkills || !!skillError || (skill_tags || []).length >= 15}
             >
               <span>
-                {isLoadingSkills 
-                  ? "Loading skills..." 
-                  : (skill_tags || []).length >= 15 
-                  ? "Maximum skills reached" 
-                  : "Select skills"}
+                {isLoadingSkills
+                  ? "Loading skills..."
+                  : (skill_tags || []).length >= 15
+                    ? "Maximum skills reached"
+                    : "Select skills"}
               </span>
               {isSkillsDropdownOpen && (
-                <span 
+                <span
                   style={{ fontSize: '20px', fontWeight: 'bold', cursor: 'pointer' }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -288,13 +288,13 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
               )}
             </button>
             {isSkillsDropdownOpen && (
-              <div 
-                className="position-absolute w-100 bg-white border rounded shadow-sm" 
-                style={{ 
-                  top: '100%', 
-                  left: 0, 
-                  zIndex: 1000, 
-                  maxHeight: '250px', 
+              <div
+                className="position-absolute w-100 bg-white border rounded shadow-sm"
+                style={{
+                  top: '100%',
+                  left: 0,
+                  zIndex: 1000,
+                  maxHeight: '250px',
                   overflowY: 'auto',
                   marginTop: '4px'
                 }}
@@ -407,6 +407,7 @@ const VideographerStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                 className={`form-control ${link && !isYouTubeUrl(link) ? 'is-invalid' : ''}`}
                 style={{ height: '60px', minHeight: '60px' }}
                 placeholder="https://www.youtube.com/..."
+                title="Please enter a valid URL"
                 value={link}
                 onChange={(e) => handlePortfolioChange(idx, e.target.value)}
                 onBlur={(e) => handlePortfolioBlur(idx, e.target.value)}

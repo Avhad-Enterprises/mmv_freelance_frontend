@@ -150,17 +150,17 @@ const CreditsArea: React.FC = () => {
                             {packages && !loading && (
                                 <div className="mt-20 pt-20" style={{ borderTop: "1px solid #eee" }}>
                                     <div className="row text-center">
-                                        <div className="col-md-4">
+                                        <div className="col-md-4 col-sm-6">
                                             <div className="text-muted small">Price Per Credit</div>
                                             <div className="fw-bold">
                                                 ₹{packages.pricePerCredit.toLocaleString("en-IN")}
                                             </div>
                                         </div>
-                                        <div className="col-md-4">
+                                        <div className="col-md-4 col-sm-6">
                                             <div className="text-muted small">Maximum Balance</div>
                                             <div className="fw-bold">{packages.limits.maxBalance} credits</div>
                                         </div>
-                                        <div className="col-md-4">
+                                        <div className="col-md-4 col-sm-12">
                                             <div className="text-muted small">Current Balance</div>
                                             <div className="fw-bold" style={{ color: "#D2F34C" }}>
                                                 {balance?.credits_balance || 0} credits

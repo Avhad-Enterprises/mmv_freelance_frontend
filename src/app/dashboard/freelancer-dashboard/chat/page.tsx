@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { useMediaQuery, useTheme } from "@mui/material";
-import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
+import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header-minus";
 import ChatList from "@/app/dashboard/client-dashboard/messages/ChatList";
 import EmptyChat from "@/app/dashboard/client-dashboard/messages/EmptyChat";
 import InlineThreadView from "@/app/dashboard/client-dashboard/messages/InlineThreadView";
@@ -47,7 +47,7 @@ export default function FreelancerChatPage() {
                 height: "100%",
               }}
             >
-              <ChatList 
+              <ChatList
                 threadBasePath="/dashboard/freelancer-dashboard/chat/thread"
                 onSelectConversation={isDesktop ? (id) => setSelectedConversationId(id) : undefined}
                 selectedConversationId={isDesktop ? selectedConversationId : undefined}

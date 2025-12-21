@@ -269,9 +269,9 @@ const DashboardJobBrowseArea = () => {
                 <div className="candidate-info">
                   <span>Client</span>
                   <div>
-                    {item.client_first_name && item.client_last_name 
+                    {item.client_first_name && item.client_last_name
                       ? `${item.client_first_name} ${item.client_last_name}`
-                      : item.client_company_name 
+                      : item.client_company_name
                         ? item.client_company_name
                         : 'Anonymous'
                     }
@@ -402,9 +402,9 @@ const DashboardJobBrowseArea = () => {
         <div className="candidate-info text-center mb-3">
           <span>Client</span>
           <div className="text-xs">
-            {item.client_first_name && item.client_last_name 
+            {item.client_first_name && item.client_last_name
               ? `${item.client_first_name} ${item.client_last_name}`
-              : item.client_company_name 
+              : item.client_company_name
                 ? item.client_company_name
                 : 'Anonymous'
             }
@@ -435,8 +435,8 @@ const DashboardJobBrowseArea = () => {
         <div className="position-relative">
           <DashboardHeader />
           <h2 className="main-title mb-30">Browse Projects</h2>
-          
-          <DashboardSearchBar 
+
+          <DashboardSearchBar
             placeholder="Search jobs by title, description, skills..."
             onSearch={(query) => {
               if (query.trim()) {
@@ -657,21 +657,27 @@ const DashboardJobBrowseArea = () => {
                     </p>
                     {filterItems.length > itemsPerPage && pageCount > 1 && (
                       <ul className="pagination-one d-flex align-items-center style-none">
-                        <li className={itemOffset === 0 ? "disabled" : ""}>
-                          <a onClick={() => handlePageClick({ selected: Math.floor(itemOffset / itemsPerPage) - 1 })}>
-                            Prev
-                          </a>
-                        </li>
+                        {/* Prev - Only show if not on first page */}
+                        {itemOffset > 0 && (
+                          <li>
+                            <a onClick={() => handlePageClick({ selected: Math.floor(itemOffset / itemsPerPage) - 1 })}>
+                              Prev
+                            </a>
+                          </li>
+                        )}
                         {Array.from({ length: pageCount }, (_, i) => (
                           <li key={i} className={Math.floor(itemOffset / itemsPerPage) === i ? "active" : ""}>
                             <a onClick={() => handlePageClick({ selected: i })}>{i + 1}</a>
                           </li>
                         ))}
-                        <li className={itemOffset + itemsPerPage >= filterItems.length ? "disabled" : ""}>
-                          <a onClick={() => handlePageClick({ selected: Math.floor(itemOffset / itemsPerPage) + 1 })}>
-                            Next
-                          </a>
-                        </li>
+                        {/* Next - Only show if not on last page */}
+                        {itemOffset + itemsPerPage < filterItems.length && (
+                          <li>
+                            <a onClick={() => handlePageClick({ selected: Math.floor(itemOffset / itemsPerPage) + 1 })}>
+                              Next
+                            </a>
+                          </li>
+                        )}
                       </ul>
                     )}
                   </div>

@@ -131,7 +131,16 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
     return (
         <div
             className="modal fade show d-block"
-            style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
+            style={{
+                backgroundColor: "rgba(0,0,0,0.6)",
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 99999,
+                overflow: 'auto'
+            }}
             onClick={handleClose}
         >
             <div

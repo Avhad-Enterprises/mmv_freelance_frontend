@@ -47,7 +47,7 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
         return (
             <div className="row mb-20">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="col-lg-4 col-md-6">
+                    <div key={i} className="col-lg-4 col-md-6 col-sm-12">
                         <div className="dash-card-one bg-white border-30 position-relative mb-15">
                             <div className="d-sm-flex align-items-center justify-content-between">
                                 <div
@@ -111,7 +111,7 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
     return (
         <div className="row mb-20">
             {stats.map((stat) => (
-                <div key={stat.id} className="col-lg-4 col-md-6">
+                <div key={stat.id} className="col-lg-4 col-md-6 col-sm-12">
                     <div className="dash-card-one bg-white border-30 position-relative mb-15">
                         <div className="d-sm-flex align-items-center justify-content-between">
                             <div className="icon rounded-circle d-flex align-items-center justify-content-center order-sm-1">
