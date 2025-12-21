@@ -25,7 +25,7 @@ interface IJob extends IJobType {
 
 type IProps = {};
 
-const AppliedJobsArea = ({}: IProps) => {
+const AppliedJobsArea = ({ }: IProps) => {
   const decoded = useDecodedToken();
   const { setIsOpenSidebar } = useSidebar();
   const [jobs, setJobs] = useState<IJob[]>([]);
@@ -84,6 +84,12 @@ const AppliedJobsArea = ({}: IProps) => {
           created_at: job.created_at || '',
           additional_notes: job.additional_notes || '',
           bidding_enabled: job.bidding_enabled || false,
+          // Client info
+          client_user_id: job.client_user_id,
+          client_first_name: job.client_first_name,
+          client_last_name: job.client_last_name,
+          client_profile_picture: job.client_profile_picture,
+          client_company_name: job.client_company_name,
         }));
         setJobs(jobData);
         setFilteredJobs(jobData);
@@ -119,12 +125,12 @@ const AppliedJobsArea = ({}: IProps) => {
     query: string
   ) => {
     let filtered = jobs;
-    
+
     // Apply status filter
     if (status !== 'All') {
       filtered = filtered.filter((job) => job.status === status);
     }
-    
+
     // Apply search filter
     if (query.trim()) {
       const lowerQuery = query.toLowerCase();
@@ -136,7 +142,7 @@ const AppliedJobsArea = ({}: IProps) => {
         job.skills_required?.some(skill => skill.toLowerCase().includes(lowerQuery))
       );
     }
-    
+
     setFilteredJobs(filtered);
   };
 
@@ -156,12 +162,12 @@ const AppliedJobsArea = ({}: IProps) => {
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="main-title mb-0">Applied Jobs</h2>
         </div>
-        
-        <DashboardSearchBar 
+
+        <DashboardSearchBar
           placeholder="Search applied jobs by title, category, skills..."
           onSearch={handleSearch}
         />
-        
+
         {/* Improved Filter Section */}
         <div className="mb-4">
           <label className="form-label fw-semibold mb-2">Filter by Application Status:</label>

@@ -221,11 +221,11 @@ const SavedCandidateArea = () => {
       let savedOnlyCandidates = allCandidates.filter(candidate =>
         savedCandidates.includes(candidate.user_id)
       );
-      
+
       // Apply search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        savedOnlyCandidates = savedOnlyCandidates.filter(c => 
+        savedOnlyCandidates = savedOnlyCandidates.filter(c =>
           c.first_name?.toLowerCase().includes(query) ||
           c.last_name?.toLowerCase().includes(query) ||
           c.username?.toLowerCase().includes(query) ||
@@ -238,7 +238,7 @@ const SavedCandidateArea = () => {
           c.country?.toLowerCase().includes(query)
         );
       }
-      
+
       setDisplayedCandidates(savedOnlyCandidates);
       setCurrentPage(1); // Reset pagination when candidates are filtered
     } else if (savedCandidates.length === 0) {
@@ -330,6 +330,30 @@ const SavedCandidateArea = () => {
     if (!userData) {
       toast.error('Please sign in to message freelancers');
       return;
+    }
+
+    // Check if chat is allowed (freelancer must have applied to client's project)
+    try {
+      const permissionResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${candidateId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (permissionResponse.ok) {
+        const permissionData = await permissionResponse.json();
+        if (!permissionData.canChat) {
+          toast.error('You can only message freelancers who have applied to your projects.');
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.error('Error checking chat permission:', permErr);
+      // Continue anyway - backend will enforce the rule
     }
 
     try {
@@ -438,11 +462,11 @@ const SavedCandidateArea = () => {
           />
         ) : (
           // Otherwise, render the list of saved candidates
-          <>            <DashboardSearchBar 
-              placeholder="Search saved candidates by name, skills, location..."
-              onSearch={setSearchQuery}
-            />
-                        {/* Removed CandidateV1FilterArea */}
+          <>            <DashboardSearchBar
+            placeholder="Search saved candidates by name, skills, location..."
+            onSearch={setSearchQuery}
+          />
+            {/* Removed CandidateV1FilterArea */}
             {/* Removed Filter and Sort UI as only saved candidates are shown */}
 
             <div className="candidate-profile-area">

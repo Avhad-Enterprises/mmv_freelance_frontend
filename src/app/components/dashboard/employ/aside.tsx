@@ -38,7 +38,7 @@ const nav_data = [
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/jobs", title: "My Jobs" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/client-dashboard/saved-candidate", title: "Saved Candidate" },
     { id: 7, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/client-dashboard/Candidates", title: "Candidates" },
-    { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Messages" },
+    { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Chat" },
     { id: 9, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/ongoing-projects", title: "Ongoing Projects" },
     { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/client-dashboard/setting", title: "Account Settings" },
 ];

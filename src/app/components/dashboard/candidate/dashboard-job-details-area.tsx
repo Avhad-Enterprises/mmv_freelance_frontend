@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { IJobType } from '@/types/job-data-type';
 import DashboardHeader from './dashboard-header-minus';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
@@ -10,6 +11,9 @@ import BiddingModal from './bidding-modal';
 import { InsufficientCreditsModal, ConfirmApplyModal } from '@/app/components/credits';
 import { creditsService } from '@/services/credits.service';
 import { CreditBalance } from '@/types/credits';
+import { db, auth } from '@/lib/firebase';
+import { ref, get, set } from 'firebase/database';
+import { signInWithCustomToken } from 'firebase/auth';
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -26,6 +30,7 @@ interface DashboardJobDetailsAreaProps {
 }
 
 const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) => {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,7 +51,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [showConfirmApplyModal, setShowConfirmApplyModal] = useState(false);
   const [checkingCredits, setCheckingCredits] = useState(false);
 
+  // Message state
+  const [isMessaging, setIsMessaging] = useState(false);
+
   useEffect(() => {
+    // Scroll to top when job details page loads
+    window.scrollTo(0, 0);
+
     const token = authCookies.getToken();
     setIsLoggedIn(!!token);
 
@@ -307,6 +318,123 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     fetchUserIdAndInitialState();
   };
 
+  const handleMessageClient = async () => {
+    if (!isLoggedIn) {
+      applyLoginModalRef.current?.show();
+      return;
+    }
+
+    const clientUserId = job.client_user_id;
+    if (!clientUserId || !userId) {
+      toast.error('Unable to get client information');
+      return;
+    }
+
+    setIsMessaging(true);
+
+    // Check if chat is allowed (freelancer must have applied to this client's project)
+    try {
+      const permissionResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${clientUserId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (permissionResponse.ok) {
+        const permissionData = await permissionResponse.json();
+        if (!permissionData.canChat) {
+          toast.error('You must apply to this project first before messaging the client.');
+          setIsMessaging(false);
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.error('Error checking chat permission:', permErr);
+    }
+
+    try {
+      // Ensure Firebase authentication
+      if (!auth.currentUser) {
+        const authToken = authCookies.getToken();
+        if (!authToken) {
+          toast.error('Authentication required. Please sign in again.');
+          setIsMessaging(false);
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get Firebase authentication token');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data?.customToken) {
+          await signInWithCustomToken(auth, data.data.customToken);
+        } else {
+          throw new Error('Invalid Firebase token response');
+        }
+      }
+
+      // Create or get conversation
+      const currentUserId = String(userId);
+      const otherId = String(clientUserId);
+      const participants = [currentUserId, otherId].sort();
+      const conversationId = participants.join('_');
+
+      const convRef = ref(db, `conversations/${conversationId}`);
+      const convSnap = await get(convRef);
+
+      if (!convSnap.exists()) {
+        // Build participant details
+        const participantDetails: any = {};
+        participantDetails[currentUserId] = {
+          firstName: 'Freelancer',
+          email: '',
+          profilePicture: null
+        };
+        participantDetails[otherId] = {
+          firstName: job.client_first_name || job.client_company_name || 'Client',
+          email: '',
+          profilePicture: job.client_profile_picture || null
+        };
+
+        await set(convRef, {
+          participants,
+          participantRoles: {
+            [currentUserId]: 'freelancer',
+            [otherId]: 'client',
+          },
+          participantDetails,
+          lastMessage: '',
+          lastSenderId: '',
+          updatedAt: Date.now(),
+          createdAt: Date.now(),
+        });
+        toast.success('Chat started! Redirecting...');
+      } else {
+        toast.success('Opening chat...');
+      }
+
+      // Navigate to chat
+      router.push(`/dashboard/freelancer-dashboard/chat?conversationId=${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to start chat:', err);
+      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setIsMessaging(false);
+    }
+  };
+
   return (
     <>
       <div className="dashboard-body" style={{ backgroundColor: '#f0f5f3', minHeight: '100vh' }}>
@@ -429,8 +557,26 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         ))}
                       </div>
 
+                      {/* Message Client Button - Only show if applied */}
+                      {isApplied && job.client_user_id && (
+                        <button
+                          className="btn-one w-100 mt-25 d-flex align-items-center justify-content-center"
+                          onClick={handleMessageClient}
+                          disabled={isMessaging || userRole === 'CLIENT'}
+                        >
+                          {isMessaging ? (
+                            'Starting Chat...'
+                          ) : (
+                            <>
+                              <i className="bi bi-chat-dots me-2"></i>
+                              Message Client
+                            </>
+                          )}
+                        </button>
+                      )}
+
                       <button
-                        className="btn-one w-100 mt-25"
+                        className="btn-one w-100 mt-15"
                         onClick={handleApplyClick}
                         disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
                       >

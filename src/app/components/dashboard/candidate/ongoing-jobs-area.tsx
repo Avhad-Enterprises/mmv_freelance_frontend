@@ -29,6 +29,12 @@ interface IJob {
   created_at?: string;
   additional_notes?: string;
   bidding_enabled: boolean;
+  // Client info
+  client_user_id?: number;
+  client_first_name?: string;
+  client_last_name?: string;
+  client_profile_picture?: string;
+  client_company_name?: string;
   // Submission tracking
   submission_status?: number | null; // 0: Submitted, 1: Approved, 2: Rejected, null: Not submitted
   submission_id?: number | null;
@@ -122,6 +128,12 @@ const OngoingJobsArea = ({ }: IProps) => {
               created_at: job.created_at || '',
               additional_notes: job.additional_notes || '',
               bidding_enabled: job.bidding_enabled || false,
+              // Client info
+              client_user_id: job.client_user_id,
+              client_first_name: job.client_first_name,
+              client_last_name: job.client_last_name,
+              client_profile_picture: job.client_profile_picture,
+              client_company_name: job.client_company_name,
               // Submission data now comes from API!
               submission_status: job.submission_status ?? null,
               submission_id: job.submission_id ?? null,

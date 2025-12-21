@@ -168,6 +168,30 @@ const CandidateV1Area = () => {
       return;
     }
 
+    // Check if chat is allowed (freelancer must have applied to client's project)
+    try {
+      const permissionResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${candidateUserId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (permissionResponse.ok) {
+        const permissionData = await permissionResponse.json();
+        if (!permissionData.canChat) {
+          toast.error('You can only message freelancers who have applied to your projects.');
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.error('Error checking chat permission:', permErr);
+      // Continue anyway - backend will enforce the rule
+    }
+
     // Ensure Firebase authentication before creating conversation
     try {
       if (!auth.currentUser) {
@@ -384,11 +408,11 @@ const CandidateV1Area = () => {
 
   const applyFilters = () => {
     let filtered = [...candidates];
-    
+
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.first_name?.toLowerCase().includes(query) ||
         c.last_name?.toLowerCase().includes(query) ||
         c.username?.toLowerCase().includes(query) ||
@@ -496,11 +520,11 @@ const CandidateV1Area = () => {
           />
         ) : (
           <>
-            <DashboardSearchBar 
+            <DashboardSearchBar
               placeholder="Search candidates by name, skills, location..."
               onSearch={setSearchQuery}
             />
-            
+
             <div className="bg-white card-box border-20 mb-40">
               <CandidateV1FilterArea
                 onSkillChange={setSelectedSkills}
