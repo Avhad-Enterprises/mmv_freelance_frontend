@@ -23,7 +23,7 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
         {
             id: "available",
             icon: icon_1,
-            label: "Available Credits",
+            label: "Available Keys",
             value: balance?.credits_balance ?? 0,
             color: "#D2F34C",
         },
@@ -37,7 +37,7 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
         {
             id: "used",
             icon: icon_3,
-            label: "Credits Used",
+            label: "Keys Used",
             value: balance?.credits_used ?? 0,
             color: "#f0ad4e",
         },

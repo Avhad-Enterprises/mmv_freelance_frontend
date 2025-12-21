@@ -10,14 +10,14 @@ const HowCreditsWork: React.FC = () => {
     const steps = [
         {
             number: 1,
-            title: "Purchase Credits",
-            description: "Choose from our credit packages to start applying for projects.",
+            title: "Get Keys",
+            description: "Choose from our key packages to start applying for projects.",
             icon: "💳",
         },
         {
             number: 2,
             title: "Apply to Projects",
-            description: "Each project application costs 1 credit. Credits are deducted when you apply.",
+            description: "Each project application costs 1 key. Keys are deducted when you apply.",
             icon: "📝",
         },
         {
@@ -32,9 +32,9 @@ const HowCreditsWork: React.FC = () => {
         <div className="row mb-20">
             <div className="col-12">
                 <div className="bg-white card-box border-20">
-                    <h4 className="dash-title-three mb-10">How Credits Work</h4>
+                    <h4 className="dash-title-three mb-10">How Keys Work</h4>
                     <p className="text-muted mb-25">
-                        Credits are used to apply for projects on Make My Vid. Here&apos;s how it works:
+                        Keys are used to apply for projects on Make My Vid. Here&apos;s how it works:
                     </p>
 
                     <div className="row">
@@ -165,7 +165,7 @@ const HowCreditsWork: React.FC = () => {
                                     ✓
                                 </span>
                                 <span className="text-muted" style={{ fontSize: "14px" }}>
-                                    Credits never expire
+                                    Keys never expire
                                 </span>
                             </div>
                         </div>

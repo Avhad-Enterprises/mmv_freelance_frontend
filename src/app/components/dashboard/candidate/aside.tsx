@@ -37,10 +37,10 @@ const nav_data = [
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
     { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
     { id: 9, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
-    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Credits" },
+    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Keys to Abundance", videoEditorOnly: true },
     { id: 10, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/chat", title: "Messages" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
-];
+] as const;
 
 type IProps = {
     // No props needed, using context
@@ -218,37 +218,46 @@ const CandidateAside = ({ }: IProps) => {
                     {/* Navigation Links */}
                     <nav className="dasboard-main-nav">
                         <ul className="style-none">
-                            {nav_data.map((m) => {
-                                const isActive = pathname === m.link;
-                                const isChatItem = m.id === 10; // Chat item
-                                const showNotification = isChatItem && hasUnreadMessages;
+                            {nav_data
+                                .filter(m => {
+                                    // Hide Keys to Abundance for videographers (only show for Video Editors)
+                                    if ('videoEditorOnly' in m && m.videoEditorOnly) {
+                                        // Check if user has Video Editor role
+                                        return userRoles.some(role => role.toLowerCase().includes('video editor'));
+                                    }
+                                    return true;
+                                })
+                                .map((m) => {
+                                    const isActive = pathname === m.link;
+                                    const isChatItem = m.id === 10; // Chat item
+                                    const showNotification = isChatItem && hasUnreadMessages;
 
-                                return (
-                                    <li key={m.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
-                                        <Link href={m.link} className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}>
-                                            <Image src={isActive ? m.icon_active : m.icon} alt="icon" className="lazy-img" />
-                                            <span>{m.title}</span>
-                                        </Link>
-                                        {showNotification && (
-                                            <div
-                                                className="position-absolute"
-                                                style={{
-                                                    top: '12px',
-                                                    right: '20px',
-                                                    width: '12px',
-                                                    height: '12px',
-                                                    borderRadius: '50%',
-                                                    backgroundColor: '#1a5f3d',
-                                                    border: '2px solid white',
-                                                    boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
-                                                    zIndex: 10,
-                                                    animation: 'pulse 2s infinite'
-                                                }}
-                                            />
-                                        )}
-                                    </li>
-                                );
-                            })}
+                                    return (
+                                        <li key={m.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
+                                            <Link href={m.link} className={`d-flex w-100 align-items-center ${isActive ? "active" : ""}`}>
+                                                <Image src={isActive ? m.icon_active : m.icon} alt="icon" className="lazy-img" />
+                                                <span>{m.title}</span>
+                                            </Link>
+                                            {showNotification && (
+                                                <div
+                                                    className="position-absolute"
+                                                    style={{
+                                                        top: '12px',
+                                                        right: '20px',
+                                                        width: '12px',
+                                                        height: '12px',
+                                                        borderRadius: '50%',
+                                                        backgroundColor: '#1a5f3d',
+                                                        border: '2px solid white',
+                                                        boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
+                                                        zIndex: 10,
+                                                        animation: 'pulse 2s infinite'
+                                                    }}
+                                                />
+                                            )}
+                                        </li>
+                                    );
+                                })}
                             <li>
                                 <a href="#" className="d-flex w-100 align-items-center" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                     <Image src={logout} alt="icon" className="lazy-img" />

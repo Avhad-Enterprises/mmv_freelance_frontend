@@ -66,10 +66,10 @@ const CreditsArea: React.FC = () => {
             <div className="dashboard-body">
                 <div className="position-relative">
                     <DashboardHeader />
-                    <h2 className="main-title">Credits Management</h2>
+                    <h2 className="main-title">Keys to Abundance</h2>
                     <div className="bg-white card-box border-20">
                         <div className="alert alert-danger mb-0">
-                            <strong>Error loading credits:</strong> {error}
+                            <strong>Error loading keys:</strong> {error}
                             <br />
                             <button
                                 className="btn btn-link p-0 mt-2"
@@ -88,7 +88,7 @@ const CreditsArea: React.FC = () => {
         <div className="dashboard-body">
             <div className="position-relative">
                 <DashboardHeader />
-                <h2 className="main-title">Credits Management</h2>
+                <h2 className="main-title">Keys to Abundance</h2>
 
                 {/* Credits Balance Stats */}
                 <CreditStats balance={balance} loading={loading} />

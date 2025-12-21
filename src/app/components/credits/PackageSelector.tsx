@@ -184,7 +184,7 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({
                                     >
                                         {pkg.credits}
                                     </span>
-                                    <span className="text-muted ms-2">Credits</span>
+                                    <span className="text-muted ms-2">Keys</span>
                                 </div>
 
                                 {/* Price */}
@@ -204,7 +204,7 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({
 
                                 {/* Per Credit Price */}
                                 <div className="text-muted small mb-15">
-                                    {formatAmount(perCreditPrice)} per credit
+                                    {formatAmount(perCreditPrice)} per key
                                 </div>
 
                                 {/* Description */}
@@ -225,7 +225,7 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({
                                         color: isSelected ? "#244034" : undefined,
                                     }}
                                 >
-                                    {isSelected ? "✓ Selected" : `Select ${pkg.credits} Credits`}
+                                    {isSelected ? "✓ Selected" : `Select ${pkg.credits} Keys`}
                                 </button>
 
                                 {/* Applications Info */}

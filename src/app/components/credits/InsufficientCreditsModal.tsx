@@ -48,7 +48,7 @@ const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> = ({
                 <div className="modal-content border-20" style={{ borderRadius: "20px" }}>
                     {/* Header */}
                     <div className="modal-header border-0 pb-0">
-                        <h5 className="modal-title dash-title-three">Not Enough Credits</h5>
+                        <h5 className="modal-title dash-title-three">Not Enough Keys</h5>
                         <button
                             type="button"
                             className="btn-close"
@@ -73,7 +73,7 @@ const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> = ({
                             </div>
 
                             {/* Message */}
-                            <h5 className="mb-15">You need more credits to apply</h5>
+                            <h5 className="mb-15">You need more keys to apply</h5>
 
                             {/* Balance Display */}
                             <div
@@ -117,13 +117,13 @@ const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> = ({
                             >
                                 <span style={{ fontSize: "18px", marginRight: "8px" }}>💡</span>
                                 <span>
-                                    You need <strong>{creditsNeeded} more credit{creditsNeeded !== 1 ? "s" : ""}</strong> to apply
+                                    You need <strong>{creditsNeeded} more key{creditsNeeded !== 1 ? "s" : ""}</strong> to apply
                                 </span>
                             </div>
 
                             {/* Description */}
                             <p className="text-muted" style={{ fontSize: "14px" }}>
-                                Purchase credits to continue applying for projects. Credits never expire!
+                                Purchase keys to continue applying for projects. Keys never expire!
                             </p>
                         </div>
                     </div>
@@ -147,7 +147,7 @@ const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> = ({
                                     onBuyCredits();
                                 }}
                             >
-                                Buy Credits
+                                Get Keys
                             </button>
                         ) : (
                             <Link
@@ -155,7 +155,7 @@ const InsufficientCreditsModal: React.FC<InsufficientCreditsModalProps> = ({
                                 className="dash-btn-two tran3s text-decoration-none"
                                 onClick={onClose}
                             >
-                                Buy Credits
+                                Get Keys
                             </Link>
                         )}
                     </div>

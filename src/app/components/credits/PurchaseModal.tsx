@@ -48,7 +48,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
                 setPurchasedCredits(result.credits_added);
                 setStep("success");
-                toast.success(`${result.credits_added} credits added to your account!`);
+                toast.success(`${result.credits_added} keys added to your account!`);
                 onSuccess();
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : "Payment verification failed";
@@ -81,7 +81,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 amount: orderData.amount,
                 currency: orderData.currency,
                 name: "Make My Vid",
-                description: `Purchase ${orderData.credits} Credits`,
+                description: `Purchase ${orderData.credits} Keys`,
                 order_id: orderData.order_id,
                 prefill: {
                     name: orderData.user.name,
@@ -189,7 +189,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                                     >
                                         {selectedPackage.credits}
                                     </span>
-                                    <span className="text-muted ms-2">Credits</span>
+                                    <span className="text-muted ms-2">Keys</span>
                                 </div>
 
                                 <div className="mb-20">
@@ -268,11 +268,11 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                                     >
                                         +{purchasedCredits}
                                     </span>
-                                    <span className="text-muted ms-2">Credits</span>
+                                    <span className="text-muted ms-2">Keys</span>
                                 </div>
 
                                 <p className="text-muted">
-                                    Your credits have been added to your account. You can now apply to projects!
+                                    Your keys have been added to your account. You can now apply to projects!
                                 </p>
                             </div>
                         )}

@@ -7,7 +7,7 @@ import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api'
 import toast from 'react-hot-toast';
 import { authCookies } from "@/utils/cookies";
 import BiddingModal from './bidding-modal';
-import { InsufficientCreditsModal } from '@/app/components/credits';
+import { InsufficientCreditsModal, ConfirmApplyModal } from '@/app/components/credits';
 import { creditsService } from '@/services/credits.service';
 import { CreditBalance } from '@/types/credits';
 
@@ -43,6 +43,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   // Credit state
   const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
   const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+  const [showConfirmApplyModal, setShowConfirmApplyModal] = useState(false);
   const [checkingCredits, setCheckingCredits] = useState(false);
 
   useEffect(() => {
@@ -147,12 +148,8 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
           return;
         }
 
-        // Has credits - proceed with application
-        if (job.bidding_enabled) {
-          setShowBiddingModal(true);
-        } else {
-          handleApplySubmit();
-        }
+        // Has credits - show confirmation modal first
+        setShowConfirmApplyModal(true);
       } catch (error: any) {
         console.error("Error checking credits:", error);
         // If credit check fails, try to proceed anyway (backend will reject if no credits)
@@ -486,6 +483,23 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
           // Navigate to credits page
           window.location.href = '/dashboard/freelancer-dashboard/credits';
         }}
+      />
+
+      {/* Confirm Apply Modal */}
+      <ConfirmApplyModal
+        isOpen={showConfirmApplyModal}
+        onClose={() => setShowConfirmApplyModal(false)}
+        onConfirm={() => {
+          setShowConfirmApplyModal(false);
+          if (job.bidding_enabled) {
+            setShowBiddingModal(true);
+          } else {
+            handleApplySubmit();
+          }
+        }}
+        projectTitle={job.project_title || 'this project'}
+        currentBalance={creditBalance?.credits_balance || 0}
+        isVideoEditor={userRole === 'VIDEO_EDITOR'}
       />
     </>
   );
