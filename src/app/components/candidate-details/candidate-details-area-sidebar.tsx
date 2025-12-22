@@ -11,9 +11,10 @@ import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
 type CandidateDetailsAreaProps = {
   freelancer: IFreelancer | null;
   loading: boolean;
+  onMessage?: (userId: number) => void; // Optional message handler
 };
 
-const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps) => {
+const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetailsAreaProps) => {
   if (loading) return <div className="container text-center p-5"> <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div> </div>;
   if (!freelancer) return <div className="container text-center p-5"><p>No freelancer data found.</p></div>;
 
@@ -25,7 +26,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
     languages = [],
     city = null,
     country = null,
-    email = "email@example.com",
+    email = "",
     rate_amount = "0.00",
     currency = "USD",
     first_name = "",
@@ -65,12 +66,49 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
 
   return (
     <>
-      <section className="candidates-profile pt-100 lg-pt-70 pb-150 lg-pb-80">
+      <section className="candidates-profile pt-0 pb-150 lg-pb-80">
         <div className="container">
+          {/* Message Button - Top Right Corner */}
+          {onMessage && (
+            <div className="d-flex justify-content-end mb-3">
+              <button
+                type="button"
+                onClick={() => onMessage(freelancer.user_id)}
+                className="btn tran3s"
+                style={{
+                  backgroundColor: '#244034',
+                  color: '#fff',
+                  padding: '12px 30px',
+                  borderRadius: '30px',
+                  fontWeight: '600',
+                  fontSize: '16px',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 15px rgba(36, 64, 52, 0.2)',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#31795A';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(36, 64, 52, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#244034';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(36, 64, 52, 0.2)';
+                }}
+              >
+                <i className="bi bi-chat-dots" style={{ fontSize: '18px' }}></i>
+                Message
+              </button>
+            </div>
+          )}
           <div className="row">
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
-                
+
                 <div className="inner-card border-style mb-65 lg-mb-40">
                   <h3 className="title">Bio</h3>
                   <p>{bio}</p>
@@ -160,13 +198,13 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
                       {profile_picture && profile_picture.trim() !== '' ? (
-                        <img 
-                          src={profile_picture} 
-                          alt="avatar" 
-                          width={85} 
-                          height={85} 
-                          className="lazy-img rounded-circle w-100" 
-                          style={{ objectFit: 'cover', width: '85px', height: '85px' }} 
+                        <img
+                          src={profile_picture}
+                          alt="avatar"
+                          width={85}
+                          height={85}
+                          className="lazy-img rounded-circle w-100"
+                          style={{ objectFit: 'cover', width: '85px', height: '85px' }}
                         />
                       ) : (
                         <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />

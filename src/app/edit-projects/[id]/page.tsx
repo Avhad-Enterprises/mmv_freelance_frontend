@@ -88,7 +88,6 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
         skill_name: trimmedSkill,
         created_by: userId,
       });
-      console.log("Insert skill response:", response);
 
       if (response.data?.message === "Inserted") {
         setFormData((prev) => ({
@@ -96,7 +95,6 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
           skills_required: [...prev.skills_required, trimmedSkill],
         }));
         if (response.data?.data?.is_deleted) {
-          console.log(`Skill "${trimmedSkill}" inserted but marked as deleted.`);
           toast.error("Skill added, but it may not be usable due to deletion status.");
         }
       } else {
@@ -154,7 +152,6 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
   };
 
   useEffect(() => {
-    console.log("projectId:", projectId);
     const fetchCategories = async () => {
       try {
         const response = await makeGetRequest(`api/v1/categories`);
@@ -178,7 +175,6 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
 
       try {
         const response = await makeGetRequest(`api/v1/projects-tasks/${projectId}`);
-        console.log("Api Response:", response);
 
         const project = response.data?.projects;
         if (project) {
@@ -337,9 +333,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
 
     setLoading(true);
     try {
-      console.log("Updating Project data:", payload);
       const response = await makePutRequest(`api/v1/projects-tasks/${formData.projectsTaskId}`, payload);
-      console.log("API response:", response);
 
       if (response.data.success) {
         toast.success("🎉 Project updated successfully!");

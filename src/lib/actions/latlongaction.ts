@@ -60,8 +60,6 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
         return getFallbackCoordinates(sanitizedAddress);
     }
 
-    console.log(`[Server Action] Attempting to geocode address: '${sanitizedAddress}'`);
-
     // Construct the URL with query parameters
     const url = new URL(GEOCODE_API_URL);
     url.searchParams.append('address', sanitizedAddress);
@@ -101,7 +99,6 @@ export async function geocodeAddress(address: string): Promise<ServerActionRespo
                 formatted_address: result.formatted_address || sanitizedAddress,
             };
 
-            console.log("[Server Action] Successfully retrieved coordinates.");
             return { data: coordinates, usedFallback: false };
 
         } else if (data.status === 'ZERO_RESULTS') {

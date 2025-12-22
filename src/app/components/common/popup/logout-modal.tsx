@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import TokenRefreshService from '@/utils/tokenRefresh';
 import Image from "next/image";
 import icon from "@/assets/dashboard/images/icon/icon_22.svg";
@@ -13,6 +13,29 @@ const LogoutModal = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { refreshUserData } = useUser();
+
+  // Ensure modal backdrop has proper z-index
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      #logoutModal.modal.show {
+        z-index: 99999 !important;
+      }
+      #logoutModal ~ .modal-backdrop,
+      .modal-backdrop.show {
+        z-index: 99998 !important;
+        background-color: rgba(0, 0, 0, 0.7) !important;
+      }
+      body.modal-open {
+        overflow: hidden !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   const handleLogout = async () => {
     // Clear token from cookies
@@ -38,9 +61,12 @@ const LogoutModal = () => {
       id="logoutModal"
       tabIndex={-1}
       aria-hidden="true"
+      style={{ zIndex: 99999 }}
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
     >
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content text-center p-4">
+      <div className="modal-dialog modal-dialog-centered" style={{ zIndex: 100000 }}>
+        <div className="modal-content text-center p-4" style={{ position: 'relative', zIndex: 100001 }}>
           <button
             type="button"
             className="btn-close"

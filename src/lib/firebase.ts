@@ -1,0 +1,1 @@
+export { db, auth, appId } from '../../firebase/config';

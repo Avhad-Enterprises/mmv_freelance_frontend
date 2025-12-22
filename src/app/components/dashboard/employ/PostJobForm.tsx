@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { makePostRequest, makeGetRequest } from '@/utils/api';
 import type { NewProjectPayload } from '@/types/project';
 import MultipleSelectionField from './MultipleSelectionField';
+import { validateURL } from '@/utils/validation';
 
 interface IProps {
   onBackToList: () => void;
@@ -14,7 +15,7 @@ interface IProps {
 // Initial form data matching the API payload structure
 const initialFormData: NewProjectPayload = {
   project_title: '',
-  project_category: 'Video Editing',
+  project_category: '',
   deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   project_description: '',
   budget: 500,
@@ -22,7 +23,7 @@ const initialFormData: NewProjectPayload = {
   skills_required: [],
   reference_links: [],
   additional_notes: '',
-  projects_type: 'Video Editing',
+  projects_type: '',
   project_format: 'MP4',
   audio_voiceover: 'None',
   audio_description: 'Client will provide licensed background music.',
@@ -52,13 +53,52 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   const [currentUser, setCurrentUser] = useState<{ userId: number; clientId: number } | null>(null);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [referenceLinks, setReferenceLinks] = useState<string[]>(['']);
+  const [referenceLinkErrors, setReferenceLinkErrors] = useState<(string | undefined)[]>([undefined]);
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState<string>('');
-  
+
   // Bidding modal states
   const [showBiddingModal, setShowBiddingModal] = useState(false);
   const [biddingEnabled, setBiddingEnabled] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<any>(null);
+
+  // New states for dynamic data
+  const [categories, setCategories] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [currency, setCurrency] = useState<string>('USD');
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // Fetch categories and skills from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoadingData(true);
+
+        // Fetch categories
+        const categoriesResponse = await makeGetRequest('api/v1/categories');
+        if (categoriesResponse.data?.data) {
+          const activeCategories = categoriesResponse.data.data
+            .filter((cat: any) => cat.is_active)
+            .map((cat: any) => cat.category_name);
+          setCategories(activeCategories);
+        }
+
+        // Fetch skills
+        const skillsResponse = await makeGetRequest('api/v1/skills');
+        if (skillsResponse.data?.data) {
+          const skillNames = skillsResponse.data.data.map((skill: any) => skill.skill_name);
+          setSkills(skillNames);
+        }
+      } catch (err) {
+        console.error('Error fetching categories/skills:', err);
+        toast.error('Failed to load categories and skills');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -101,18 +141,42 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       ? pendingFormData.url.trim()
       : `${generateSlug(pendingFormData.project_title)}-${Date.now()}`;
 
-    const validReferenceLinks = referenceLinks.filter(link => link.trim() !== '');
+    // Validate reference links
+    const nonEmptyLinks = referenceLinks.filter(link => link.trim() !== '');
+    const invalidLinks: string[] = [];
+    const validLinks: string[] = [];
+
+    nonEmptyLinks.forEach((link, index) => {
+      const validation = validateURL(link, { allowEmpty: false });
+      if (!validation.isValid) {
+        invalidLinks.push(`Reference link ${index + 1}: ${validation.error}`);
+      } else {
+        validLinks.push(validation.normalizedURL || link);
+      }
+    });
+
+    if (invalidLinks.length > 0) {
+      setError(invalidLinks.join('; '));
+      toast.error('Please fix invalid reference links');
+      setLoading(false);
+      setPendingFormData(null);
+      return;
+    }
 
     const payload = {
       ...pendingFormData,
       url: finalUrl,
       skills_required: selectedSkills,
-      reference_links: validReferenceLinks,
+      reference_links: validLinks,
       tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
       is_active: 1,
       bidding_enabled: biddingEnabled, // Add bidding status to payload
+      currency: currency, // Add currency to payload
+      // Ensure numeric fields are sent as numbers, not strings
+      budget: Number(pendingFormData.budget),
+      video_length: Number(pendingFormData.video_length),
     };
 
     try {
@@ -144,15 +208,31 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
   };
 
   // Handlers for Reference Links
-  const addReferenceLink = () => setReferenceLinks([...referenceLinks, '']);
+  const addReferenceLink = () => {
+    setReferenceLinks([...referenceLinks, '']);
+    setReferenceLinkErrors([...referenceLinkErrors, undefined]);
+  };
+
   const updateReferenceLink = (index: number, value: string) => {
     const newLinks = [...referenceLinks];
     newLinks[index] = value;
     setReferenceLinks(newLinks);
+
+    // Validate URL on change
+    const newErrors = [...referenceLinkErrors];
+    if (value.trim()) {
+      const validation = validateURL(value, { allowEmpty: false });
+      newErrors[index] = validation.isValid ? undefined : validation.error;
+    } else {
+      newErrors[index] = undefined; // Empty is okay for reference links
+    }
+    setReferenceLinkErrors(newErrors);
   };
+
   const removeReferenceLink = (index: number) => {
     if (referenceLinks.length > 1) {
       setReferenceLinks(referenceLinks.filter((_, i) => i !== index));
+      setReferenceLinkErrors(referenceLinkErrors.filter((_, i) => i !== index));
     }
   };
 
@@ -194,10 +274,12 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
                 <label>Project Category*</label>
-                <select className="form-control" {...register("project_category", { required: "Category is required" })}>
-                  <option value="Video Editing">Video Editing</option>
-                  <option value="Animation">Animation</option>
-                  <option value="Motion Graphics">Motion Graphics</option>
+                <select className="form-control" {...register("project_category", { required: "Category is required" })}
+                  disabled={isLoadingData}>
+                  <option value="">Select category</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
                 </select>
                 {errors.project_category && <div className="error">{String(errors.project_category.message)}</div>}
               </div>
@@ -216,15 +298,64 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
 
             {/* Budget & Deadline */}
             <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Budget ($)*</label>
-                <input type="number" placeholder="Enter budget amount" className="form-control"
-                  {...register("budget", {
-                    required: "Budget is required",
-                    min: { value: 1, message: "Budget must be greater than 0" }
-                  })}
-                />
-                {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+              <div className="row">
+                <div className="col-md-7">
+                  <div className="input-group-meta position-relative mb-25">
+                    <label>Budget*</label>
+                    <input type="number" placeholder="Enter amount" className="form-control"
+                      {...register("budget", {
+                        required: "Budget is required",
+                        min: { value: 1, message: "Budget must be greater than 0" }
+                      })}
+                    />
+                    {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
+                  </div>
+                </div>
+                <div className="col-md-5">
+                  <div className="input-group-meta position-relative mb-25">
+                    <label>Currency*</label>
+                    <select
+                      className="form-control"
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value)}
+                    >
+                      <option value="INR">INR ₹</option>
+                      <option value="USD">USD $</option>
+                      <option value="EUR">EUR €</option>
+                      <option value="GBP">GBP £</option>
+                      <option value="JPY">JPY ¥</option>
+                      <option value="AUD">AUD $</option>
+                      <option value="CAD">CAD $</option>
+                      <option value="CHF">CHF Fr</option>
+                      <option value="CNY">CNY ¥</option>
+                      <option value="SEK">SEK kr</option>
+                      <option value="NZD">NZD $</option>
+                      <option value="MXN">MXN $</option>
+                      <option value="SGD">SGD $</option>
+                      <option value="HKD">HKD $</option>
+                      <option value="NOK">NOK kr</option>
+                      <option value="KRW">KRW ₩</option>
+                      <option value="TRY">TRY ₺</option>
+                      <option value="RUB">RUB ₽</option>
+                      <option value="BRL">BRL R$</option>
+                      <option value="ZAR">ZAR R</option>
+                      <option value="DKK">DKK kr</option>
+                      <option value="PLN">PLN zł</option>
+                      <option value="THB">THB ฿</option>
+                      <option value="IDR">IDR Rp</option>
+                      <option value="HUF">HUF Ft</option>
+                      <option value="CZK">CZK Kč</option>
+                      <option value="ILS">ILS ₪</option>
+                      <option value="CLP">CLP $</option>
+                      <option value="PHP">PHP ₱</option>
+                      <option value="AED">AED د.إ</option>
+                      <option value="COP">COP $</option>
+                      <option value="SAR">SAR ﷼</option>
+                      <option value="MYR">MYR RM</option>
+                      <option value="RON">RON lei</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="col-md-6">
@@ -270,7 +401,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-12">
               <MultipleSelectionField
                 label="Skills Required*"
-                options={["Video Editing", "Color Grading", "Sound Design", "Motion Graphics", "Animation", "VFX", "Adobe Premiere Pro", "Adobe After Effects", "Final Cut Pro", "DaVinci Resolve", "Avid Media Composer", "Cinema 4D", "Blender", "Adobe Audition"]}
+                options={skills}
                 selectedItems={selectedSkills}
                 onChange={(skills) => { setSelectedSkills(skills); setValue('skills_required', skills, { shouldValidate: true }); }}
                 required={true}
@@ -336,9 +467,20 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
               <div className="input-group-meta position-relative mb-25">
                 <label>Reference Links</label>
                 {referenceLinks.map((link, index) => (
-                  <div key={index} className="d-flex align-items-center mb-10">
-                    <input type="url" placeholder="https://example.com/reference1" className="form-control" value={link} onChange={(e) => updateReferenceLink(index, e.target.value)} />
-                    {referenceLinks.length > 1 && <button type="button" className="btn btn-outline-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                  <div key={index} className="mb-10">
+                    <div className="d-flex align-items-center">
+                      <input
+                        type="url"
+                        placeholder="https://example.com/reference1"
+                        className={`form-control ${referenceLinkErrors[index] ? 'is-invalid' : ''}`}
+                        value={link}
+                        onChange={(e) => updateReferenceLink(index, e.target.value)}
+                      />
+                      {referenceLinks.length > 1 && <button type="button" className="btn btn-outline-danger btn-sm ms-2" onClick={() => removeReferenceLink(index)}>-</button>}
+                    </div>
+                    {referenceLinkErrors[index] && (
+                      <small className="text-danger d-block mt-1">{referenceLinkErrors[index]}</small>
+                    )}
                   </div>
                 ))}
                 <button type="button" className="dash-btn-two mt-2" style={{ minWidth: 'auto', lineHeight: '35px', padding: '0 15px', fontSize: '14px' }} onClick={addReferenceLink}>+ Add Another Link</button>
@@ -384,7 +526,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
 
       {/* Bidding Confirmation Modal */}
       {showBiddingModal && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflow: 'auto' }} tabIndex={-1}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
@@ -401,10 +543,10 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                     </div>
                   </div>
                   <div className="form-check form-switch">
-                    <input 
-                      className="form-check-input" 
-                      type="checkbox" 
-                      role="switch" 
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      role="switch"
                       id="biddingToggle"
                       checked={biddingEnabled}
                       onChange={(e) => setBiddingEnabled(e.target.checked)}

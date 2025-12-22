@@ -1,12 +1,19 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { IJobType } from '@/types/job-data-type';
 import DashboardHeader from './dashboard-header-minus';
 import ApplyLoginModal from '@/app/components/common/popup/apply-login-modal';
 import { makeGetRequest, makePostRequest, makeDeleteRequest } from '@/utils/api';
 import toast from 'react-hot-toast';
 import { authCookies } from "@/utils/cookies";
-import BiddingModal from './bidding-modal'; // Import BiddingModal component
+import BiddingModal from './bidding-modal';
+import { InsufficientCreditsModal, ConfirmApplyModal } from '@/app/components/credits';
+import { creditsService } from '@/services/credits.service';
+import { CreditBalance } from '@/types/credits';
+import { db, auth } from '@/lib/firebase';
+import { ref, get, set } from 'firebase/database';
+import { signInWithCustomToken } from 'firebase/auth';
 
 // Helper function to format seconds into a more readable string
 const formatDuration = (seconds: number | undefined): string => {
@@ -23,6 +30,7 @@ interface DashboardJobDetailsAreaProps {
 }
 
 const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) => {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -34,9 +42,22 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [showBiddingModal, setShowBiddingModal] = useState(false);
 
+  // Credit state
+  const [creditBalance, setCreditBalance] = useState<CreditBalance | null>(null);
+  const [showInsufficientCreditsModal, setShowInsufficientCreditsModal] = useState(false);
+  const [showConfirmApplyModal, setShowConfirmApplyModal] = useState(false);
+  const [checkingCredits, setCheckingCredits] = useState(false);
+
+  // Message state
+  const [isMessaging, setIsMessaging] = useState(false);
+
   useEffect(() => {
+    // Scroll to top when job details page loads
+    window.scrollTo(0, 0);
+
     const token = authCookies.getToken();
     setIsLoggedIn(!!token);
 
@@ -70,7 +91,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       console.error('Error fetching user data:', error);
     }
   };
-  
+
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job.projects_task_id) return;
     try {
@@ -83,19 +104,21 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
 
       // Check if already applied to this specific project using the correct API
       const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
-      
+
       if (appliedRes.data?.success && appliedRes.data?.data) {
         // Find if user has applied to THIS specific project
         const applicationForThisProject = appliedRes.data.data.find(
           (app: any) => app.projects_task_id === job.projects_task_id
         );
-        
+
         if (applicationForThisProject) {
           setIsApplied(true);
           setApplicationId(applicationForThisProject.applied_projects_id);
+          setApplicationStatus(applicationForThisProject.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
@@ -110,7 +133,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     }
   };
 
-  const handleApplyClick = () => {
+  const handleApplyClick = async () => {
     if (!isLoggedIn) {
       applyLoginModalRef.current?.show();
       return;
@@ -124,11 +147,30 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     if (isApplied && applicationId) {
       handleWithdrawApplication();
     } else {
-      // Check if bidding is enabled
-      if (job.bidding_enabled) {
-        setShowBiddingModal(true);
-      } else {
-        handleApplySubmit();
+      // Check credits before allowing application
+      setCheckingCredits(true);
+      try {
+        const balance = await creditsService.getBalance();
+        setCreditBalance(balance);
+
+        if (balance.credits_balance < 1) {
+          // Not enough credits - show modal
+          setShowInsufficientCreditsModal(true);
+          return;
+        }
+
+        // Has credits - show confirmation modal first
+        setShowConfirmApplyModal(true);
+      } catch (error: any) {
+        console.error("Error checking credits:", error);
+        // If credit check fails, try to proceed anyway (backend will reject if no credits)
+        if (job.bidding_enabled) {
+          setShowBiddingModal(true);
+        } else {
+          handleApplySubmit();
+        }
+      } finally {
+        setCheckingCredits(false);
       }
     }
   };
@@ -138,7 +180,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -166,13 +208,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       setIsApplying(false);
     }
   };
-  
+
   const handleApplySubmit = async () => {
     if (!userId) {
       toast.error('Could not verify user. Please refresh and try again.');
       return;
     }
-    
+
     setIsApplying(true);
     try {
       const payload = {
@@ -204,10 +246,21 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       return;
     }
 
+    // Check if application is already approved (status = 1)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an approved project. Please contact support if you have concerns.');
+      return;
+    }
+
+    // Confirm withdrawal
+    if (!confirm('Are you sure you want to withdraw your application?')) {
+      return;
+    }
+
     setIsApplying(true);
     try {
       const response = await makeDeleteRequest(`api/v1/applications/withdraw/${applicationId}`, {});
-      
+
       if (response.data?.message || response.status === 200) {
         toast.success('Application withdrawn successfully!');
         setIsApplied(false);
@@ -265,19 +318,136 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     fetchUserIdAndInitialState();
   };
 
+  const handleMessageClient = async () => {
+    if (!isLoggedIn) {
+      applyLoginModalRef.current?.show();
+      return;
+    }
+
+    const clientUserId = job.client_user_id;
+    if (!clientUserId || !userId) {
+      toast.error('Unable to get client information');
+      return;
+    }
+
+    setIsMessaging(true);
+
+    // Check if chat is allowed (freelancer must have applied to this client's project)
+    try {
+      const permissionResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${clientUserId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (permissionResponse.ok) {
+        const permissionData = await permissionResponse.json();
+        if (!permissionData.canChat) {
+          toast.error('You must apply to this project first before messaging the client.');
+          setIsMessaging(false);
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.error('Error checking chat permission:', permErr);
+    }
+
+    try {
+      // Ensure Firebase authentication
+      if (!auth.currentUser) {
+        const authToken = authCookies.getToken();
+        if (!authToken) {
+          toast.error('Authentication required. Please sign in again.');
+          setIsMessaging(false);
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get Firebase authentication token');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data?.customToken) {
+          await signInWithCustomToken(auth, data.data.customToken);
+        } else {
+          throw new Error('Invalid Firebase token response');
+        }
+      }
+
+      // Create or get conversation
+      const currentUserId = String(userId);
+      const otherId = String(clientUserId);
+      const participants = [currentUserId, otherId].sort();
+      const conversationId = participants.join('_');
+
+      const convRef = ref(db, `conversations/${conversationId}`);
+      const convSnap = await get(convRef);
+
+      if (!convSnap.exists()) {
+        // Build participant details
+        const participantDetails: any = {};
+        participantDetails[currentUserId] = {
+          firstName: 'Freelancer',
+          email: '',
+          profilePicture: null
+        };
+        participantDetails[otherId] = {
+          firstName: job.client_first_name || job.client_company_name || 'Client',
+          email: '',
+          profilePicture: job.client_profile_picture || null
+        };
+
+        await set(convRef, {
+          participants,
+          participantRoles: {
+            [currentUserId]: 'freelancer',
+            [otherId]: 'client',
+          },
+          participantDetails,
+          lastMessage: '',
+          lastSenderId: '',
+          updatedAt: Date.now(),
+          createdAt: Date.now(),
+        });
+        toast.success('Chat started! Redirecting...');
+      } else {
+        toast.success('Opening chat...');
+      }
+
+      // Navigate to chat
+      router.push(`/dashboard/freelancer-dashboard/chat?conversationId=${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to start chat:', err);
+      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
+    } finally {
+      setIsMessaging(false);
+    }
+  };
+
   return (
     <>
       <div className="dashboard-body" style={{ backgroundColor: '#f0f5f3', minHeight: '100vh' }}>
         <div className="position-relative">
           <DashboardHeader />
-          
+
           <section className="job-details pt-50 pb-50">
             <div className="container-fluid">
               <div className="row">
                 {/* Left Side: Details - Green Background */}
                 <div className="col-xxl-9 col-xl-8">
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
-                    
+
                     <button onClick={onBack} className="btn-two mb-20">
                       &larr; Back to Jobs
                     </button>
@@ -286,7 +456,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       Posted on: {job.created_at?.slice(0, 10)}
                     </div>
                     <h3 className="post-title">{job.project_title}</h3>
-                    
+
                     <div className="post-block border-style mt-50 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
@@ -342,14 +512,31 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                 {/* Right Side: Metadata - White Island */}
                 <div className="col-xxl-3 col-xl-4">
                   <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50 bg-white rounded-3 p-4" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                    <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize fw-500">
-                      {job.project_title}
+                    <div className="text-center mb-3">
+                      <div className="text-md text-dark text-center mt-15 mb-10 text-capitalize fw-500">
+                        {job.project_title}
+                      </div>
+                      <div className="text-sm text-muted mb-3">
+                        Posted by: <span className="fw-500 text-dark">
+                          {job.client_first_name && job.client_last_name
+                            ? `${job.client_first_name} ${job.client_last_name}`
+                            : job.client_company_name
+                              ? job.client_company_name
+                              : 'Anonymous Client'
+                          }
+                        </span>
+                      </div>
+                      {job.client_company_name && (
+                        <div className="text-xs text-muted">
+                          Company: {job.client_company_name}
+                        </div>
+                      )}
                     </div>
                     <div className="border-top mt-40 pt-40">
                       <ul className="job-meta-data row style-none">
                         <li className="col-6">
                           <span>Budget</span>
-                          <div>${job.budget?.toLocaleString()}</div>
+                          <div>{job.currency ? `${job.currency} ${job.budget?.toLocaleString()}` : `$${job.budget?.toLocaleString()}`}</div>
                         </li>
                         <li className="col-6">
                           <span>Deadline</span>
@@ -369,13 +556,31 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                           <a key={idx} href="#">{tag}</a>
                         ))}
                       </div>
-                      
-                      <button 
-                        className="btn-one w-100 mt-25" 
+
+                      {/* Message Client Button - Only show if applied */}
+                      {isApplied && job.client_user_id && (
+                        <button
+                          className="btn-one w-100 mt-25 d-flex align-items-center justify-content-center"
+                          onClick={handleMessageClient}
+                          disabled={isMessaging || userRole === 'CLIENT'}
+                        >
+                          {isMessaging ? (
+                            'Starting Chat...'
+                          ) : (
+                            <>
+                              <i className="bi bi-chat-dots me-2"></i>
+                              Message Client
+                            </>
+                          )}
+                        </button>
+                      )}
+
+                      <button
+                        className="btn-one w-100 mt-15"
                         onClick={handleApplyClick}
-                        disabled={isApplying || userRole === 'CLIENT'}
+                        disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
                       </button>
 
                       <button
@@ -384,12 +589,12 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         disabled={isSaving}
                       >
                         {isSaving ? (
-                            'Saving...'
+                          'Saving...'
                         ) : (
-                            <>
-                                <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
-                                {isSaved ? 'Saved' : 'Save Job'}
-                            </>
+                          <>
+                            <i className={`bi ${isSaved ? "bi-heart-fill text-danger" : "bi-heart"} me-2`}></i>
+                            {isSaved ? 'Saved' : 'Save Job'}
+                          </>
                         )}
                       </button>
                     </div>
@@ -402,7 +607,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       </div>
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
-      
+
       {showBiddingModal && (
         <BiddingModal
           originalBudget={job.budget || 0}
@@ -412,6 +617,36 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
           isSubmitting={isApplying}
         />
       )}
+
+      {/* Insufficient Credits Modal */}
+      <InsufficientCreditsModal
+        isOpen={showInsufficientCreditsModal}
+        onClose={() => setShowInsufficientCreditsModal(false)}
+        requiredCredits={1}
+        currentBalance={creditBalance?.credits_balance || 0}
+        onBuyCredits={() => {
+          setShowInsufficientCreditsModal(false);
+          // Navigate to credits page
+          window.location.href = '/dashboard/freelancer-dashboard/credits';
+        }}
+      />
+
+      {/* Confirm Apply Modal */}
+      <ConfirmApplyModal
+        isOpen={showConfirmApplyModal}
+        onClose={() => setShowConfirmApplyModal(false)}
+        onConfirm={() => {
+          setShowConfirmApplyModal(false);
+          if (job.bidding_enabled) {
+            setShowBiddingModal(true);
+          } else {
+            handleApplySubmit();
+          }
+        }}
+        projectTitle={job.project_title || 'this project'}
+        currentBalance={creditBalance?.credits_balance || 0}
+        isVideoEditor={userRole === 'VIDEO_EDITOR'}
+      />
     </>
   );
 };

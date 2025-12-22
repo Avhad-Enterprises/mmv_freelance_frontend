@@ -1,14 +1,20 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import toast from 'react-hot-toast';
-import DashboardHeader from "../dashboard/candidate/dashboard-header";
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
+import { db, auth } from '@/lib/firebase';
+import { ref, get, set } from 'firebase/database';
+import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { authCookies } from "@/utils/cookies";
+import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
 import Pagination from "@/ui/pagination";
 import NiceSelect from "@/ui/nice-select";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
-import { authCookies } from "@/utils/cookies";
+import DashboardSearchBar from "@/app/components/dashboard/common/DashboardSearchBar";
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -64,7 +70,7 @@ interface ApiCandidate {
   payment_method: any;
   bank_account_info: any;
   role_name: string | null;
-  experience: any; 
+  experience: any;
 }
 
 
@@ -87,6 +93,7 @@ const CandidateV1Area = () => {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedSuperpowers, setSelectedSuperpowers] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -124,7 +131,7 @@ const CandidateV1Area = () => {
       languages: apiCandidate.languages || [],
       city: apiCandidate.city || null,
       country: apiCandidate.country || null,
-      email: `${apiCandidate.username || 'unknown'}@example.com`,
+      email: '',
       rate_amount: apiCandidate.rate_amount || "0.00",
       currency: apiCandidate.currency || "USD",
       availability: apiCandidate.availability || "not specified",
@@ -152,6 +159,128 @@ const CandidateV1Area = () => {
     };
   }, []);
 
+  const router = useRouter();
+  const { userData } = useUser();
+
+  const handleStartChat = async (candidateUserId: number) => {
+    if (!userData) {
+      toast.error('Please sign in to message freelancers');
+      return;
+    }
+
+    // Check if chat is allowed (freelancer must have applied to client's project)
+    try {
+      const permissionResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${candidateUserId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authCookies.getToken()}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (permissionResponse.ok) {
+        const permissionData = await permissionResponse.json();
+        if (!permissionData.canChat) {
+          toast.error('You can only message freelancers who have applied to your projects.');
+          return;
+        }
+      }
+    } catch (permErr) {
+      console.error('Error checking chat permission:', permErr);
+      // Continue anyway - backend will enforce the rule
+    }
+
+    // Ensure Firebase authentication before creating conversation
+    try {
+      if (!auth.currentUser) {
+        const authToken = authCookies.getToken();
+        if (!authToken) {
+          toast.error('Authentication required. Please sign in again.');
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get Firebase authentication token');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data?.customToken) {
+          await signInWithCustomToken(auth, data.data.customToken);
+        } else {
+          throw new Error('Invalid Firebase token response');
+        }
+      }
+    } catch (authErr: any) {
+      console.error('Firebase authentication error:', authErr);
+      toast.error('Failed to authenticate. Please try again.');
+      return;
+    }
+
+    const currentUserId = String(userData.user_id);
+    const otherId = String(candidateUserId);
+    const participants = [currentUserId, otherId].sort();
+    const conversationId = participants.join('_');
+
+    try {
+      const convRef = ref(db, `conversations/${conversationId}`);
+      const convSnap = await get(convRef);
+
+      if (!convSnap.exists()) {
+        // Build participantDetails from local state and current user
+        const participantDetails: any = {};
+        participantDetails[currentUserId] = {
+          firstName: userData.first_name || '',
+          email: userData.email || '',
+          profilePicture: userData.profile_picture || null
+        };
+        const otherCandidate = candidates.find(c => String(c.user_id) === otherId);
+        if (otherCandidate) {
+          participantDetails[otherId] = {
+            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`,
+            email: '',
+            profilePicture: otherCandidate.profile_picture || null
+          };
+        }
+
+        await set(convRef, {
+          participants,
+          participantRoles: {
+            [currentUserId]: 'client',
+            [otherId]: 'freelancer',
+          },
+          participantDetails,
+          lastMessage: '',
+          lastSenderId: '',
+          updatedAt: Date.now(),
+          createdAt: Date.now(),
+        });
+        toast.success('Chat started! Redirecting...');
+      } else {
+        toast.success('Opening chat...');
+      }
+
+      // Redirect to the thread page to show the conversation
+      router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
+    } catch (err: any) {
+      console.error('Failed to start chat:', err);
+      console.error('Error details:', {
+        code: err?.code,
+        message: err?.message,
+        stack: err?.stack
+      });
+      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
+    }
+  };
+
   // Effect to fetch all candidates
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -159,7 +288,7 @@ const CandidateV1Area = () => {
         setLoading(true);
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
-        
+
         const responseData = await response.json();
         const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
         setCandidates(candidatesData);
@@ -210,66 +339,66 @@ const CandidateV1Area = () => {
     };
     fetchFavorites();
   }, []);
-  
+
   // Effect to automatically apply filters when selections change
   useEffect(() => {
     applyFilters();
-  }, [selectedSkills, selectedLocations, selectedSuperpowers]);
-  
+  }, [selectedSkills, selectedLocations, selectedSuperpowers, searchQuery]);
+
   // --- Event Handler to Add/Remove Favorites ---
   const handleToggleSave = async (candidateId: number) => {
     const token = authCookies.getToken();
     if (!token) {
-        toast.error("Please log in to save candidates.");
-        return;
+      toast.error("Please log in to save candidates.");
+      return;
     }
 
     const isCurrentlySaved = savedCandidates.includes(candidateId);
-    
+
     try {
-        if (isCurrentlySaved) {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+      if (isCurrentlySaved) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) throw new Error("Failed to remove from favorites");
+        if (!response.ok) throw new Error("Failed to remove from favorites");
 
-            setSavedCandidates(prev => prev.filter(id => id !== candidateId));
-            setFavoriteIds(prev => {
-                const newFavs = { ...prev };
-                delete newFavs[candidateId];
-                return newFavs;
-            });
-            toast.success('Removed from favorites!');
-        } else {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ freelancer_id: candidateId })
-            });
+        setSavedCandidates(prev => prev.filter(id => id !== candidateId));
+        setFavoriteIds(prev => {
+          const newFavs = { ...prev };
+          delete newFavs[candidateId];
+          return newFavs;
+        });
+        toast.success('Removed from favorites!');
+      } else {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ freelancer_id: candidateId })
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to add to favorites");
-            }
-            
-            const result = await response.json();
-
-            setSavedCandidates(prev => [...prev, candidateId]);
-            setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
-            toast.success('Added to favorites!');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to add to favorites");
         }
+
+        const result = await response.json();
+
+        setSavedCandidates(prev => [...prev, candidateId]);
+        setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
+        toast.success('Added to favorites!');
+      }
     } catch (err: any) {
-        console.error("Error toggling favorite:", err);
-        toast.error(err.message || "An unexpected error occurred.");
+      console.error("Error toggling favorite:", err);
+      toast.error(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -279,25 +408,42 @@ const CandidateV1Area = () => {
 
   const applyFilters = () => {
     let filtered = [...candidates];
-    
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(c =>
+        c.first_name?.toLowerCase().includes(query) ||
+        c.last_name?.toLowerCase().includes(query) ||
+        c.username?.toLowerCase().includes(query) ||
+        c.profile_title?.toLowerCase().includes(query) ||
+        c.bio?.toLowerCase().includes(query) ||
+        c.short_description?.toLowerCase().includes(query) ||
+        c.skills?.some(skill => skill.toLowerCase().includes(query)) ||
+        c.superpowers?.some(sp => sp.toLowerCase().includes(query)) ||
+        c.city?.toLowerCase().includes(query) ||
+        c.country?.toLowerCase().includes(query)
+      );
+    }
+
     if (selectedSkills.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         selectedSkills.every(skill => c.skills?.includes(skill))
       );
     }
 
     if (selectedSuperpowers.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         selectedSuperpowers.every(superpower => c.superpowers?.includes(superpower))
       );
     }
-    
+
     if (selectedLocations.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.city && c.country && selectedLocations.includes(`${c.city}, ${c.country}`)
       );
     }
-    
+
     setFilteredCandidates(filtered);
     setCurrentPage(1);
   };
@@ -306,6 +452,7 @@ const CandidateV1Area = () => {
     setSelectedSkills([]);
     setSelectedLocations([]);
     setSelectedSuperpowers([]);
+    setSearchQuery("");
     setFilteredCandidates(candidates);
     setCurrentPage(1);
   };
@@ -321,7 +468,7 @@ const CandidateV1Area = () => {
         sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
         break;
       default:
-        applyFilters(); 
+        applyFilters();
         return;
     }
     setFilteredCandidates(sorted);
@@ -354,7 +501,7 @@ const CandidateV1Area = () => {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader />
-        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+        <div className="d-sm-flex align-items-center justify-content-between mb-20 lg-mb-10">
           <h2 className="main-title m0">
             {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "Candidates"}
           </h2>
@@ -364,88 +511,97 @@ const CandidateV1Area = () => {
             </button>
           )}
         </div>
-        
+
         {selectedFreelancer ? (
-          <CandidateDetailsArea freelancer={selectedFreelancer} loading={loadingProfile} />
+          <CandidateDetailsArea
+            freelancer={selectedFreelancer}
+            loading={loadingProfile}
+            onMessage={() => handleStartChat(selectedFreelancer.user_id)}
+          />
         ) : (
           <>
+            <DashboardSearchBar
+              placeholder="Search candidates by name, skills, location..."
+              onSearch={setSearchQuery}
+            />
+
             <div className="bg-white card-box border-20 mb-40">
-                <CandidateV1FilterArea
-                  onSkillChange={setSelectedSkills}
-                  onLocationChange={setSelectedLocations}
-                  onSuperpowerChange={setSelectedSuperpowers}
-                  skills={allSkills}
-                  locations={allLocations}
-                  superpowers={allSuperpowers}
-                  selectedSkills={selectedSkills}
-                  selectedLocations={selectedLocations}
-                  selectedSuperpowers={selectedSuperpowers}
-                  onClearFilters={clearFilters}
-                />
+              <CandidateV1FilterArea
+                onSkillChange={setSelectedSkills}
+                onLocationChange={setSelectedLocations}
+                onSuperpowerChange={setSelectedSuperpowers}
+                skills={allSkills}
+                locations={allLocations}
+                superpowers={allSuperpowers}
+                selectedSkills={selectedSkills}
+                selectedLocations={selectedLocations}
+                selectedSuperpowers={selectedSuperpowers}
+                onClearFilters={clearFilters}
+              />
             </div>
 
             <div className="candidate-profile-area">
-                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                    <div className="total-job-found">
-                        All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
-                    </div>
-                    <div className="d-flex align-items-center">
-                        <div className="short-filter d-flex align-items-center">
-                            <div className="text-dark fw-500 me-2">Sort:</div>
-                            <NiceSelect
-                                options={[
-                                    { value: "", label: "Budget Sort" },
-                                    { value: "price-low-to-high", label: "Low to High" },
-                                    { value: "price-high-to-low", label: "High to Low" },
-                                ]}
-                                defaultCurrent={0}
-                                onChange={(item) => handleSort(item.value)}
-                                name="Budget Sort"
-                            />
-                        </div>
-                    </div>
+              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                <div className="total-job-found">
+                  All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
                 </div>
-
-                <div className="accordion-box list-style show">
-                    {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
-                    {error && <p className="text-danger text-center p-5">{error}</p>}
-                    
-                    {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
-                        <CandidateListItem
-                            key={apiCandidate.user_id}
-                            isSaved={savedCandidates.includes(apiCandidate.user_id)}
-                            onToggleSave={handleToggleSave}
-                            onViewProfile={handleViewProfile}
-                            item={{
-                                user_id: apiCandidate.user_id,
-                                username: apiCandidate.username,
-                                first_name: apiCandidate.first_name,
-                                last_name: apiCandidate.last_name,
-                                profile_picture: apiCandidate.profile_picture || undefined,
-                                city: apiCandidate.city || '',
-                                country: apiCandidate.country || '',
-                                skill: apiCandidate.skills,
-                                post: apiCandidate.profile_title || 'Freelancer',
-                                budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
-                                location: '', 
-                                total_earnings: apiCandidate.total_earnings,
-                            }}
-                        />
-                    ))}
-
-                    {!loading && currentDisplayCandidates.length === 0 && (
-                        <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
-                    )}
+                <div className="d-flex align-items-center">
+                  <div className="short-filter d-flex align-items-center">
+                    <div className="text-dark fw-500 me-2">Sort:</div>
+                    <NiceSelect
+                      options={[
+                        { value: "", label: "Budget Sort" },
+                        { value: "price-low-to-high", label: "Low to High" },
+                        { value: "price-high-to-low", label: "High to Low" },
+                      ]}
+                      defaultCurrent={0}
+                      onChange={(item) => handleSort(item.value)}
+                      name="Budget Sort"
+                    />
+                  </div>
                 </div>
+              </div>
 
-                {totalPages > 1 && (
-                    <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
-                        <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                            Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
-                        </p>
-                        <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
-                    </div>
+              <div className="accordion-box list-style show">
+                {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+                {error && <p className="text-danger text-center p-5">{error}</p>}
+
+                {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
+                  <CandidateListItem
+                    key={apiCandidate.user_id}
+                    isSaved={savedCandidates.includes(apiCandidate.user_id)}
+                    onToggleSave={handleToggleSave}
+                    onViewProfile={handleViewProfile}
+                    item={{
+                      user_id: apiCandidate.user_id,
+                      username: apiCandidate.username,
+                      first_name: apiCandidate.first_name,
+                      last_name: apiCandidate.last_name,
+                      profile_picture: apiCandidate.profile_picture || undefined,
+                      city: apiCandidate.city || '',
+                      country: apiCandidate.country || '',
+                      skill: apiCandidate.skills,
+                      post: apiCandidate.profile_title || 'Freelancer',
+                      budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
+                      location: '',
+                      total_earnings: apiCandidate.total_earnings,
+                    }}
+                  />
+                ))}
+
+                {!loading && currentDisplayCandidates.length === 0 && (
+                  <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
                 )}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                  <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                    Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
+                  </p>
+                  <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
+                </div>
+              )}
             </div>
           </>
         )}

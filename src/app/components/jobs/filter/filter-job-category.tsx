@@ -25,7 +25,7 @@ const FilterJobCategory = ({
       }}
       className="basic-multi-select"
       classNamePrefix="select"
-      placeholder="Select Categories"
+      placeholder="Select Superpowers"
     />
   );
 };

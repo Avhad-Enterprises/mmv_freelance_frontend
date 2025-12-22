@@ -1,5 +1,27 @@
 'use client';
 
+/**
+ * My Jobs Area for Clients
+ * 
+ * This component displays all jobs posted by the client and their applications.
+ * 
+ * Status Systems in the Application:
+ * 
+ * 1. PROJECT TASK STATUS (projects_tasks table):
+ *    - 0: Pending (awaiting freelancer assignment)
+ *    - 1: Assigned/In Progress (freelancer is working on it)
+ *    - 2: Completed (project finished)
+ * 
+ * 2. APPLICATION STATUS (applied_projects table):
+ *    - 0: Pending (waiting for client review)
+ *    - 1: Approved (client approved the application)
+ *    - 2: Completed (work completed)
+ *    - 3: Rejected (client rejected the application)
+ * 
+ * Note: This page shows PROJECT TASK STATUS in the jobs list.
+ *       When viewing applications, it shows APPLICATION STATUS.
+ */
+
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
@@ -167,39 +189,39 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       // Fetch applications
       const applicationsResponse = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
       const rawApplicants = applicationsResponse.data?.data || [];
-      
+
       // Fetch all freelancers to get profile pictures and additional data
       const freelancersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
       if (!freelancersResponse.ok) throw new Error(`Failed to fetch freelancer data`);
       const freelancersData = await freelancersResponse.json();
       const freelancers = freelancersData.data || [];
-      
+
       // Create a map of user_id to freelancer data for quick lookup
       const freelancerMap = new Map();
       freelancers.forEach((freelancer: any) => {
         freelancerMap.set(freelancer.user_id, freelancer);
       });
-      
+
       // Map API response to match Applicant interface, enriched with freelancer data
       const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
-  const freelancer = freelancerMap.get(app.user_id);
-  return {
-    applied_projects_id: app.applied_projects_id,
-    user_id: app.user_id,
-    first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
-    last_name: app.applicant?.last_name || freelancer?.last_name || '',
-    email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
-    profile_picture: freelancer?.profile_picture || '',
-    status: app.status,
-    bio: freelancer?.bio || freelancer?.short_description || null,
-    skills: freelancer?.skills || [],
-    applied_date: app.created_at,
-    bid_amount: parseFloat(app.bid_amount) || 0,
-    bid_message: app.bid_message || '',
-  };
-});
+        const freelancer = freelancerMap.get(app.user_id);
+        return {
+          applied_projects_id: app.applied_projects_id,
+          user_id: app.user_id,
+          first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
+          last_name: app.applicant?.last_name || freelancer?.last_name || '',
+          email: app.applicant?.email || freelancer?.email || '',
+          profile_picture: freelancer?.profile_picture || '',
+          status: app.status,
+          bio: freelancer?.bio || freelancer?.short_description || null,
+          skills: freelancer?.skills || [],
+          applied_date: app.created_at,
+          bid_amount: parseFloat(app.bid_amount) || 0,
+          bid_message: app.bid_message || '',
+        };
+      });
 
-      
+
       setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
@@ -285,14 +307,14 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     if (newStatus === 1) {
       // Check if project is already assigned
       if (currentProject.status === 1) {
-        toast.error("❌ Only one applicant can be assigned to this project.");
+        toast.error("Only one applicant can be assigned to this project.");
         return;
       }
     }
     if (newStatus === 2) {
       // Check if project is already completed
       if (currentProject.status === 2) {
-        toast.error("❌ This project is already marked as completed.");
+        toast.error("This project is already marked as completed.");
         return;
       }
     }
@@ -318,9 +340,9 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       });
 
       // Update local state immediately after successful API call
-      setApplicants(prev => prev.map(app => 
-        app.applied_projects_id === applicationId 
-          ? { ...app, status: newStatus } 
+      setApplicants(prev => prev.map(app =>
+        app.applied_projects_id === applicationId
+          ? { ...app, status: newStatus }
           : app
       ));
 
@@ -331,7 +353,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         });
       }
 
-      toast.success("✅ Applicant and project updated successfully!");
+      toast.success("Applicant and project updated successfully!");
     } catch (err: any) {
       console.error("Failed to update applicant/project:", err);
       // Revert project status on error
@@ -339,16 +361,27 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         setProjects(originalProjects);
       }
       const message = err.response?.data?.message || err.message || "Failed to update applicant/project.";
-      toast.error(`❌ ${message}`);
+      toast.error(`${message}`);
     }
   };
 
-  const getStatusInfo = (status: Applicant['status'] | number) => {
+  // Application Status Info - used when viewing applicants for a job
+  const getApplicationStatusInfo = (status: Applicant['status'] | number) => {
     switch (status) {
       case 0: return { text: "Pending", className: "text-warning" };
       case 1: return { text: "Approved", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
       case 3: return { text: "Rejected", className: "text-danger" };
+      default: return { text: "Unknown", className: "text-secondary" };
+    }
+  };
+
+  // Project Task Status Info - used in the jobs list
+  const getProjectStatusInfo = (status: number) => {
+    switch (status) {
+      case 0: return { text: "Awaiting Assignment", className: "text-warning" };
+      case 1: return { text: "In Progress", className: "text-success" };
+      case 2: return { text: "Completed", className: "text-info" };
       default: return { text: "Unknown", className: "text-secondary" };
     }
   };
@@ -426,7 +459,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           languages: foundFreelancer.languages || [],
           city: foundFreelancer.city || null,
           country: foundFreelancer.country || null,
-          email: `${foundFreelancer.username || 'unknown'}@example.com`,
+          email: foundFreelancer.email || '',
           rate_amount: foundFreelancer.rate_amount || "0.00",
           currency: foundFreelancer.currency || "USD",
           availability: foundFreelancer.availability || "not specified",
@@ -486,9 +519,9 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       isPending: applicant.status === 0,
       maxMessages: applicant.status === 0 ? 10 : -1, // -1 means unlimited
     };
-    
+
     sessionStorage.setItem('chatRestriction', JSON.stringify(chatRestriction));
-    
+
     // Navigate to chat page
     router.push('/dashboard/client-dashboard/submit-job');
   };
@@ -536,7 +569,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
             onViewProfile={handleViewProfile}
             onToggleSave={handleToggleSave}
             onUpdateApplicantStatus={handleUpdateApplicantStatus}
-            getStatusInfo={getStatusInfo}
+            getStatusInfo={getApplicationStatusInfo}
             onOpenChat={handleOpenChat}
           />
         ) : (
@@ -550,7 +583,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
                 loading={loading}
                 error={error}
                 onViewApplicants={handleViewApplicantsClick}
-                getStatusInfo={getStatusInfo}
+                getStatusInfo={getProjectStatusInfo}
               />
             )}
           </>

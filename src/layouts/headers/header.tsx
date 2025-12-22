@@ -1,5 +1,5 @@
 "use client"
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Menus from "./component/menus";
@@ -11,7 +11,8 @@ import { useUser } from "@/context/UserContext";
 const Header = () => {
   const { userData, userRoles, isLoading } = useUser();
   const isAuthenticated = !!userData && !isLoading;
-  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   // Determine dashboard route based on user role
   const getDashboardRoute = () => {
     if (!userData || !userRoles.length) return '/dashboard/freelancer-dashboard';
@@ -19,6 +20,46 @@ const Header = () => {
     if (normalizedRoles.includes('CLIENT')) return '/dashboard/client-dashboard';
     return '/dashboard/freelancer-dashboard';
   };
+
+  // Handle menu toggle with proper event handling
+  const handleMenuToggle = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  // Close menu when clicking outside or on a link
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const navbar = document.getElementById('navbarNav');
+      const toggler = document.querySelector('.navbar-toggler');
+
+      if (isMenuOpen && navbar && !navbar.contains(target) && !toggler?.contains(target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Close menu when window is resized to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMenuOpen]);
+
+  // Close menu when a nav link is clicked
+  const handleNavClick = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
 
   return (
     <>
@@ -57,7 +98,7 @@ const Header = () => {
                     )}
                   </li>
                   <li className="d-none d-md-block ms-4">
-                    <Link href="/coming-soon" className="btn-one hire-top-talents-btn">
+                    <Link href="/freelancers" className="btn-one hire-top-talents-btn">
                       Hire Top Talents
                     </Link>
                   </li>
@@ -67,15 +108,14 @@ const Header = () => {
                 <button
                   className="navbar-toggler d-block d-lg-none"
                   type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#navbarNav"
+                  onClick={handleMenuToggle}
                   aria-controls="navbarNav"
-                  aria-expanded="false"
+                  aria-expanded={isMenuOpen}
                   aria-label="Toggle navigation"
                 >
                   <span></span>
                 </button>
-                <div className="collapse navbar-collapse" id="navbarNav">
+                <div className={`navbar-collapse ${isMenuOpen ? 'show' : 'collapse'}`} id="navbarNav" onClick={handleNavClick}>
                   <ul className="navbar-nav align-items-lg-center">
                     <li className="d-block d-lg-none">
                       <div className="logo">

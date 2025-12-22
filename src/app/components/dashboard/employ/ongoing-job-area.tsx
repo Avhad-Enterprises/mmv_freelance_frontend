@@ -6,6 +6,7 @@ import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from '@/context/SidebarContext';
 import DashboardHeader from "../candidate/dashboard-header";
+import DashboardSearchBar from "../common/DashboardSearchBar";
 import ApplicantsList from "./ApplicantsList";
 import ApplicantProfile from "./ApplicantProfile";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
@@ -54,6 +55,7 @@ const OngoingJobArea: FC = () => {
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProjectForApplicants, setSelectedProjectForApplicants] = useState<ProjectSummary | null>(null);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [applicantsLoading, setApplicantsLoading] = useState(false);
@@ -101,7 +103,11 @@ const OngoingJobArea: FC = () => {
       const projectsResponse = await makeGetRequest(`api/v1/projects-tasks/client/${clientId}`);
       const createdProjects = projectsResponse.data?.data || [];
 
-      const processedData: ProjectSummary[] = createdProjects.map((p: any) => ({
+      // Filter to show only ongoing projects (status 1 = Assigned/In Progress)
+      // Status 0 = Pending/Awaiting Assignment, Status 2 = Completed
+      const ongoingProjects = createdProjects.filter((p: any) => p.status === 1);
+
+      const processedData: ProjectSummary[] = ongoingProjects.map((p: any) => ({
         project_id: p.projects_task_id,
         title: p.project_title,
         date_created: p.created_at,
@@ -177,7 +183,7 @@ const OngoingJobArea: FC = () => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`,
         {
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           }
@@ -223,17 +229,17 @@ const OngoingJobArea: FC = () => {
     try {
       const applicationsResponse = await makeGetRequest(`api/v1/applications/projects/${project.project_id}/applications`);
       const rawApplicants = applicationsResponse.data?.data || [];
-      
+
       const freelancersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
       if (!freelancersResponse.ok) throw new Error(`Failed to fetch freelancer data`);
       const freelancersData = await freelancersResponse.json();
       const freelancers = freelancersData.data || [];
-      
+
       const freelancerMap = new Map();
       freelancers.forEach((freelancer: any) => {
         freelancerMap.set(freelancer.user_id, freelancer);
       });
-      
+
       const applicantsData: Applicant[] = rawApplicants.map((app: any) => {
         const freelancer = freelancerMap.get(app.user_id);
         return {
@@ -241,7 +247,7 @@ const OngoingJobArea: FC = () => {
           user_id: app.user_id,
           first_name: app.applicant?.first_name || freelancer?.first_name || 'Unknown',
           last_name: app.applicant?.last_name || freelancer?.last_name || '',
-          email: app.applicant?.email || freelancer ? `${freelancer.username || 'unknown'}@example.com` : '',
+          email: app.applicant?.email || freelancer?.email || '',
           profile_picture: freelancer?.profile_picture || '',
           status: app.status,
           bio: freelancer?.bio || freelancer?.short_description || null,
@@ -249,7 +255,7 @@ const OngoingJobArea: FC = () => {
           applied_date: app.created_at,
         };
       });
-      
+
       setApplicants(applicantsData);
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || "Failed to load applicants.";
@@ -335,13 +341,13 @@ const OngoingJobArea: FC = () => {
 
     if (newStatus === 1) {
       if (currentProject.status === 1) {
-        toast.error("❌ Only one applicant can be assigned to this project.");
+        toast.error("Only one applicant can be assigned to this project.");
         return;
       }
     }
     if (newStatus === 2) {
       if (currentProject.status === 2) {
-        toast.error("❌ This project is already marked as completed.");
+        toast.error("This project is already marked as completed.");
         return;
       }
     }
@@ -364,9 +370,9 @@ const OngoingJobArea: FC = () => {
         status: newStatus,
       });
 
-      setApplicants(prev => prev.map(app => 
-        app.applied_projects_id === applicationId 
-          ? { ...app, status: newStatus } 
+      setApplicants(prev => prev.map(app =>
+        app.applied_projects_id === applicationId
+          ? { ...app, status: newStatus }
           : app
       ));
 
@@ -376,14 +382,14 @@ const OngoingJobArea: FC = () => {
         });
       }
 
-      toast.success("✅ Applicant and project updated successfully!");
+      toast.success("Applicant and project updated successfully!");
     } catch (err: any) {
       console.error("Failed to update applicant/project:", err);
       if (newProjectStatus !== null) {
         setProjects(originalProjects);
       }
       const message = err.response?.data?.message || err.message || "Failed to update applicant/project.";
-      toast.error(`❌ ${message}`);
+      toast.error(`${message}`);
     }
   };
 
@@ -401,7 +407,7 @@ const OngoingJobArea: FC = () => {
   // Approve/Reject Submission
   const handleReviewSubmission = async (submissionId: number, status: 1 | 2) => {
     setReviewingSubmission(true);
-    
+
     try {
       const token = authCookies.getToken();
       if (!token) throw new Error('Authentication required');
@@ -432,12 +438,26 @@ const OngoingJobArea: FC = () => {
             : sub
         ));
 
-        toast.success(status === 1 ? '✅ Submission approved! Freelancer has been assigned.' : '❌ Submission rejected.');
-        handleCloseSubmissionModal();
-
-        // Refresh projects list if approved
         if (status === 1) {
+          // Approved - project is now completed
+          toast.success('Submission approved! Project marked as completed.');
+          handleCloseSubmissionModal();
+
+          // Remove the completed project from ongoing projects list immediately
+          if (selectedProjectForSubmissions) {
+            setProjects(prev => prev.filter(p => p.project_id !== selectedProjectForSubmissions.project_id));
+          }
+
+          // Also clear the submissions view
+          setSelectedProjectForSubmissions(null);
+          setSubmissions([]);
+
+          // Refresh to get latest data from server
           fetchClientData();
+        } else {
+          // Rejected
+          toast.success('Submission rejected. Freelancer can resubmit.');
+          handleCloseSubmissionModal();
         }
       }
     } catch (error: any) {
@@ -448,12 +468,23 @@ const OngoingJobArea: FC = () => {
     }
   };
 
-  const getStatusInfo = (status: Applicant['status'] | number) => {
+  // Application Status Info - for viewing applicants
+  const getApplicationStatusInfo = (status: Applicant['status'] | number) => {
     switch (status) {
       case 0: return { text: "Pending", className: "text-warning" };
       case 1: return { text: "Approved", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
       case 3: return { text: "Rejected", className: "text-danger" };
+      default: return { text: "Unknown", className: "text-secondary" };
+    }
+  };
+
+  // Project Task Status Info - for ongoing projects list
+  const getProjectStatusInfo = (status: number) => {
+    switch (status) {
+      case 0: return { text: "Awaiting Assignment", className: "text-warning" };
+      case 1: return { text: "In Progress", className: "text-success" };
+      case 2: return { text: "Completed", className: "text-info" };
       default: return { text: "Unknown", className: "text-secondary" };
     }
   };
@@ -536,7 +567,7 @@ const OngoingJobArea: FC = () => {
           languages: foundFreelancer.languages || [],
           city: foundFreelancer.city || null,
           country: foundFreelancer.country || null,
-          email: `${foundFreelancer.username || 'unknown'}@example.com`,
+          email: foundFreelancer.email || '',
           rate_amount: foundFreelancer.rate_amount || "0.00",
           currency: foundFreelancer.currency || "USD",
           availability: foundFreelancer.availability || "not specified",
@@ -591,13 +622,13 @@ const OngoingJobArea: FC = () => {
           <DashboardHeader />
           <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
             <h2 className="main-title m0">
-              {selectedApplicant 
-                ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` 
+              {selectedApplicant
+                ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}`
                 : selectedProjectForSubmissions
-                ? `Submissions for: ${selectedProjectForSubmissions.title}`
-                : selectedProjectForApplicants 
-                ? `Applications for: ${selectedProjectForApplicants.title}` 
-                : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
+                  ? `Submissions for: ${selectedProjectForSubmissions.title}`
+                  : selectedProjectForApplicants
+                    ? `Applications for: ${selectedProjectForApplicants.title}`
+                    : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
             </h2>
             {selectedApplicant && (
               <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
@@ -640,7 +671,7 @@ const OngoingJobArea: FC = () => {
                       <tr>
                         <th style={{ width: '30%' }}>Freelancer</th>
                         <th>Submitted On</th>
-                        <th>Status</th>
+                        <th>Submission Status</th>
                         <th className="text-end">Action</th>
                       </tr>
                     </thead>
@@ -651,8 +682,8 @@ const OngoingJobArea: FC = () => {
                           <tr key={submission.submission_id} className="align-middle">
                             <td>
                               <div className="d-flex align-items-center">
-                                <img 
-                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'} 
+                                <img
+                                  src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'}
                                   alt={submission.freelancer_name}
                                   className="rounded-circle me-3"
                                   style={{ width: 50, height: 50, objectFit: 'cover' }}
@@ -663,9 +694,9 @@ const OngoingJobArea: FC = () => {
                                 </div>
                               </div>
                             </td>
-                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', { 
-                              year: 'numeric', 
-                              month: 'short', 
+                            <td>{new Date(submission.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
                               day: 'numeric',
                               hour: '2-digit',
                               minute: '2-digit'
@@ -710,7 +741,7 @@ const OngoingJobArea: FC = () => {
               onViewProfile={handleViewProfile}
               onToggleSave={handleToggleSave}
               onUpdateApplicantStatus={handleUpdateApplicantStatus}
-              getStatusInfo={getStatusInfo}
+              getStatusInfo={getApplicationStatusInfo}
               onOpenChat={handleOpenChat}
             />
           ) : (
@@ -718,89 +749,105 @@ const OngoingJobArea: FC = () => {
               {isPostingJob ? (
                 <PostJobForm onBackToList={handleReturnToList} />
               ) : (
-                <div className="bg-white card-box border-20">
-                  <div className="table-responsive">
-                    <table className="table job-alert-table">
-                      <thead>
-                        <tr>
-                          <th style={{ width: '30%' }}>Title</th>
-                          <th>Category</th>
-                          <th>Budget</th>
-                          <th>Date Created</th>
-                          <th>Status</th>
-                          <th className="text-end">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="border-0">
-                        {loading && (
+                <>
+                  <DashboardSearchBar
+                    placeholder="Search ongoing projects by title, category..."
+                    onSearch={setSearchQuery}
+                  />
+
+                  <div className="bg-white card-box border-20">
+                    <div className="table-responsive">
+                      <table className="table job-alert-table">
+                        <thead>
                           <tr>
-                            <td colSpan={6} className="text-center py-5">
-                              <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                              </div>
-                            </td>
+                            <th style={{ width: '30%' }}>Title</th>
+                            <th>Category</th>
+                            <th>Budget</th>
+                            <th>Date Created</th>
+                            <th>Project Status</th>
+                            <th className="text-end">Action</th>
                           </tr>
-                        )}
-                        {error && (
-                          <tr>
-                            <td colSpan={6} className="text-center text-danger py-4">
-                              {error}
-                            </td>
-                          </tr>
-                        )}
-                        {!loading && !error && projects.length === 0 && (
-                          <tr>
-                            <td colSpan={6} className="text-center py-5">
-                              <h5>No Ongoing Projects</h5>
-                              <p className="text-muted mb-0">You don't have any ongoing projects at the moment.</p>
-                            </td>
-                          </tr>
-                        )}
-                        {!loading && !error && projects.map((project) => {
-                          const statusInfo = getStatusInfo(project.status);
-                          return (
-                            <tr key={project.project_id} className="align-middle">
-                              <td>
-                                <div className="job-name fw-500">{project.title}</div>
-                              </td>
-                              <td>{project.category}</td>
-                              <td>₹{project.budget?.toLocaleString() ?? 0}</td>
-                              <td>
-                                {new Date(project.date_created).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                })}
-                              </td>
-                              <td>
-                                <span className={`fw-bold ${statusInfo.className}`}>
-                                  {statusInfo.text}
-                                </span>
-                              </td>
-                              <td className="text-end">
-                                <button
-                                  className="btn"
-                                  onClick={() => handleViewSubmissionsClick(project)}
-                                  style={{
-                                    backgroundColor: '#31795A',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '6px 12px',
-                                    borderRadius: '6px',
-                                    fontSize: '14px',
-                                    fontWeight: '500'
-                                  }}
-                                >
-                                  View Submissions
-                                </button>
+                        </thead>
+                        <tbody className="border-0">
+                          {loading && (
+                            <tr>
+                              <td colSpan={6} className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
                               </td>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                          )}
+                          {error && (
+                            <tr>
+                              <td colSpan={6} className="text-center text-danger py-4">
+                                {error}
+                              </td>
+                            </tr>
+                          )}
+                          {!loading && !error && projects.length === 0 && (
+                            <tr>
+                              <td colSpan={6} className="text-center py-5">
+                                <h5>No Ongoing Projects</h5>
+                                <p className="text-muted mb-0">You don't have any ongoing projects at the moment.</p>
+                              </td>
+                            </tr>
+                          )}
+                          {!loading && !error && projects
+                            .filter((project) => {
+                              if (!searchQuery.trim()) return true;
+                              const query = searchQuery.toLowerCase();
+                              return (
+                                project.title.toLowerCase().includes(query) ||
+                                project.category.toLowerCase().includes(query)
+                              );
+                            })
+                            .map((project) => {
+                              const statusInfo = getProjectStatusInfo(project.status);
+                              return (
+                                <tr key={project.project_id} className="align-middle">
+                                  <td>
+                                    <div className="job-name fw-500">{project.title}</div>
+                                  </td>
+                                  <td>{project.category}</td>
+                                  <td>₹{project.budget?.toLocaleString() ?? 0}</td>
+                                  <td>
+                                    {new Date(project.date_created).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                    })}
+                                  </td>
+                                  <td>
+                                    <span className={`fw-bold ${statusInfo.className}`}>
+                                      {statusInfo.text}
+                                    </span>
+                                  </td>
+                                  <td className="text-end">
+                                    <button
+                                      className="btn"
+                                      onClick={() => handleViewSubmissionsClick(project)}
+                                      style={{
+                                        backgroundColor: '#31795A',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        fontSize: '14px',
+                                        fontWeight: '500'
+                                      }}
+                                    >
+                                      View Submissions
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </>
           )}
@@ -809,7 +856,7 @@ const OngoingJobArea: FC = () => {
 
       {/* Submission Review Modal */}
       {showSubmissionModal && selectedSubmission && (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999, overflow: 'auto' }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -824,8 +871,8 @@ const OngoingJobArea: FC = () => {
               <div className="modal-body">
                 {/* Freelancer Info */}
                 <div className="d-flex align-items-center mb-4 pb-3 border-bottom">
-                  <img 
-                    src={selectedSubmission.freelancer_profile_picture || 'https://via.placeholder.com/80'} 
+                  <img
+                    src={selectedSubmission.freelancer_profile_picture || 'https://via.placeholder.com/80'}
                     alt={selectedSubmission.freelancer_name}
                     className="rounded-circle me-3"
                     style={{ width: 60, height: 60, objectFit: 'cover' }}
@@ -842,9 +889,9 @@ const OngoingJobArea: FC = () => {
                   <div className="bg-light p-3 rounded">
                     {selectedSubmission.submitted_files.split(',').map((link, index) => (
                       <div key={index} className="mb-2">
-                        <a 
-                          href={link.trim()} 
-                          target="_blank" 
+                        <a
+                          href={link.trim()}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-decoration-none d-flex align-items-center"
                         >
@@ -871,9 +918,9 @@ const OngoingJobArea: FC = () => {
                   <div className="row">
                     <div className="col-md-6">
                       <label className="form-label fw-semibold">Submitted On</label>
-                      <p>{new Date(selectedSubmission.created_at).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
+                      <p>{new Date(selectedSubmission.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit'
@@ -893,7 +940,7 @@ const OngoingJobArea: FC = () => {
                 {/* Alert for pending submissions */}
                 {selectedSubmission.status === 0 && (
                   <div className="alert alert-info" role="alert">
-                    <strong>Action Required:</strong> Please review the submitted work and either approve or reject it. 
+                    <strong>Action Required:</strong> Please review the submitted work and either approve or reject it.
                     Approving will automatically assign this freelancer to the project.
                   </div>
                 )}
@@ -911,7 +958,7 @@ const OngoingJobArea: FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="modal-footer">
                 <button
                   type="button"
@@ -921,7 +968,7 @@ const OngoingJobArea: FC = () => {
                 >
                   Close
                 </button>
-                
+
                 {selectedSubmission.status === 0 && (
                   <>
                     <button

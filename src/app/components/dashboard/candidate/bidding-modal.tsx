@@ -21,45 +21,52 @@ const BiddingModal: React.FC<BiddingModalProps> = ({
 
   const handleSubmit = () => {
     const amount = parseFloat(bidAmount);
-    
+
     if (!bidAmount || isNaN(amount) || amount <= 0) {
       setError('Please enter a valid bid amount greater than 0');
       return;
     }
-    
+
     setError('');
     onSubmit(amount, bidMessage);
   };
 
   return (
-    <div 
-      className="modal fade show" 
-      style={{ 
-        display: 'block', 
-        backgroundColor: 'rgba(0,0,0,0.5)' 
+    <div
+      className="modal fade show"
+      style={{
+        display: 'block',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 99999,
+        overflow: 'auto'
       }}
       onClick={onCancel}
     >
-      <div 
+      <div
         className="modal-dialog modal-dialog-centered"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-content" style={{ borderRadius: '12px' }}>
           <div className="modal-header" style={{ borderBottom: '1px solid #e0e0e0' }}>
             <h5 className="modal-title fw-600">Submit Your Bid</h5>
-            <button 
-              type="button" 
-              className="btn-close" 
+            <button
+              type="button"
+              className="btn-close"
               onClick={onCancel}
               disabled={isSubmitting}
             ></button>
           </div>
-          
+
           <div className="modal-body p-4">
             <div className="mb-4">
-              <div 
-                className="p-3 rounded-3" 
-                style={{ 
+              <div
+                className="p-3 rounded-3"
+                style={{
                   backgroundColor: '#f8f9fa',
                   border: '1px solid #e0e0e0'
                 }}
@@ -118,13 +125,13 @@ const BiddingModal: React.FC<BiddingModalProps> = ({
               </div>
             </div>
 
-            <div 
-              className="alert alert-info d-flex align-items-start" 
+            <div
+              className="alert alert-info d-flex align-items-start"
               style={{ fontSize: '13px' }}
             >
               <i className="bi bi-info-circle me-2 mt-1"></i>
               <div>
-                <strong>Note:</strong> Submitting this bid will cost 1 credit. 
+                <strong>Note:</strong> Submitting this bid will cost 1 key.
                 Make sure your bid is competitive and realistic.
               </div>
             </div>
@@ -142,7 +149,7 @@ const BiddingModal: React.FC<BiddingModalProps> = ({
             <button
               type="button"
               className="btn btn-primary"
-              style={{ 
+              style={{
                 backgroundColor: '#00BF58',
                 borderColor: '#00BF58'
               }}

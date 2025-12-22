@@ -1,12 +1,12 @@
 import { IMenuData } from "@/types/menu-data-type";
 
-const menu_data:IMenuData[] = [
+const menu_data: IMenuData[] = [
   {
-    id:1,
-    link:'/',
-    title:'Home',
-    sub_menus:[
-      {link:'/',title:'Home 1'},
+    id: 1,
+    link: '/',
+    title: 'Home',
+    sub_menus: [
+      { link: '/', title: 'Home 1' },
       // {link:'/home-2',title:'Home 2'},
       // {link:'/home-3',title:'Home 3'},
       // {link:'/home-4',title:'Home 4'},
@@ -16,11 +16,11 @@ const menu_data:IMenuData[] = [
     ]
   },
   {
-    id:2,
-    link:'/coming-soon',
-    title:'Jobs',
-    sub_menus:[
-      {link:'/coming-soon',title:'Job List style -1'},
+    id: 2,
+    link: '/job-list',
+    title: 'Jobs',
+    sub_menus: [
+      { link: '/job-list', title: 'Job List style -1' },
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid',title:'Job Grid style -1'},
@@ -33,32 +33,32 @@ const menu_data:IMenuData[] = [
   },
   {
     id: 3,
-    link: '/coming-soon',
+    link: '/freelancers',
     title: 'Candidates',
     sub_menus: [
-      {link: '/coming-soon', title: 'Candidates'}
+      { link: '/freelancers', title: 'Candidates' }
     ]
   },
   {
-    id:4,
-    link:'/coming-soon',
-    title:'Blog',
-    sub_menus:[
-      {link:'/coming-soon',title:'Blog'},
+    id: 4,
+    link: '/coming-soon',
+    title: 'Blog',
+    sub_menus: [
+      { link: '/coming-soon', title: 'Blog' },
       // {link:'/coming-soon',title:'Blog Grid'},
       // {link:'/blog-v3',title:'Full width'},
       // {link:'/blog-details',title:'Blog Details'},
     ]
   },
   {
-    id:6,
-    link:'/about-us',
-    title:'About'
+    id: 6,
+    link: '/about-us',
+    title: 'About'
   },
   {
-    id:5,
-    link:'/contact',
-    title:'Contact'
+    id: 5,
+    link: '/contact',
+    title: 'Contact'
   },
   // {
   //   id:6,

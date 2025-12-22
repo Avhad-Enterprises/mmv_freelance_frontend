@@ -104,17 +104,6 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       fd.append('terms_accepted', String(termsAccepted));
       fd.append('privacy_policy_accepted', String(privacyAccepted));
 
-      // Debug: Log all form data being sent
-      console.log('=== VIDEOGRAPHER REGISTRATION PAYLOAD ===');
-      for (let [key, value] of fd.entries()) {
-        if (value instanceof File) {
-          console.log(`${key}: [File] ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(`${key}:`, value);
-        }
-      }
-      console.log('==========================================');
-
       // Submit
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register/videographer`,
@@ -128,7 +117,6 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       );
 
       const respData = response.data;
-      console.log('API Response:', respData);
       
       if (response.status !== 200 && response.status !== 201) {
         console.error('Registration failed with status:', response.status);
@@ -137,7 +125,6 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
       }
 
       // Registration successful - show success message and redirect
-      console.log('✅ Registration successful!');
       toast.success('Registration completed successfully!', { id: loadingToast });
       setTimeout(() => {
         window.location.href = '/?login=true';

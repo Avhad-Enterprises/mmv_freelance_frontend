@@ -27,7 +27,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
     languages = [],
     city = null,
     country = null,
-    email = "email@example.com",
+    email = "",
     rate_amount = "0.00",
     currency = "USD",
     first_name = "",
@@ -72,7 +72,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
           <div className="row">
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
-                
+
                 {/* --- BACK BUTTON ADDED HERE --- */}
                 <Link href="/freelancers" className="btn-two mb-30">
                   &larr; Back to Candidates

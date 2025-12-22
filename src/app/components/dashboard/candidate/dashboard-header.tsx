@@ -9,6 +9,7 @@ import notify_icon_3 from "@/assets/dashboard/images/icon/icon_38.svg";
 import search from "@/assets/dashboard/images/icon/icon_10.svg";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
+import { useNotification, Notification } from "@/context/NotificationContext";
 
 // Notification item component
 type NotificationItemProps = {
@@ -22,7 +23,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ icon, main, time, i
   <li className={`d-flex align-items-center ${isUnread ? "unread" : ""}`}>
     <Image src={icon} alt="icon" className="lazy-img icon" />
     <div className="flex-fill ps-2">
-      <h6>{main}</h6>
+      <h6 style={{ whiteSpace: 'normal', lineHeight: '1.4', fontSize: '13px' }}>{main}</h6>
       <span className="time">{time} hours ago</span>
     </div>
   </li>
@@ -30,12 +31,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ icon, main, time, i
 
 // Props type for DashboardHeader
 type DashboardHeaderProps = {
-    // No props needed, using context
+  // No props needed, using context
 };
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
+  const { unreadCount, notifications, markAsRead, markAllAsRead } = useNotification();
 
   const handleOpenSidebar = () => {
     setIsOpenSidebar(true);
@@ -45,32 +47,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
     <header className="dashboard-header">
       <div className="d-flex align-items-center justify-content-between">
         {/* Left side - User Role */}
-        <div className="user-role" style={{
-          fontSize: '14px',
-          color: '#244034',
-          fontWeight: '600',
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          padding: '8px 16px',
-          backgroundColor: '#EFF6F3',
-          borderRadius: '15px',
-          border: '2px solid #31795A',
-          whiteSpace: 'nowrap',
-          minWidth: 'fit-content',
-          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
-        }}>
-          {currentRole || 'Loading...'}
-        </div>
-
-        {/* Right side - Search, Notifications, Post Job */}
         <div className="d-flex align-items-center">
-          {/* Mobile Sidebar Toggle */}
+          {/* Mobile Sidebar Toggle - Moved to Left */}
           <button
             onClick={handleOpenSidebar}
             className="dash-mobile-nav-toggler d-block d-md-none me-3"
           >
             <span></span>
           </button>
+
+          {/* Left side - User Role (Hidden on mobile) */}
+          <div className="user-role d-none d-md-block" style={{
+            fontSize: '14px',
+            color: '#244034',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            padding: '8px 16px',
+            backgroundColor: '#EFF6F3',
+            borderRadius: '15px',
+            border: '2px solid #31795A',
+            whiteSpace: 'nowrap',
+            minWidth: 'fit-content',
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+          }}>
+            {currentRole || 'Loading...'}
+          </div>
+        </div>
+
+        {/* Right side - Search, Notifications, Post Job */}
+        <div className="d-flex align-items-center">
+          {/* Mobile Sidebar Toggle */}
+
 
           {/* Search Form - Commented out as it's not working */}
           {/*
@@ -83,7 +91,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
           */}
 
           {/* Notifications */}
-          {/* <div className="profile-notification ms-2 ms-md-5 me-4">
+          <div className="profile-notification ms-2 ms-md-5 me-4">
             <button
               className="noti-btn dropdown-toggle"
               type="button"
@@ -91,22 +99,80 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({}) => {
               data-bs-toggle="dropdown"
               data-bs-auto-close="outside"
               aria-expanded="false"
+              style={{ position: 'relative' }}
             >
               <Image src={notifi} alt="Notification" className="lazy-img" />
-              <div className="badge-pill"></div>
+              {unreadCount > 0 && (
+                <div
+                  className="badge-pill"
+                  style={{
+                    position: 'absolute',
+                    top: '-5px',
+                    right: '-2px',
+                    backgroundColor: '#FF3B30',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    fontSize: '11px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    border: '1px solid #fff'
+                  }}
+                >
+                  {unreadCount}
+                </div>
+              )}
             </button>
 
             <ul className="dropdown-menu" aria-labelledby="notification-dropdown">
               <li>
-                <h4>Notifications</h4>
+                <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2">
+                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Notifications</h4>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={() => markAllAsRead()}
+                      style={{
+                        fontSize: '12px',
+                        color: '#fff',
+                        background: '#31795A',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        fontWeight: '500',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#244034'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = '#31795A'}
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
                 <ul className="style-none notify-list">
-                  <NotificationItem icon={notify_icon_1} main="You have 3 new messages" time="3" isUnread={true} />
-                  <NotificationItem icon={notify_icon_2} main="You have 5 new tasks" time="6" isUnread={false} />
-                  <NotificationItem icon={notify_icon_3} main="You have 7 new alerts" time="9" isUnread={true} />
+                  {notifications.length === 0 ? (
+                    <li className="d-flex align-items-center justify-content-center py-3">
+                      <span style={{ fontSize: '14px', color: '#666' }}>No notifications</span>
+                    </li>
+                  ) : (
+                    notifications.slice(0, 5).map((item) => (
+                      <div key={item.id} onClick={() => !item.is_read && markAsRead(item.id)} style={{ cursor: 'pointer' }}>
+                        <NotificationItem
+                          icon={notify_icon_1} // Use default icon or determine based on item.type
+                          main={item.message}
+                          time={item.created_at ? Math.floor((new Date().getTime() - new Date(item.created_at).getTime()) / (1000 * 60 * 60)).toString() : "0"}
+                          isUnread={!item.is_read}
+                        />
+                      </div>
+                    ))
+                  )}
                 </ul>
               </li>
             </ul>
-          </div> */}
+          </div>
 
           {/* Post Job Button */}
           <div>

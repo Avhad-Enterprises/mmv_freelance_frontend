@@ -119,8 +119,6 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                 throw new Error('No image URL returned from upload');
             }
 
-            console.log('Uploaded image URL:', imageUrl);
-
             // Step 3: Update profile with the image URL
             const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
                 method: 'PATCH',
@@ -139,7 +137,6 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
             }
 
             const updateData = await updateResponse.json();
-            console.log('Profile update response:', updateData);
 
             // Update the preview to show the new image URL
             setPreviewUrl(imageUrl);
@@ -165,7 +162,20 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex={-1}>
+        <div
+            className="modal fade show d-block"
+            style={{
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 99999,
+                overflow: 'auto'
+            }}
+            tabIndex={-1}
+        >
             <div className="modal-dialog modal-dialog-centered modal-lg">
                 <div className="modal-content bg-white card-box border-20 mt-30 shadow-lg">
                     <div className="modal-header border-0 pb-0">
@@ -205,9 +215,8 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                                     </label>
                                 </div>
                                 <div
-                                    className={`border-3 border-dashed rounded-4 p-4 text-center cursor-pointer transition-all position-relative ${
-                                        dragOver ? 'border-success bg-success bg-opacity-10 shadow-lg' : 'border-secondary'
-                                    }`}
+                                    className={`border-3 border-dashed rounded-4 p-4 text-center cursor-pointer transition-all position-relative ${dragOver ? 'border-success bg-success bg-opacity-10 shadow-lg' : 'border-secondary'
+                                        }`}
                                     style={{
                                         backgroundColor: dragOver ? 'rgba(25, 135, 84, 0.08)' : '#f8f9fa',
                                         borderColor: dragOver ? '#198754' : '#dee2e6',
@@ -225,10 +234,10 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                                 >
                                     <div className="mb-3">
                                         <i className={`bi ${dragOver ? 'bi-cloud-check' : 'bi-cloud-upload'}`}
-                                           style={{
-                                               fontSize: '3rem',
-                                               color: dragOver ? '#198754' : '#6c757d'
-                                           }}></i>
+                                            style={{
+                                                fontSize: '3rem',
+                                                color: dragOver ? '#198754' : '#6c757d'
+                                            }}></i>
                                     </div>
                                     <h6 className="mb-2 fw-bold" style={{ color: '#244034' }}>
                                         {selectedFile ? (
@@ -260,13 +269,13 @@ const ProfilePictureModal: React.FC<ProfilePictureModalProps> = ({
                                 </div>
                                 <div className="d-flex flex-column align-items-center">
                                     <div className="rounded-circle overflow-hidden border shadow-lg position-relative mb-3"
-                                         style={{
-                                             width: '120px',
-                                             height: '120px',
-                                             backgroundColor: '#ffffff',
-                                             border: '4px solid #D3FA38',
-                                             boxShadow: '0 8px 30px rgba(210, 243, 76, 0.3)'
-                                         }}>
+                                        style={{
+                                            width: '120px',
+                                            height: '120px',
+                                            backgroundColor: '#ffffff',
+                                            border: '4px solid #D3FA38',
+                                            boxShadow: '0 8px 30px rgba(210, 243, 76, 0.3)'
+                                        }}>
                                         {previewUrl ? (
                                             <Image
                                                 src={previewUrl}

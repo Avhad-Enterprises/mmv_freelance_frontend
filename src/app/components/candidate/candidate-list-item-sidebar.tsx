@@ -25,6 +25,7 @@ interface CandidateListItemProps {
   isSaved: boolean;
   onToggleSave: (id: number) => void | Promise<void>;
   onViewProfile: (id: number) => void; // <-- ADDED: Prop to handle profile view
+  onMessage?: (id: number) => void; // optional chat handler
 }
 
 const CandidateListItem: React.FC<CandidateListItemProps> = ({
@@ -32,6 +33,7 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
   isSaved,
   onToggleSave,
   onViewProfile, // <-- ADDED: Destructure the new prop
+  onMessage, // <-- ADDED: Message (chat) handler
 }) => {
   // Get initials for fallback avatar
   const getInitials = () => {
@@ -132,6 +134,18 @@ const CandidateListItem: React.FC<CandidateListItemProps> = ({
                 >
                   View Profile
                 </button>
+                {/* Chat button - only show when onMessage is provided */}
+                {onMessage && (
+                  <button
+                    type="button"
+                    onClick={() => onMessage(item.user_id)}
+                    className="chat-btn tran3s ms-2"
+                    title="Message"
+                    style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  >
+                    <i className="bi bi-chat-dots" style={{ fontSize: '18px' }}></i>
+                  </button>
+                )}
               </div>
             </div>
           </div>
