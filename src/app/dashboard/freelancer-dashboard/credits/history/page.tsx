@@ -38,7 +38,7 @@ const CreditsHistoryPage = () => {
                             href="/dashboard/freelancer-dashboard/credits"
                             className="text-muted text-decoration-none"
                         >
-                            ← Back to Credits
+                            ← Back to Keys
                         </Link>
                     </div>
 

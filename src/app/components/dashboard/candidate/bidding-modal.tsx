@@ -131,7 +131,7 @@ const BiddingModal: React.FC<BiddingModalProps> = ({
             >
               <i className="bi bi-info-circle me-2 mt-1"></i>
               <div>
-                <strong>Note:</strong> Submitting this bid will cost 1 credit.
+                <strong>Note:</strong> Submitting this bid will cost 1 key.
                 Make sure your bid is competitive and realistic.
               </div>
             </div>

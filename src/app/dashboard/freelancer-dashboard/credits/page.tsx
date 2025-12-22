@@ -19,7 +19,7 @@ const CreditsPage = () => {
               <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔒</div>
               <h4>Access Denied</h4>
               <p className="text-muted">
-                Credits are only available for freelancers (Videographers and Video Editors).
+                Keys are only available for freelancers (Videographers and Video Editors).
               </p>
             </div>
           </div>

@@ -66,7 +66,7 @@ const CreditsArea: React.FC = () => {
             <div className="dashboard-body">
                 <div className="position-relative">
                     <DashboardHeader />
-                    <h2 className="main-title">Keys to Abundance</h2>
+                    <h2 className="main-title">Keys</h2>
                     <div className="bg-white card-box border-20">
                         <div className="alert alert-danger mb-0">
                             <strong>Error loading keys:</strong> {error}
@@ -88,7 +88,7 @@ const CreditsArea: React.FC = () => {
         <div className="dashboard-body">
             <div className="position-relative">
                 <DashboardHeader />
-                <h2 className="main-title">Keys to Abundance</h2>
+                <h2 className="main-title">Keys</h2>
 
                 {/* Credits Balance Stats */}
                 <CreditStats balance={balance} loading={loading} />
@@ -102,9 +102,9 @@ const CreditsArea: React.FC = () => {
                         <div className="bg-white card-box border-20">
                             <div className="d-flex justify-content-between align-items-center mb-20 flex-wrap gap-3">
                                 <div>
-                                    <h4 className="dash-title-three mb-10">Purchase Credit Packages</h4>
+                                    <h4 className="dash-title-three mb-10">Purchase Key Packages</h4>
                                     <p className="mb-0 text-muted">
-                                        Choose a credit package to start applying for projects. 1 credit = 1 application.
+                                        Choose a key package to start applying for projects. 1 key = 1 application.
                                     </p>
                                 </div>
 
@@ -128,7 +128,7 @@ const CreditsArea: React.FC = () => {
                                             </>
                                         ) : (
                                             <>
-                                                Buy {selectedPackage.credits} Credits - ₹
+                                                Buy {selectedPackage.credits} Keys - ₹
                                                 {selectedPackage.price.toLocaleString("en-IN")}
                                             </>
                                         )}
@@ -145,30 +145,6 @@ const CreditsArea: React.FC = () => {
                                 disabled={purchaseProcessing}
                                 pricePerCredit={packages?.pricePerCredit || 50}
                             />
-
-                            {/* Pricing Info */}
-                            {packages && !loading && (
-                                <div className="mt-20 pt-20" style={{ borderTop: "1px solid #eee" }}>
-                                    <div className="row text-center">
-                                        <div className="col-md-4 col-sm-6">
-                                            <div className="text-muted small">Price Per Credit</div>
-                                            <div className="fw-bold">
-                                                ₹{packages.pricePerCredit.toLocaleString("en-IN")}
-                                            </div>
-                                        </div>
-                                        <div className="col-md-4 col-sm-6">
-                                            <div className="text-muted small">Maximum Balance</div>
-                                            <div className="fw-bold">{packages.limits.maxBalance} credits</div>
-                                        </div>
-                                        <div className="col-md-4 col-sm-12">
-                                            <div className="text-muted small">Current Balance</div>
-                                            <div className="fw-bold" style={{ color: "#D2F34C" }}>
-                                                {balance?.credits_balance || 0} credits
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

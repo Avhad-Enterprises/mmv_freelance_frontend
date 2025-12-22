@@ -37,7 +37,7 @@ const nav_data = [
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
     { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
     { id: 9, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
-    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Keys to Abundance", videoEditorOnly: true },
+    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Keys", videoEditorOnly: true },
     { id: 10, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ] as const;
@@ -220,7 +220,7 @@ const CandidateAside = ({ }: IProps) => {
                         <ul className="style-none">
                             {nav_data
                                 .filter(m => {
-                                    // Hide Keys to Abundance for videographers (only show for Video Editors)
+                                    // Hide Keys for videographers (only show for Video Editors)
                                     if ('videoEditorOnly' in m && m.videoEditorOnly) {
                                         // Check if user has Video Editor role
                                         return userRoles.some(role => role.toLowerCase().includes('video editor'));
