@@ -48,7 +48,7 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
       </button>
 
       <div className="cadidate-avatar online position-relative d-block m-auto">
-        <Link href="/freelancer-profile" className="rounded-circle">
+        <Link href={`/freelancer-profile/${item.user_id}`} className="rounded-circle">
           <AuthenticatedImage
             src={item.profile_picture}
             alt="Candidate"
@@ -62,7 +62,7 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
       </div>
 
       <h4 className="candidate-name mt-15 mb-0">
-        <Link href="/freelancer-profile" className="tran3s">
+        <Link href={`/freelancer-profile/${item.user_id}`} className="tran3s">
           {item.first_name} {item.last_name}
         </Link>
       </h4>
@@ -101,7 +101,7 @@ const CandidateGridItem: React.FC<CandidateGridItemProps> = ({
       <div className="row gx-2 pt-25 sm-pt-10">
         <div className="col-12">
           <Link
-            href={`/freelancer-profile/${item.username}`}
+            href={`/freelancer-profile/${item.user_id}`}
             className="profile-btn tran3s w-100 mt-5"
           >
             View Profile

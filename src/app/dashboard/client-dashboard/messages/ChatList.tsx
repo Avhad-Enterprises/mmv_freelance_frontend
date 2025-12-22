@@ -35,8 +35,8 @@ const formatTime = (ts?: any) => {
     typeof ts === "number"
       ? new Date(ts)
       : ts?.toDate
-      ? ts.toDate()
-      : null;
+        ? ts.toDate()
+        : null;
   if (!d) return "";
   const now = new Date();
   const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
@@ -118,9 +118,9 @@ const ChatList: React.FC<ChatListProps> = ({
     if (!searchQuery.trim()) return conversations;
     const query = searchQuery.toLowerCase().trim();
     return conversations.filter((c) => {
-      const name = (c as any).otherParticipantName || 
-                   namesMap[c.otherParticipantId] || 
-                   c.otherParticipantId;
+      const name = (c as any).otherParticipantName ||
+        namesMap[c.otherParticipantId] ||
+        c.otherParticipantId;
       const message = c.lastMessage || "";
       return name.toLowerCase().includes(query) || message.toLowerCase().includes(query);
     });
@@ -363,10 +363,10 @@ const ChatList: React.FC<ChatListProps> = ({
                 {searchQuery ? "No matching conversations" : "No conversations yet"}
               </Typography>
               {searchQuery && (
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: "#31795A", 
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "#31795A",
                     cursor: "pointer",
                     "&:hover": { textDecoration: "underline" }
                   }}
@@ -386,7 +386,7 @@ const ChatList: React.FC<ChatListProps> = ({
                     py: 1.5,
                     px: { xs: 2, md: 2.5 },
                     bgcolor: "#FFFFFF",
-                    "&:hover": { 
+                    "&:hover": {
                       backgroundColor: "#F0F5F3",
                       "& .chat-avatar": {
                         transform: "scale(1.05)",
@@ -421,7 +421,7 @@ const ChatList: React.FC<ChatListProps> = ({
                     >
                       <Avatar
                         className="chat-avatar"
-                        sx={{ 
+                        sx={{
                           bgcolor: "#244034",
                           width: 48,
                           height: 48,
@@ -443,8 +443,8 @@ const ChatList: React.FC<ChatListProps> = ({
                         ) &&
                           // Use the first letter of the most friendly name we have
                           (
-                            (c as any).otherParticipantName ||
                             namesMap[c.otherParticipantId] ||
+                            (c as any).otherParticipantName ||
                             c.otherParticipantId
                           )
                             .toString()
@@ -457,8 +457,8 @@ const ChatList: React.FC<ChatListProps> = ({
                   <ListItemText
                     primary={
                       <Typography
-                        sx={{ 
-                          fontWeight: 600, 
+                        sx={{
+                          fontWeight: 600,
                           fontFamily: "inherit",
                           color: "#244034",
                           fontSize: "0.95rem",
@@ -468,8 +468,8 @@ const ChatList: React.FC<ChatListProps> = ({
                          * then API-resolved name, and only as a last resort fall back
                          * to a generic label / raw ID.
                          */}
-                        {(c as any).otherParticipantName ||
-                          namesMap[c.otherParticipantId] ||
+                        {namesMap[c.otherParticipantId] ||
+                          (c as any).otherParticipantName ||
                           (isFreelancerUser ? "Client" : c.otherParticipantId)}
                       </Typography>
                     }
@@ -477,7 +477,7 @@ const ChatList: React.FC<ChatListProps> = ({
                       <Typography
                         variant="body2"
                         noWrap
-                        sx={{ 
+                        sx={{
                           maxWidth: 200,
                           color: "#6B7280",
                           fontSize: "0.85rem",
@@ -489,9 +489,9 @@ const ChatList: React.FC<ChatListProps> = ({
                   />
 
                   <Box sx={{ ml: "auto", textAlign: "right", flexShrink: 0 }}>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
+                    <Typography
+                      variant="caption"
+                      sx={{
                         color: "#9CA3AF",
                         fontSize: "0.75rem",
                         display: "block",

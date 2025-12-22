@@ -28,8 +28,8 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({
     if (loading) {
         return (
             <div className="row">
-                {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="col-lg-3 col-md-6 col-sm-12">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="col-lg-4 col-md-6 col-sm-12">
                         <div
                             className="dash-card-one bg-white border-30 position-relative mb-15"
                             style={{ minHeight: "280px" }}
@@ -111,14 +111,14 @@ const PackageSelector: React.FC<PackageSelectorProps> = ({
 
     return (
         <div className="row">
-            {packages.map((pkg) => {
+            {packages.slice(0, 3).map((pkg) => {
                 const isSelected = selectedPackage?.id === pkg.id;
                 const perCreditPrice = pkg.price / pkg.credits;
                 const regularPrice = pkg.credits * pricePerCredit;
                 const hasDiscount = pkg.savings_percent && pkg.savings_percent > 0;
 
                 return (
-                    <div key={pkg.id} className="col-lg-3 col-md-6 col-sm-12">
+                    <div key={pkg.id} className="col-lg-4 col-md-6 col-sm-12">
                         <div
                             className={`dash-card-one bg-white border-30 position-relative mb-15 ${isSelected ? "border border-2" : ""
                                 }`}

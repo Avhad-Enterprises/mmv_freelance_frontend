@@ -501,7 +501,7 @@ const CandidateV1Area = () => {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader />
-        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+        <div className="d-sm-flex align-items-center justify-content-between mb-20 lg-mb-10">
           <h2 className="main-title m0">
             {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "Candidates"}
           </h2>

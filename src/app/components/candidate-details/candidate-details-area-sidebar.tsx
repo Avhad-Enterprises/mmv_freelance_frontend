@@ -66,7 +66,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
 
   return (
     <>
-      <section className="candidates-profile pt-100 lg-pt-70 pb-150 lg-pb-80">
+      <section className="candidates-profile pt-0 pb-150 lg-pb-80">
         <div className="container">
           {/* Message Button - Top Right Corner */}
           {onMessage && (
