@@ -30,7 +30,7 @@ interface ApiCandidate {
   availability: string;
 }
 
-const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} }) => {
+const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }) => {
   const searchParams = useSearchParams();
   // State variables for data and UI control
   const [candidates, setCandidates] = useState<ApiCandidate[]>([]);
@@ -87,11 +87,11 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => {} })
         const token = authCookies.getToken();
         if (!token) return;
 
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Failed to fetch user');
-        
+
         const data = await response.json();
         if (data.success && data.data.user) {
           setCurrentUserId(data.data.user.user_id);
@@ -109,11 +109,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/me
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, {
           cache: 'no-cache'
         });
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
-        
+
         const responseData = await response.json();
         const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
         setCandidates(candidatesData);
@@ -136,16 +136,17 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelanc
           const token = authCookies.getToken();
           if (!token) return;
 
-const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/listfreelancers`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/my-favorites`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (!response.ok) throw new Error('Failed to fetch favorites');
 
           const result = await response.json();
           if (result.data && Array.isArray(result.data)) {
-            const savedIds = result.data.map((fav: any) => fav.freelancer_id);
+            const savedIds = result.data.map((fav: any) => fav.freelancer_user_id || fav.freelancer_id);
             const favIds = result.data.reduce((acc: any, fav: any) => {
-              acc[fav.freelancer_id] = fav.id;
+              const userId = fav.freelancer_user_id || fav.freelancer_id;
+              acc[userId] = fav.id;
               return acc;
             }, {});
             setSavedCandidates(savedIds);
@@ -160,7 +161,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
     };
     fetchFavorites();
   }, [isAuthenticated, currentUserId, userType]);
-  
+
   // Effect to read URL parameters and set initial filters
   // useEffect(() => {
   //   const categoryParam = searchParams.get('category');
@@ -172,7 +173,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
   //     }
   //   }
   // }, [searchParams]);
-  
+
   // Initialize the login modal
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -216,25 +217,25 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
   // Effect to auto-apply filters when any filter changes
   useEffect(() => {
     let filtered = [...candidates];
-    
+
     // Filter by skills (any of the selected skills)
     if (selectedSkills.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.skills?.some(skill => selectedSkills.includes(skill))
       );
     }
-    
+
     // Filter by locations (any of the selected locations)
     if (selectedLocations.length > 0) {
-      filtered = filtered.filter(c => 
-        c.city && c.country && 
+      filtered = filtered.filter(c =>
+        c.city && c.country &&
         selectedLocations.includes(`${c.city}, ${c.country}`)
       );
     }
-    
+
     // Filter by superpowers (any of the selected superpowers)
     if (selectedSuperpowers.length > 0) {
-      filtered = filtered.filter(c => 
+      filtered = filtered.filter(c =>
         c.superpowers?.some(sp => selectedSuperpowers.includes(sp))
       );
     }
@@ -338,7 +339,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                   <div className="row">
                     {loading && <div className="text-center p-5 col-12"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
                     {error && <p className="text-danger text-center p-5 col-12">{error}</p>}
-                    
+
                     {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
                       <div key={apiCandidate.user_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
                         <CandidateGridItem
@@ -361,7 +362,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                     ))}
 
                     {!loading && currentDisplayCandidates.length === 0 && (
-                       <div className="text-center p-5 col-12"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
+                      <div className="text-center p-5 col-12"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
                     )}
                   </div>
                 </div>
@@ -369,7 +370,7 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                 <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
                   {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
                   {error && <p className="text-danger text-center p-5">{error}</p>}
-                  
+
                   {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
                     <CandidateListItem
                       key={apiCandidate.user_id}
@@ -387,14 +388,14 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorite
                         post: apiCandidate.profile_title || 'Freelancer',
                         budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
                         // These fields are in your old component's type but not used in the layout
-                        location: '', 
+                        location: '',
                         total_earnings: apiCandidate.total_earnings,
                       }}
                     />
                   ))}
 
                   {!loading && currentDisplayCandidates.length === 0 && (
-                     <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
+                    <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
                   )}
                 </div>
 
