@@ -36,10 +36,12 @@ const slider_setting = {
   slidesToShow: 6,
   slidesToScroll: 1,
   autoplay: true,
-  autoplaySpeed: 2000,
-  speed: 2000,
+  autoplaySpeed: 0, // Continuous scrolling - no pause
+  speed: 3000, // Slower, smoother transition
   cssEase: "linear",
   pauseOnHover: false,
+  infinite: true, // Ensure looping
+  variableWidth: false,
   responsive: [
     { breakpoint: 1400, settings: { slidesToShow: 5 } },
     { breakpoint: 992, settings: { slidesToShow: 4 } },
@@ -82,7 +84,7 @@ const PartnersSlider = () => {
             <Image
               src={logo}
               alt={`carousal logo ${i + 1}`}
-              style={{ 
+              style={{
                 width: '100%',
                 maxWidth: '160px',
                 height: 'auto',

@@ -54,8 +54,8 @@ const HeroBannerSeven = () => {
   };
 
   const handleFindFreelanceWork = () => {
-    // Always redirect to coming soon page
-    router.push('/coming-soon');
+    // Redirect to jobs page
+    router.push('/job-list');
   };
 
   return (
@@ -116,13 +116,13 @@ const HeroBannerSeven = () => {
                     </div>
                   </form>
                   <div className="d-flex flex-column flex-md-row justify-content-center gap-3 mt-25 lg-mt-20">
-                    <button 
+                    <button
                       className="btn-five fw-500 tran3s flex-fill"
                       onClick={handlePostProject}
                     >
                       Post Project
                     </button>
-                    <button 
+                    <button
                       className="btn-five fw-500 tran3s flex-fill"
                       onClick={handleFindFreelanceWork}
                     >
@@ -135,7 +135,7 @@ const HeroBannerSeven = () => {
           </div>
         </div>
       </div>
-      
+
       {/* ✅ Larger images positioned in the middle */}
       <Image
         src={screen_2}

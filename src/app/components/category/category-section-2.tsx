@@ -89,7 +89,7 @@ export function CategoryCardWrapper() {
           >
             {/* Normal Cards */}
             {!item.df && (
-              <Link href="/coming-soon" className="d-block">
+              <Link href="/job-list" className="d-block">
                 <div className="icon tran3s d-flex align-items-center justify-content-center">
                   <Image src={item.icon} alt="icon" width={60} height={60} className="lazy-img" style={{ filter: 'brightness(0) saturate(100%) invert(47%) sepia(95%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%)' }} />
                 </div>
@@ -98,9 +98,9 @@ export function CategoryCardWrapper() {
               </Link>
             )}
 
-         
-          
-          
+
+
+
             {/* Explore All Card */}
             {item.df && (
               <>
@@ -108,7 +108,7 @@ export function CategoryCardWrapper() {
                 <p className="text-muted text-start mb-3" style={{ fontSize: '16px', lineHeight: '1.5' }}>
                   Viel thest Foca post des am Expories
                 </p>
-                <Link href="/coming-soon">
+                <Link href="/job-list">
                   <button className="btn fw-500 rounded-pill text-white px-4 py-2" style={{ backgroundColor: '#00bf63', fontSize: '16px' }}>
                     View All
                   </button>
