@@ -99,7 +99,7 @@ const HomeSix = () => {
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+                  <Link href="/job-list" className="btn-six">All Categories</Link>
                 </div>
               </div>
             </div>
@@ -107,7 +107,7 @@ const HomeSix = () => {
             <CategoryCardWrapper />
             {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/job-grid-v2" className="btn-six">All Categories</Link>
+              <Link href="/job-list" className="btn-six">All Categories</Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
