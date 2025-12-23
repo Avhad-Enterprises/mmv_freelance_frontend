@@ -34,6 +34,34 @@ const customButtonCss = `
     border: 1px solid #D1D5DB; /* Light grey border */
   }
 
+  /* Mobile responsiveness for role buttons */
+  @media (max-width: 767px) {
+    .${CLASS_PREFIX} {
+      min-width: 100px;
+      margin: 0 4px;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 575px) {
+    .${CLASS_PREFIX} {
+      min-width: 90px;
+      margin: 0 3px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    .${CLASS_PREFIX} {
+      min-width: 80px;
+      margin: 0 2px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+  }
+
   .${CLASS_PREFIX}:hover {
     color: #1f413a; /* Dark green text on hover */
     background-color: rgba(31, 65, 58, 0.1); /* Light green background tint on hover */
@@ -158,7 +186,7 @@ const RegisterArea = () => {
           <div className="form-wrapper m-auto">
             <div
               className="d-flex justify-content-center align-items-center mt-30"
-              style={{ flexWrap: 'nowrap' }} // Explicitly prevent wrapping
+              style={{ flexWrap: 'wrap', gap: '8px' }}
             >
               {renderRoleButton("videoEditor", "Video Editor")}
               {renderRoleButton("videographer", "Videographer")}

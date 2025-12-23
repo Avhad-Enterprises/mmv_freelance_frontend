@@ -263,7 +263,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                     </button>
                                   </li>
                                 )}
-                                {applicant.status !== 3 && applicant.status !== 2 && (
+                                {applicant.status === 0 && (
                                   <li>
                                     <button
                                       className="dropdown-item"
@@ -274,17 +274,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                     </button>
                                   </li>
                                 )}
-                                {applicant.status === 1 && (
-                                  <li>
-                                    <button
-                                      className="dropdown-item"
-                                      onClick={() => selectedProjectForApplicants && onUpdateApplicantStatus(selectedProjectForApplicants.project_id, applicant.applied_projects_id, 2)}
-                                      style={{ color: '#0dcaf0', fontWeight: '500' }}
-                                    >
-                                      Mark as Completed
-                                    </button>
-                                  </li>
-                                )}
+                                {/* Mark as Completed removed - completion is based on submission flow */}
                               </ul>
                             </div>
                           </div>

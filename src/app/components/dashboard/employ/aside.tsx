@@ -106,6 +106,18 @@ const EmployAside = ({ }: IProps) => {
 
     return (
         <>
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.1);
+                        opacity: 0.8;
+                    }
+                }
+            `}</style>
             <aside className={`dash-aside-navbar ${isOpenSidebar ? "show" : ""}`} style={{ zIndex: 9999 }}>
                 <div className="position-relative">
                     {/* Logo + Close Button */}
@@ -231,15 +243,16 @@ const EmployAside = ({ }: IProps) => {
                                             <div
                                                 className="position-absolute"
                                                 style={{
-                                                    top: '8px',
-                                                    right: '8px',
-                                                    width: '10px',
-                                                    height: '10px',
+                                                    top: '12px',
+                                                    right: '20px',
+                                                    width: '12px',
+                                                    height: '12px',
                                                     borderRadius: '50%',
-                                                    backgroundColor: '#D2F34C',
+                                                    backgroundColor: '#1a5f3d',
                                                     border: '2px solid white',
-                                                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                                    zIndex: 10
+                                                    boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
+                                                    zIndex: 10,
+                                                    animation: 'pulse 2s infinite'
                                                 }}
                                             />
                                         )}

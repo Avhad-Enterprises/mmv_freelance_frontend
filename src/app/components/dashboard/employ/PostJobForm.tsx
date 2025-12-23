@@ -303,9 +303,17 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                   <div className="input-group-meta position-relative mb-25">
                     <label>Budget*</label>
                     <input type="number" placeholder="Enter amount" className="form-control"
+                      maxLength={8}
+                      onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        if (target.value.length > 8) {
+                          target.value = target.value.slice(0, 8);
+                        }
+                      }}
                       {...register("budget", {
                         required: "Budget is required",
-                        min: { value: 1, message: "Budget must be greater than 0" }
+                        min: { value: 1, message: "Budget must be greater than 0" },
+                        max: { value: 99999999, message: "Budget cannot exceed 8 digits" }
                       })}
                     />
                     {errors.budget && <div className="error">{String(errors.budget.message)}</div>}
@@ -361,7 +369,12 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
                 <label>Deadline*</label>
-                <input type="date" className="form-control" {...register("deadline", { required: "Deadline is required" })} />
+                <input
+                  type="date"
+                  className="form-control"
+                  min={new Date().toISOString().split('T')[0]}
+                  {...register("deadline", { required: "Deadline is required" })}
+                />
                 {errors.deadline && <div className="error">{String(errors.deadline.message)}</div>}
               </div>
             </div>

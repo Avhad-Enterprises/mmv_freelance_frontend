@@ -413,9 +413,9 @@ const ChatList: React.FC<ChatListProps> = ({
                       }
                       sx={{
                         "& .MuiBadge-badge": {
-                          bgcolor: "#D2F34C",
+                          bgcolor: "#1a5f3d",
                           border: "2px solid #FFFFFF",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                          boxShadow: "0 2px 6px rgba(26, 95, 61, 0.4)",
                         },
                       }}
                     >
@@ -512,9 +512,9 @@ const ChatList: React.FC<ChatListProps> = ({
                             width: 12,
                             height: 12,
                             borderRadius: "50%",
-                            backgroundColor: "#D2F34C",
+                            backgroundColor: "#1a5f3d",
                             border: "2px solid #FFFFFF",
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                            boxShadow: "0 2px 6px rgba(26, 95, 61, 0.4)",
                           }}
                         />
                       </Box>
