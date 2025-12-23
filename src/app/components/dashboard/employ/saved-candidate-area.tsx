@@ -196,9 +196,11 @@ const SavedCandidateArea = () => {
 
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
-          const savedIds = result.data.map((fav: any) => fav.freelancer_id);
+          // Use freelancer_user_id (which is the user_id) for matching with candidates
+          const savedIds = result.data.map((fav: any) => fav.freelancer_user_id || fav.freelancer_id);
           const favIds = result.data.reduce((acc: any, fav: any) => {
-            acc[fav.freelancer_id] = fav.id;
+            const userId = fav.freelancer_user_id || fav.freelancer_id;
+            acc[userId] = fav.id;
             return acc;
           }, {});
           setSavedCandidates(savedIds);
