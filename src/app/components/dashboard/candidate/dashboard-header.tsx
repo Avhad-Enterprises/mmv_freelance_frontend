@@ -24,7 +24,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ icon, main, time, i
     <Image src={icon} alt="icon" className="lazy-img icon" />
     <div className="flex-fill ps-2">
       <h6 style={{ whiteSpace: 'normal', lineHeight: '1.4', fontSize: '13px' }}>{main}</h6>
-      <span className="time">{time} hours ago</span>
+      <span className="time">{time}</span>
     </div>
   </li>
 );
@@ -38,6 +38,24 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
   const { unreadCount, notifications, markAsRead, markAllAsRead } = useNotification();
+
+  // Helper function to format notification time
+  const formatNotificationTime = (createdAt: string | undefined): string => {
+    if (!createdAt) return "Just now";
+
+    const now = new Date().getTime();
+    const created = new Date(createdAt).getTime();
+    const diffInSeconds = Math.floor((now - created) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+
+    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  };
 
   const handleOpenSidebar = () => {
     setIsOpenSidebar(true);
@@ -163,7 +181,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
                         <NotificationItem
                           icon={notify_icon_1} // Use default icon or determine based on item.type
                           main={item.message}
-                          time={item.created_at ? Math.floor((new Date().getTime() - new Date(item.created_at).getTime()) / (1000 * 60 * 60)).toString() : "0"}
+                          time={formatNotificationTime(item.created_at)}
                           isUnread={!item.is_read}
                         />
                       </div>
