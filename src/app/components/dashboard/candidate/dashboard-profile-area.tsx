@@ -226,7 +226,7 @@ const DashboardProfileArea = ({ }: IProps) => {
   // Static options
   const availableLanguages = ["English", "Hindi", "Marathi", "Tamil", "Telugu", "Kannada", "Bengali", "Gujarati", "Punjabi", "Malayalam", "Urdu", "Spanish", "French", "German", "Chinese", "Japanese", "Arabic"];
   const availabilityOptions = ["full-time", "part-time", "contract", "freelance", "unavailable"];
-  const experienceLevels = ["beginner", "intermediate", "expert", "professional"];
+  const experienceLevels = ["entry", "intermediate", "expert", "master"];
 
   // Utility to safely parse arrays from stringified JSON
   const safeArray = <T,>(val: any, fallback: T[] = []): T[] => {
@@ -440,6 +440,11 @@ const DashboardProfileArea = ({ }: IProps) => {
       value = value.replace(/\D/g, '').slice(0, 10); // Limit to 10 digits
     }
 
+    // Only allow numeric input for pincode and limit to 6 digits
+    if (field === 'pincode') {
+      value = value.replace(/\D/g, '').slice(0, 6); // Limit to 6 digits
+    }
+
     setEditedData(prev => prev ? { ...prev, [field]: value } : null);
   }, []);
 
@@ -521,6 +526,18 @@ const DashboardProfileArea = ({ }: IProps) => {
         return;
       }
     }
+
+    // Validate portfolio links if they've been changed
+    if (editedData.portfolio_links && editedData.portfolio_links.length > 0) {
+      const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?\&\/\/=]*)$/;
+      const invalidLinks = editedData.portfolio_links.filter((link: string) => link.trim() && !urlRegex.test(link));
+      if (invalidLinks.length > 0) {
+        toast.error('Please enter valid URLs for all portfolio links (e.g., https://example.com)');
+        setSaving(false);
+        return;
+      }
+    }
+
 
     const changes = getChangedFields(profileData, editedData);
 
@@ -830,47 +847,7 @@ const DashboardProfileArea = ({ }: IProps) => {
                     ) : ((displayData.languages && displayData.languages.length > 0) ? (displayData.languages || []).join(', ') : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>)}
                   </div>
                 </div>
-                <div className="row mb-3">
-                  <div className="col-md-4"><strong>Equipment/Base Skills:</strong></div>
-                  <div className="col-md-8">
-                    {isEditModeFor("skills") ? (
-                      <div>
-                        <input type="text" className="form-control mb-2" placeholder="Enter skill and press Enter"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              const value = e.currentTarget.value.trim();
-                              if (value && !(editedData.base_skills || []).includes(value)) {
-                                handleArrayChange('base_skills', [...(editedData.base_skills || []), value]);
-                                e.currentTarget.value = '';
-                              }
-                            }
-                          }} />
-                        <div className="d-flex flex-wrap gap-2">
-                          {(editedData.base_skills || []).map((skill, idx) => (
-                            <span key={idx} className="badge bg-warning text-dark d-flex align-items-center" style={{ gap: 6, padding: '0.5em 0.75em' }}>
-                              {skill}
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-link text-dark p-0 m-0 fw-bold"
-                                style={{ fontSize: '16px', lineHeight: 1, textDecoration: 'none' }}
-                                onClick={() => handleArrayChange('base_skills', (editedData.base_skills || []).filter((_, i) => i !== idx))}
-                                aria-label={`Remove ${skill}`}
-                                title={`Remove ${skill}`}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="d-flex flex-wrap gap-2">
-                        {(displayData.base_skills && displayData.base_skills.length > 0) ? displayData.base_skills.map((skill: string, idx: number) => (<span key={idx} className="badge bg-warning text-dark">{skill}</span>)) : <span style={{ color: '#999', fontStyle: 'italic' }}>Not provided</span>}
-                      </div>
-                    )}
-                  </div>
-                </div>
+
               </InfoSection>
 
               <InfoSection title="Services & Rates" sectionKey="rates" editingSection={editingSection} onEdit={handleEdit} onSave={handleSave} onCancel={handleCancel} isSaving={saving}>

@@ -49,13 +49,15 @@ const InfoRow = ({ label, value, field, editMode, editedData, handleInputChange,
   required?: boolean;
 }) => {
   if (!editMode) {
-    if (value === undefined || value === null || value === "") return null;
+    const displayValue = (value === undefined || value === null || value === "") ? 'Not provided' : value;
     return (
       <div className="row mb-3">
         <div className="col-md-4">
           <strong>{label}:</strong>
         </div>
-        <div className="col-md-8">{value}</div>
+        <div className="col-md-8" style={displayValue === 'Not provided' ? { color: '#999', fontStyle: 'italic' } : {}}>
+          {displayValue}
+        </div>
       </div>
     );
   }
@@ -826,23 +828,7 @@ const DashboardProfileArea = ({ }: IProps) => {
                   </div>
                 )}
 
-                {(profileData.payment_method || isEditModeFor("address")) && (
-                  <div className="row mb-3">
-                    <div className="col-md-4"><strong>Payment Method:</strong></div>
-                    <div className="col-md-8">
-                      {isEditModeFor("address") ? (
-                        <select className="form-select" value={editedData.payment_method || ''} onChange={(e) => handleInputChange('payment_method', e.target.value)}>
-                          <option value="">Select Payment Method</option>
-                          <option value="bank_transfer">Bank Transfer</option>
-                          <option value="paypal">PayPal</option>
-                          <option value="stripe">Stripe</option>
-                          <option value="check">Check</option>
-                          <option value="other">Other</option>
-                        </select>
-                      ) : (displayData.payment_method || 'Not specified')}
-                    </div>
-                  </div>
-                )}
+
               </InfoSection>
             </>
           )}

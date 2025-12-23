@@ -439,6 +439,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
                   <input
                     type="date"
                     name="deadline"
+                    min={new Date().toISOString().split('T')[0]}
                     value={formData.deadline}
                     onChange={handleInputChange}
                     required

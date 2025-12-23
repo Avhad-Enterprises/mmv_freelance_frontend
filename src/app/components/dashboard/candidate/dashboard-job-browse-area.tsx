@@ -592,24 +592,6 @@ const DashboardJobBrowseArea = () => {
               <div className="total-job-found">
                 All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
               </div>
-              <div className="d-flex align-items-center gap-3">
-                <div className="layout-switcher">
-                  <button
-                    className={`style-changer-btn text-center ${!gridStyle ? 'active' : ''}`}
-                    onClick={() => setGridStyle(false)}
-                    title="List Layout"
-                  >
-                    <i className="bi bi-list"></i>
-                  </button>
-                  <button
-                    className={`style-changer-btn text-center ${gridStyle ? 'active' : ''}`}
-                    onClick={() => setGridStyle(true)}
-                    title="Grid Layout"
-                  >
-                    <i className="bi bi-grid-3x2"></i>
-                  </button>
-                </div>
-              </div>
             </div>
 
             {loading ? (
