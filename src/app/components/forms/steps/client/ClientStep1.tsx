@@ -8,12 +8,12 @@ type Props = {
 };
 
 const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors, isValid }, 
-    watch 
-  } = useForm({ 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch
+  } = useForm({
     defaultValues: formData,
     mode: 'onChange' // Real-time validation
   });
@@ -35,10 +35,10 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>First Name*</label>
-            <input 
-              type="text" 
-              placeholder="Enter First Name" 
-              className="form-control" 
+            <input
+              type="text"
+              placeholder="Enter First Name"
+              className="form-control"
               {...register("first_name", { required: "First Name is required" })}
             />
             {errors.first_name && (
@@ -53,10 +53,10 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Last Name*</label>
-            <input 
-              type="text" 
-              placeholder="Enter Last Name" 
-              className="form-control" 
+            <input
+              type="text"
+              placeholder="Enter Last Name"
+              className="form-control"
               {...register("last_name", { required: "Last Name is required" })}
             />
             {errors.last_name && (
@@ -71,11 +71,11 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Email*</label>
-            <input 
-              type="email" 
-              placeholder="Enter Email" 
+            <input
+              type="email"
+              placeholder="Enter Email"
               className="form-control"
-              {...register("email", { 
+              {...register("email", {
                 required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -95,19 +95,25 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Password*</label>
-            <input 
+            <input
               type={showPassword ? "text" : "password"}
-              placeholder="Enter Password" 
+              placeholder="Enter Password"
               className="form-control"
-              {...register("password", { 
+              {...register("password", {
                 required: "Password is required",
                 minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters"
+                  value: 8,
+                  message: "Password must be at least 8 characters"
+                },
+                validate: {
+                  hasUppercase: (value) => /[A-Z]/.test(value) || "Must contain at least one uppercase letter",
+                  hasLowercase: (value) => /[a-z]/.test(value) || "Must contain at least one lowercase letter",
+                  hasNumber: (value) => /[0-9]/.test(value) || "Must contain at least one number",
+                  hasSpecial: (value) => /[!@#$%^&*(),.?":{}|<>]/.test(value) || "Must contain at least one special character (!@#$%^&*)"
                 }
               })}
             />
-            <span 
+            <span
               className="placeholder_icon"
               onClick={() => setShowPassword(!showPassword)}
               style={{
@@ -131,16 +137,16 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
         <div className="col-12">
           <div className="input-group-meta position-relative mb-25">
             <label>Confirm Password*</label>
-            <input 
+            <input
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password" 
+              placeholder="Confirm Password"
               className="form-control"
-              {...register("confirm_password", { 
+              {...register("confirm_password", {
                 required: "Please confirm your password",
                 validate: value => value === password || "Passwords do not match"
               })}
             />
-            <span 
+            <span
               className="placeholder_icon"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               style={{
@@ -162,8 +168,8 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
 
         {/* Next Button */}
         <div className="col-12">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-one tran3s w-100 mt-30"
             disabled={!isValid}
           >
