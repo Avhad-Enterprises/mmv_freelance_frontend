@@ -22,9 +22,21 @@ const ChangePasswordArea = () => {
       return;
     }
 
-    // Validate minimum length
-    if (newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long");
+    // Strong password validation
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+
+    if (!strongPasswordRegex.test(newPassword)) {
+      if (newPassword.length < 8) {
+        toast.error("Password must be at least 8 characters long");
+      } else if (!/[A-Z]/.test(newPassword)) {
+        toast.error("Password must contain at least one uppercase letter");
+      } else if (!/[a-z]/.test(newPassword)) {
+        toast.error("Password must contain at least one lowercase letter");
+      } else if (!/[0-9]/.test(newPassword)) {
+        toast.error("Password must contain at least one number");
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+        toast.error("Password must contain at least one special character (!@#$%^&*)");
+      }
       return;
     }
 

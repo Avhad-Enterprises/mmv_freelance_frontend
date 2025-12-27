@@ -39,7 +39,13 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               type="text"
               placeholder="Enter First Name"
               className="form-control"
-              {...register("first_name", { required: "First Name is required" })}
+              {...register("first_name", {
+                required: "First Name is required",
+                pattern: {
+                  value: /^[A-Za-z\s]+$/,
+                  message: "First name can only contain letters"
+                }
+              })}
             />
             {errors.first_name && (
               <div className="error" style={{ color: 'red' }}>
@@ -57,7 +63,13 @@ const ClientStep1: React.FC<Props> = ({ formData, nextStep }) => {
               type="text"
               placeholder="Enter Last Name"
               className="form-control"
-              {...register("last_name", { required: "Last Name is required" })}
+              {...register("last_name", {
+                required: "Last Name is required",
+                pattern: {
+                  value: /^[A-Za-z\s]+$/,
+                  message: "Last name can only contain letters"
+                }
+              })}
             />
             {errors.last_name && (
               <div className="error" style={{ color: 'red' }}>
