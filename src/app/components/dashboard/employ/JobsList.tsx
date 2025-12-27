@@ -16,6 +16,7 @@ interface JobsListProps {
   loading: boolean;
   error: string | null;
   onViewApplicants: (project: ProjectSummary) => void;
+  onCloseJob: (project: ProjectSummary) => void;
   getStatusInfo: (status: number) => { text: string; className: string };
 }
 
@@ -24,6 +25,7 @@ const JobsList: React.FC<JobsListProps> = ({
   loading,
   error,
   onViewApplicants,
+  onCloseJob,
   getStatusInfo
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,21 +83,40 @@ const JobsList: React.FC<JobsListProps> = ({
                     </span>
                   </td>
                   <td className="text-end">
-                    <button
-                      className="btn"
-                      onClick={() => onViewApplicants(project)}
-                      style={{
-                        backgroundColor: '#31795A',
-                        color: 'white',
-                        border: 'none',
-                        padding: '6px 12px',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      View Applications
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <button
+                        className="btn"
+                        onClick={() => onViewApplicants(project)}
+                        style={{
+                          backgroundColor: '#31795A',
+                          color: 'white',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        View Applications
+                      </button>
+                      {project.status === 0 && (
+                        <button
+                          className="btn"
+                          onClick={() => onCloseJob(project)}
+                          style={{
+                            backgroundColor: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            padding: '6px 12px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          Close Job
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
