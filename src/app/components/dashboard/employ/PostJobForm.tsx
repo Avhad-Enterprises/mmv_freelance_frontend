@@ -165,6 +165,15 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
 
     const payload = {
       ...pendingFormData,
+      // Inject defaults for removed UI fields
+      video_length: initialFormData.video_length,
+      project_format: initialFormData.project_format,
+      preferred_video_style: initialFormData.preferred_video_style,
+      audio_voiceover: initialFormData.audio_voiceover,
+      audio_description: initialFormData.audio_description,
+      meta_title: initialFormData.meta_title,
+      meta_description: initialFormData.meta_description,
+
       url: finalUrl,
       skills_required: selectedSkills,
       reference_links: validLinks,
@@ -176,7 +185,6 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       currency: currency, // Add currency to payload
       // Ensure numeric fields are sent as numbers, not strings
       budget: Number(pendingFormData.budget),
-      video_length: Number(pendingFormData.video_length),
     };
 
     try {
@@ -273,8 +281,8 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             {/* Project Category & Type */}
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
-                <label>Project Category*</label>
-                <select className="form-control" {...register("project_category", { required: "Category is required" })}
+                <label>Project Category</label>
+                <select className="form-control" {...register("project_category")}
                   disabled={isLoadingData}>
                   <option value="">Select category</option>
                   {categories.map((category) => (
@@ -286,8 +294,8 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             </div>
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
-                <label>Project Type*</label>
-                <select className="form-control" {...register("projects_type", { required: "Project type is required" })}>
+                <label>Project Type</label>
+                <select className="form-control" {...register("projects_type")}>
                   <option value="Video Editing">Video Editing</option>
                   <option value="Commercial">Commercial</option>
                   <option value="Social Media">Social Media</option>
@@ -394,15 +402,17 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             <div className="col-12">
               <div className="input-group-meta position-relative mb-25">
                 <label>Tags</label>
-                <div className="tags-input-container p-2 border rounded">
-                  {tags.map((tag, index) => (
-                    <span key={index} className="tag-chip badge me-2 mb-2" style={{ backgroundColor: '#e8f5e9', color: '#31795a', border: '1px solid #31795a' }}>
-                      {tag}
-                      <button type="button" className="btn-close ms-2" style={{ fontSize: '0.65em' }} onClick={() => handleRemoveTag(index)}></button>
-                    </span>
-                  ))}
+                <div className="tags-input-container p-3 border rounded bg-light">
+                  <div className="d-flex flex-wrap gap-2 mb-2">
+                    {tags.map((tag, index) => (
+                      <span key={index} className="tag-chip badge rounded-pill d-inline-flex align-items-center" style={{ backgroundColor: '#e8f5e9', color: '#31795a', border: '1px solid #31795a', padding: '8px 12px', fontSize: '14px' }}>
+                        {tag}
+                        <button type="button" className="btn-close ms-2" style={{ fontSize: '0.65em' }} onClick={() => handleRemoveTag(index)}></button>
+                      </span>
+                    ))}
+                  </div>
                   <div className="d-flex">
-                    <input type="text" className="form-control" placeholder="Add a tag..." value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} />
+                    <input type="text" className="form-control" placeholder="Type tag and press Enter..." value={currentTag} onChange={(e) => setCurrentTag(e.target.value)} onKeyDown={handleTagKeyDown} />
                     <button type="button" className="dash-btn-two ms-2" style={{ minWidth: '45px', lineHeight: '38px', padding: '0 15px' }} onClick={handleAddTag}>+</button>
                   </div>
                 </div>
@@ -422,60 +432,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
               />
             </div>
 
-            {/* Video Length & Format */}
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Video Length (seconds)*</label>
-                <input type="number" placeholder="e.g., 300 for 5 minutes" className="form-control"
-                  {...register("video_length", { required: "Video length is required", min: { value: 1, message: "Length must be > 0" } })}
-                />
-                {errors.video_length && <div className="error">{String(errors.video_length.message)}</div>}
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Final Format*</label>
-                <select className="form-control" {...register("project_format", { required: "Format is required" })}>
-                  <option value="MP4">MP4</option>
-                  <option value="MOV">MOV</option>
-                  <option value="ProRes">ProRes</option>
-                </select>
-                {errors.project_format && <div className="error">{String(errors.project_format.message)}</div>}
-              </div>
-            </div>
-
-            {/* Preferred Style & Voiceover */}
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Preferred Video Style*</label>
-                <select className="form-control" {...register("preferred_video_style", { required: "Video style is required" })}>
-                  <option value="Professional">Professional</option>
-                  <option value="Cinematic">Cinematic</option>
-                  <option value="Vlog / Lifestyle">Vlog / Lifestyle</option>
-                </select>
-                {errors.preferred_video_style && <div className="error">{String(errors.preferred_video_style.message)}</div>}
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Voiceover Language*</label>
-                <input type="text" placeholder="e.g., English, Spanish, or None" className="form-control"
-                  {...register("audio_voiceover", { required: "Voiceover info is required" })}
-                />
-                {errors.audio_voiceover && <div className="error">{String(errors.audio_voiceover.message)}</div>}
-              </div>
-            </div>
-
-            {/* Audio & Reference Links */}
-            <div className="col-12">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Audio Requirements*</label>
-                <textarea placeholder="Narration needed, background music, etc." className="form-control" rows={3}
-                  {...register("audio_description", { required: "Audio description is required" })}
-                />
-                {errors.audio_description && <div className="error">{String(errors.audio_description.message)}</div>}
-              </div>
-            </div>
+            {/* Reference Links */}
             <div className="col-12">
               <div className="input-group-meta position-relative mb-25">
                 <label>Reference Links</label>
@@ -500,30 +457,11 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
               </div>
             </div>
 
-            {/* Additional Notes & Meta Info */}
+            {/* Additional Notes */}
             <div className="col-12">
               <div className="input-group-meta position-relative mb-25">
                 <label>Additional Notes</label>
                 <textarea placeholder="Please deliver high quality work" className="form-control" rows={3} {...register("additional_notes")} />
-              </div>
-            </div>
-            <div className="col-12"><h4 className="dash-title-three pt-30 mb-20">Meta Information (Optional)</h4></div>
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>URL Slug</label>
-                <input type="text" placeholder="auto-generated if empty" className="form-control" {...register("url")} />
-              </div>
-            </div>
-            <div className="col-md-6">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Meta Title</label>
-                <input type="text" placeholder="SEO-friendly title" className="form-control" {...register("meta_title")} />
-              </div>
-            </div>
-            <div className="col-12">
-              <div className="input-group-meta position-relative mb-25">
-                <label>Meta Description</label>
-                <textarea placeholder="Brief description for search engines" className="form-control" rows={2} {...register("meta_description")} />
               </div>
             </div>
 
