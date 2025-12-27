@@ -172,7 +172,7 @@ const AppliedJobsArea = ({ }: IProps) => {
         <div className="mb-4">
           <label className="form-label fw-semibold mb-2">Filter by Application Status:</label>
           <div className="d-flex flex-wrap gap-2">
-            {['All', 'Pending', 'Ongoing', 'Completed', 'Rejected'].map((status) => (
+            {['All', 'Pending', 'Ongoing', 'Completed'].map((status) => (
               <button
                 key={status}
                 type="button"
