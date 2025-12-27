@@ -18,8 +18,8 @@ const statusMap: Record<number, { text: string; className: string }> = {
   3: { text: 'Rejected', className: 'bg-danger' },
 };
 
-// Job Interface - Aligned with IJobType
-interface IJob extends IJobType {
+// Job Interface - Aligned with IJobType but with string-based status for applications
+interface IJob extends Omit<IJobType, 'status'> {
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected'; // Application Status
 }
 

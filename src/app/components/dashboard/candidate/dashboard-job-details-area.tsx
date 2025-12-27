@@ -25,7 +25,7 @@ const formatDuration = (seconds: number | undefined): string => {
 };
 
 interface DashboardJobDetailsAreaProps {
-  job: IJobType;
+  job: IJobType | (Omit<IJobType, 'status'> & { status?: string });
   onBack: () => void;
 }
 
