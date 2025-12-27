@@ -49,7 +49,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
-  
+
   // Ref to prevent duplicate useEffect runs
   const hasInitialized = useRef(false);
 
@@ -58,10 +58,10 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     if (hasInitialized.current) {
       return;
     }
-    
+
     const token = authCookies.getToken();
     setIsLoggedIn(!!token);
-    
+
     // Reset states when job changes
     setIsApplied(false);
     setApplicationId(null);
@@ -76,7 +76,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       }
     };
     initialize();
-    
+
     hasInitialized.current = true;
 
     if (typeof window !== 'undefined') {
@@ -90,7 +90,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
 
   const fetchUserIdAndInitialState = async () => {
     try {
-      const response = await api.get('api/v1/users/me'); 
+      const response = await api.get('api/v1/users/me');
       const userData = response.data?.data;
       if (userData?.user?.user_id) {
         setUserId(userData.user.user_id);
@@ -101,16 +101,16 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       console.error('Error fetching user data:', error);
     }
   };
-  
+
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job || job.projects_task_id === undefined) {
       setIsCheckingApplication(false);
       return;
     }
-    
+
     try {
       setIsCheckingApplication(true);
-      
+
       // Check if job is saved
       const savedRes = await api.get(`api/v1/saved/my-saved-projects`);
       const savedProjects = savedRes.data?.data || [];
@@ -121,17 +121,17 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
 
       // Check if already applied to this specific project
       const appliedRes = await api.get(`api/v1/applications/my-applications/project/${job.projects_task_id}`);
-      
+
       if (appliedRes.data?.success && appliedRes.data?.data) {
         let application = null;
-        
+
         // Handle both single object and array responses
         if (Array.isArray(appliedRes.data.data)) {
           application = appliedRes.data.data.length > 0 ? appliedRes.data.data[0] : null;
         } else {
           application = appliedRes.data.data;
         }
-        
+
         if (application && application.applied_projects_id && application.projects_task_id === job.projects_task_id) {
           setIsApplied(true);
           setApplicationId(application.applied_projects_id);
@@ -177,43 +177,43 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       handleApplySubmit();
     }
   };
-  
+
   const handleApplySubmit = async () => {
     if (!userId) {
-        toast.error('Could not verify user. Please refresh and try again.');
-        return;
+      toast.error('Could not verify user. Please refresh and try again.');
+      return;
     }
-    
+
     if (isApplying) {
       return;
     }
-    
+
     setIsApplying(true);
     try {
-        const response = await api.post('api/v1/applications/projects/apply', {
-            projects_task_id: job.projects_task_id,
-            description: "" // Sending blank description as per requirement
-        });
+      const response = await api.post('api/v1/applications/projects/apply', {
+        projects_task_id: job.projects_task_id,
+        description: "" // Sending blank description as per requirement
+      });
 
-        if (response.data?.success) {
-            if (response.data.alreadyApplied) {
-                toast.success('You have already applied to this project.');
-                setIsApplied(true);
-                setApplicationId(response.data.data?.applied_projects_id || null);
-            } else {
-                toast.success('Application submitted successfully!');
-                setIsApplied(true);
-                setApplicationId(response.data.data?.applied_projects_id || null);
-            }
+      if (response.data?.success) {
+        if (response.data.alreadyApplied) {
+          toast.success('You have already applied to this project.');
+          setIsApplied(true);
+          setApplicationId(response.data.data?.applied_projects_id || null);
         } else {
-            toast.error(response.data?.message || 'Failed to submit application.');
+          toast.success('Application submitted successfully!');
+          setIsApplied(true);
+          setApplicationId(response.data.data?.applied_projects_id || null);
         }
+      } else {
+        toast.error(response.data?.message || 'Failed to submit application.');
+      }
     } catch (error: any) {
-        console.error('Error submitting application:', error);
-        const errorMessage = error.response?.data?.message || 'An error occurred while applying.';
-        toast.error(errorMessage);
+      console.error('Error submitting application:', error);
+      const errorMessage = error.response?.data?.message || 'An error occurred while applying.';
+      toast.error(errorMessage);
     } finally {
-        setIsApplying(false);
+      setIsApplying(false);
     }
   };
 
@@ -230,7 +230,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     setIsApplying(true);
     try {
       const response = await api.delete(`api/v1/applications/withdraw/${applicationId}`);
-      
+
       if (response.data?.message || response.status === 200) {
         toast.success('Application withdrawn successfully!');
         setIsApplied(false);
@@ -258,7 +258,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     }
 
     setIsSaving(true);
-    
+
     const payload = {
       projects_task_id: job.projects_task_id,
     };
@@ -266,7 +266,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
     try {
       if (isSaved) {
         const response = await api.delete('api/v1/saved/unsave-project', { data: payload });
-        
+
         if (response.data?.success) {
           toast.success('Job unsaved successfully');
           setIsSaved(false);
@@ -294,7 +294,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const handleLoginSuccess = () => {
     applyLoginModalRef.current?.hide();
     setIsLoggedIn(true);
-    window.location.reload(); 
+    window.location.reload();
   };
 
   return (
@@ -305,7 +305,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
             {/* Left Side: Details */}
             <div className="col-xxl-9 col-xl-8">
               <div className="details-post-data me-xxl-5 pe-xxl-4">
-                
+
                 <Link href="/job-list" className="btn-two mb-20">
                   &larr; Back to Jobs
                 </Link>
@@ -393,16 +393,26 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                       <a key={idx} href="#">{tag}</a>
                     ))}
                   </div>
-                  
-                  <button 
-                    className="btn-one w-100 mt-25" 
-                    onClick={handleApplyClick}
-                    disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
-                  >
-                    {isCheckingApplication ? 'Checking...' : 
-                     isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : 
-                     isApplied ? <>✅ Applied<br/>Click To Withdraw</> : 'Apply Now'}
-                  </button>
+                  {/* Check if project is still accepting applications */}
+                  {job.status !== undefined && job.status !== 0 ? (
+                    <button
+                      className="btn-one w-100 mt-25"
+                      disabled={true}
+                      style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                    >
+                      {job.status === 3 ? '🚫 Job Closed' : '✅ Freelancer Assigned'}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn-one w-100 mt-25"
+                      onClick={handleApplyClick}
+                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
+                    >
+                      {isCheckingApplication ? 'Checking...' :
+                        isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') :
+                          isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                    </button>
+                  )}
 
                   <button
                     className={`btn-outline w-100 mt-15 ${isSaved ? 'saved' : ''}`}
@@ -416,7 +426,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
     </>
