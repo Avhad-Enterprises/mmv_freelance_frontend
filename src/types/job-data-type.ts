@@ -30,7 +30,8 @@ export interface IJobType {
   is_deleted?: boolean;
   deleted_by?: number | null;
   deleted_at?: string | null;
-  bidding_enabled?:boolean;
+  bidding_enabled?: boolean;
+  status?: number; // 0=Pending, 1=Assigned, 2=Completed, 3=Closed
 
   // Client information (from API joins)
   client_user_id?: number;
@@ -52,7 +53,7 @@ export interface IJobType {
 
   // UI-specific or fallback fields (may not come from API)
   logo?: any; // optional - for placeholder logo
- 
+
   location?: string; // optional - fallback, not in API
   experience?: string; // if added later in schema
   company?: string; // for display - if derived
@@ -61,7 +62,7 @@ export interface IJobType {
   salary_duration?: string; // optional
   id?: number; // optional
   duration?: string; // optional
-  title?: string; 
-  salary?: any; 
-  date?:any;
+  title?: string;
+  salary?: any;
+  date?: any;
 }

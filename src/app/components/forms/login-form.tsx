@@ -36,7 +36,7 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
 
   const onSubmit = async (data: IFormData) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     try {
       const res = await makePostRequest("api/v1/auth/login", {
@@ -84,9 +84,9 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         // Redirect to appropriate dashboard based on role (immediate redirect since full page reload handles context update)
         if (normalizedRoles.includes('CLIENT')) {
           window.location.href = '/dashboard/client-dashboard';
-        } else if (normalizedRoles.includes('VIDEOGRAPHER') || 
-                   normalizedRoles.includes('VIDEO_EDITOR') ||
-                   normalizedRoles.includes('VIDEOEDITOR')) {
+        } else if (normalizedRoles.includes('VIDEOGRAPHER') ||
+          normalizedRoles.includes('VIDEO_EDITOR') ||
+          normalizedRoles.includes('VIDEOEDITOR')) {
           window.location.href = '/dashboard/freelancer-dashboard';
         } else {
           window.location.href = '/';
@@ -149,9 +149,9 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
         <div className="col-12">
           <div className="agreement-checkbox d-flex justify-content-between align-items-center">
             <div>
-              <input 
-                type="checkbox" 
-                id="remember" 
+              <input
+                type="checkbox"
+                id="remember"
                 {...register("rememberMe")}
               />
               <label htmlFor="remember">Keep me logged in</label>
