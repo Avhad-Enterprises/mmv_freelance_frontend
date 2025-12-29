@@ -239,6 +239,32 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     setApplicantsError(null);
   };
 
+  // Handler to close a job
+  const handleCloseJob = async (project: ProjectSummary) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to close "${project.title}"?\n\nThis will reject all pending applications and the job will no longer accept new applicants.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await makePatchRequest(`api/v1/projects-tasks/${project.project_id}/status`, {
+        status: 3, // Closed
+      });
+
+      // Update local state
+      setProjects(prev => prev.map(p =>
+        p.project_id === project.project_id ? { ...p, status: 3 } : p
+      ));
+
+      toast.success('Job closed successfully. All pending applications have been rejected.');
+    } catch (err: any) {
+      console.error('Failed to close job:', err);
+      const message = err.response?.data?.message || err.message || 'Failed to close job.';
+      toast.error(message);
+    }
+  };
+
   // Event Handler to Add/Remove Favorites
   const handleToggleSave = async (applicantId: number) => {
     const token = authCookies.getToken();
@@ -383,6 +409,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       case 0: return { text: "Awaiting Assignment", className: "text-warning" };
       case 1: return { text: "In Progress", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
+      case 3: return { text: "Closed", className: "text-secondary" };
       default: return { text: "Unknown", className: "text-secondary" };
     }
   };
@@ -584,6 +611,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
                 loading={loading}
                 error={error}
                 onViewApplicants={handleViewApplicantsClick}
+                onCloseJob={handleCloseJob}
                 getStatusInfo={getProjectStatusInfo}
               />
             )}
