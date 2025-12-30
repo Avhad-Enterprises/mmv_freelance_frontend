@@ -325,7 +325,8 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   const handleUpdateApplicantStatus = async (
     projectId: string,
     applicationId: number,
-    newStatus: Applicant['status']
+    newStatus: Applicant['status'],
+    rejectionReason?: string
   ) => {
     // Check if another applicant is already assigned or completed by looking at projects
     const currentProject = projects.find(p => p.project_id === projectId);
@@ -360,11 +361,26 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     }
 
     try {
-      // Update application status using the correct endpoint
-      await makePatchRequest(`api/v1/applications/update-status`, {
+      // Prepare payload with rejection reason if status is 3 (rejected)
+      const payload: any = {
         applied_projects_id: applicationId,
         status: newStatus,
-      });
+      };
+      
+      if (newStatus === 3 && rejectionReason) {
+        payload.rejection_reason = rejectionReason;
+      }
+
+      // Debug logging
+      console.log('=== FRONTEND: Sending Update Request ===');
+      console.log('Application ID:', applicationId);
+      console.log('New Status:', newStatus);
+      console.log('Rejection Reason:', rejectionReason);
+      console.log('Payload:', payload);
+      console.log('======================================');
+
+      // Update application status using the correct endpoint
+      await makePatchRequest(`api/v1/applications/update-status`, payload);
 
       // Update local state immediately after successful API call
       setApplicants(prev => prev.map(app =>
