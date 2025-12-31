@@ -41,6 +41,7 @@ interface IJob {
   submitted_files?: string;
   submission_notes?: string;
   submitted_at?: string;
+  rejection_reason?: string; // Add rejection reason
 }
 
 type IProps = {};
@@ -140,6 +141,7 @@ const OngoingJobsArea = ({ }: IProps) => {
               submitted_files: job.submitted_files ?? null,
               submission_notes: job.submission_notes ?? null,
               submitted_at: job.submitted_at ?? null,
+              rejection_reason: job.rejection_reason ?? null, // Map rejection reason
             };
           });
 
@@ -558,16 +560,37 @@ const OngoingJobsArea = ({ }: IProps) => {
 
                           {/* Rejection Alert Banner */}
                           {job.submission_status === 2 && (
-                            <div className="alert alert-warning mt-3 mb-0" style={{
-                              padding: '12px 16px',
+                            <div className="alert alert-danger mt-3 mb-0" style={{
+                              padding: '14px 18px',
                               borderRadius: '8px',
-                              backgroundColor: '#fff3cd',
-                              border: '1px solid #ffc107'
+                              backgroundColor: '#f8d7da',
+                              border: '1px solid #f5c6cb',
+                              boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
                             }}>
-                              <strong style={{ color: '#856404' }}>Submission Rejected</strong>
-                              <p className="mb-0 mt-1" style={{ fontSize: '13px', color: '#856404' }}>
-                                Your previous submission was rejected. Please improve your work and click "Resubmit Project" to submit again.
-                              </p>
+                              <div className="d-flex align-items-start">
+                                <i className="bi bi-exclamation-circle-fill me-3" style={{ 
+                                  color: '#dc3545', 
+                                  fontSize: '20px',
+                                  marginTop: '2px'
+                                }}></i>
+                                <div className="flex-grow-1">
+                                  <h6 className="mb-2" style={{ 
+                                    color: '#721c24', 
+                                    fontWeight: '600',
+                                    fontSize: '15px'
+                                  }}>
+                                    <i className="bi bi-x-circle me-2"></i>Submission Rejected
+                                  </h6>
+                                  <p className="mb-0" style={{ 
+                                    fontSize: '14px', 
+                                    color: '#721c24', 
+                                    whiteSpace: 'pre-wrap',
+                                    lineHeight: '1.6'
+                                  }}>
+                                    {job.rejection_reason || 'Your previous submission was rejected. Please improve your work and click "Resubmit Project" to submit again.'}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           )}
 
@@ -614,9 +637,37 @@ const OngoingJobsArea = ({ }: IProps) => {
                 )}
 
                 {submittingJob.submission_status === 2 && (
-                  <div className="alert alert-warning" role="alert">
-                    <strong>⚠️ Resubmission Required:</strong> Your previous submission was rejected by the client.
-                    Please review their feedback and make necessary changes before resubmitting.
+                  <div className="alert alert-danger" role="alert" style={{
+                    padding: '14px 18px',
+                    borderRadius: '8px',
+                    backgroundColor: '#f8d7da',
+                    border: '1px solid #f5c6cb',
+                    boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
+                  }}>
+                    <div className="d-flex align-items-start">
+                      <i className="bi bi-exclamation-circle-fill me-3" style={{ 
+                        color: '#dc3545', 
+                        fontSize: '20px',
+                        marginTop: '2px'
+                      }}></i>
+                      <div className="flex-grow-1">
+                        <h6 className="mb-2" style={{ 
+                          color: '#721c24', 
+                          fontWeight: '600',
+                          fontSize: '15px'
+                        }}>
+                          <i className="bi bi-x-circle me-2"></i>Submission Rejected
+                        </h6>
+                        <p className="mb-0" style={{ 
+                          fontSize: '14px', 
+                          color: '#721c24', 
+                          whiteSpace: 'pre-wrap',
+                          lineHeight: '1.6'
+                        }}>
+                          {submittingJob.rejection_reason || 'Your previous submission was rejected by the client. Please review their feedback and make necessary changes before resubmitting.'}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -742,7 +793,43 @@ const OngoingJobsArea = ({ }: IProps) => {
                     <span className="badge bg-success">Approved ✓</span>
                   )}
                   {viewingSubmission.submission_status === 2 && (
-                    <span className="badge bg-danger">Rejected</span>
+                    <div>
+                      <span className="badge bg-danger mb-3" style={{ fontSize: '13px', padding: '6px 12px' }}>Rejected</span>
+                      {viewingSubmission.rejection_reason && (
+                        <div className="alert alert-danger mt-2" style={{
+                          padding: '14px 18px',
+                          borderRadius: '8px',
+                          backgroundColor: '#f8d7da',
+                          border: '1px solid #f5c6cb',
+                          boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
+                        }}>
+                          <div className="d-flex align-items-start">
+                            <i className="bi bi-exclamation-circle-fill me-3" style={{ 
+                              color: '#dc3545', 
+                              fontSize: '20px',
+                              marginTop: '2px'
+                            }}></i>
+                            <div className="flex-grow-1">
+                              <h6 className="mb-2" style={{ 
+                                color: '#721c24', 
+                                fontWeight: '600',
+                                fontSize: '15px'
+                              }}>
+                                <i className="bi bi-x-circle me-2"></i>Rejection Reason
+                              </h6>
+                              <p className="mb-0" style={{ 
+                                fontSize: '14px', 
+                                color: '#721c24', 
+                                whiteSpace: 'pre-wrap',
+                                lineHeight: '1.6'
+                              }}>
+                                {viewingSubmission.rejection_reason}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
