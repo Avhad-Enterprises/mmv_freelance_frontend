@@ -27,6 +27,7 @@ import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from "@/context/SidebarContext";
+import { useUser } from "@/context/UserContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
@@ -45,6 +46,9 @@ export interface ProjectSummary {
   category: string;
   budget: number;
   status: number; // 0: Pending, 1: Approved, 2: Completed
+  application_count: number;
+  currency?: string;
+  bidding_enabled?: boolean;
 }
 
 export interface Applicant {
@@ -68,8 +72,10 @@ interface EmployJobAreaProps {
 
 const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   const router = useRouter();
+  const { userData } = useUser();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(startInPostMode);
+  const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +123,10 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         date_created: p.created_at,
         category: p.project_category,
         budget: p.budget,
+        currency: p.currency || 'USD',
         status: p.status,
+        bidding_enabled: p.bidding_enabled || false,
+        application_count: p.application_count || 0,
       }));
 
       setProjects(processedData);
@@ -177,8 +186,14 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       router.push('/dashboard/client-dashboard/jobs');
     } else {
       setIsPostingJob(false);
+      setEditingProject(null);
       fetchClientData();
     }
+  };
+
+  const handleEditJob = (project: ProjectSummary) => {
+    setEditingProject(project);
+    setIsPostingJob(true);
   };
 
   const handleViewApplicantsClick = async (project: ProjectSummary) => {
@@ -548,26 +563,20 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   };
 
   // Handler for opening chat with applicant
-  const handleOpenChat = (applicant: Applicant) => {
-    if (!applicant.user_id) {
+  const handleOpenChat = (applicant: Applicant | { user_id: number; status?: number }) => {
+    if (!applicant.user_id || !userData?.user_id) {
       toast.error('Unable to start chat: User information not available');
       return;
     }
 
-    // Store chat restriction info in sessionStorage for the chat component to access
-    const chatRestriction = {
-      targetUserId: applicant.user_id.toString(),
-      applicationStatus: applicant.status,
-      projectId: selectedProjectForApplicants?.project_id,
-      projectTitle: selectedProjectForApplicants?.title,
-      isPending: applicant.status === 0,
-      maxMessages: applicant.status === 0 ? 10 : -1, // -1 means unlimited
-    };
+    const currentUserId = userData.user_id.toString();
+    const targetUserId = applicant.user_id.toString();
+    
+    // Sort IDs to match Firebase pattern
+    const conversationId = [currentUserId, targetUserId].sort().join('_');
 
-    sessionStorage.setItem('chatRestriction', JSON.stringify(chatRestriction));
-
-    // Navigate to chat page
-    router.push('/dashboard/client-dashboard/submit-job');
+    // Navigate to messages page
+    router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
   };
 
   return (
@@ -601,6 +610,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
             selectedApplicant={selectedApplicant}
             loadingProfile={loadingProfile}
             onBackToApplicants={handleBackToApplicants}
+            onMessage={(userId) => handleOpenChat({ user_id: userId })}
           />
         ) : selectedProjectForApplicants ? (
           // Applicants View
@@ -620,7 +630,10 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           // Jobs View
           <>
             {isPostingJob ? (
-              <PostJobForm onBackToList={handleReturnToList} />
+              <PostJobForm 
+                onBackToList={handleReturnToList} 
+                editProject={editingProject} 
+              />
             ) : (
               <JobsList
                 projects={projects}
@@ -628,6 +641,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
                 error={error}
                 onViewApplicants={handleViewApplicantsClick}
                 onCloseJob={handleCloseJob}
+                onEditJob={handleEditJob}
                 getStatusInfo={getProjectStatusInfo}
               />
             )}

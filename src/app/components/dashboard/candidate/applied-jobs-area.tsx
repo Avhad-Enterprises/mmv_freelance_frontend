@@ -6,6 +6,7 @@ import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import DashboardSearchBar from '../common/DashboardSearchBar';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
+import { formatBudget } from '@/utils/currencyUtils';
 import { authCookies } from "@/utils/cookies";
 import { IJobType } from '@/types/job-data-type';
 
@@ -75,18 +76,22 @@ const AppliedJobsArea = ({ }: IProps) => {
         }
         const jobData: IJob[] = (resData.data || []).map((job: any) => {
           // Debug logging for each job
-          console.log(`Job: ${job.project_title}, Raw Status: ${job.status} (type: ${typeof job.status}), Mapped: ${statusMap[job.status]?.text}`);
+          // Debug logging for each job
+          console.log(`Job: ${job.project_title}, Raw Status: ${job.status}`);
+          console.log(`RejectionReason: ${job.rejection_reason}`);
+          console.log(`ComparisonRejectionReason: ${job.comparison_rejection_reason}`);
           
           return {
-            projects_task_id: job.projects_task_id,
+            projects_task_id: Number(job.projects_task_id),
             project_title: job.project_title || 'Untitled Project',
-            budget: job.budget || 0,
+            budget: Number(job.budget) || 0,
+            currency: job.currency || 'INR', // Add currency field
             deadline: job.deadline || '',
             category: job.project_category || 'N/A',
             projects_type: job.projects_type || 'N/A',
             skills_required: job.skills_required || [],
             status: statusMap[job.status]?.text || 'Pending',
-            rejection_reason: job.rejection_reason || null, // Add rejection reason
+            rejection_reason: job.comparison_rejection_reason || job.rejection_reason || null, // Add rejection reason with fallback
             project_description: job.project_description || '',
             project_format: job.project_format || '',
             audio_voiceover: job.audio_voiceover || '',
@@ -98,7 +103,7 @@ const AppliedJobsArea = ({ }: IProps) => {
             additional_notes: job.additional_notes || '',
             bidding_enabled: job.bidding_enabled || false,
             // Client info
-            client_user_id: job.client_user_id,
+            client_user_id: job.client_user_id ? Number(job.client_user_id) : undefined,
             client_first_name: job.client_first_name,
             client_last_name: job.client_last_name,
             client_profile_picture: job.client_profile_picture,
@@ -262,7 +267,7 @@ const AppliedJobsArea = ({ }: IProps) => {
                       <div className="col-lg-2 col-md-4 col-sm-6">
                         <div className="candidate-info">
                           <span>Budget</span>
-                          <div>₹{job.budget?.toLocaleString() ?? 0}</div>
+                          <div>{formatBudget(job.budget ?? 0, job.currency)}</div>
                         </div>
                       </div>
                       <div className="col-lg-2 col-md-4 col-sm-6">
@@ -294,23 +299,40 @@ const AppliedJobsArea = ({ }: IProps) => {
                     </div>
                     
                     {/* Rejection Reason Display */}
-                    {job.status === 'Rejected' && job.rejection_reason && (
-                      <div className="row mt-2">
+                    {/* Rejection Reason Display */}
+                    {job.status === 'Rejected' && (
+                      <div className="row mt-3">
                         <div className="col-12">
-                          <div className="candidate-info">
-                            <span className="text-danger">
-                              <i className="bi bi-exclamation-circle me-1"></i>
-                              Rejection Reason
-                            </span>
-                            <div 
-                              className="text-muted"
-                              style={{ 
-                                whiteSpace: 'pre-wrap',
-                                fontSize: '14px',
-                                lineHeight: '1.5'
-                              }}
-                            >
-                              {job.rejection_reason}
+                          <div className="alert alert-danger mb-0" style={{
+                            padding: '14px 18px',
+                            borderRadius: '8px',
+                            backgroundColor: '#f8d7da',
+                            border: '1px solid #f5c6cb',
+                            boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
+                          }}>
+                            <div className="d-flex align-items-start">
+                              <i className="bi bi-exclamation-circle-fill me-3" style={{ 
+                                color: '#dc3545', 
+                                fontSize: '20px',
+                                marginTop: '2px'
+                              }}></i>
+                              <div className="flex-grow-1">
+                                <h6 className="mb-2" style={{ 
+                                  color: '#721c24', 
+                                  fontWeight: '600',
+                                  fontSize: '15px'
+                                }}>
+                                  <i className="bi bi-x-circle me-2"></i>Application Rejected
+                                </h6>
+                                <p className="mb-0" style={{ 
+                                  fontSize: '14px', 
+                                  color: '#721c24', 
+                                  whiteSpace: 'pre-wrap',
+                                  lineHeight: '1.6'
+                                }}>
+                                  {job.rejection_reason || 'Client did not provide a specific reason for rejection.'}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>

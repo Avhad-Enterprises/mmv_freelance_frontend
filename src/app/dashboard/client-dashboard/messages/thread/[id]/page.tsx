@@ -134,6 +134,7 @@ export default function ThreadPage() {
                   conv.participantDetails[otherId] = {
                     firstName: found.first_name || (found.username || '').split('@')[0],
                     email: '',
+                    profilePicture: found.profile_picture || undefined
                   };
                 }
               }
@@ -143,8 +144,59 @@ export default function ThreadPage() {
           }
 
           setConversation(conv);
+        } else if (conversationId.includes('_') && userData?.user_id) {
+          // Handle non-existent but valid pattern conversation ID
+          const participants = conversationId.split('_').sort();
+          const currentUserId = String(userData.user_id);
+          const otherId = participants.find(p => p !== currentUserId);
 
-          // Don't seed placeholder messages - let the realtime listener handle all messages
+          if (otherId && participants.includes(currentUserId)) {
+            try {
+              // Fetch other user profile info
+              let otherDetails = {
+                firstName: `User ${otherId}`,
+                email: '',
+                profilePicture: undefined
+              };
+
+              const publicRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+              if (publicRes.ok) {
+                const publicData = await publicRes.json();
+                const found = (publicData.data || []).find((f: any) => String(f.user_id) === String(otherId));
+                if (found) {
+                  otherDetails = {
+                    firstName: found.first_name || (found.username || '').split('@')[0],
+                    email: '',
+                    profilePicture: found.profile_picture || undefined
+                  };
+                }
+              }
+
+              const participantDetails = {
+                [currentUserId]: {
+                  firstName: userData.first_name || 'Me',
+                  email: userData.email || '',
+                  profilePicture: userData.profile_picture || undefined
+                },
+                [otherId]: otherDetails
+              };
+
+              const newConvData = {
+                participants,
+                participantDetails,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                lastMessage: '',
+                lastSenderId: '',
+                lastMessageRead: true
+              };
+
+              await set(convRef, newConvData);
+              setConversation({ id: conversationId, ...newConvData });
+            } catch (createErr) {
+              console.error('Failed to auto-create conversation', createErr);
+            }
+          }
         }
       } catch (err) {
         console.error('Could not load conversation', err);

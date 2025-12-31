@@ -6,6 +6,7 @@ import DashboardHeader from './dashboard-header-minus';
 import DashboardJobDetailsArea from './dashboard-job-details-area';
 import DashboardSearchBar from '../common/DashboardSearchBar';
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from '@/utils/categoryIcons';
+import { formatBudget } from '@/utils/currencyUtils';
 import { authCookies } from "@/utils/cookies";
 import { validateURL } from '@/utils/validation';
 
@@ -14,6 +15,7 @@ interface IJob {
   projects_task_id: number;
   project_title: string;
   budget: number;
+  currency?: string; // Add currency field
   deadline: string;
   category: string;
   projects_type: string;
@@ -111,9 +113,10 @@ const OngoingJobsArea = ({ }: IProps) => {
           .filter((job: any) => job.status === 1) // Only "In Progress" jobs (status === 1)
           .map((job: any) => {
             return {
-              projects_task_id: job.projects_task_id,
+              projects_task_id: Number(job.projects_task_id),
               project_title: job.project_title || 'Untitled Project',
-              budget: job.budget || 0,
+              budget: Number(job.budget) || 0,
+              currency: job.currency || 'INR', // Add currency field
               deadline: job.deadline || '',
               category: job.project_category || 'N/A',
               projects_type: job.projects_type || 'N/A',
@@ -130,7 +133,7 @@ const OngoingJobsArea = ({ }: IProps) => {
               additional_notes: job.additional_notes || '',
               bidding_enabled: job.bidding_enabled || false,
               // Client info
-              client_user_id: job.client_user_id,
+              client_user_id: job.client_user_id ? Number(job.client_user_id) : undefined,
               client_first_name: job.client_first_name,
               client_last_name: job.client_last_name,
               client_profile_picture: job.client_profile_picture,
@@ -435,10 +438,10 @@ const OngoingJobsArea = ({ }: IProps) => {
                         <div className="col-lg-8 col-md-6">
                           <div className="row gx-3">
                             <div className="col-6 col-md-3 mb-2 mb-md-0">
-                              <div className="candidate-info">
-                                <span>Budget</span>
-                                <div>₹{job.budget?.toLocaleString() ?? 0}</div>
-                              </div>
+                                <div className="candidate-info">
+                                  <span>Budget</span>
+                                  <div>{formatBudget(job.budget ?? 0, job.currency)}</div>
+                                </div>
                             </div>
                             <div className="col-6 col-md-3 mb-2 mb-md-0">
                               <div className="candidate-info">

@@ -3,13 +3,16 @@
 import React, { useState, useEffect, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { makePostRequest, makeGetRequest } from '@/utils/api';
+import { makePostRequest, makeGetRequest, makePutRequest } from '@/utils/api';
 import type { NewProjectPayload } from '@/types/project';
 import MultipleSelectionField from './MultipleSelectionField';
 import { validateURL } from '@/utils/validation';
 
+import { ProjectSummary } from './job-area';
+
 interface IProps {
   onBackToList: () => void;
+  editProject?: ProjectSummary | null;
 }
 
 // Initial form data matching the API payload structure
@@ -42,7 +45,7 @@ const generateSlug = (title: string) => {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
 };
 
-const PostJobForm: FC<IProps> = ({ onBackToList }) => {
+const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
   const { register, handleSubmit, formState: { errors }, setValue, clearErrors } = useForm({
     defaultValues: initialFormData,
     mode: 'onChange'
@@ -100,6 +103,55 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     fetchData();
   }, []);
 
+  // Fetch full project details if editing
+  useEffect(() => {
+    const fetchFullProjectDetails = async () => {
+      if (editProject?.project_id) {
+        try {
+          const res = await makeGetRequest(`api/v1/projects-tasks/${editProject.project_id}`);
+          const project = res.data.projects;
+          if (project) {
+            setValue('project_title', project.project_title);
+            setValue('project_category', project.project_category);
+            setValue('project_description', project.project_description);
+            setValue('budget', project.budget);
+            setValue('projects_type', project.projects_type);
+            setValue('deadline', project.deadline ? new Date(project.deadline).toISOString().split('T')[0] : '');
+            setValue('additional_notes', project.additional_notes || '');
+
+            // Handle lists
+            let skillsList = project.skills_required;
+            if (typeof skillsList === 'string') {
+              try { skillsList = JSON.parse(skillsList); } catch (e) { skillsList = []; }
+            }
+            setSelectedSkills(skillsList || []);
+            setValue('skills_required', skillsList || []);
+
+            let linksList = project.reference_links;
+            if (typeof linksList === 'string') {
+              try { linksList = JSON.parse(linksList); } catch (e) { linksList = []; }
+            }
+            setReferenceLinks(linksList && linksList.length > 0 ? linksList : ['']);
+
+            let tagsList = project.tags;
+            if (typeof tagsList === 'string') {
+              try { tagsList = JSON.parse(tagsList); } catch (e) { tagsList = []; }
+            }
+            setTags(tagsList || []);
+
+            setCurrency(project.currency || 'USD');
+            setBiddingEnabled(project.bidding_enabled || false);
+            setValue('url', project.url);
+          }
+        } catch (err) {
+          console.error("Error fetching project details for edit:", err);
+          toast.error("Failed to load project details for editing");
+        }
+      }
+    };
+    fetchFullProjectDetails();
+  }, [editProject, setValue]);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -118,6 +170,14 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     };
     fetchUserData();
   }, []);
+
+  // Register skills_required field for validation
+  useEffect(() => {
+    register("skills_required", { 
+      required: "At least one skill is required",
+      validate: (value) => (Array.isArray(value) && value.length > 0) || "At least one skill is required"
+    });
+  }, [register]);
 
   const onSubmit = async (data: any) => {
     if (!currentUser) {
@@ -166,7 +226,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
     const payload = {
       ...pendingFormData,
       // Inject defaults for removed UI fields
-      video_length: initialFormData.video_length,
+      video_length: Number(initialFormData.video_length),
       project_format: initialFormData.project_format,
       preferred_video_style: initialFormData.preferred_video_style,
       audio_voiceover: initialFormData.audio_voiceover,
@@ -180,16 +240,21 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
       tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
-      is_active: 1,
-      bidding_enabled: biddingEnabled, // Add bidding status to payload
-      currency: currency, // Add currency to payload
+      is_active: true, // Boolean, not number
+      bidding_enabled: Boolean(biddingEnabled), // Ensure boolean
+      currency: currency,
       // Ensure numeric fields are sent as numbers, not strings
       budget: Number(pendingFormData.budget),
     };
 
     try {
-      await makePostRequest("api/v1/projects-tasks", payload);
-      toast.success("Job posted successfully!");
+      if (editProject) {
+        await makePutRequest(`api/v1/projects-tasks/${editProject.project_id}`, payload);
+        toast.success("Job updated successfully!");
+      } else {
+        await makePostRequest("api/v1/projects-tasks", payload);
+        toast.success("Job posted successfully!");
+      }
       setTimeout(() => {
         onBackToList();
       }, 1500);
@@ -281,8 +346,8 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             {/* Project Category & Type */}
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
-                <label>Project Category</label>
-                <select className="form-control" {...register("project_category")}
+                <label>Project Category*</label>
+                <select className="form-control" {...register("project_category", { required: "Project category is required" })}
                   disabled={isLoadingData}>
                   <option value="">Select category</option>
                   {categories.map((category) => (
@@ -294,8 +359,9 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             </div>
             <div className="col-md-6">
               <div className="input-group-meta position-relative mb-25">
-                <label>Project Type</label>
-                <select className="form-control" {...register("projects_type")}>
+                <label>Project Type*</label>
+                <select className="form-control" {...register("projects_type", { required: "Project type is required" })}>
+                  <option value="">Select type</option>
                   <option value="Video Editing">Video Editing</option>
                   <option value="Commercial">Commercial</option>
                   <option value="Social Media">Social Media</option>
@@ -311,6 +377,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                   <div className="input-group-meta position-relative mb-25">
                     <label>Budget*</label>
                     <input type="number" placeholder="Enter amount" className="form-control"
+                      step="0.01"
                       maxLength={8}
                       onInput={(e) => {
                         const target = e.target as HTMLInputElement;
@@ -320,7 +387,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                       }}
                       {...register("budget", {
                         required: "Budget is required",
-                        min: { value: 1, message: "Budget must be greater than 0" },
+                        min: { value: 0.01, message: "Budget must be greater than 0" },
                         max: { value: 99999999, message: "Budget cannot exceed 8 digits" }
                       })}
                     />
@@ -423,7 +490,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             {/* Skills Required */}
             <div className="col-12">
               <MultipleSelectionField
-                label="Skills Required*"
+                label="Skills Required"
                 options={skills}
                 selectedItems={selectedSkills}
                 onChange={(skills) => { setSelectedSkills(skills); setValue('skills_required', skills, { shouldValidate: true }); }}
@@ -469,7 +536,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
             {error && <div className="col-12"><div className="alert alert-danger my-3">{error}</div></div>}
             <div className="col-12 d-flex justify-content-between mt-30">
               <button type="button" className="dash-btn-two" style={{ background: '#6c757d' }} onClick={onBackToList} disabled={loading}>Cancel</button>
-              <button type="submit" className="dash-btn-two" disabled={loading}>{loading ? "Submitting..." : "Post Job"}</button>
+              <button type="submit" className="dash-btn-two" disabled={loading}>{loading ? "Submitting..." : (editProject ? "Update Job" : "Post Job")}</button>
             </div>
           </div>
         </form>
@@ -511,10 +578,10 @@ const PostJobForm: FC<IProps> = ({ onBackToList }) => {
                 <button type="button" className="btn btn-secondary" onClick={handleCancelModal}>
                   Cancel
                 </button>
-                <button type="button" className="dash-btn-two" onClick={handleConfirmPost} disabled={loading}>
-                  {loading ? 'Posting...' : 'Confirm & Post Job'}
-                </button>
-              </div>
+                  <button type="button" className="dash-btn-two" onClick={handleConfirmPost} disabled={loading}>
+                    {loading ? 'Processing...' : (editProject ? 'Confirm & Update Job' : 'Confirm & Post Job')}
+                  </button>
+                </div>
             </div>
           </div>
         </div>

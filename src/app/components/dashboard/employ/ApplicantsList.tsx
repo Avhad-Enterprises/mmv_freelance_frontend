@@ -24,7 +24,7 @@ interface ApplicantsListProps {
   applicantsLoading: boolean;
   applicantsError: string | null;
   savedApplicants: number[];
-  selectedProjectForApplicants: { project_id: string; title: string; budget?: number } | null;
+  selectedProjectForApplicants: { project_id: string; title: string; budget?: number; bidding_enabled?: boolean } | null;
   onViewProfile: (applicantId: number) => void;
   onToggleSave: (applicantId: number) => void;
   onUpdateApplicantStatus: (projectId: string, applicationId: number, newStatus: Applicant['status'], rejectionReason?: string) => void;
@@ -251,7 +251,9 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                           <div className="candidate-info">
                             <span style={{ fontSize: '12px', color: '#666' }}>Bid Amount</span>
                             <div className="fw-bold text-success" style={{ fontSize: '15px', marginTop: '4px' }}>
-                              ${applicant.bid_amount?.toFixed(2) || '0.00'}
+                              {selectedProjectForApplicants?.bidding_enabled 
+                                ? `$${applicant.bid_amount?.toFixed(2) || '0.00'}` 
+                                : 'N/A'}
                             </div>
                           </div>
                         </div>
@@ -298,6 +300,14 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                                     onClick={() => onViewProfile(applicant.user_id)}
                                   >
                                     <i className="bi bi-person me-2"></i>View Profile
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    className="dropdown-item"
+                                    onClick={() => onOpenChat(applicant)}
+                                  >
+                                    <i className="bi bi-chat-dots me-2"></i>Message
                                   </button>
                                 </li>
                                 <li>

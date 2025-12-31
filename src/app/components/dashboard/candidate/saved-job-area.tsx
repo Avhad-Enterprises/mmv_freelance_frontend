@@ -37,13 +37,13 @@ const SavedJobArea = () => {
         const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
         const allJobs = jobsRes.data.data || [];
         
-        // Then, get the user's saved project IDs
+        // Then, get the user's saved project IDs - convert to strings for robust comparison
         const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
-        const savedProjectIds = new Set(savedProjectsRes.data.data.map((p: any) => p.projects_task_id));
+        const savedProjectIds = new Set(savedProjectsRes.data.data.map((p: any) => String(p.projects_task_id)));
         
         // Filter the main job list to get the full objects for saved jobs
         const userSavedJobs = allJobs.filter((job: IJobType) => 
-          job.projects_task_id !== undefined && savedProjectIds.has(job.projects_task_id)
+          job.projects_task_id !== undefined && savedProjectIds.has(String(job.projects_task_id))
         );
         
         // Populate the Redux store with the saved jobs
