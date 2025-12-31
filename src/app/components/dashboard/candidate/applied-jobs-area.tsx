@@ -21,6 +21,7 @@ const statusMap: Record<number, { text: string; className: string }> = {
 // Job Interface - Aligned with IJobType but with string-based status for applications
 interface IJob extends Omit<IJobType, 'status'> {
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected'; // Application Status
+  rejection_reason?: string; // Reason for rejection (if rejected)
 }
 
 type IProps = {};
@@ -62,35 +63,48 @@ const AppliedJobsArea = ({ }: IProps) => {
           throw new Error(`Failed to fetch applications: ${response.statusText}`);
         }
         const resData = await response.json();
+        
+        // Debug logging
+        console.log('=== FREELANCER: Fetched Applications ===');
+        console.log('Raw API Response:', resData);
+        console.log('First application (if exists):', resData.data?.[0]);
+        console.log('======================================');
+        
         if (!resData?.data) {
           throw new Error(resData?.message || 'Failed to fetch applications: Data not found');
         }
-        const jobData: IJob[] = (resData.data || []).map((job: any) => ({
-          projects_task_id: job.projects_task_id,
-          project_title: job.project_title || 'Untitled Project',
-          budget: job.budget || 0,
-          deadline: job.deadline || '',
-          category: job.project_category || 'N/A',
-          projects_type: job.projects_type || 'N/A',
-          skills_required: job.skills_required || [],
-          status: statusMap[job.status]?.text || 'Pending',
-          project_description: job.project_description || '',
-          project_format: job.project_format || '',
-          audio_voiceover: job.audio_voiceover || '',
-          video_length: job.video_length,
-          preferred_video_style: job.preferred_video_style || '',
-          audio_description: job.audio_description || '',
-          reference_links: job.reference_links || [],
-          created_at: job.created_at || '',
-          additional_notes: job.additional_notes || '',
-          bidding_enabled: job.bidding_enabled || false,
-          // Client info
-          client_user_id: job.client_user_id,
-          client_first_name: job.client_first_name,
-          client_last_name: job.client_last_name,
-          client_profile_picture: job.client_profile_picture,
-          client_company_name: job.client_company_name,
-        }));
+        const jobData: IJob[] = (resData.data || []).map((job: any) => {
+          // Debug logging for each job
+          console.log(`Job: ${job.project_title}, Raw Status: ${job.status} (type: ${typeof job.status}), Mapped: ${statusMap[job.status]?.text}`);
+          
+          return {
+            projects_task_id: job.projects_task_id,
+            project_title: job.project_title || 'Untitled Project',
+            budget: job.budget || 0,
+            deadline: job.deadline || '',
+            category: job.project_category || 'N/A',
+            projects_type: job.projects_type || 'N/A',
+            skills_required: job.skills_required || [],
+            status: statusMap[job.status]?.text || 'Pending',
+            rejection_reason: job.rejection_reason || null, // Add rejection reason
+            project_description: job.project_description || '',
+            project_format: job.project_format || '',
+            audio_voiceover: job.audio_voiceover || '',
+            video_length: job.video_length,
+            preferred_video_style: job.preferred_video_style || '',
+            audio_description: job.audio_description || '',
+            reference_links: job.reference_links || [],
+            created_at: job.created_at || '',
+            additional_notes: job.additional_notes || '',
+            bidding_enabled: job.bidding_enabled || false,
+            // Client info
+            client_user_id: job.client_user_id,
+            client_first_name: job.client_first_name,
+            client_last_name: job.client_last_name,
+            client_profile_picture: job.client_profile_picture,
+            client_company_name: job.client_company_name,
+          };
+        });
         setJobs(jobData);
         setFilteredJobs(jobData);
       } catch (error: any) {
@@ -278,6 +292,31 @@ const AppliedJobsArea = ({ }: IProps) => {
                         </div>
                       </div>
                     </div>
+                    
+                    {/* Rejection Reason Display */}
+                    {job.status === 'Rejected' && job.rejection_reason && (
+                      <div className="row mt-2">
+                        <div className="col-12">
+                          <div className="candidate-info">
+                            <span className="text-danger">
+                              <i className="bi bi-exclamation-circle me-1"></i>
+                              Rejection Reason
+                            </span>
+                            <div 
+                              className="text-muted"
+                              style={{ 
+                                whiteSpace: 'pre-wrap',
+                                fontSize: '14px',
+                                lineHeight: '1.5'
+                              }}
+                            >
+                              {job.rejection_reason}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="row">
                       <div className="col-12">
                         <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">

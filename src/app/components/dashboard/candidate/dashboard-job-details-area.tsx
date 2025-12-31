@@ -579,6 +579,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         className="btn-one w-100 mt-15"
                         onClick={handleApplyClick}
                         disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
+                        style={!isApplied ? {
+                          backgroundColor: '#3d6f5d',
+                          borderColor: '#3d6f5d',
+                          color: 'white',
+                          borderRadius: '8px',
+                          padding: '12px 24px',
+                          fontWeight: '500'
+                        } : undefined}
                       >
                         {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
                       </button>

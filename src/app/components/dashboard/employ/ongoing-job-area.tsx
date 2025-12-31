@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
+import { useRouter } from 'next/navigation';
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
@@ -50,6 +51,7 @@ interface Submission {
 }
 
 const OngoingJobArea: FC = () => {
+  const router = useRouter();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -72,6 +74,11 @@ const OngoingJobArea: FC = () => {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [reviewingSubmission, setReviewingSubmission] = useState(false);
+
+  // Rejection Modal States
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [submissionToReject, setSubmissionToReject] = useState<Submission | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   // State for viewing applicant profiles
   const [selectedApplicant, setSelectedApplicant] = useState<IFreelancer | null>(null);
@@ -405,8 +412,33 @@ const OngoingJobArea: FC = () => {
     setSelectedSubmission(null);
   };
 
+  // Open rejection modal
+  const handleInitiateRejection = (submission: Submission) => {
+    setSubmissionToReject(submission);
+    setRejectionReason('');
+    setShowRejectModal(true);
+    // Close the submission detail modal to show the rejection modal clearly
+    handleCloseSubmissionModal();
+  };
+
+  const handleCloseRejectModal = () => {
+    setShowRejectModal(false);
+    setSubmissionToReject(null);
+    setRejectionReason('');
+  };
+
+  const handleConfirmReject = () => {
+    if (!submissionToReject) return;
+    if (!rejectionReason.trim()) {
+      toast.error("Please provide a reason for rejection");
+      return;
+    }
+    handleReviewSubmission(submissionToReject.submission_id, 2, rejectionReason);
+    handleCloseRejectModal();
+  };
+
   // Approve/Reject Submission
-  const handleReviewSubmission = async (submissionId: number, status: 1 | 2) => {
+  const handleReviewSubmission = async (submissionId: number, status: 1 | 2, reason?: string) => {
     setReviewingSubmission(true);
 
     try {
@@ -421,7 +453,10 @@ const OngoingJobArea: FC = () => {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({ 
+            status,
+            rejection_reason: reason 
+          }),
         }
       );
 
@@ -441,7 +476,7 @@ const OngoingJobArea: FC = () => {
 
         if (status === 1) {
           // Approved - project is now completed
-          toast.success('Submission approved! Project marked as completed.');
+          toast.success('Submission approved! Redirecting to Approved Projects...');
           handleCloseSubmissionModal();
 
           // Remove the completed project from ongoing projects list immediately
@@ -453,12 +488,14 @@ const OngoingJobArea: FC = () => {
           setSelectedProjectForSubmissions(null);
           setSubmissions([]);
 
-          // Refresh to get latest data from server
-          fetchClientData();
+          // Redirect to approved projects page after a short delay
+          setTimeout(() => {
+            router.push('/dashboard/client-dashboard/approved-projects');
+          }, 1500);
         } else {
           // Rejected
           toast.success('Submission rejected. Freelancer can resubmit.');
-          handleCloseSubmissionModal();
+          // handleCloseSubmissionModal(); // Already closed when initiating rejection
         }
       }
     } catch (error: any) {
@@ -483,6 +520,7 @@ const OngoingJobArea: FC = () => {
   // Project Task Status Info - for ongoing projects list
   const getProjectStatusInfo = (status: number) => {
     switch (status) {
+      // 0: Awaiting Assignment, 1: In Progress, 2: Completed
       case 0: return { text: "Awaiting Assignment", className: "text-warning" };
       case 1: return { text: "In Progress", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
@@ -975,10 +1013,10 @@ const OngoingJobArea: FC = () => {
                     <button
                       type="button"
                       className="btn btn-danger"
-                      onClick={() => handleReviewSubmission(selectedSubmission.submission_id, 2)}
+                      onClick={() => handleInitiateRejection(selectedSubmission)}
                       disabled={reviewingSubmission}
                     >
-                      {reviewingSubmission ? 'Processing...' : 'Reject'}
+                      Reject
                     </button>
                     <button
                       type="button"
@@ -990,6 +1028,57 @@ const OngoingJobArea: FC = () => {
                     </button>
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Reason Modal */}
+      {showRejectModal && submissionToReject && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100000 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-danger">Reject Submission</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCloseRejectModal}
+                  disabled={reviewingSubmission}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Please provide a reason for rejecting this submission. This will be visible to the freelancer.</p>
+                <div className="mb-3">
+                  <label htmlFor="rejectionReason" className="form-label fw-semibold">Rejection Reason <span className="text-danger">*</span></label>
+                  <textarea
+                    id="rejectionReason"
+                    className="form-control"
+                    rows={4}
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="e.g., The submitted files do not meet the requirements..."
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCloseRejectModal}
+                  disabled={reviewingSubmission}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleConfirmReject}
+                  disabled={reviewingSubmission || !rejectionReason.trim()}
+                >
+                  {reviewingSubmission ? 'Rejecting...' : 'Confirm Rejection'}
+                </button>
               </div>
             </div>
           </div>

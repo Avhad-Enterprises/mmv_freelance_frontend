@@ -30,6 +30,7 @@ const DashboardJobBrowseArea = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [biddingFilter, setBiddingFilter] = useState<string>("all"); // "all", "bidding", "fixed"
+  const [currencyFilter, setCurrencyFilter] = useState<string>("all"); // Currency filter state
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [shortValue, setShortValue] = useState<string>("");
@@ -120,6 +121,11 @@ const DashboardJobBrowseArea = () => {
       filteredData = filteredData.filter((item) => item.bidding_enabled === false);
     }
 
+    // Filter by currency
+    if (currencyFilter !== "all") {
+      filteredData = filteredData.filter((item) => item.currency === currencyFilter);
+    }
+
     if (projects_type) {
       filteredData = filteredData.filter(
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
@@ -145,7 +151,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, projects_type,
-    all_jobs, search_key, biddingFilter, shortValue,
+    all_jobs, search_key, biddingFilter, currencyFilter, shortValue,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -197,6 +203,7 @@ const DashboardJobBrowseArea = () => {
     dispatch(resetFilter());
     setSelectedSkills([]);
     setBiddingFilter("all");
+    setCurrencyFilter("all");
     setShortValue("");
     setItemOffset(0);
     toast.success("Filters reset successfully");
@@ -214,7 +221,7 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || shortValue !== "";
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
@@ -506,8 +513,54 @@ const DashboardJobBrowseArea = () => {
                   </select>
                 </div>
 
+                {/* Currency Filter */}
+                <div className="col-lg-2 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Currency</div>
+                  <select
+                    className="form-select"
+                    value={currencyFilter}
+                    onChange={(e) => {
+                      setCurrencyFilter(e.target.value);
+                      setItemOffset(0);
+                    }}
+                    style={{ height: '48px' }}
+                  >
+                    <option value="all">All Currencies</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="AUD">AUD (A$)</option>
+                    <option value="CAD">CAD (C$)</option>
+                    <option value="CHF">CHF (Fr)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="NZD">NZD (NZ$)</option>
+                    <option value="SGD">SGD (S$)</option>
+                    <option value="HKD">HKD (HK$)</option>
+                    <option value="KRW">KRW (₩)</option>
+                    <option value="SEK">SEK (kr)</option>
+                    <option value="NOK">NOK (kr)</option>
+                    <option value="DKK">DKK (kr)</option>
+                    <option value="MXN">MXN ($)</option>
+                    <option value="BRL">BRL (R$)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                    <option value="RUB">RUB (₽)</option>
+                    <option value="TRY">TRY (₺)</option>
+                    <option value="AED">AED (د.إ)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                    <option value="MYR">MYR (RM)</option>
+                    <option value="THB">THB (฿)</option>
+                    <option value="IDR">IDR (Rp)</option>
+                    <option value="PHP">PHP (₱)</option>
+                    <option value="PLN">PLN (zł)</option>
+                    <option value="CZK">CZK (Kč)</option>
+                    <option value="ILS">ILS (₪)</option>
+                  </select>
+                </div>
+
                 {/* Sort Filter */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <div className="filter-title fw-500 text-dark mb-2">Sort By</div>
                   <select
                     className="form-select"
@@ -525,7 +578,7 @@ const DashboardJobBrowseArea = () => {
                 </div>
 
                 {/* Reset Filters Button */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <button
                     onClick={handleReset}
                     className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
@@ -546,6 +599,20 @@ const DashboardJobBrowseArea = () => {
                       <span style={{ color: 'white' }}>{biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}</span>
                       <button
                         onClick={() => setBiddingFilter("all")}
+                        className="btn-close ms-2"
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
+                  {currencyFilter !== "all" && (
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
+                      style={{ backgroundColor: '#4A90E2', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>Currency: {currencyFilter}</span>
+                      <button
+                        onClick={() => setCurrencyFilter("all")}
                         className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
