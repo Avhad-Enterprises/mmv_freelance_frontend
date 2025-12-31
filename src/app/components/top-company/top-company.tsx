@@ -1,10 +1,5 @@
-import React from 'react';
-// import Link from 'next/link'; // Removed Next.js dependency
-// import Image, { StaticImageData } from 'next/image'; // Removed Image component
-// import company_1 from '@/assets/images/logo/media_29.png'; // Removed local asset
-// import company_2 from '@/assets/images/logo/media_30.png'; // Removed local asset
-// import company_3 from '@/assets/images/logo/media_31.png'; // Removed local asset
-// import company_4 from '@/assets/images/logo/media_32.png'; // Removed local asset
+import React from "react";
+import { FeaturedCreator } from "@/types/cms.types";
 
 // Generic User Icon to replace local images
 const UserIcon = () => (
@@ -14,88 +9,144 @@ const UserIcon = () => (
     height="80"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#28a745" // Green color from your image
+    stroke="#28a745" // Green color
     strokeWidth="1"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="lazy-img m-auto" // Kept original class
+    className="lazy-img m-auto"
   >
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
     <circle cx="12" cy="7" r="4"></circle>
   </svg>
 );
 
+interface TopCompanyProps {
+  featuredCreators: FeaturedCreator[];
+}
 
-// company data: Updated based on the image
-const company_data: {
-  id: number;
-  name: string;
-  desc: string;
-  linkText: string; // Changed from 'job: number' to 'linkText: string'
-}[] = [
-    {
-      id: 1,
-      name: 'Ria Sharra',
-      desc: 'Wedding Film Editor | Mumbai, India',
-      linkText: 'View Portfolio',
-    },
-    {
-      id: 2,
-      name: 'Chen Li',
-      desc: 'YouTube Video Specialist | Toronto, Canada CA',
-      linkText: 'View services',
-    },
-    {
-      id: 3,
-      name: 'Marcus V.',
-      desc: 'Corporate Video Specialist | Tondoe, UK',
-      linkText: 'View open jobs',
-    },
-    {
-      id: 4,
-      name: 'Aisha Khan',
-      desc: 'Reels & Shorts Editor | <br />Dubai, UAE', // Added <br /> for new line
-      linkText: 'View portfolio',
-    },
-  ]
+const TopCompany: React.FC<TopCompanyProps> = ({ featuredCreators }) => {
+  // Limit to 4 creators for display
+  const displayCreators = featuredCreators.slice(0, 4);
 
-const TopCompany = () => {
   return (
     <section className="top-company-section pt-100 lg-pt-60 pb-130 lg-pb-80 mt-200 xl-mt-150">
       <div className="container">
         <div className="row justify-content-between align-items-center pb-40 lg-pb-10">
           <div className="col-sm-7">
             <div className="title-one">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Meet Our Featured Video Creators</h2>
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">
+                Meet Our Featured Video Creators
+              </h2>
             </div>
           </div>
           <div className="col-sm-5">
             <div className="d-flex justify-content-sm-end">
-              {/* Replaced Next.js Link with standard <a> tag */}
-              <a href="/coming-soon" className="btn-six d-none d-sm-inline-block">Explore All Creators</a>
+              <a
+                href="/coming-soon"
+                className="btn-six d-none d-sm-inline-block"
+              >
+                Explore All Creators
+              </a>
             </div>
           </div>
         </div>
 
         <div className="row">
-          {company_data.map((item) => (
-            <div key={item.id} className="col-lg-3 col-sm-6">
-              <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                {/* Replaced next/image with the SVG icon */}
-                <UserIcon />
-                <div className="text-lg fw-500 text-dark mt-15 mb-30">{item.name}</div>
-                {/* Updated description to render HTML for the line break */}
-                <p className="mb-20" dangerouslySetInnerHTML={{ __html: item.desc }} />
-                {/* Updated link text and replaced Next.js Link with standard <a> tag */}
-                <a href="/coming-soon" className="open-job-btn fw-500 tran3s">{item.linkText}</a>
+          {displayCreators.length > 0 ? (
+            displayCreators.map((creator) => (
+              <div key={creator.id} className="col-lg-3 col-sm-6">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                  {creator.profile_image ? (
+                    <img
+                      src={creator.profile_image}
+                      alt={creator.name}
+                      className="lazy-img m-auto"
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <UserIcon />
+                  )}
+                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
+                    {creator.name}
+                  </div>
+                  <p className="mb-20">{creator.title || creator.bio || ""}</p>
+                  <a
+                    href={creator.portfolio_url || "/coming-soon"}
+                    className="open-job-btn fw-500 tran3s"
+                  >
+                    View Portfolio
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            // Fallback to default data if no CMS data
+            <>
+              <div className="col-lg-3 col-sm-6">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                  <UserIcon />
+                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
+                    Ria Sharra
+                  </div>
+                  <p className="mb-20">Wedding Film Editor | Mumbai, India</p>
+                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
+                    View Portfolio
+                  </a>
+                </div>
+              </div>
+              <div className="col-lg-3 col-sm-6">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                  <UserIcon />
+                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
+                    Chen Li
+                  </div>
+                  <p className="mb-20">
+                    YouTube Video Specialist | Toronto, Canada
+                  </p>
+                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
+                    View services
+                  </a>
+                </div>
+              </div>
+              <div className="col-lg-3 col-sm-6">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                  <UserIcon />
+                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
+                    Marcus V.
+                  </div>
+                  <p className="mb-20">
+                    Corporate Video Specialist | London, UK
+                  </p>
+                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
+                    View open jobs
+                  </a>
+                </div>
+              </div>
+              <div className="col-lg-3 col-sm-6">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                  <UserIcon />
+                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
+                    Aisha Khan
+                  </div>
+                  <p className="mb-20">Reels & Shorts Editor | Dubai, UAE</p>
+                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
+                    View portfolio
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="text-center mt-30 d-sm-none">
-          {/* Replaced Next.js Link with standard <a> tag */}
-          <a href="/coming-soon" className="btn-six">Explore More</a>
+          <a href="/coming-soon" className="btn-six">
+            Explore More
+          </a>
         </div>
       </div>
     </section>
@@ -103,4 +154,3 @@ const TopCompany = () => {
 };
 
 export default TopCompany;
-
