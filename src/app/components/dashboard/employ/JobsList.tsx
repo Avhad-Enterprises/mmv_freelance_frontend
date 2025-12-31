@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { formatBudget } from "@/utils/currencyUtils";
 import DashboardSearchBar from "../common/DashboardSearchBar";
 
 export interface ProjectSummary {
@@ -8,7 +9,10 @@ export interface ProjectSummary {
   date_created: string;
   category: string;
   budget: number;
+  currency?: string;
   status: number; // Project Task Status: 0=Pending, 1=In Progress, 2=Completed
+  bidding_enabled?: boolean;
+  application_count: number;
 }
 
 interface JobsListProps {
@@ -17,6 +21,7 @@ interface JobsListProps {
   error: string | null;
   onViewApplicants: (project: ProjectSummary) => void;
   onCloseJob: (project: ProjectSummary) => void;
+  onEditJob: (project: ProjectSummary) => void;
   getStatusInfo: (status: number) => { text: string; className: string };
 }
 
@@ -26,6 +31,7 @@ const JobsList: React.FC<JobsListProps> = ({
   error,
   onViewApplicants,
   onCloseJob,
+  onEditJob,
   getStatusInfo
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,7 +81,7 @@ const JobsList: React.FC<JobsListProps> = ({
                 <tr key={project.project_id} className="align-middle">
                   <td>{project.title}</td>
                   <td>{project.category}</td>
-                  <td>${project.budget}</td>
+                  <td>{formatBudget(project.budget, project.currency)}</td>
                   <td>{new Date(project.date_created).toLocaleDateString()}</td>
                   <td>
                     <span className={`fw-bold ${getStatusInfo(project.status).className}`}>
@@ -83,7 +89,7 @@ const JobsList: React.FC<JobsListProps> = ({
                     </span>
                   </td>
                   <td className="text-end">
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                       <button
                         className="btn"
                         onClick={() => onViewApplicants(project)}
@@ -99,22 +105,43 @@ const JobsList: React.FC<JobsListProps> = ({
                       >
                         View Applications
                       </button>
+                      
+                      {/* Allow editing for pending projects (status 0) */}
                       {project.status === 0 && (
-                        <button
-                          className="btn"
-                          onClick={() => onCloseJob(project)}
-                          style={{
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontWeight: '500'
-                          }}
-                        >
-                          Close Job
-                        </button>
+                        <>
+                          <button
+                            className="btn"
+                            onClick={() => onEditJob(project)}
+                            title="Edit Job"
+                            style={{
+                              backgroundColor: '#007bff',
+                              color: 'white',
+                              border: 'none',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            Edit Job
+                          </button>
+                          
+                          <button
+                            className="btn"
+                            onClick={() => onCloseJob(project)}
+                            style={{
+                              backgroundColor: '#dc3545',
+                              color: 'white',
+                              border: 'none',
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            Close Job
+                          </button>
+                        </>
                       )}
                     </div>
                   </td>

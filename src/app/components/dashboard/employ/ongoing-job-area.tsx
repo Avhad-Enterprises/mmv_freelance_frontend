@@ -6,6 +6,7 @@ import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from '@/context/SidebarContext';
+import { useUser } from "@/context/UserContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import DashboardSearchBar from "../common/DashboardSearchBar";
 import ApplicantsList from "./ApplicantsList";
@@ -21,6 +22,7 @@ export interface ProjectSummary {
   category: string;
   budget: number;
   status: number;
+  bidding_enabled?: boolean;
 }
 
 export interface Applicant {
@@ -52,6 +54,7 @@ interface Submission {
 
 const OngoingJobArea: FC = () => {
   const router = useRouter();
+  const { userData } = useUser();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -649,9 +652,20 @@ const OngoingJobArea: FC = () => {
     setSelectedApplicant(null);
   };
 
-  const handleOpenChat = (applicant: Applicant) => {
-    // TODO: Implement chat functionality
-    toast(`Chat with ${applicant.first_name} ${applicant.last_name} - Coming soon!`);
+  const handleOpenChat = (applicant: Applicant | { user_id: number; status?: number }) => {
+    if (!applicant.user_id || !userData?.user_id) {
+      toast.error('Unable to start chat: User information not available');
+      return;
+    }
+
+    const currentUserId = userData.user_id.toString();
+    const targetUserId = applicant.user_id.toString();
+    
+    // Sort IDs to match Firebase pattern
+    const conversationId = [currentUserId, targetUserId].sort().join('_');
+
+    // Navigate to messages page
+    router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
   };
 
   return (
@@ -686,6 +700,7 @@ const OngoingJobArea: FC = () => {
               selectedApplicant={selectedApplicant}
               loadingProfile={loadingProfile}
               onBackToApplicants={handleBackToApplicants}
+              onMessage={(userId) => handleOpenChat({ user_id: userId })}
             />
           ) : selectedProjectForSubmissions ? (
             // Submissions View

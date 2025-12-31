@@ -12,6 +12,7 @@ import { resetFilter } from "@/redux/features/filterSlice";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { useSidebar } from "@/context/SidebarContext";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
+import { formatBudget } from "@/utils/currencyUtils";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 import toast from "react-hot-toast";
 import Select from 'react-select';
@@ -398,7 +399,7 @@ const DashboardJobBrowseArea = () => {
 
         <div className="candidate-info text-center mb-3">
           <span>Budget</span>
-          <div>{item.currency ? `${item.currency} ${budget ?? 0}` : `$${budget ?? 0}`}</div>
+          <div>{formatBudget(budget ?? 0, item.currency)}</div>
         </div>
 
         <div className="candidate-info text-center mb-3">

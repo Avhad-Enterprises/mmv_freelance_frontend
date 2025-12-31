@@ -95,20 +95,22 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job.projects_task_id) return;
     try {
-      // Check saved status
+      // Check saved status with robust type comparison
       const savedRes = await makeGetRequest(`api/v1/saved/my-saved-projects`);
-      const savedProjectIds = savedRes.data.data.map((p: any) => p.projects_task_id);
-      if (savedProjectIds.includes(job.projects_task_id)) {
-        setIsSaved(true);
+      if (savedRes.data?.data) {
+        const savedProjectIds = savedRes.data.data.map((p: any) => String(p.projects_task_id));
+        if (savedProjectIds.includes(String(job.projects_task_id))) {
+          setIsSaved(true);
+        }
       }
 
       // Check if already applied to this specific project using the correct API
       const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
 
       if (appliedRes.data?.success && appliedRes.data?.data) {
-        // Find if user has applied to THIS specific project
+        // Find if user has applied to THIS specific project - convert to strings for robust comparison
         const applicationForThisProject = appliedRes.data.data.find(
-          (app: any) => app.projects_task_id === job.projects_task_id
+          (app: any) => String(app.projects_task_id) === String(job.projects_task_id)
         );
 
         if (applicationForThisProject) {

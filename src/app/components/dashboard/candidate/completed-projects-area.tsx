@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DashboardHeader from "./dashboard-header";
 import DashboardSearchBar from "../common/DashboardSearchBar";
+import { formatBudget } from "@/utils/currencyUtils";
 import { authCookies } from "@/utils/cookies";
 import toast from 'react-hot-toast';
 
@@ -157,7 +158,7 @@ const CompletedProjectsArea = () => {
                         <small className="text-muted">{project.client_company}</small>
                       </div>
                     </td>
-                    <td><strong>₹{project.budget?.toLocaleString() ?? 0}</strong></td>
+                    <td><strong>{formatBudget(project.budget ?? 0, project.currency)}</strong></td>
                     <td>
                       <span className="text-muted">
                         {new Date(project.approved_at).toLocaleDateString('en-IN', {
@@ -207,7 +208,7 @@ const CompletedProjectsArea = () => {
                     </div>
                     <div className="col-md-6">
                       <small className="text-muted d-block">Budget</small>
-                      <strong className="text-success">₹{selectedProject.budget?.toLocaleString()}</strong>
+                      <strong className="text-success">{formatBudget(selectedProject.budget ?? 0, selectedProject.currency)}</strong>
                     </div>
                   </div>
                 </div>
