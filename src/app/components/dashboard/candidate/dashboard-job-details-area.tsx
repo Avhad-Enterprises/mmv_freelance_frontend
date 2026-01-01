@@ -248,9 +248,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       return;
     }
 
-    // Check if application is already approved (status = 1)
+    // Check if application is already approved (status = 1) or completed (status = 2)
     if (applicationStatus === 1) {
-      toast.error('Cannot withdraw from an approved project. Please contact support if you have concerns.');
+      toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
+      return;
+    }
+    
+    if (applicationStatus === 2) {
+      toast.error('Cannot withdraw from a completed project.');
       return;
     }
 
@@ -580,7 +585,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       <button
                         className="btn-one w-100 mt-15"
                         onClick={handleApplyClick}
-                        disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
+                        disabled={isApplying || checkingCredits || userRole === 'CLIENT' || (isApplied && applicationStatus !== 0)}
                         style={!isApplied ? {
                           backgroundColor: '#3d6f5d',
                           borderColor: '#3d6f5d',
@@ -590,7 +595,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                           fontWeight: '500'
                         } : undefined}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : 
+                         isApplied ? 
+                           (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> : 
+                            applicationStatus === 1 ? '✅ Application Accepted' : 
+                            applicationStatus === 2 ? '✅ Project Completed' : 
+                            '✅ Applied') : 
+                         'Apply Now'}
                       </button>
 
                       <button

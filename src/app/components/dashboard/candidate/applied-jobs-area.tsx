@@ -193,13 +193,13 @@ const AppliedJobsArea = ({ }: IProps) => {
 
         {/* Improved Filter Section */}
         <div className="mb-4">
-          <label className="form-label fw-semibold mb-2">Filter by Application Status:</label>
           <div className="d-flex flex-wrap gap-2">
             {[
               { value: 'All', label: 'All', count: jobs.length },
               { value: 'Pending', label: 'Pending', count: jobs.filter(j => j.status === 'Pending').length },
               { value: 'Ongoing', label: 'Ongoing', count: jobs.filter(j => j.status === 'Ongoing').length },
               { value: 'Completed', label: 'Completed', count: jobs.filter(j => j.status === 'Completed').length },
+              { value: 'Rejected', label: 'Rejected', count: jobs.filter(j => j.status === 'Rejected').length },
             ].map((option) => (
               <button
                 key={option.value}
@@ -397,26 +397,6 @@ const AppliedJobsArea = ({ }: IProps) => {
                         </div>
                       </div>
                     )}
-                    
-                    {/* Skills Row */}
-                    <div className="row">
-                      <div className="col-12">
-                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap mt-2">
-                          {job.skills_required &&
-                            job.skills_required.slice(0, 5).map((s, i) => (
-                              <li key={i}>
-                                {s}
-                              </li>
-                            ))}
-                          {job.skills_required &&
-                            job.skills_required.length > 5 && (
-                              <li className="more">
-                                +{job.skills_required.length - 5}
-                              </li>
-                            )}
-                        </ul>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>

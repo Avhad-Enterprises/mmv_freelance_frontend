@@ -48,6 +48,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
 
   // Ref to prevent duplicate useEffect runs
@@ -135,13 +136,16 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         if (application && application.applied_projects_id && application.projects_task_id === job.projects_task_id) {
           setIsApplied(true);
           setApplicationId(application.applied_projects_id);
+          setApplicationStatus(application.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
         setApplicationId(null);
+        setApplicationStatus(null);
       }
 
     } catch (error: any) {
@@ -220,6 +224,17 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const handleWithdrawApplication = async () => {
     if (!applicationId) {
       toast.error('Application ID not found.');
+      return;
+    }
+
+    // Check if application is already approved (status = 1) or completed (status = 2)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
+      return;
+    }
+    
+    if (applicationStatus === 2) {
+      toast.error('Cannot withdraw from a completed project.');
       return;
     }
 
@@ -406,11 +421,16 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     <button
                       className="btn-one w-100 mt-25"
                       onClick={handleApplyClick}
-                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
+                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication || (isApplied && applicationStatus !== 0)}
                     >
                       {isCheckingApplication ? 'Checking...' :
                         isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') :
-                          isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                          isApplied ? 
+                            (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> : 
+                             applicationStatus === 1 ? '✅ Application Accepted' : 
+                             applicationStatus === 2 ? '✅ Project Completed' : 
+                             '✅ Applied') : 
+                          'Apply Now'}
                     </button>
                   )}
 
