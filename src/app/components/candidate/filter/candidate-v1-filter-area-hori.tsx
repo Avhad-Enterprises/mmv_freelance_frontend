@@ -93,7 +93,7 @@ const CandidateV1FilterArea = ({
               onClick={onClearFilters}
               className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
             >
-              Reset Filters
+              Reset
             </button>
           </div>
         </div>

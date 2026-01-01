@@ -22,7 +22,7 @@ const howItWorksData = {
     {
       id: 1,
       title: "Post Your Video Project",
-      description: "Quick, Easy, Effortless. Define video editing or videography needs. Our smart form makes job posting simple.",
+      description: "Quick, Easy, Effortless. Define video editing or videography needs. Our smart form makes project posting simple.",
       icon: "/assets/images/assets/c1.png"
     },
     {

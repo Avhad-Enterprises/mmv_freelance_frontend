@@ -95,20 +95,22 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
   const checkInitialJobStatus = async (currentUserId: number) => {
     if (!job.projects_task_id) return;
     try {
-      // Check saved status
+      // Check saved status with robust type comparison
       const savedRes = await makeGetRequest(`api/v1/saved/my-saved-projects`);
-      const savedProjectIds = savedRes.data.data.map((p: any) => p.projects_task_id);
-      if (savedProjectIds.includes(job.projects_task_id)) {
-        setIsSaved(true);
+      if (savedRes.data?.data) {
+        const savedProjectIds = savedRes.data.data.map((p: any) => String(p.projects_task_id));
+        if (savedProjectIds.includes(String(job.projects_task_id))) {
+          setIsSaved(true);
+        }
       }
 
       // Check if already applied to this specific project using the correct API
       const appliedRes = await makeGetRequest(`api/v1/applications/my-applications`);
 
       if (appliedRes.data?.success && appliedRes.data?.data) {
-        // Find if user has applied to THIS specific project
+        // Find if user has applied to THIS specific project - convert to strings for robust comparison
         const applicationForThisProject = appliedRes.data.data.find(
-          (app: any) => app.projects_task_id === job.projects_task_id
+          (app: any) => String(app.projects_task_id) === String(job.projects_task_id)
         );
 
         if (applicationForThisProject) {
@@ -246,9 +248,14 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       return;
     }
 
-    // Check if application is already approved (status = 1)
+    // Check if application is already approved (status = 1) or completed (status = 2)
     if (applicationStatus === 1) {
-      toast.error('Cannot withdraw from an approved project. Please contact support if you have concerns.');
+      toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
+      return;
+    }
+    
+    if (applicationStatus === 2) {
+      toast.error('Cannot withdraw from a completed project.');
       return;
     }
 
@@ -283,25 +290,25 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     }
 
     if (!userId || job.projects_task_id === undefined) {
-      toast.error('Unable to get user or job information');
+      toast.error('Unable to get user or project information');
       return;
     }
 
     setIsSaving(true);
     try {
       if (isSaved) {
-        // Unsave the job
+        // Unsave the project
         await makeDeleteRequest('api/v1/saved/unsave-project', {
           projects_task_id: job.projects_task_id,
         });
-        toast.success('Job unsaved!');
+        toast.success('Project unsaved!');
         setIsSaved(false);
       } else {
-        // Save the job
+        // Save the project
         await makePostRequest('api/v1/saved/save-project', {
           projects_task_id: job.projects_task_id,
         });
-        toast.success('Job saved!');
+        toast.success('Project saved!');
         setIsSaved(true);
       }
     } catch (error: any) {
@@ -449,7 +456,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
 
                     <button onClick={onBack} className="btn-two mb-20">
-                      &larr; Back to Jobs
+                      &larr; Back to Projects
                     </button>
 
                     <div className="post-date">
@@ -466,7 +473,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
                     </div>
 
-                    <div className="post-block border-style mt-50 lg-mt-30">
+                    {/* <div className="post-block border-style mt-50 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                         <h4 className="block-title">Project Specifications</h4>
@@ -479,11 +486,11 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
                         {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
                       </ul>
-                    </div>
+                    </div> */}
 
                     <div className="post-block border-style mt-40 lg-mt-30">
                       <div className="d-flex align-items-center">
-                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                         <h4 className="block-title">Required Skills</h4>
                       </div>
                       <ul className="list-type-two style-none mt-25 mb-15">
@@ -578,9 +585,23 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       <button
                         className="btn-one w-100 mt-15"
                         onClick={handleApplyClick}
-                        disabled={isApplying || checkingCredits || userRole === 'CLIENT'}
+                        disabled={isApplying || checkingCredits || userRole === 'CLIENT' || (isApplied && applicationStatus !== 0)}
+                        style={!isApplied ? {
+                          backgroundColor: '#3d6f5d',
+                          borderColor: '#3d6f5d',
+                          color: 'white',
+                          borderRadius: '8px',
+                          padding: '12px 24px',
+                          fontWeight: '500'
+                        } : undefined}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : 
+                         isApplied ? 
+                           (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> : 
+                            applicationStatus === 1 ? '✅ Application Accepted' : 
+                            applicationStatus === 2 ? '✅ Project Completed' : 
+                            '✅ Applied') : 
+                         'Apply Now'}
                       </button>
 
                       <button
@@ -611,7 +632,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       {showBiddingModal && (
         <BiddingModal
           originalBudget={job.budget || 0}
-          currency="USD"
+          currency={job.currency || 'USD'}
           onSubmit={handleBidSubmit}
           onCancel={() => setShowBiddingModal(false)}
           isSubmitting={isApplying}

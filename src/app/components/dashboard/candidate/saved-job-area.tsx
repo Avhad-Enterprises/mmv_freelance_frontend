@@ -37,20 +37,20 @@ const SavedJobArea = () => {
         const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
         const allJobs = jobsRes.data.data || [];
         
-        // Then, get the user's saved project IDs
+        // Then, get the user's saved project IDs - convert to strings for robust comparison
         const savedProjectsRes = await makeGetRequest("api/v1/saved/my-saved-projects");
-        const savedProjectIds = new Set(savedProjectsRes.data.data.map((p: any) => p.projects_task_id));
+        const savedProjectIds = new Set(savedProjectsRes.data.data.map((p: any) => String(p.projects_task_id)));
         
-        // Filter the main job list to get the full objects for saved jobs
+        // Filter the main project list to get the full objects for saved projects
         const userSavedJobs = allJobs.filter((job: IJobType) => 
-          job.projects_task_id !== undefined && savedProjectIds.has(job.projects_task_id)
+          job.projects_task_id !== undefined && savedProjectIds.has(String(job.projects_task_id))
         );
         
-        // Populate the Redux store with the saved jobs
+        // Populate the Redux store with the saved projects
         dispatch(set_wishlist(userSavedJobs));
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        toast.error("Failed to load saved jobs.");
+        toast.error("Failed to load saved projects.");
         dispatch(set_wishlist([])); // Clear list on error
       } finally {
         setLoading(false);
@@ -60,11 +60,11 @@ const SavedJobArea = () => {
     fetchSavedJobs();
   }, [decoded, dispatch]);
 
-  // Handler to unsave a job (it will disappear from this page)
+  // Handler to unsave a project (it will disappear from this page)
   const handleToggleSave = async (job: IJobType) => {
     if (!decoded || !decoded.user_id || job.projects_task_id === undefined) return;
 
-    // In the context of this page, clicking a saved job always means unsaving it.
+    // In the context of this page, clicking a saved project always means unsaving it.
     try {
       await makeDeleteRequest("api/v1/saved/unsave-project", {
         projects_task_id: job.projects_task_id,
@@ -72,7 +72,7 @@ const SavedJobArea = () => {
       dispatch(remove_from_wishlist(job.projects_task_id));
     } catch (error) {
       console.error("Error toggling save status:", error);
-      toast.error("Could not remove the job.");
+      toast.error("Could not remove the project.");
     }
   };
 
@@ -215,17 +215,17 @@ const SavedJobArea = () => {
       <div className="dashboard-body">
         <div className="position-relative">
           <DashboardHeader />
-          <h2 className="main-title mb-30">Saved Jobs</h2>
+          <h2 className="main-title mb-30">Saved Projects</h2>
 
           <DashboardSearchBar 
-            placeholder="Search saved jobs by title, category, type..."
+            placeholder="Search saved projects by title, category, type..."
             onSearch={setSearchQuery}
           />
 
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
               <div className="total-job-found">
-                <span className="text-dark fw-500">{savedJobs.length}</span> saved jobs found
+                <span className="text-dark fw-500">{savedJobs.length}</span> saved projects found
               </div>
             </div>
 
@@ -239,7 +239,7 @@ const SavedJobArea = () => {
               <>
                 {savedJobs.length === 0 ? (
                     <div className="text-center mt-5">
-                        <h3>No saved jobs found</h3>
+                        <h3>No saved projects found</h3>
                         <p>You can save jobs from the 'Browse Projects' page.</p>
                     </div>
                 ) : (

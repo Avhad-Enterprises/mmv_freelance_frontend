@@ -19,7 +19,7 @@ const WishlistArea = () => {
               <div className="light-bg border-20 ps-4 pe-4">
                 <a className="filter-header border-20 d-block search">
                   <span className="main-title fw-500 text-dark">
-                   {wishlist.length === 0 ? 'No Job Found in Your Wishlist.' : 'Wishlist Jobs'} 
+                   {wishlist.length === 0 ? 'No Project Found in Your Wishlist.' : 'Wishlist Projects'} 
                   </span>
                 </a>
               </div>
@@ -30,7 +30,7 @@ const WishlistArea = () => {
             <div className="job-post-item-wrapper">
               <div className="upper-filter d-flex justify-content-between align-items-center mb-25 mt-70 lg-mt-40">
                 <div className="total-job-found">
-                  All <span className="text-dark">{wishlist?.length}</span> jobs
+                  All <span className="text-dark">{wishlist?.length}</span> projects
                   found
                 </div>
                 <div className="d-flex align-items-center">

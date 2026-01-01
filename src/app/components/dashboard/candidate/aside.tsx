@@ -19,26 +19,36 @@ import nav_1 from "@/assets/dashboard/images/icon/icon_1.svg";
 import nav_1_active from "@/assets/dashboard/images/icon/icon_1_active.svg";
 import nav_2 from "@/assets/dashboard/images/icon/icon_2.svg";
 import nav_2_active from "@/assets/dashboard/images/icon/icon_2_active.svg";
-import nav_3 from "@/assets/dashboard/images/icon/icon_2.svg";
-import nav_3_active from "@/assets/dashboard/images/icon/icon_2_active.svg";
+import nav_3 from "@/assets/dashboard/images/icon/icon_3.svg";
+import nav_3_active from "@/assets/dashboard/images/icon/icon_3_active.svg";
 import nav_6 from "@/assets/dashboard/images/icon/icon_6.svg";
 import nav_6_active from "@/assets/dashboard/images/icon/icon_6_active.svg";
 import nav_7 from "@/assets/dashboard/images/icon/icon_7.svg";
 import nav_7_active from "@/assets/dashboard/images/icon/icon_7_active.svg";
 import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
 import nav_9 from "@/assets/dashboard/images/icon/icon_9.svg";
+import nav_10 from "@/assets/dashboard/images/icon/icon_10.svg";
+import nav_11 from "@/assets/dashboard/images/icon/icon_11.svg";
+import nav_12 from "@/assets/dashboard/images/icon/icon_12.svg";
+import nav_13 from "@/assets/dashboard/images/icon/icon_13.svg";
+import nav_17 from "@/assets/dashboard/images/icon/icon_17.svg";
+import nav_14 from "@/assets/dashboard/images/icon/icon_14.svg";
+import nav_5 from "@/assets/dashboard/images/icon/icon_39.svg";
+import nav_5_active from "@/assets/dashboard/images/icon/icon_39_active.svg";
+import nav_18 from "@/assets/dashboard/images/icon/icon_18.svg";
 
 import LogoutModal from "../../common/popup/logout-modal";
 
 const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/freelancer-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/freelancer-dashboard/profile", title: "My Profile" },
-    { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Job" },
+    { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/freelancer-dashboard/saved-job", title: "Saved Projects" },
     { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/freelancer-dashboard/browse-jobs", title: "Browse Projects" },
-    { id: 8, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
-    { id: 9, icon: nav_9, icon_active: nav_9, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
-    { id: 11, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/credits", title: "Keys", videoEditorOnly: true },
-    { id: 10, icon: nav_8, icon_active: nav_8, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
+    { id: 8, icon: nav_10, icon_active: nav_10, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
+    { id: 9, icon: nav_14, icon_active: nav_14, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
+    { id: 12, icon: nav_12, icon_active: nav_12, link: "/dashboard/freelancer-dashboard/completed-projects", title: "Completed Projects" },
+    { id: 11, icon: nav_18, icon_active: nav_18, link: "/dashboard/freelancer-dashboard/credits", title: "Keys", videoEditorOnly: true },
+    { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ] as const;
 

@@ -62,7 +62,7 @@ const RelatedJobs: React.FC<RelatedJobsProps> = ({ category }) => {
       <div className="container">
         <div className="position-relative">
           <div className="title-three text-center text-md-start mb-55 lg-mb-40">
-            <h2 className="main-font">Related Jobs</h2>
+            <h2 className="main-font">Related Projects</h2>
           </div>
 
           <Slider {...slider_setting} ref={sliderRef} className="related-job-slider">

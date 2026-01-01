@@ -162,6 +162,10 @@ const ConfirmApplyModal: React.FC<ConfirmApplyModalProps> = ({
                             type="button"
                             className="btn btn-outline-secondary"
                             onClick={onClose}
+                            style={{
+                                borderRadius: '8px',
+                                padding: '12px 24px'
+                            }}
                         >
                             Cancel
                         </button>
@@ -169,6 +173,14 @@ const ConfirmApplyModal: React.FC<ConfirmApplyModalProps> = ({
                             type="button"
                             className="dash-btn-two tran3s"
                             onClick={onConfirm}
+                            style={{
+                                backgroundColor: '#3d6f5d',
+                                borderColor: '#3d6f5d',
+                                color: 'white',
+                                borderRadius: '8px',
+                                padding: '12px 24px',
+                                fontWeight: '500'
+                            }}
                         >
                             Confirm &amp; Apply
                         </button>

@@ -12,6 +12,7 @@ import { resetFilter } from "@/redux/features/filterSlice";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { useSidebar } from "@/context/SidebarContext";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
+import { formatBudget } from "@/utils/currencyUtils";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 import toast from "react-hot-toast";
 import Select from 'react-select';
@@ -30,6 +31,7 @@ const DashboardJobBrowseArea = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [biddingFilter, setBiddingFilter] = useState<string>("all"); // "all", "bidding", "fixed"
+  const [currencyFilter, setCurrencyFilter] = useState<string>("all"); // Currency filter state
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [shortValue, setShortValue] = useState<string>("");
@@ -91,7 +93,7 @@ const DashboardJobBrowseArea = () => {
 
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        toast.error("Failed to load jobs. Please try again.");
+        toast.error("Failed to load projects. Please try again.");
       } finally {
         setLoading(false);
         setLoadingSkills(false);
@@ -120,6 +122,11 @@ const DashboardJobBrowseArea = () => {
       filteredData = filteredData.filter((item) => item.bidding_enabled === false);
     }
 
+    // Filter by currency
+    if (currencyFilter !== "all") {
+      filteredData = filteredData.filter((item) => item.currency === currencyFilter);
+    }
+
     if (projects_type) {
       filteredData = filteredData.filter(
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
@@ -145,7 +152,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, projects_type,
-    all_jobs, search_key, biddingFilter, shortValue,
+    all_jobs, search_key, biddingFilter, currencyFilter, shortValue,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -197,6 +204,7 @@ const DashboardJobBrowseArea = () => {
     dispatch(resetFilter());
     setSelectedSkills([]);
     setBiddingFilter("all");
+    setCurrencyFilter("all");
     setShortValue("");
     setItemOffset(0);
     toast.success("Filters reset successfully");
@@ -214,7 +222,7 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || shortValue !== "";
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
@@ -326,7 +334,7 @@ const DashboardJobBrowseArea = () => {
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
-          title={isActive ? 'Unsave Job' : 'Save Job'}
+          title={isActive ? 'Unsave Project' : 'Save Project'}
           style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
@@ -391,7 +399,7 @@ const DashboardJobBrowseArea = () => {
 
         <div className="candidate-info text-center mb-3">
           <span>Budget</span>
-          <div>{item.currency ? `${item.currency} ${budget ?? 0}` : `$${budget ?? 0}`}</div>
+          <div>{formatBudget(budget ?? 0, item.currency)}</div>
         </div>
 
         <div className="candidate-info text-center mb-3">
@@ -437,7 +445,7 @@ const DashboardJobBrowseArea = () => {
           <h2 className="main-title mb-30">Browse Projects</h2>
 
           <DashboardSearchBar
-            placeholder="Search jobs by title, description, skills..."
+            placeholder="Search projects by title, description, skills..."
             onSearch={(query) => {
               if (query.trim()) {
                 const filtered = all_jobs.filter(job =>
@@ -506,8 +514,54 @@ const DashboardJobBrowseArea = () => {
                   </select>
                 </div>
 
+                {/* Currency Filter */}
+                <div className="col-lg-2 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Currency</div>
+                  <select
+                    className="form-select"
+                    value={currencyFilter}
+                    onChange={(e) => {
+                      setCurrencyFilter(e.target.value);
+                      setItemOffset(0);
+                    }}
+                    style={{ height: '48px' }}
+                  >
+                    <option value="all">All Currencies</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="AUD">AUD (A$)</option>
+                    <option value="CAD">CAD (C$)</option>
+                    <option value="CHF">CHF (Fr)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="NZD">NZD (NZ$)</option>
+                    <option value="SGD">SGD (S$)</option>
+                    <option value="HKD">HKD (HK$)</option>
+                    <option value="KRW">KRW (₩)</option>
+                    <option value="SEK">SEK (kr)</option>
+                    <option value="NOK">NOK (kr)</option>
+                    <option value="DKK">DKK (kr)</option>
+                    <option value="MXN">MXN ($)</option>
+                    <option value="BRL">BRL (R$)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                    <option value="RUB">RUB (₽)</option>
+                    <option value="TRY">TRY (₺)</option>
+                    <option value="AED">AED (د.إ)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                    <option value="MYR">MYR (RM)</option>
+                    <option value="THB">THB (฿)</option>
+                    <option value="IDR">IDR (Rp)</option>
+                    <option value="PHP">PHP (₱)</option>
+                    <option value="PLN">PLN (zł)</option>
+                    <option value="CZK">CZK (Kč)</option>
+                    <option value="ILS">ILS (₪)</option>
+                  </select>
+                </div>
+
                 {/* Sort Filter */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <div className="filter-title fw-500 text-dark mb-2">Sort By</div>
                   <select
                     className="form-select"
@@ -525,12 +579,12 @@ const DashboardJobBrowseArea = () => {
                 </div>
 
                 {/* Reset Filters Button */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <button
                     onClick={handleReset}
                     className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
                   >
-                    Reset Filters
+                    Reset
                   </button>
                 </div>
               </div>
@@ -546,6 +600,20 @@ const DashboardJobBrowseArea = () => {
                       <span style={{ color: 'white' }}>{biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}</span>
                       <button
                         onClick={() => setBiddingFilter("all")}
+                        className="btn-close ms-2"
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
+                  {currencyFilter !== "all" && (
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
+                      style={{ backgroundColor: '#4A90E2', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>Currency: {currencyFilter}</span>
+                      <button
+                        onClick={() => setCurrencyFilter("all")}
                         className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
@@ -590,7 +658,7 @@ const DashboardJobBrowseArea = () => {
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
               <div className="total-job-found">
-                All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
+                All <span className="text-dark fw-500">{filterItems.length}</span> projects found
               </div>
             </div>
 
@@ -623,7 +691,7 @@ const DashboardJobBrowseArea = () => {
                 {/* Empty State */}
                 {currentItems && currentItems.length === 0 && (
                   <div className="text-center mt-5">
-                    <h3>No jobs found</h3>
+                    <h3>No projects found</h3>
                     <p>Try adjusting your filters to find what you're looking for.</p>
                   </div>
                 )}

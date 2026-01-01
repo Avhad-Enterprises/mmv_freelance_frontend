@@ -198,7 +198,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
               href="/dashboard/client-dashboard/submit-job"
               className="job-post-btn tran3s"
             >
-              Post a Job
+              Post a Project
             </Link>
           </div>
         </div>

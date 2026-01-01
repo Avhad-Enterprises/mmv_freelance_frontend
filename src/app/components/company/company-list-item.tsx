@@ -67,7 +67,7 @@ const CompanyListItem = ({ item }: { item: ICompany }) => {
             </Link>
             <Link href="/company-details"
               className="save-btn text-center rounded-circle tran3s"
-              title="Save Job"
+              title="Save Project"
             >
               <i className="bi bi-bookmark-dash"></i>
             </Link>

@@ -65,7 +65,7 @@ const mapApiCandidateToIFreelancer = (apiCandidate: any): IFreelancer => {
 export default function ThreadPage() {
   const params = useParams() as { id?: string };
   const conversationId = params?.id;
-  const { userData, isLoading } = useUser();
+  const { userData, currentRole, isLoading } = useUser();
   const [conversation, setConversation] = useState<any | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileModalUser, setProfileModalUser] = useState<{ id?: string; firstName?: string; email?: string } | null>(null);
@@ -75,6 +75,7 @@ export default function ThreadPage() {
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
   const [selectedFreelancer, setSelectedFreelancer] = useState<IFreelancer | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [otherParticipantId, setOtherParticipantId] = useState<string | undefined>(undefined);
 
   // Firebase Authentication Effect
   useEffect(() => {
@@ -122,6 +123,9 @@ export default function ThreadPage() {
 
           // Try to resolve the other participant's public profile (freelancer list)
           const otherId = conv.participants?.find((p: string) => p !== String(userData?.user_id));
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
           if (otherId) {
             try {
@@ -134,6 +138,7 @@ export default function ThreadPage() {
                   conv.participantDetails[otherId] = {
                     firstName: found.first_name || (found.username || '').split('@')[0],
                     email: '',
+                    profilePicture: found.profile_picture || undefined
                   };
                 }
               }
@@ -143,8 +148,62 @@ export default function ThreadPage() {
           }
 
           setConversation(conv);
+        } else if (conversationId.includes('_') && userData?.user_id) {
+          // Handle non-existent but valid pattern conversation ID
+          const participants = conversationId.split('_').sort();
+          const currentUserId = String(userData.user_id);
+          const otherId = participants.find(p => p !== currentUserId);
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
-          // Don't seed placeholder messages - let the realtime listener handle all messages
+          if (otherId && participants.includes(currentUserId)) {
+            try {
+              // Fetch other user profile info
+              let otherDetails = {
+                firstName: `User ${otherId}`,
+                email: '',
+                profilePicture: undefined
+              };
+
+              const publicRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+              if (publicRes.ok) {
+                const publicData = await publicRes.json();
+                const found = (publicData.data || []).find((f: any) => String(f.user_id) === String(otherId));
+                if (found) {
+                  otherDetails = {
+                    firstName: found.first_name || (found.username || '').split('@')[0],
+                    email: '',
+                    profilePicture: found.profile_picture || undefined
+                  };
+                }
+              }
+
+              const participantDetails = {
+                [currentUserId]: {
+                  firstName: userData.first_name || 'Me',
+                  email: userData.email || '',
+                  profilePicture: userData.profile_picture || undefined
+                },
+                [otherId]: otherDetails
+              };
+
+              const newConvData = {
+                participants,
+                participantDetails,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                lastMessage: '',
+                lastSenderId: '',
+                lastMessageRead: true
+              };
+
+              await set(convRef, newConvData);
+              setConversation({ id: conversationId, ...newConvData });
+            } catch (createErr) {
+              console.error('Failed to auto-create conversation', createErr);
+            }
+          }
         }
       } catch (err) {
         console.error('Could not load conversation', err);
@@ -359,6 +418,8 @@ export default function ThreadPage() {
                 <ChatInput
                   conversationId={conversationId}
                   currentUserId={String(userData.user_id)}
+                  userRole={currentRole}
+                  otherParticipantId={otherParticipantId}
                   onSend={async (text) => {
                     if (!conversationId || !conversation || !userData) return;
                     const senderId = String(userData.user_id);

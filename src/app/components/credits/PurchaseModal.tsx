@@ -310,6 +310,10 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                                     type="button"
                                     className="btn btn-outline-secondary"
                                     onClick={handleClose}
+                                    style={{
+                                        borderRadius: '8px',
+                                        padding: '12px 24px'
+                                    }}
                                 >
                                     Cancel
                                 </button>
@@ -317,6 +321,14 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                                     type="button"
                                     className="dash-btn-two tran3s"
                                     onClick={handlePurchase}
+                                    style={{
+                                        backgroundColor: '#3d6f5d',
+                                        borderColor: '#3d6f5d',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        padding: '12px 24px',
+                                        fontWeight: '500'
+                                    }}
                                 >
                                     Pay {formatAmount(selectedPackage.price)}
                                 </button>

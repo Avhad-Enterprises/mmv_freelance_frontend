@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * My Jobs Area for Clients
- * 
- * This component displays all jobs posted by the client and their applications.
+ * My Projects Area for Clients
+ *
+ * This component displays all projects posted by the client and their applications.
  * 
  * Status Systems in the Application:
  * 
@@ -27,6 +27,7 @@ import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from "@/context/SidebarContext";
+import { useUser } from "@/context/UserContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import CandidateDetailsArea from "@/app/components/candidate-details/candidate-details-area-sidebar";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
@@ -45,6 +46,9 @@ export interface ProjectSummary {
   category: string;
   budget: number;
   status: number; // 0: Pending, 1: Approved, 2: Completed
+  application_count: number;
+  currency?: string;
+  bidding_enabled?: boolean;
 }
 
 export interface Applicant {
@@ -68,8 +72,10 @@ interface EmployJobAreaProps {
 
 const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   const router = useRouter();
+  const { userData } = useUser();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(startInPostMode);
+  const [editingProject, setEditingProject] = useState<ProjectSummary | null>(null);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,12 +123,15 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         date_created: p.created_at,
         category: p.project_category,
         budget: p.budget,
+        currency: p.currency || 'USD',
         status: p.status,
+        bidding_enabled: p.bidding_enabled || false,
+        application_count: p.application_count || 0,
       }));
 
       setProjects(processedData);
     } catch (err: any) {
-      const message = err.response?.data?.message || err.message || "Failed to load your jobs.";
+      const message = err.response?.data?.message || err.message || "Failed to load your projects.";
       setError(message);
       setProjects([]);
     } finally {
@@ -177,8 +186,14 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
       router.push('/dashboard/client-dashboard/jobs');
     } else {
       setIsPostingJob(false);
+      setEditingProject(null);
       fetchClientData();
     }
+  };
+
+  const handleEditJob = (project: ProjectSummary) => {
+    setEditingProject(project);
+    setIsPostingJob(true);
   };
 
   const handleViewApplicantsClick = async (project: ProjectSummary) => {
@@ -242,7 +257,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   // Handler to close a job
   const handleCloseJob = async (project: ProjectSummary) => {
     const confirmed = window.confirm(
-      `Are you sure you want to close "${project.title}"?\n\nThis will reject all pending applications and the job will no longer accept new applicants.`
+      `Are you sure you want to close "${project.title}"?\n\nThis will reject all pending applications and the project will no longer accept new applicants.`
     );
 
     if (!confirmed) return;
@@ -257,10 +272,10 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         p.project_id === project.project_id ? { ...p, status: 3 } : p
       ));
 
-      toast.success('Job closed successfully. All pending applications have been rejected.');
+      toast.success('Project closed successfully. All pending applications have been rejected.');
     } catch (err: any) {
       console.error('Failed to close job:', err);
-      const message = err.response?.data?.message || err.message || 'Failed to close job.';
+      const message = err.response?.data?.message || err.message || 'Failed to close project.';
       toast.error(message);
     }
   };
@@ -325,7 +340,8 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   const handleUpdateApplicantStatus = async (
     projectId: string,
     applicationId: number,
-    newStatus: Applicant['status']
+    newStatus: Applicant['status'],
+    rejectionReason?: string
   ) => {
     // Check if another applicant is already assigned or completed by looking at projects
     const currentProject = projects.find(p => p.project_id === projectId);
@@ -360,11 +376,26 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     }
 
     try {
-      // Update application status using the correct endpoint
-      await makePatchRequest(`api/v1/applications/update-status`, {
+      // Prepare payload with rejection reason if status is 3 (rejected)
+      const payload: any = {
         applied_projects_id: applicationId,
         status: newStatus,
-      });
+      };
+      
+      if (newStatus === 3 && rejectionReason) {
+        payload.rejection_reason = rejectionReason;
+      }
+
+      // Debug logging
+      console.log('=== FRONTEND: Sending Update Request ===');
+      console.log('Application ID:', applicationId);
+      console.log('New Status:', newStatus);
+      console.log('Rejection Reason:', rejectionReason);
+      console.log('Payload:', payload);
+      console.log('======================================');
+
+      // Update application status using the correct endpoint
+      await makePatchRequest(`api/v1/applications/update-status`, payload);
 
       // Update local state immediately after successful API call
       setApplicants(prev => prev.map(app =>
@@ -532,26 +563,20 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   };
 
   // Handler for opening chat with applicant
-  const handleOpenChat = (applicant: Applicant) => {
-    if (!applicant.user_id) {
+  const handleOpenChat = (applicant: Applicant | { user_id: number; status?: number }) => {
+    if (!applicant.user_id || !userData?.user_id) {
       toast.error('Unable to start chat: User information not available');
       return;
     }
 
-    // Store chat restriction info in sessionStorage for the chat component to access
-    const chatRestriction = {
-      targetUserId: applicant.user_id.toString(),
-      applicationStatus: applicant.status,
-      projectId: selectedProjectForApplicants?.project_id,
-      projectTitle: selectedProjectForApplicants?.title,
-      isPending: applicant.status === 0,
-      maxMessages: applicant.status === 0 ? 10 : -1, // -1 means unlimited
-    };
+    const currentUserId = userData.user_id.toString();
+    const targetUserId = applicant.user_id.toString();
+    
+    // Sort IDs to match Firebase pattern
+    const conversationId = [currentUserId, targetUserId].sort().join('_');
 
-    sessionStorage.setItem('chatRestriction', JSON.stringify(chatRestriction));
-
-    // Navigate to chat page
-    router.push('/dashboard/client-dashboard/submit-job');
+    // Navigate to messages page
+    router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
   };
 
   return (
@@ -560,11 +585,11 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">
-            {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Job" : "My Jobs")}
+            {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Project" : "My Projects")}
           </h2>
           {/* {!isPostingJob && !selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
-              Post a Job
+              Post a Project
             </button>
           )} */}
           {selectedApplicant && (
@@ -574,7 +599,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           )}
           {selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={handleBackToJobs}>
-              ← Back to Jobs
+              ← Back to Projects
             </button>
           )}
         </div>
@@ -585,6 +610,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
             selectedApplicant={selectedApplicant}
             loadingProfile={loadingProfile}
             onBackToApplicants={handleBackToApplicants}
+            onMessage={(userId) => handleOpenChat({ user_id: userId })}
           />
         ) : selectedProjectForApplicants ? (
           // Applicants View
@@ -604,7 +630,10 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           // Jobs View
           <>
             {isPostingJob ? (
-              <PostJobForm onBackToList={handleReturnToList} />
+              <PostJobForm 
+                onBackToList={handleReturnToList} 
+                editProject={editingProject} 
+              />
             ) : (
               <JobsList
                 projects={projects}
@@ -612,6 +641,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
                 error={error}
                 onViewApplicants={handleViewApplicantsClick}
                 onCloseJob={handleCloseJob}
+                onEditJob={handleEditJob}
                 getStatusInfo={getProjectStatusInfo}
               />
             )}
