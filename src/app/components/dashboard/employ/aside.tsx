@@ -40,7 +40,7 @@ const nav_data = [
     { id: 7, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/client-dashboard/Candidates", title: "Candidates" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Chat" },
     { id: 9, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/ongoing-projects", title: "Ongoing Projects" },
-    { id: 11, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/client-dashboard/approved-projects", title: "Approved Projects" },
+    { id: 11, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/client-dashboard/completed-projects", title: "Completed Projects" },
     { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/client-dashboard/setting", title: "Account Settings" },
 ];
 

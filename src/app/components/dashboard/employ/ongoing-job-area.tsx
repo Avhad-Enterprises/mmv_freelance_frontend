@@ -479,7 +479,7 @@ const OngoingJobArea: FC = () => {
 
         if (status === 1) {
           // Approved - project is now completed
-          toast.success('Submission approved! Redirecting to Approved Projects...');
+          toast.success('Submission approved! Redirecting to Completed Projects...');
           handleCloseSubmissionModal();
 
           // Remove the completed project from ongoing projects list immediately
@@ -491,9 +491,9 @@ const OngoingJobArea: FC = () => {
           setSelectedProjectForSubmissions(null);
           setSubmissions([]);
 
-          // Redirect to approved projects page after a short delay
+          // Redirect to completed projects page after a short delay
           setTimeout(() => {
-            router.push('/dashboard/client-dashboard/approved-projects');
+            router.push('/dashboard/client-dashboard/completed-projects');
           }, 1500);
         } else {
           // Rejected

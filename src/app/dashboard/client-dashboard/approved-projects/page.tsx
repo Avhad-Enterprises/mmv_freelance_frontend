@@ -1,14 +1,7 @@
-import React from "react";
-import EmployAside from "@/app/components/dashboard/employ/aside";
-import ApprovedProjectsArea from "@/app/components/dashboard/employ/approved-projects-area";
+import { redirect } from 'next/navigation';
 
-const ApprovedProjectsPage = () => {
-  return (
-    <div className='dashboard-wrapper'>
-        <EmployAside />
-        <ApprovedProjectsArea />
-    </div>
-  );
-};
+export default function Page() {
+  // Redirect old route to the new completed-projects path
+  redirect('/dashboard/client-dashboard/completed-projects');
+}
 
-export default ApprovedProjectsPage;

@@ -195,6 +195,18 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
 
   return (
     <>
+      <style jsx>{`
+        .candidate-profile-area .dropdown-menu .dropdown-item {
+          transition: background-color .15s ease, color .15s ease;
+        }
+
+        .candidate-profile-area .dropdown-menu .dropdown-item:hover,
+        .candidate-profile-area .dropdown-menu .dropdown-item:focus {
+          background-color: #31795A !important;
+          color: #fff !important;
+        }
+      `}</style>
+
       <div className="candidate-profile-area">
         <div className="accordion-box list-style show">
           {applicantsLoading && (

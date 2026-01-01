@@ -63,7 +63,7 @@ const CompletedProjectsArea = () => {
 
         if (data.success) {
             console.log('All client projects:', data.data);
-            
+
             // Filter for Completed projects (status === 2)
             const completedProjects = (data.data || [])
                 .filter((task: any) => {
@@ -78,7 +78,7 @@ const CompletedProjectsArea = () => {
                     budget: task.budget,
                     status: task.status
                 }));
-            
+
             console.log('Filtered completed projects:', completedProjects);
             setProjects(completedProjects);
         } else {
@@ -106,7 +106,7 @@ const CompletedProjectsArea = () => {
         if (!token) throw new Error("Authentication required");
 
         console.log('Fetching submissions for project:', project.project_id);
-        
+
         // Correct endpoint: /:projectId/submissions
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`, {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -119,7 +119,7 @@ const CompletedProjectsArea = () => {
             // Find the approved submission (status === 1)
             const approved = result.data.find((sub: Submission) => sub.status === 1);
             console.log('Found approved submission:', approved);
-            
+
             if (approved) {
                 setApprovedSubmission(approved);
             } else {
