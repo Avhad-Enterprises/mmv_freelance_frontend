@@ -169,12 +169,19 @@ const CompletedProjectsArea = () => {
                       </span>
                     </td>
                     <td style={{ textAlign: 'center' }}>
-                      <button 
-                        className="btn btn-sm btn-success text-white"
+                      <button
+                        className="btn"
                         onClick={() => handleViewDetails(project)}
-                        style={{ minWidth: '110px' }}
+                        style={{
+                          backgroundColor: '#31795A',
+                          color: 'white',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
                       >
-                        <i className="bi bi-eye me-1"></i>
                         View Details
                       </button>
                     </td>

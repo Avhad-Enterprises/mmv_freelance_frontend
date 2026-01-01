@@ -54,7 +54,7 @@ const MultipleSelectionField: FC<Props> = ({ label, options, selectedItems, onCh
           </div>
         ))}
       </div>
-      {error && <div className="error mt-2">{error}</div>}
+      {error && <div className="error mt-2" style={{ color: 'red' }}>{error}</div>}
     </div>
   );
 };

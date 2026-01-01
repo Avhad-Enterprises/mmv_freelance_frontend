@@ -23,6 +23,8 @@ const statusMap: Record<number, { text: string; className: string }> = {
 interface IJob extends Omit<IJobType, 'status'> {
   status: 'Pending' | 'Ongoing' | 'Completed' | 'Rejected'; // Application Status
   rejection_reason?: string; // Reason for rejection (if rejected)
+  bid_amount?: number; // Bid amount for bidding-enabled projects
+  bid_message?: string; // Bid message for bidding-enabled projects
 }
 
 type IProps = {};
@@ -102,6 +104,8 @@ const AppliedJobsArea = ({ }: IProps) => {
             created_at: job.created_at || '',
             additional_notes: job.additional_notes || '',
             bidding_enabled: job.bidding_enabled || false,
+            bid_amount: job.bid_amount ? Number(job.bid_amount) : undefined,
+            bid_message: job.bid_message || undefined,
             // Client info
             client_user_id: job.client_user_id ? Number(job.client_user_id) : undefined,
             client_first_name: job.client_first_name,
@@ -191,15 +195,54 @@ const AppliedJobsArea = ({ }: IProps) => {
         <div className="mb-4">
           <label className="form-label fw-semibold mb-2">Filter by Application Status:</label>
           <div className="d-flex flex-wrap gap-2">
-            {['All', 'Pending', 'Ongoing', 'Completed'].map((status) => (
+            {[
+              { value: 'All', label: 'All', count: jobs.length },
+              { value: 'Pending', label: 'Pending', count: jobs.filter(j => j.status === 'Pending').length },
+              { value: 'Ongoing', label: 'Ongoing', count: jobs.filter(j => j.status === 'Ongoing').length },
+              { value: 'Completed', label: 'Completed', count: jobs.filter(j => j.status === 'Completed').length },
+            ].map((option) => (
               <button
-                key={status}
-                type="button"
-                className={`btn-one ${selectedStatus === status ? 'active' : ''}`}
-                style={{ minWidth: '100px' }}
-                onClick={() => handleStatusFilter(status as any)}
+                key={option.value}
+                onClick={() => handleStatusFilter(option.value as any)}
+                style={{
+                  padding: '8px 16px',
+                  border: `2px solid ${selectedStatus === option.value ? '#31795A' : '#E8ECF2'}`,
+                  borderRadius: '8px',
+                  backgroundColor: selectedStatus === option.value ? '#31795A' : '#fff',
+                  color: selectedStatus === option.value ? '#fff' : '#244034',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: selectedStatus === option.value ? '0 2px 4px rgba(49, 121, 90, 0.2)' : '0 2px 4px rgba(0, 0, 0, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedStatus !== option.value) {
+                    e.currentTarget.style.borderColor = '#31795A';
+                    e.currentTarget.style.color = '#31795A';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedStatus !== option.value) {
+                    e.currentTarget.style.borderColor = '#E8ECF2';
+                    e.currentTarget.style.color = '#244034';
+                  }
+                }}
               >
-                {status}
+                {option.label}
+                <span style={{
+                  backgroundColor: selectedStatus === option.value ? 'rgba(255, 255, 255, 0.2)' : '#f8f9fa',
+                  color: selectedStatus === option.value ? '#fff' : '#6c757d',
+                  padding: '2px 6px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  {option.count}
+                </span>
               </button>
             ))}
           </div>
@@ -251,32 +294,46 @@ const AppliedJobsArea = ({ }: IProps) => {
                     </a>
                   </div>
                   <div className="right-side">
-                    <div className="row gx-2 align-items-center mb-2">
-                      <div className="col-lg-4">
-                        <div className="position-relative">
-                          <h4 className="candidate-name mb-0">
-                            <a
-                              onClick={() => setSelectedJob(job)}
-                              className="tran3s cursor-pointer"
-                            >
-                              {job.project_title}
-                            </a>
-                          </h4>
-                        </div>
+                    {/* Title Row */}
+                    <div className="row gx-3 align-items-center mb-3">
+                      <div className="col-12">
+                        <h4 className="candidate-name mb-0">
+                          <a
+                            onClick={() => setSelectedJob(job)}
+                            className="tran3s cursor-pointer"
+                          >
+                            {job.project_title}
+                          </a>
+                        </h4>
                       </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
+                    </div>
+
+                    {/* Info Row */}
+                    <div className="row gx-3 align-items-center mb-3">
+                      <div className="col-lg-3 col-md-4 col-sm-6 mb-3 mb-lg-0">
                         <div className="candidate-info">
                           <span>Budget</span>
                           <div>{formatBudget(job.budget ?? 0, job.currency)}</div>
                         </div>
                       </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
+                      <div className="col-lg-2 col-md-4 col-sm-6 mb-3 mb-lg-0">
                         <div className="candidate-info">
                           <span>Type</span>
                           <div>{job.projects_type || 'N/A'}</div>
                         </div>
                       </div>
-                      <div className="col-lg-2 col-md-4 col-sm-6">
+                      <div className="col-lg-3 col-md-4 col-sm-6 mb-3 mb-lg-0">
+                        <div className="candidate-info">
+                          <span>Your Bid</span>
+                          <div className="fw-bold text-success">
+                            {job.bidding_enabled && job.bid_amount 
+                              ? formatBudget(job.bid_amount, job.currency) 
+                              : 'NA'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-lg-2 col-md-4 col-sm-6 mb-3 mb-lg-0">
                         <div className="candidate-info">
                           <span>Application Status</span>
                           <div>
@@ -286,15 +343,17 @@ const AppliedJobsArea = ({ }: IProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-lg-2 col-md-4">
-                        <div className="d-flex justify-content-lg-end align-items-center">
-                          <a
-                            onClick={() => setSelectedJob(job)}
-                            className="profile-btn tran3s ms-md-2 cursor-pointer"
-                          >
-                            View Details
-                          </a>
-                        </div>
+                      <div className="col-lg-2 col-md-12 d-flex justify-content-lg-end justify-content-start">
+                        <a
+                          onClick={() => setSelectedJob(job)}
+                          className="profile-btn tran3s cursor-pointer"
+                          style={{
+                            padding: '8px 20px',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          View Details
+                        </a>
                       </div>
                     </div>
                     
@@ -339,9 +398,10 @@ const AppliedJobsArea = ({ }: IProps) => {
                       </div>
                     )}
                     
+                    {/* Skills Row */}
                     <div className="row">
                       <div className="col-12">
-                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap mt-2">
                           {job.skills_required &&
                             job.skills_required.slice(0, 5).map((s, i) => (
                               <li key={i}>

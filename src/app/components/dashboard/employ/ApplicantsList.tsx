@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import AuthenticatedImage from '../../common/AuthenticatedImage';
+import { formatBudget } from '@/utils/currencyUtils';
 
 // Interface defining the props for this component
 interface Applicant {
@@ -24,7 +25,7 @@ interface ApplicantsListProps {
   applicantsLoading: boolean;
   applicantsError: string | null;
   savedApplicants: number[];
-  selectedProjectForApplicants: { project_id: string; title: string; budget?: number; bidding_enabled?: boolean } | null;
+  selectedProjectForApplicants: { project_id: string; title: string; budget?: number; bidding_enabled?: boolean; currency?: string } | null;
   onViewProfile: (applicantId: number) => void;
   onToggleSave: (applicantId: number) => void;
   onUpdateApplicantStatus: (projectId: string, applicationId: number, newStatus: Applicant['status'], rejectionReason?: string) => void;
@@ -264,7 +265,7 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                             <span style={{ fontSize: '12px', color: '#666' }}>Bid Amount</span>
                             <div className="fw-bold text-success" style={{ fontSize: '15px', marginTop: '4px' }}>
                               {selectedProjectForApplicants?.bidding_enabled 
-                                ? `$${applicant.bid_amount?.toFixed(2) || '0.00'}` 
+                                ? formatBudget(applicant.bid_amount || 0, selectedProjectForApplicants?.currency || 'USD') 
                                 : 'N/A'}
                             </div>
                           </div>

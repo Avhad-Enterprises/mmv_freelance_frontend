@@ -621,7 +621,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       {showBiddingModal && (
         <BiddingModal
           originalBudget={job.budget || 0}
-          currency="USD"
+          currency={job.currency || 'USD'}
           onSubmit={handleBidSubmit}
           onCancel={() => setShowBiddingModal(false)}
           isSubmitting={isApplying}

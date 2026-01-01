@@ -185,6 +185,13 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
       return;
     }
 
+    // Validate that at least one skill is selected
+    if (!selectedSkills || selectedSkills.length === 0) {
+      setError("At least one skill is required");
+      toast.error("At least one skill is required");
+      return;
+    }
+
     // Store form data and show bidding modal
     setPendingFormData(data);
     setShowBiddingModal(true);
@@ -240,7 +247,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
       tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
-      is_active: true, // Boolean, not number
+      is_active: 1, // Integer, not boolean
       bidding_enabled: Boolean(biddingEnabled), // Ensure boolean
       currency: currency,
       // Ensure numeric fields are sent as numbers, not strings
@@ -568,17 +575,39 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
                       id="biddingToggle"
                       checked={biddingEnabled}
                       onChange={(e) => setBiddingEnabled(e.target.checked)}
-                      style={{ width: '3rem', height: '1.5rem', cursor: 'pointer' }}
+                      style={{ 
+                        width: '3rem', 
+                        height: '1.5rem', 
+                        cursor: 'pointer',
+                        backgroundColor: biddingEnabled ? '#31795A' : '#6c757d',
+                        borderColor: biddingEnabled ? '#31795A' : '#6c757d'
+                      }}
                     />
                     <label className="form-check-label" htmlFor="biddingToggle"></label>
                   </div>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCancelModal}>
+                <button type="button" className="btn" onClick={handleCancelModal} style={{
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
                   Cancel
                 </button>
-                  <button type="button" className="dash-btn-two" onClick={handleConfirmPost} disabled={loading}>
+                  <button type="button" className="btn" onClick={handleConfirmPost} disabled={loading} style={{
+                    backgroundColor: '#31795A',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
                     {loading ? 'Processing...' : (editProject ? 'Confirm & Update Job' : 'Confirm & Post Job')}
                   </button>
                 </div>
