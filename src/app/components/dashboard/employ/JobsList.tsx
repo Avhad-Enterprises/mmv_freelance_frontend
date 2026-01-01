@@ -114,7 +114,7 @@ const JobsList: React.FC<JobsListProps> = ({
                             onClick={() => onEditJob(project)}
                             title="Edit Job"
                             style={{
-                              backgroundColor: '#007bff',
+                              backgroundColor: '#31795A',
                               color: 'white',
                               border: 'none',
                               padding: '6px 12px',
