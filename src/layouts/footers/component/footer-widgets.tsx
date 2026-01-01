@@ -22,8 +22,8 @@ export function WidgetTwo({ cls, style_2 }: { cls: string; style_2?: boolean }) 
       <h5 className={`footer-title ${style_2 ? 'text-white' : ''}`}>For Freelancers</h5>
       <ul className="footer-nav-link style-none">
         <li><Link href="/coming-soon">How to Find Work</Link></li>
-        <li><Link href="/job-list">Video Editing Jobs</Link></li>
-        <li><Link href="/job-list">Videography Gigs</Link></li>
+        <li><Link href="/job-list">Video Editing Projects</Link></li>
+        <li><Link href="/job-list">Videography Projects</Link></li>
         <li><Link href="/coming-soon">Freelancer FAQ</Link></li>
         <li><Link href="/coming-soon">Commission Explained</Link></li>
       </ul>

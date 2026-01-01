@@ -48,6 +48,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
 
   // Ref to prevent duplicate useEffect runs
@@ -135,13 +136,16 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         if (application && application.applied_projects_id && application.projects_task_id === job.projects_task_id) {
           setIsApplied(true);
           setApplicationId(application.applied_projects_id);
+          setApplicationStatus(application.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
         setApplicationId(null);
+        setApplicationStatus(null);
       }
 
     } catch (error: any) {
@@ -223,6 +227,17 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       return;
     }
 
+    // Check if application is already approved (status = 1) or completed (status = 2)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
+      return;
+    }
+    
+    if (applicationStatus === 2) {
+      toast.error('Cannot withdraw from a completed project.');
+      return;
+    }
+
     if (isApplying) {
       return;
     }
@@ -268,19 +283,19 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         const response = await api.delete('api/v1/saved/unsave-project', { data: payload });
 
         if (response.data?.success) {
-          toast.success('Job unsaved successfully');
+          toast.success('Project unsaved successfully');
           setIsSaved(false);
         } else {
-          toast.error(response.data?.message || 'Failed to unsave job');
+          toast.error(response.data?.message || 'Failed to unsave project');
         }
       } else {
         const response = await api.post('api/v1/saved/save-project', payload);
 
         if (response.data?.data?.saved_projects_id) {
-          toast.success('Job saved successfully!');
+          toast.success('Project saved successfully!');
           setIsSaved(true);
         } else {
-          toast.error(response.data?.message || 'Failed to save job');
+          toast.error(response.data?.message || 'Failed to save project');
         }
       }
     } catch (error: any) {
@@ -307,7 +322,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
               <div className="details-post-data me-xxl-5 pe-xxl-4">
 
                 <Link href="/job-list" className="btn-two mb-20">
-                  &larr; Back to Jobs
+                  &larr; Back to Projects
                 </Link>
 
                 <div className="post-date">
@@ -322,7 +337,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   <p className="mt-25 mb-20">{job.project_description}</p>
                   {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
                 </div>
-                <div className="post-block border-style mt-50 lg-mt-30">
+                {/* <div className="post-block border-style mt-50 lg-mt-30">
                   <div className="d-flex align-items-center">
                     <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                     <h4 className="block-title">Project Specifications</h4>
@@ -335,10 +350,10 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
                     {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
                   </ul>
-                </div>
+                </div> */}
                 <div className="post-block border-style mt-40 lg-mt-30">
                   <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                     <h4 className="block-title">Required Skills</h4>
                   </div>
                   <ul className="list-type-two style-none mt-25 mb-15">
@@ -350,7 +365,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                 {job.reference_links && job.reference_links.length > 0 && (
                   <div className="post-block border-style mt-40 lg-mt-30">
                     <div className="d-flex align-items-center">
-                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">4</div>
+                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
                       <h4 className="block-title">Reference Links</h4>
                     </div>
                     <ul className="list-type-two style-none mt-25 mb-15">
@@ -400,17 +415,22 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                       disabled={true}
                       style={{ opacity: 0.6, cursor: 'not-allowed' }}
                     >
-                      {job.status === 3 ? '🚫 Job Closed' : '✅ Freelancer Assigned'}
+                      {job.status === 3 ? '🚫 Project Closed' : '✅ Freelancer Assigned'}
                     </button>
                   ) : (
                     <button
                       className="btn-one w-100 mt-25"
                       onClick={handleApplyClick}
-                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
+                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication || (isApplied && applicationStatus !== 0)}
                     >
                       {isCheckingApplication ? 'Checking...' :
                         isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') :
-                          isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                          isApplied ? 
+                            (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> : 
+                             applicationStatus === 1 ? '✅ Application Accepted' : 
+                             applicationStatus === 2 ? '✅ Project Completed' : 
+                             '✅ Applied') : 
+                          'Apply Now'}
                     </button>
                   )}
 
@@ -419,7 +439,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     onClick={handleSaveJobClick}
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Job'}
+                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Project'}
                   </button>
                 </div>
               </div>

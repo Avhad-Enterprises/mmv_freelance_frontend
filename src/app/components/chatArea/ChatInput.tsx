@@ -2,17 +2,22 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { ref, update } from "firebase/database";
+import ChatActionsButton from "./ChatActionsButton";
+import UpdateBudgetModal from "./UpdateBudgetModal";
 
 interface Props {
   onSend: (text: string) => Promise<void> | void;
   disabled?: boolean;
   conversationId?: string | null;
   currentUserId?: string | null;
+  userRole?: string;
+  otherParticipantId?: string;
 }
 
-export default function ChatInput({ onSend, disabled, conversationId, currentUserId }: Props) {
+export default function ChatInput({ onSend, disabled, conversationId, currentUserId, userRole, otherParticipantId }: Props) {
   const [value, setValue] = useState("");
   const [sending, setSending] = useState(false);
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isTypingRef = useRef(false);
   const isMountedRef = useRef(true);
@@ -142,21 +147,29 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
   };
 
   return (
-    <div style={{
-      padding: '14px 16px',
-      borderTop: '1px solid rgba(49,121,90,0.1)',
-      background: '#FFFFFF',
-      display: 'flex',
-      gap: 12,
-      alignItems: 'center',
-      flexShrink: 0,
-      position: 'sticky',
-      bottom: 0,
-      zIndex: 30,
-      fontFamily: "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
-      borderRadius: '0 0 30px 0'
-    }}>
-      <textarea
+    <>
+      <div style={{
+        padding: '14px 16px',
+        borderTop: '1px solid rgba(49,121,90,0.1)',
+        background: '#FFFFFF',
+        display: 'flex',
+        gap: 12,
+        alignItems: 'center',
+        flexShrink: 0,
+        position: 'sticky',
+        bottom: 0,
+        zIndex: 30,
+        fontFamily: "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+        borderRadius: '0 0 30px 0'
+      }}>
+        {/* Actions Button (Only for CLIENT role) */}
+        <ChatActionsButton
+          onUpdateBudget={() => setIsBudgetModalOpen(true)}
+          userRole={userRole}
+          disabled={disabled}
+        />
+        
+        <textarea
         value={value}
         onChange={handleInputChange}
         placeholder={disabled ? 'Select a conversation to start messaging' : 'Type your message...'}
@@ -249,5 +262,14 @@ export default function ChatInput({ onSend, disabled, conversationId, currentUse
         )}
       </button>
     </div>
+
+    {/* Budget Update Modal */}
+    <UpdateBudgetModal
+      isOpen={isBudgetModalOpen}
+      onClose={() => setIsBudgetModalOpen(false)}
+      currentUserId={currentUserId || ''}
+      otherParticipantId={otherParticipantId}
+    />
+  </>
   );
 }

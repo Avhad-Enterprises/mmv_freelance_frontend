@@ -259,7 +259,7 @@ const JobListThree = ({
             <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
               <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
                 <div className="total-job-found">
-                  All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
+                  All <span className="text-dark fw-500">{filterItems.length}</span> projects found
                 </div>
                 <div className="d-flex align-items-center">
                   <div className="short-filter d-flex align-items-center">
@@ -310,7 +310,7 @@ const JobListThree = ({
 
               {currentItems && currentItems.length === 0 && (
                 <div className="text-center mt-5">
-                  <h3>No jobs found</h3>
+                  <h3>No projects found</h3>
                   <p>Try adjusting your filters to find what you're looking for.</p>
                 </div>
               )}

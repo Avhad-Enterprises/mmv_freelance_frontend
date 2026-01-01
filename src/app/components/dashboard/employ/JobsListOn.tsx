@@ -45,8 +45,8 @@ const JobsList: React.FC<JobsListProps> = ({
   if (projects.length === 0) {
     return (
       <div className="text-center p-5 bg-light rounded">
-        <h4>No Jobs Found</h4>
-        <p className="text-muted">You haven't posted any jobs yet.</p>
+        <h4>No Projects Found</h4>
+        <p className="text-muted">You haven't posted any projects yet.</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ const JobsList: React.FC<JobsListProps> = ({
                       <button
                         className="btn btn-sm btn-outline-success"
                         onClick={() => onViewSubmissions(project)}
-                        title="View submissions for this job"
+                        title="View submissions for this project"
                       >
                         <i className="bi bi-file-earmark-check me-1"></i>
                         Submissions

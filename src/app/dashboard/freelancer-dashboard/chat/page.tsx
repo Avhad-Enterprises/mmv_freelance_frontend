@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -11,7 +12,16 @@ import InlineThreadView from "@/app/dashboard/client-dashboard/messages/InlineTh
 export default function FreelancerChatPage() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const searchParams = useSearchParams();
+  const conversationIdFromUrl = searchParams.get('conversationId');
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
+  // Auto-select conversation from URL query param
+  useEffect(() => {
+    if (conversationIdFromUrl) {
+      setSelectedConversationId(conversationIdFromUrl);
+    }
+  }, [conversationIdFromUrl]);
 
   return (
     <div className="dashboard-body">

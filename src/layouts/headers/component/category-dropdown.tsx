@@ -20,7 +20,7 @@ const CategoryDropdown = () => {
             </div>
             <div className="ps-3 flex-fill">
               <div className="fw-500 text-dark">{c.title}</div>
-              <div className="job-count">{c.count} Jobs</div>
+              <div className="job-count">{c.count} Projects</div>
             </div>
           </Link>
           ))}

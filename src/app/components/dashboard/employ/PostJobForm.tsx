@@ -181,7 +181,14 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
 
   const onSubmit = async (data: any) => {
     if (!currentUser) {
-      setError("User data is not available. Cannot post job.");
+      setError("User data is not available. Cannot post project.");
+      return;
+    }
+
+    // Validate that at least one skill is selected
+    if (!selectedSkills || selectedSkills.length === 0) {
+      setError("At least one skill is required");
+      toast.error("At least one skill is required");
       return;
     }
 
@@ -240,7 +247,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
       tags: JSON.stringify(tags),
       client_id: currentUser.clientId,
       created_by: currentUser.userId,
-      is_active: true, // Boolean, not number
+      is_active: 1, // Integer, not boolean
       bidding_enabled: Boolean(biddingEnabled), // Ensure boolean
       currency: currency,
       // Ensure numeric fields are sent as numbers, not strings
@@ -250,16 +257,16 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
     try {
       if (editProject) {
         await makePutRequest(`api/v1/projects-tasks/${editProject.project_id}`, payload);
-        toast.success("Job updated successfully!");
+        toast.success("Project updated successfully!");
       } else {
         await makePostRequest("api/v1/projects-tasks", payload);
-        toast.success("Job posted successfully!");
+        toast.success("Project posted successfully!");
       }
       setTimeout(() => {
         onBackToList();
       }, 1500);
     } catch (err: unknown) {
-      let message = "An error occurred while posting the job.";
+      let message = "An error occurred while posting the project.";
       if (err instanceof Error) {
         const errorResponse = (err as any).response?.data;
         message = errorResponse?.Message || err.message;
@@ -552,7 +559,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
                 <button type="button" className="btn-close" onClick={handleCancelModal}></button>
               </div>
               <div className="modal-body">
-                <p className="mb-3">Would you like to enable bidding for this job? This allows freelancers to submit proposals with their own pricing.</p>
+                <p className="mb-3">Would you like to enable bidding for this project? This allows freelancers to submit proposals with their own pricing.</p>
                 <div className="d-flex align-items-center justify-content-between p-3 border rounded">
                   <div>
                     <strong>Bidding Status</strong>
@@ -568,17 +575,39 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
                       id="biddingToggle"
                       checked={biddingEnabled}
                       onChange={(e) => setBiddingEnabled(e.target.checked)}
-                      style={{ width: '3rem', height: '1.5rem', cursor: 'pointer' }}
+                      style={{ 
+                        width: '3rem', 
+                        height: '1.5rem', 
+                        cursor: 'pointer',
+                        backgroundColor: biddingEnabled ? '#31795A' : '#6c757d',
+                        borderColor: biddingEnabled ? '#31795A' : '#6c757d'
+                      }}
                     />
                     <label className="form-check-label" htmlFor="biddingToggle"></label>
                   </div>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={handleCancelModal}>
+                <button type="button" className="btn" onClick={handleCancelModal} style={{
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
                   Cancel
                 </button>
-                  <button type="button" className="dash-btn-two" onClick={handleConfirmPost} disabled={loading}>
+                  <button type="button" className="btn" onClick={handleConfirmPost} disabled={loading} style={{
+                    backgroundColor: '#31795A',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500'
+                  }}>
                     {loading ? 'Processing...' : (editProject ? 'Confirm & Update Job' : 'Confirm & Post Job')}
                   </button>
                 </div>

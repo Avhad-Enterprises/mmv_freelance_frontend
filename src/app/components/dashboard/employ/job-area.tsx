@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * My Jobs Area for Clients
- * 
- * This component displays all jobs posted by the client and their applications.
+ * My Projects Area for Clients
+ *
+ * This component displays all projects posted by the client and their applications.
  * 
  * Status Systems in the Application:
  * 
@@ -131,7 +131,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
 
       setProjects(processedData);
     } catch (err: any) {
-      const message = err.response?.data?.message || err.message || "Failed to load your jobs.";
+      const message = err.response?.data?.message || err.message || "Failed to load your projects.";
       setError(message);
       setProjects([]);
     } finally {
@@ -257,7 +257,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
   // Handler to close a job
   const handleCloseJob = async (project: ProjectSummary) => {
     const confirmed = window.confirm(
-      `Are you sure you want to close "${project.title}"?\n\nThis will reject all pending applications and the job will no longer accept new applicants.`
+      `Are you sure you want to close "${project.title}"?\n\nThis will reject all pending applications and the project will no longer accept new applicants.`
     );
 
     if (!confirmed) return;
@@ -272,10 +272,10 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         p.project_id === project.project_id ? { ...p, status: 3 } : p
       ));
 
-      toast.success('Job closed successfully. All pending applications have been rejected.');
+      toast.success('Project closed successfully. All pending applications have been rejected.');
     } catch (err: any) {
       console.error('Failed to close job:', err);
-      const message = err.response?.data?.message || err.message || 'Failed to close job.';
+      const message = err.response?.data?.message || err.message || 'Failed to close project.';
       toast.error(message);
     }
   };
@@ -585,11 +585,11 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
           <h2 className="main-title m0">
-            {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Job" : "My Jobs")}
+            {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Project" : "My Projects")}
           </h2>
           {/* {!isPostingJob && !selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={() => setIsPostingJob(true)}>
-              Post a Job
+              Post a Project
             </button>
           )} */}
           {selectedApplicant && (
@@ -599,7 +599,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           )}
           {selectedProjectForApplicants && !selectedApplicant && (
             <button className="dash-btn-two tran3s" onClick={handleBackToJobs}>
-              ← Back to Jobs
+              ← Back to Projects
             </button>
           )}
         </div>

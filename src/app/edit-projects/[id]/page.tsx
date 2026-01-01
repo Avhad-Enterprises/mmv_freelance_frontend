@@ -393,7 +393,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
                   />
                 </div>
               </div>
-              <div className="col-md-6">
+              {/* <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
                   <label htmlFor="project_format">Project Format</label>
                   <input
@@ -405,7 +405,7 @@ const EditProjectArea = ({ setIsOpenSidebar }: any) => {
                     required
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="col-md-6">
                 <div className="dash-input-wrapper mb-30">
                   <label htmlFor="">Budget</label>

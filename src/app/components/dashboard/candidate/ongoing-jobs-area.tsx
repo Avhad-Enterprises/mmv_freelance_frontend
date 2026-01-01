@@ -151,7 +151,7 @@ const OngoingJobsArea = ({ }: IProps) => {
         setJobs(jobData);
       } catch (error: any) {
         console.error('Error fetching jobs:', error);
-        setError(error.message || 'An error occurred while fetching jobs');
+        setError(error.message || 'An error occurred while fetching projects');
       } finally {
         setLoading(false);
       }
@@ -325,7 +325,7 @@ const OngoingJobsArea = ({ }: IProps) => {
 
   const getSubmitButtonText = (job: IJob) => {
     if (job.submission_status === 2) {
-      return 'Resubmit Job';
+      return 'Resubmit Project';
     }
     if (job.submission_status === 0) {
       return 'Submitted';
@@ -333,7 +333,7 @@ const OngoingJobsArea = ({ }: IProps) => {
     if (job.submission_status === 1) {
       return 'Approved';
     }
-    return 'Submit Job';
+    return 'Submit Project';
   };
 
   const isSubmitButtonDisabled = (job: IJob) => {

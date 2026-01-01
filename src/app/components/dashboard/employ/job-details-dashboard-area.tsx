@@ -35,7 +35,7 @@ const JobDetailsDashboardArea = ({ job_id }: { job_id: string }) => {
   }
 
   if (!job) {
-    return <div className="dashboard-body"><div className="text-center py-5">Job not found.</div></div>;
+    return <div className="dashboard-body"><div className="text-center py-5">Project not found.</div></div>;
   }
 
   return (

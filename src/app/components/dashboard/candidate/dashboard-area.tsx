@@ -138,12 +138,12 @@ const DashboardArea = ({ }: IProps) => {
           setMetrics({ totalApplied, pending, accepted, rejected });
         }
 
-        // Fetch saved jobs count
+        // Fetch saved projects count
         try {
           const savedRes = await makeGetRequest("api/v1/saved/my-saved-projects");
           setSavedJobsCount(savedRes?.data?.data?.length || 0);
         } catch (error) {
-          console.error("Error fetching saved jobs:", error);
+          console.error("Error fetching saved projects:", error);
         }
 
         // Fetch profile completion
