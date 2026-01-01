@@ -65,7 +65,7 @@ const mapApiCandidateToIFreelancer = (apiCandidate: any): IFreelancer => {
 export default function ThreadPage() {
   const params = useParams() as { id?: string };
   const conversationId = params?.id;
-  const { userData, isLoading } = useUser();
+  const { userData, currentRole, isLoading } = useUser();
   const [conversation, setConversation] = useState<any | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileModalUser, setProfileModalUser] = useState<{ id?: string; firstName?: string; email?: string } | null>(null);
@@ -75,6 +75,7 @@ export default function ThreadPage() {
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
   const [selectedFreelancer, setSelectedFreelancer] = useState<IFreelancer | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
+  const [otherParticipantId, setOtherParticipantId] = useState<string | undefined>(undefined);
 
   // Firebase Authentication Effect
   useEffect(() => {
@@ -122,6 +123,9 @@ export default function ThreadPage() {
 
           // Try to resolve the other participant's public profile (freelancer list)
           const otherId = conv.participants?.find((p: string) => p !== String(userData?.user_id));
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
           if (otherId) {
             try {
@@ -149,6 +153,9 @@ export default function ThreadPage() {
           const participants = conversationId.split('_').sort();
           const currentUserId = String(userData.user_id);
           const otherId = participants.find(p => p !== currentUserId);
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
           if (otherId && participants.includes(currentUserId)) {
             try {
@@ -411,6 +418,8 @@ export default function ThreadPage() {
                 <ChatInput
                   conversationId={conversationId}
                   currentUserId={String(userData.user_id)}
+                  userRole={currentRole}
+                  otherParticipantId={otherParticipantId}
                   onSend={async (text) => {
                     if (!conversationId || !conversation || !userData) return;
                     const senderId = String(userData.user_id);

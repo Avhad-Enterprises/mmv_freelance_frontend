@@ -15,12 +15,13 @@ interface InlineThreadViewProps {
 }
 
 const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) => {
-  const { userData, isLoading } = useUser();
+  const { userData, currentRole, isLoading } = useUser();
   const [conversation, setConversation] = useState<any | null>(null);
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
+  const [otherParticipantId, setOtherParticipantId] = useState<string | undefined>(undefined);
 
   // Firebase Authentication Effect
   useEffect(() => {
@@ -69,6 +70,9 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
 
           // Try to resolve the other participant's public profile
           const otherId = conv.participants?.find((p: string) => p !== String(userData?.user_id));
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
           if (otherId) {
             try {
@@ -96,6 +100,9 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
           const participants = conversationId.split('_').sort();
           const currentUserId = String(userData.user_id);
           const otherId = participants.find(p => p !== currentUserId);
+          
+          // Store other participant ID
+          setOtherParticipantId(otherId);
 
           if (otherId && participants.includes(currentUserId)) {
             try {
@@ -312,6 +319,8 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         <ChatInput
           conversationId={conversationId}
           currentUserId={String(userData.user_id)}
+          userRole={currentRole}
+          otherParticipantId={otherParticipantId}
           onSend={async (text) => {
             if (!conversationId || !conversation || !userData) return;
             const senderId = String(userData.user_id);
