@@ -33,7 +33,7 @@ const JobGridItem = ({
           onClick={() => onToggleSave(item)}
           // 'isActive' prop controls the 'active' class
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
-          title={isActive ? 'Unsave Job' : 'Save Job'}
+          title={isActive ? 'Unsave Project' : 'Save Project'}
         >
           {/* 'isActive' prop controls the icon */}
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>

@@ -181,7 +181,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
 
   const onSubmit = async (data: any) => {
     if (!currentUser) {
-      setError("User data is not available. Cannot post job.");
+      setError("User data is not available. Cannot post project.");
       return;
     }
 
@@ -257,16 +257,16 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
     try {
       if (editProject) {
         await makePutRequest(`api/v1/projects-tasks/${editProject.project_id}`, payload);
-        toast.success("Job updated successfully!");
+        toast.success("Project updated successfully!");
       } else {
         await makePostRequest("api/v1/projects-tasks", payload);
-        toast.success("Job posted successfully!");
+        toast.success("Project posted successfully!");
       }
       setTimeout(() => {
         onBackToList();
       }, 1500);
     } catch (err: unknown) {
-      let message = "An error occurred while posting the job.";
+      let message = "An error occurred while posting the project.";
       if (err instanceof Error) {
         const errorResponse = (err as any).response?.data;
         message = errorResponse?.Message || err.message;
@@ -559,7 +559,7 @@ const PostJobForm: FC<IProps> = ({ onBackToList, editProject }) => {
                 <button type="button" className="btn-close" onClick={handleCancelModal}></button>
               </div>
               <div className="modal-body">
-                <p className="mb-3">Would you like to enable bidding for this job? This allows freelancers to submit proposals with their own pricing.</p>
+                <p className="mb-3">Would you like to enable bidding for this project? This allows freelancers to submit proposals with their own pricing.</p>
                 <div className="d-flex align-items-center justify-content-between p-3 border rounded">
                   <div>
                     <strong>Bidding Status</strong>

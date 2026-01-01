@@ -283,19 +283,19 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         const response = await api.delete('api/v1/saved/unsave-project', { data: payload });
 
         if (response.data?.success) {
-          toast.success('Job unsaved successfully');
+          toast.success('Project unsaved successfully');
           setIsSaved(false);
         } else {
-          toast.error(response.data?.message || 'Failed to unsave job');
+          toast.error(response.data?.message || 'Failed to unsave project');
         }
       } else {
         const response = await api.post('api/v1/saved/save-project', payload);
 
         if (response.data?.data?.saved_projects_id) {
-          toast.success('Job saved successfully!');
+          toast.success('Project saved successfully!');
           setIsSaved(true);
         } else {
-          toast.error(response.data?.message || 'Failed to save job');
+          toast.error(response.data?.message || 'Failed to save project');
         }
       }
     } catch (error: any) {
@@ -322,7 +322,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
               <div className="details-post-data me-xxl-5 pe-xxl-4">
 
                 <Link href="/job-list" className="btn-two mb-20">
-                  &larr; Back to Jobs
+                  &larr; Back to Projects
                 </Link>
 
                 <div className="post-date">
@@ -337,7 +337,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   <p className="mt-25 mb-20">{job.project_description}</p>
                   {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
                 </div>
-                <div className="post-block border-style mt-50 lg-mt-30">
+                {/* <div className="post-block border-style mt-50 lg-mt-30">
                   <div className="d-flex align-items-center">
                     <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                     <h4 className="block-title">Project Specifications</h4>
@@ -350,10 +350,10 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
                     {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
                   </ul>
-                </div>
+                </div> */}
                 <div className="post-block border-style mt-40 lg-mt-30">
                   <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                     <h4 className="block-title">Required Skills</h4>
                   </div>
                   <ul className="list-type-two style-none mt-25 mb-15">
@@ -365,7 +365,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                 {job.reference_links && job.reference_links.length > 0 && (
                   <div className="post-block border-style mt-40 lg-mt-30">
                     <div className="d-flex align-items-center">
-                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">4</div>
+                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
                       <h4 className="block-title">Reference Links</h4>
                     </div>
                     <ul className="list-type-two style-none mt-25 mb-15">
@@ -415,7 +415,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                       disabled={true}
                       style={{ opacity: 0.6, cursor: 'not-allowed' }}
                     >
-                      {job.status === 3 ? '🚫 Job Closed' : '✅ Freelancer Assigned'}
+                      {job.status === 3 ? '🚫 Project Closed' : '✅ Freelancer Assigned'}
                     </button>
                   ) : (
                     <button
@@ -439,7 +439,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     onClick={handleSaveJobClick}
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Job'}
+                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Project'}
                   </button>
                 </div>
               </div>

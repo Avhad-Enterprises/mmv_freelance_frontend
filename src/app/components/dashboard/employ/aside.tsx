@@ -38,7 +38,7 @@ import nav_16 from "@/assets/dashboard/images/icon/icon_16.svg";
 const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/client-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/client-dashboard/profile", title: "My Profile" },
-    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/jobs", title: "My Jobs" },
+    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/jobs", title: "My Projects" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/client-dashboard/saved-candidate", title: "Saved Candidate" },
     { id: 7, icon: nav_16, icon_active: nav_16, link: "/dashboard/client-dashboard/Candidates", title: "Candidates" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Chat" },

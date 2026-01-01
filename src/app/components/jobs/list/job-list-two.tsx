@@ -115,7 +115,7 @@ const JobListTwo = () => {
                     <a href="#" className="d-block">
                       <div className="title text-white">13k+</div>
                       <div className="text-lg text-white">
-                        Job already posted
+                        Project already posted
                       </div>
                       <div className="d-flex align-items-center justify-content-end mt-140 lg-mt-120 xs-mt-60 mb-30">
                         <Image src={shape} alt="shape" className="lazy-img" />

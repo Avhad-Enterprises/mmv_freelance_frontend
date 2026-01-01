@@ -52,7 +52,7 @@ const FilterArea = ({
 
         {/* Job Type */}
         <div className="filter-block bottom-line pb-25">
-          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseJobType" role="button" aria-expanded="true">Job Type</a>
+          <a className="filter-title fw-500 text-dark" data-bs-toggle="collapse" href="#collapseJobType" role="button" aria-expanded="true">Project Type</a>
           <div className="collapse show" id="collapseJobType">
             <JobType />
           </div>

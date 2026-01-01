@@ -93,7 +93,7 @@ const DashboardJobBrowseArea = () => {
 
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        toast.error("Failed to load jobs. Please try again.");
+        toast.error("Failed to load projects. Please try again.");
       } finally {
         setLoading(false);
         setLoadingSkills(false);
@@ -334,7 +334,7 @@ const DashboardJobBrowseArea = () => {
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
-          title={isActive ? 'Unsave Job' : 'Save Job'}
+          title={isActive ? 'Unsave Project' : 'Save Project'}
           style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
@@ -445,7 +445,7 @@ const DashboardJobBrowseArea = () => {
           <h2 className="main-title mb-30">Browse Projects</h2>
 
           <DashboardSearchBar
-            placeholder="Search jobs by title, description, skills..."
+            placeholder="Search projects by title, description, skills..."
             onSearch={(query) => {
               if (query.trim()) {
                 const filtered = all_jobs.filter(job =>
@@ -658,7 +658,7 @@ const DashboardJobBrowseArea = () => {
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
               <div className="total-job-found">
-                All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
+                All <span className="text-dark fw-500">{filterItems.length}</span> projects found
               </div>
             </div>
 
@@ -691,7 +691,7 @@ const DashboardJobBrowseArea = () => {
                 {/* Empty State */}
                 {currentItems && currentItems.length === 0 && (
                   <div className="text-center mt-5">
-                    <h3>No jobs found</h3>
+                    <h3>No projects found</h3>
                     <p>Try adjusting your filters to find what you're looking for.</p>
                   </div>
                 )}

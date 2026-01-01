@@ -88,7 +88,7 @@ const JobListV3Area = ({ itemsPerPage }: { itemsPerPage: number }) => {
                     Filter
                   </button>
                   <div className="total-job-found xs-mt-10">All <span className="text-dark fw-500">
-                    {all_jobs.length}</span> jobs found
+                    {all_jobs.length}</span> projects found
                   </div>
                 </div>
                 <div className="d-flex align-items-center">

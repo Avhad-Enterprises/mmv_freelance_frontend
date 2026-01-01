@@ -118,7 +118,7 @@ const AppliedJobsArea = ({ }: IProps) => {
         setFilteredJobs(jobData);
       } catch (error: any) {
         console.error('Error fetching jobs:', error);
-        setError(error.message || 'An error occurred while fetching jobs');
+        setError(error.message || 'An error occurred while fetching projects');
       } finally {
         setLoading(false);
       }
@@ -183,11 +183,11 @@ const AppliedJobsArea = ({ }: IProps) => {
       <div className="position-relative">
         <DashboardHeader />
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="main-title mb-0">Applied Jobs</h2>
+          <h2 className="main-title mb-0">Applied Projects</h2>
         </div>
 
         <DashboardSearchBar
-          placeholder="Search applied jobs by title, category, skills..."
+          placeholder="Search applied projects by title, category, skills..."
           onSearch={handleSearch}
         />
 
@@ -256,7 +256,7 @@ const AppliedJobsArea = ({ }: IProps) => {
           <p className="text-danger">{error}</p>
         ) : filteredJobs.length === 0 ? (
           <div className="text-center p-5 bg-light rounded mt-4">
-            <h4>No Applied Jobs Found</h4>
+            <h4>No Applied Projects Found</h4>
             <p className="text-muted">
               You have no applications with the status: '{selectedStatus}'
             </p>

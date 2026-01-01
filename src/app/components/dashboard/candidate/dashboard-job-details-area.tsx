@@ -290,25 +290,25 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
     }
 
     if (!userId || job.projects_task_id === undefined) {
-      toast.error('Unable to get user or job information');
+      toast.error('Unable to get user or project information');
       return;
     }
 
     setIsSaving(true);
     try {
       if (isSaved) {
-        // Unsave the job
+        // Unsave the project
         await makeDeleteRequest('api/v1/saved/unsave-project', {
           projects_task_id: job.projects_task_id,
         });
-        toast.success('Job unsaved!');
+        toast.success('Project unsaved!');
         setIsSaved(false);
       } else {
-        // Save the job
+        // Save the project
         await makePostRequest('api/v1/saved/save-project', {
           projects_task_id: job.projects_task_id,
         });
-        toast.success('Job saved!');
+        toast.success('Project saved!');
         setIsSaved(true);
       }
     } catch (error: any) {
@@ -456,7 +456,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                   <div className="details-post-data me-xxl-5 pe-xxl-4">
 
                     <button onClick={onBack} className="btn-two mb-20">
-                      &larr; Back to Jobs
+                      &larr; Back to Projects
                     </button>
 
                     <div className="post-date">
@@ -473,7 +473,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                       {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
                     </div>
 
-                    <div className="post-block border-style mt-50 lg-mt-30">
+                    {/* <div className="post-block border-style mt-50 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                         <h4 className="block-title">Project Specifications</h4>
@@ -486,11 +486,11 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                         <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
                         {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
                       </ul>
-                    </div>
+                    </div> */}
 
                     <div className="post-block border-style mt-40 lg-mt-30">
                       <div className="d-flex align-items-center">
-                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
                         <h4 className="block-title">Required Skills</h4>
                       </div>
                       <ul className="list-type-two style-none mt-25 mb-15">

@@ -49,7 +49,7 @@ const company_data: {
       id: 3,
       name: 'Marcus V.',
       desc: 'Corporate Video Specialist | Tondoe, UK',
-      linkText: 'View open jobs',
+      linkText: 'View open projects',
     },
     {
       id: 4,

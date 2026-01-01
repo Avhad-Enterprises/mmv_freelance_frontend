@@ -16,7 +16,7 @@ const JobAlertArea = ({}:IProps) => {
         {/* header end */}
 
         <div className="d-flex align-items-center justify-content-between mb-40 lg-mb-30">
-          <h2 className="main-title m0">Job Alerts</h2>
+          <h2 className="main-title m0">Project Alerts</h2>
           <div className="short-filter d-flex align-items-center">
             <div className="text-dark fw-500 me-2">Short by:</div>
             <ShortSelect onChange={()=>''}/>
@@ -30,7 +30,7 @@ const JobAlertArea = ({}:IProps) => {
                 <tr>
                   <th scope="col">Title</th>
                   <th scope="col">Alert </th>
-                  <th scope="col">Job</th>
+                  <th scope="col">Project</th>
                   <th scope="col">Time</th>
                   <th scope="col">Actions</th>
                 </tr>

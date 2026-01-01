@@ -74,7 +74,7 @@ const JobsList: React.FC<JobsListProps> = ({
   return (
     <>
       <DashboardSearchBar
-        placeholder="Search jobs by title, category, or budget..."
+        placeholder="Search projects by title, category, or budget..."
         onSearch={handleSearch}
       />
 
@@ -143,8 +143,8 @@ const JobsList: React.FC<JobsListProps> = ({
             <tbody>
               {loading && <tr><td colSpan={6} className="text-center">Loading...</td></tr>}
               {error && <tr><td colSpan={6} className="text-center text-danger">{error}</td></tr>}
-              {!loading && projects.length === 0 && <tr><td colSpan={6} className="text-center">No jobs found. Post one to get started!</td></tr>}
-              {!loading && projects.length > 0 && filteredProjects.length === 0 && <tr><td colSpan={6} className="text-center">No jobs match your search and filter criteria.</td></tr>}
+              {!loading && projects.length === 0 && <tr><td colSpan={6} className="text-center">No projects found. Post one to get started!</td></tr>}
+              {!loading && projects.length > 0 && filteredProjects.length === 0 && <tr><td colSpan={6} className="text-center">No projects match your search and filter criteria.</td></tr>}
 
               {filteredProjects.map((project) => (
                 <tr key={project.project_id} className="align-middle">
@@ -181,7 +181,7 @@ const JobsList: React.FC<JobsListProps> = ({
                           <button
                             className="btn"
                             onClick={() => onEditJob(project)}
-                            title="Edit Job"
+                            title="Edit Project"
                             style={{
                               backgroundColor: '#31795A',
                               color: 'white',
@@ -192,7 +192,7 @@ const JobsList: React.FC<JobsListProps> = ({
                               fontWeight: '500'
                             }}
                           >
-                            Edit Job
+                            Edit Project
                           </button>
                           
                           <button
@@ -208,7 +208,7 @@ const JobsList: React.FC<JobsListProps> = ({
                               fontWeight: '500'
                             }}
                           >
-                            Close Job
+                            Close Project
                           </button>
                         </>
                       )}

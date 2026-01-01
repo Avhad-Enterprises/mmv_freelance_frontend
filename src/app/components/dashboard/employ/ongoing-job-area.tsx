@@ -128,7 +128,7 @@ const OngoingJobArea: FC = () => {
 
       setProjects(processedData);
     } catch (err: any) {
-      const message = err.response?.data?.message || err.message || "Failed to load your jobs.";
+      const message = err.response?.data?.message || err.message || "Failed to load your projects.";
       setError(message);
       setProjects([]);
     } finally {
@@ -690,7 +690,7 @@ const OngoingJobArea: FC = () => {
             )}
             {(selectedProjectForApplicants || selectedProjectForSubmissions) && !selectedApplicant && (
               <button className="dash-btn-two tran3s" onClick={handleBackToJobs}>
-                ← Back to Jobs
+                ← Back to Projects
               </button>
             )}
           </div>

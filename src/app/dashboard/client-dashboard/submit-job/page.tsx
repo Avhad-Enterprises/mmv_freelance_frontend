@@ -5,7 +5,7 @@ import PermissionGuard from "@/components/auth/PermissionGuard";
 
 const EmployDashboardSubmitJobPage = () => {
   return (
-    <PermissionGuard permission="projects.create" fallback={<div className="p-4 text-center">You do not have permission to post jobs.</div>}>
+    <PermissionGuard permission="projects.create" fallback={<div className="p-4 text-center">You do not have permission to post projects.</div>}>
       <EmployJobArea startInPostMode={true} />
     </PermissionGuard>
   );
