@@ -41,14 +41,8 @@ const menu_data: IMenuData[] = [
   },
   {
     id: 4,
-    link: '/coming-soon',
-    title: 'Blog',
-    sub_menus: [
-      { link: '/coming-soon', title: 'Blog' },
-      // {link:'/coming-soon',title:'Blog Grid'},
-      // {link:'/blog-v3',title:'Full width'},
-      // {link:'/blog-details',title:'Blog Details'},
-    ]
+    link: '/clientfaq',
+    title: 'Client FAQ',
   },
   {
     id: 6,

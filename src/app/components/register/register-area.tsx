@@ -244,7 +244,7 @@ const RegisterArea = () => {
             </div>
 
             {/* Apple Sign Up */}
-            <div className="col-sm-4 col-6">
+            {/* <div className="col-sm-4 col-6">
               <div className="mt-10 position-relative">
                 <SocialLoginButton
                   provider="apple"
@@ -263,7 +263,7 @@ const RegisterArea = () => {
                   </small>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Info text for OAuth registration */}

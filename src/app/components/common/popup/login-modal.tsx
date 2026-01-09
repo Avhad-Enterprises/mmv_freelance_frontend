@@ -165,7 +165,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                 </div>
 
                 {/* Apple Login */}
-                <div className="col-md-4 col-12">
+                {/* <div className="col-md-4 col-12">
                   <SocialLoginButton
                     provider="apple"
                     icon={apple}
@@ -179,7 +179,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLoginSuccess = () => { } }) =
                       Coming Soon
                     </small>
                   )}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
