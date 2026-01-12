@@ -17,12 +17,12 @@ import facebookIcon from '@/assets/images/icon/facebook.png';
 import appleIcon from '@/assets/images/icon/apple.png';
 
 // Provider configurations
-const providerConfig: Record<OAuthProvider, {
+const providerConfig: Partial<Record<OAuthProvider, {
     icon: any;
     label: string;
     color: string;
     enabled: boolean;
-}> = {
+}>> = {
     google: {
         icon: googleIcon,
         label: 'Google',
@@ -35,12 +35,12 @@ const providerConfig: Record<OAuthProvider, {
         color: '#1877F2',
         enabled: false, // Coming soon
     },
-    apple: {
-        icon: appleIcon,
-        label: 'Apple',
-        color: '#000000',
-        enabled: false, // Coming soon
-    },
+    // apple: {
+    //     icon: appleIcon,
+    //     label: 'Apple',
+    //     color: '#000000',
+    //     enabled: false, // Coming soon
+    // },
 };
 
 interface LinkedAccountsSectionProps {
@@ -82,8 +82,9 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
      * Handle linking a new OAuth provider
      */
     const handleLinkProvider = (provider: OAuthProvider) => {
-        if (!providerConfig[provider].enabled) {
-            toast.error(`${providerConfig[provider].label} login coming soon!`);
+        const config = providerConfig[provider];
+        if (!config || !config.enabled) {
+            toast.error(`${config?.label || 'Provider'} login coming soon!`);
             return;
         }
 
@@ -95,10 +96,13 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
      * Handle unlinking an OAuth provider
      */
     const handleUnlinkProvider = async (provider: OAuthProvider) => {
+        const config = providerConfig[provider];
+        if (!config) return;
+
         // Confirm with user
         const confirmed = window.confirm(
-            `Are you sure you want to unlink your ${providerConfig[provider].label} account?\n\n` +
-            `You won't be able to use ${providerConfig[provider].label} to sign in after this.`
+            `Are you sure you want to unlink your ${config.label} account?\n\n` +
+            `You won't be able to use ${config.label} to sign in after this.`
         );
 
         if (!confirmed) return;
@@ -116,7 +120,7 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
 
             if (result.success) {
                 setLinkedProviders(prev => prev.filter(p => p !== provider));
-                toast.success(`${providerConfig[provider].label} account unlinked`);
+                toast.success(`${config.label} account unlinked`);
             } else {
                 toast.error(result.message);
             }
@@ -154,6 +158,8 @@ const LinkedAccountsSection: React.FC<LinkedAccountsSectionProps> = ({
                 <div className="providers-list">
                     {(Object.keys(providerConfig) as OAuthProvider[]).map((provider) => {
                         const config = providerConfig[provider];
+                        if (!config) return null;
+
                         const isLinked = linkedProviders.includes(provider);
                         const isUnlinking = unlinkingProvider === provider;
 
