@@ -7,6 +7,19 @@
     Developed by : (me@heloshape.com) / (www.me.heloshape.com)
 */
 
+/* Mobile Header Overlap Fix */
+@media (max-width: 991px) {
+  .main-page-wrapper {
+    padding-top: 90px;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-page-wrapper {
+    padding-top: 85px;
+  }
+}
+
 /* Chat area responsive helpers */
 .chat-area-container {
   display: flex;
