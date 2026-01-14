@@ -78,11 +78,11 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
       }
 
       const data = await response.json();
-      
+
       // Filter projects where current user is client and status is ongoing
-      
+
       // Filter projects where current user is client and status is ongoing
-      
+
       // Filter projects where:
       // 1. Current user is the client (owner)
       // 2. Project is ongoing (status = 1)
@@ -90,7 +90,7 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
         // Check if client_user_id matches currentUserId
         const isClient = Number(project.client_user_id) === Number(currentUserId);
         const isOngoing = project.status === 1;
-        
+
         return isClient && isOngoing;
       });
 
@@ -115,7 +115,7 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
     }
 
     const budgetValue = parseFloat(newBudget);
-    
+
     if (isNaN(budgetValue) || budgetValue <= 0) {
       setError('Please enter a valid budget amount');
       return;
@@ -158,7 +158,7 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
       toast.success(
         `Budget updated successfully from ${currencySymbol}${selectedProject.budget} to ${currencySymbol}${budgetValue}`
       );
-      
+
       // Update the project budget in local state
       setProjects(prevProjects =>
         prevProjects.map(project =>
@@ -167,7 +167,7 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
             : project
         )
       );
-      
+
       onClose();
     } catch (err: any) {
       console.error('Error updating budget:', err);
@@ -333,7 +333,7 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
                     onChange={(e) => setSelectedProjectId(Number(e.target.value))}
                     style={{
                       width: '100%',
-                      padding: '16px',
+                      padding: '12px 16px',
                       height: '48px',
                       border: '2px solid #E9F7EF',
                       borderRadius: '10px',
@@ -341,7 +341,17 @@ const UpdateBudgetModal: React.FC<UpdateBudgetModalProps> = ({
                       outline: 'none',
                       transition: 'border-color 0.2s ease',
                       background: '#FFFFFF',
-                    }}
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      MozAppearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2331795A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 12px center',
+                      backgroundSize: '20px',
+                      paddingRight: '40px',
+                      color: '#244034',
+                    } as React.CSSProperties}
                     onFocus={(e) => {
                       e.currentTarget.style.borderColor = '#31795A';
                     }}

@@ -47,7 +47,7 @@ const nav_data = [
     { id: 8, icon: nav_10, icon_active: nav_10, link: "/dashboard/freelancer-dashboard/applied-jobs", title: "Applied Projects" },
     { id: 9, icon: nav_14, icon_active: nav_14, link: "/dashboard/freelancer-dashboard/ongoing-jobs", title: "Ongoing Projects" },
     { id: 12, icon: nav_12, icon_active: nav_12, link: "/dashboard/freelancer-dashboard/completed-projects", title: "Completed Projects" },
-    { id: 11, icon: nav_18, icon_active: nav_18, link: "/dashboard/freelancer-dashboard/credits", title: "Keys", videoEditorOnly: true },
+    { id: 11, icon: nav_18, icon_active: nav_18, link: "/dashboard/freelancer-dashboard/credits", title: "Keys" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
 ] as const;

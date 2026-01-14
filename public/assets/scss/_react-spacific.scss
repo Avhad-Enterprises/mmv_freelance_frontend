@@ -6,18 +6,21 @@
     }
   }
 }
+
 .hero-banner-two {
   & .img-box {
     & .main-img {
       width: auto;
       height: 100%;
     }
+
     & .screen_01 .screen_02 {
       width: 100%;
       height: 100%;
     }
   }
 }
+
 .hero-banner-three {
   & .img-box {
     & .main-img {
@@ -29,6 +32,7 @@
 
 // media
 @media (max-width: 1199px) {
+
   .hero-banner-two .img-box .screen_01,
   .hero-banner-two .img-box .screen_02 {
     height: auto;
@@ -45,7 +49,7 @@
 }
 
 .slick-slide {
-  & > div {
+  &>div {
     margin: 0 15px;
   }
 }
@@ -62,7 +66,7 @@
   & .slider-wrapper {
     & .feedback-slider-two {
       & .slick-slide {
-        & > div {
+        &>div {
           margin: 50px 25px;
         }
       }
@@ -86,31 +90,32 @@
   }
 }
 
-.text-feature-one{
-  & .img-data{
-    & .lazy-img{
+.text-feature-one {
+  & .img-data {
+    & .lazy-img {
       height: auto;
     }
   }
 }
 
 .slick-slider {
-  &.expert-slider-two{
-    & .slick-dots{
+  &.expert-slider-two {
+    & .slick-dots {
       display: flex !important;
     }
   }
 }
 
 .slick-slide .item:focus,
-img:focus-visible,img:focus {
+img:focus-visible,
+img:focus {
   // box-shadow: none;
   outline: none;
 }
 
-.feedback-slider-one{
+.feedback-slider-one {
   & .slick-slide {
-    & > div {
+    &>div {
       margin: 0 35px;
     }
   }
@@ -118,17 +123,19 @@ img:focus-visible,img:focus {
 
 .pagination-one {
   & li {
-    &.previous{
-      &.disabled{
+    &.previous {
+      &.disabled {
         display: none;
       }
-      & a{
+
+      & a {
         width: auto;
         height: auto;
       }
     }
-    &.next{
-      &.disabled{
+
+    &.next {
+      &.disabled {
         display: none;
       }
     }
@@ -136,14 +143,15 @@ img:focus-visible,img:focus {
 }
 
 .nice-select {
-  &.category{
-    & .list{
+  &.category {
+    & .list {
       max-height: 250px;
       overflow-y: auto;
     }
   }
-  &.location{
-    & .list{
+
+  &.location {
+    & .list {
       max-height: 250px;
       overflow-y: auto;
     }
@@ -155,9 +163,9 @@ img:focus-visible,img:focus {
 }
 
 
-.save-btn{
-    &.active{
-      background: #31795A !important;
-      color: #fff !important;
-    }
+.save-btn {
+  &.active {
+    background: #31795A !important;
+    color: #fff !important;
+  }
 }

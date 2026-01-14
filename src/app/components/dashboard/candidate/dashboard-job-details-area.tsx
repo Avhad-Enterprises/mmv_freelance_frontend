@@ -253,7 +253,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
       toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
       return;
     }
-    
+
     if (applicationStatus === 2) {
       toast.error('Cannot withdraw from a completed project.');
       return;
@@ -595,13 +595,13 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
                           fontWeight: '500'
                         } : undefined}
                       >
-                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') : 
-                         isApplied ? 
-                           (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> : 
-                            applicationStatus === 1 ? '✅ Application Accepted' : 
-                            applicationStatus === 2 ? '✅ Project Completed' : 
-                            '✅ Applied') : 
-                         'Apply Now'}
+                        {isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') :
+                          isApplied ?
+                            (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> :
+                              applicationStatus === 1 ? '✅ Application Accepted' :
+                                applicationStatus === 2 ? '✅ Project Completed' :
+                                  '✅ Applied') :
+                            'Apply Now'}
                       </button>
 
                       <button
@@ -666,7 +666,7 @@ const DashboardJobDetailsArea = ({ job, onBack }: DashboardJobDetailsAreaProps) 
         }}
         projectTitle={job.project_title || 'this project'}
         currentBalance={creditBalance?.credits_balance || 0}
-        isVideoEditor={userRole === 'VIDEO_EDITOR'}
+        isVideoEditor={userRole === 'VIDEO_EDITOR' || userRole === 'VIDEOGRAPHER'}
       />
     </>
   );
