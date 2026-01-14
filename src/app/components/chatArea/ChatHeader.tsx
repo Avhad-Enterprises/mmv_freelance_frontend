@@ -15,9 +15,10 @@ interface Props {
   currentUserId?: string | null;
   conversation?: ConversationShape | null;
   onBack?: () => void;
+  onProfileClick?: () => void;
 }
 
-export default function ChatHeader({ currentUserId, conversation, onBack }: Props) {
+export default function ChatHeader({ currentUserId, conversation, onBack, onProfileClick }: Props) {
   const router = useRouter();
   const otherId = conversation?.participants?.find((p) => p !== currentUserId) || null;
   const otherDetails = otherId ? conversation?.participantDetails?.[otherId] : null;
@@ -28,6 +29,9 @@ export default function ChatHeader({ currentUserId, conversation, onBack }: Prop
     if (!conversation?.id || !otherId) return;
 
     setFetchedDetails(null);
+
+    // If db is not initialized (e.g. missing env vars), skip Firebase listeners
+    if (!db) return;
 
     // Listen for typing status from Realtime Database
     const typingRef = ref(db, `conversations/${conversation.id}/typing/${otherId}`);
@@ -47,15 +51,18 @@ export default function ChatHeader({ currentUserId, conversation, onBack }: Prop
       if (!otherDetails && otherId) {
         // Try to get user details from Realtime Database
         try {
-          const userRef = ref(db, `users/${otherId}`);
-          const userSnap = await get(userRef);
-          if (userSnap.exists()) {
-            const data = userSnap.val();
-            setFetchedDetails({
-              firstName: data.firstName || data.first_name || data.username || "",
-              email: data.email || "",
-            });
-            return;
+          // Double check db existence
+          if (db) {
+            const userRef = ref(db, `users/${otherId}`);
+            const userSnap = await get(userRef);
+            if (userSnap.exists()) {
+              const data = userSnap.val();
+              setFetchedDetails({
+                firstName: data.firstName || data.first_name || data.username || "",
+                email: data.email || "",
+              });
+              return;
+            }
           }
         } catch (err) {
           console.error("Failed to fetch participant from Realtime Database users", err);
@@ -176,29 +183,39 @@ export default function ChatHeader({ currentUserId, conversation, onBack }: Prop
             <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div style={{
-          width: 44,
-          height: 44,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.15)',
-          color: '#fff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 700,
-          fontSize: '1.1rem',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          {displayFirstName?.charAt(0)?.toUpperCase() || 'U'}
-        </div>
-        <div>
-          <div style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '1rem' }}>{displayFirstName}</div>
+        <div
+          onClick={() => onProfileClick && onProfileClick()}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            cursor: onProfileClick ? 'pointer' : 'default'
+          }}
+        >
           <div style={{
-            fontSize: '0.8rem',
-            color: isTyping ? '#D2F34C' : 'rgba(255,255,255,0.7)',
-            fontWeight: isTyping ? 500 : 400
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            background: 'rgba(255,255,255,0.15)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}>
-            {isTyping ? '● Typing...' : displayEmail}
+            {displayFirstName?.charAt(0)?.toUpperCase() || 'U'}
+          </div>
+          <div>
+            <div style={{ fontWeight: 600, color: '#FFFFFF', fontSize: '1rem' }}>{displayFirstName}</div>
+            <div style={{
+              fontSize: '0.8rem',
+              color: isTyping ? '#D2F34C' : 'rgba(255,255,255,0.7)',
+              fontWeight: isTyping ? 500 : 400
+            }}>
+              {isTyping ? '● Typing...' : displayEmail}
+            </div>
           </div>
         </div>
       </div>

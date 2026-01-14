@@ -334,6 +334,12 @@ const SavedCandidateArea = () => {
       return;
     }
 
+    if (!db || !auth) {
+      toast.error("Chat service is currently unavailable.");
+      console.warn("Firebase not initialized in SavedCandidateArea");
+      return;
+    }
+
     // Check if chat is allowed (freelancer must have applied to client's project)
     try {
       const permissionResponse = await fetch(
