@@ -12,9 +12,10 @@ import CandidateDetailsArea from "@/app/components/candidate-details/candidate-d
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page"; // Import IFreelancer interface
 import { authCookies } from "@/utils/cookies";
 import { useUser } from "@/context/UserContext";
-import { db, auth } from '@/lib/firebase';
-import { ref, get, set } from 'firebase/database';
-import { signInWithCustomToken } from 'firebase/auth';
+// Firebase chat implementation commented out - replaced with Socket.io
+// import { db, auth } from '@/lib/firebase';
+// import { ref, get, set } from 'firebase/database';
+// import { signInWithCustomToken } from 'firebase/auth';
 
 // This interface matches the raw data from your API
 interface ApiCandidate {
@@ -334,6 +335,17 @@ const SavedCandidateArea = () => {
       return;
     }
 
+    // TODO: SOCKET.IO IMPLEMENTATION
+    // Firebase chat implementation has been commented out and replaced with Socket.io
+    
+    /* OLD FIREBASE IMPLEMENTATION - COMMENTED OUT
+    if (!db || !auth) {
+      toast.error("Chat service is currently unavailable.");
+      console.warn("Firebase not initialized in SavedCandidateArea");
+      return;
+    }
+    */
+
     // Check if chat is allowed (freelancer must have applied to client's project)
     try {
       const permissionResponse = await fetch(
@@ -359,6 +371,7 @@ const SavedCandidateArea = () => {
     }
 
     try {
+      /* OLD FIREBASE AUTHENTICATION - COMMENTED OUT
       // Ensure Firebase authentication
       if (!auth.currentUser) {
         const authToken = authCookies.getToken();
@@ -425,9 +438,18 @@ const SavedCandidateArea = () => {
       } else {
         toast.success('Opening chat...');
       }
+      */
 
-      // Navigate to chat
-      router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
+      // Socket.io Implementation: Create conversation via API
+      const currentUserId = String(userData.user_id);
+      const otherId = String(candidateId);
+      
+      // Use the existing Socket.io based chat system
+      // The conversation creation and navigation is now handled via REST API + Socket.io
+      toast.success('Opening chat...');
+      
+      // Navigate to chat - the chat system will handle conversation creation via Socket.io
+      router.push(`/dashboard/client-dashboard/messages?userId=${candidateId}`);
     } catch (err: any) {
       console.error('Failed to start chat:', err);
       toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);

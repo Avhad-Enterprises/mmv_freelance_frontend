@@ -1,5 +1,5 @@
 "use client";
-import React, { ComponentProps, useState, useMemo, useEffect } from "react";
+import React, { ComponentProps, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -13,12 +13,9 @@ import {
   Badge,
   InputBase,
 } from "@mui/material";
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 import { useConversations } from "@/hooks/useConversations";
-import Cookies from "js-cookie";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
 
 type ChatListProps = {
   /** Base path for thread page, e.g. "/dashboard/client-dashboard/messages/thread" */
@@ -27,18 +24,14 @@ type ChatListProps = {
   onSelectConversation?: (id: string) => void;
   /** Currently selected conversation ID for highlighting */
   selectedConversationId?: string | null;
-  /** Callback for new conversation button */
-  onNewConversation?: () => void;
 } & Omit<ComponentProps<"div">, "ref">;
 
-const formatTime = (ts?: any) => {
+const formatTime = (ts?: number) => {
   if (!ts) return "";
-  const d =
-    typeof ts === "number" ? new Date(ts) : ts?.toDate ? ts.toDate() : null;
-  if (!d) return "";
+  const d = new Date(ts);
   const now = new Date();
   const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
-  if (diff < 60) return `${diff}s`;
+  if (diff < 60) return "Just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   return d.toLocaleDateString();
@@ -48,181 +41,32 @@ const ChatList: React.FC<ChatListProps> = ({
   threadBasePath = "/dashboard/client-dashboard/messages/thread",
   onSelectConversation,
   selectedConversationId,
-  onNewConversation,
 }) => {
   const router = useRouter();
-  const { userData, isLoading } = useUser();
+  const { userData } = useUser();
   const currentUserId = userData?.user_id ? String(userData.user_id) : null;
-  const { conversations, loading, error } = useConversations(currentUserId);
-  const [namesMap, setNamesMap] = React.useState<Record<string, string>>({});
-  const [profilePicturesMap, setProfilePicturesMap] = React.useState<
-    Record<string, string>
-  >({});
+  const { conversations, isLoading } = useConversations(currentUserId || undefined);
   const [searchQuery, setSearchQuery] = useState("");
-  const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
 
-  // Firebase authentication - required for useConversations hook to work
-  useEffect(() => {
-    if (!auth) {
-      console.error("Firebase auth not initialized");
-      return;
+  const getOtherParticipant = (convo: any) => {
+    const otherId = convo.participants.find((p: string) => p !== currentUserId);
+    if (otherId && convo.participantDetails && convo.participantDetails[otherId]) {
+      return { id: otherId, ...convo.participantDetails[otherId] };
     }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setFirebaseAuthenticated(true);
-        return;
-      }
-
-      setFirebaseAuthenticated(false);
-
-      // Try to authenticate with custom token
-      const authToken = Cookies.get("auth_token");
-      if (!authToken) {
-        console.warn("No auth token found, cannot authenticate with Firebase");
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`,
-          {
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          console.error("Failed to fetch Firebase custom token");
-          return;
-        }
-
-        const data = await response.json();
-        if (data.success && data.data?.customToken) {
-          await signInWithCustomToken(auth, data.data.customToken);
-          setFirebaseAuthenticated(true);
-        }
-      } catch (error) {
-        console.error("Firebase authentication error in ChatList:", error);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+    return { id: otherId || 'unknown', firstName: 'Unknown User', email: '' }; // Fallback
+  };
 
   // Filter conversations based on search query
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) return conversations;
     const query = searchQuery.toLowerCase().trim();
     return conversations.filter((c) => {
-      const name =
-        (c as any).otherParticipantName ||
-        namesMap[c.otherParticipantId] ||
-        c.otherParticipantId;
+      const other = getOtherParticipant(c);
+      const name = other.firstName || "";
       const message = c.lastMessage || "";
-      return (
-        name.toLowerCase().includes(query) ||
-        message.toLowerCase().includes(query)
-      );
+      return name.toLowerCase().includes(query) || message.toLowerCase().includes(query);
     });
-  }, [conversations, namesMap, searchQuery]);
-
-  // Fetch participant display names and profile pictures for chat list
-  React.useEffect(() => {
-    if (!conversations || conversations.length === 0) return;
-    const loadNames = async () => {
-      try {
-        const allOtherIds = Array.from(
-          new Set(conversations.map((c) => String(c.otherParticipantId)))
-        );
-
-        const nameMap: Record<string, string> = {};
-        const pictureMap: Record<string, string> = {};
-
-        // 1) Try public freelancers endpoint (works when the other user is a freelancer)
-        try {
-          const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
-            { cache: "no-cache" }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            (data.data || []).forEach((f: any) => {
-              const id = String(f.user_id);
-              const displayName =
-                f.first_name ||
-                (f.username || "").split("@")[0] ||
-                (f.company_name || "").toString().trim() ||
-                id;
-              nameMap[id] = displayName;
-              if (f.profile_picture && f.profile_picture.trim() !== "") {
-                pictureMap[id] = f.profile_picture;
-              }
-            });
-          }
-        } catch (err) {
-          console.error("Failed to load freelancer names for chat list", err);
-        }
-
-        // 2) For any remaining ids (typically clients), try the public user info endpoint
-        const token = Cookies.get("auth_token");
-        if (token) {
-          await Promise.all(
-            allOtherIds
-              .filter((id) => !nameMap[id])
-              .map(async (id) => {
-                try {
-                  const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}/public-info`,
-                    {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                      },
-                    }
-                  );
-                  if (!res.ok) return;
-                  const data = await res.json();
-                  const u = data?.data;
-                  if (!u) return;
-                  const displayName =
-                    u.first_name ||
-                    u.company_name ||
-                    u.username ||
-                    u.display_name ||
-                    id;
-                  nameMap[id] = displayName;
-                  if (
-                    u.profile_picture &&
-                    typeof u.profile_picture === "string" &&
-                    u.profile_picture.trim() !== ""
-                  ) {
-                    pictureMap[id] = u.profile_picture;
-                  }
-                } catch (err) {
-                  console.error(
-                    `Failed to load profile for conversation participant ${id}`,
-                    err
-                  );
-                }
-              })
-          );
-        }
-
-        setNamesMap(nameMap);
-        setProfilePicturesMap(pictureMap);
-      } catch (err) {
-        console.error("Failed to load participant names for chat list", err);
-      }
-    };
-    loadNames();
-  }, [conversations]);
-
-  const isFreelancerUser =
-    (userData as any)?.role === "freelancer" ||
-    (userData as any)?.user_type === "freelancer";
+  }, [conversations, searchQuery, currentUserId]);
 
   const handleClick = (id: string) => {
     if (onSelectConversation) {
@@ -272,63 +116,8 @@ const ChatList: React.FC<ChatListProps> = ({
           variant="body2"
           sx={{ color: "rgba(255,255,255,0.75)", mb: 2, fontSize: "0.85rem" }}
         >
-          {conversations.length} conversation
-          {conversations.length !== 1 ? "s" : ""}
+          {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
         </Typography>
-
-        {/* New Conversation Button */}
-        {onNewConversation && (
-          <Box sx={{ mb: 2 }}>
-            <button
-              onClick={onNewConversation}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                background: "#D2F34C",
-                border: "none",
-                borderRadius: "10px",
-                color: "#244034",
-                fontSize: "0.95rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                transition: "all 0.2s ease",
-                fontFamily: "inherit",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#c5e647";
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow =
-                  "0 4px 12px rgba(210, 243, 76, 0.3)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#D2F34C";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 18 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 3.75V14.25M3.75 9H14.25"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              New Conversation
-            </button>
-          </Box>
-        )}
 
         {/* Search Bar */}
         <Box
@@ -352,11 +141,7 @@ const ChatList: React.FC<ChatListProps> = ({
             },
           }}
         >
-          <Search
-            size={20}
-            color="rgba(255,255,255,0.7)"
-            style={{ marginRight: 8, flexShrink: 0 }}
-          />
+          <Search size={20} color="rgba(255,255,255,0.7)" style={{ marginRight: 8, flexShrink: 0 }} />
           <InputBase
             placeholder="Search conversations..."
             value={searchQuery}
@@ -397,7 +182,7 @@ const ChatList: React.FC<ChatListProps> = ({
         }}
       >
         <List disablePadding>
-          {isLoading || loading ? (
+          {isLoading ? (
             <Box sx={{ p: 3, textAlign: "center" }}>
               <Box
                 sx={{
@@ -417,14 +202,10 @@ const ChatList: React.FC<ChatListProps> = ({
               />
               <Typography sx={{ color: "#6B7280" }}>Loading...</Typography>
             </Box>
-          ) : error ? (
-            <Typography sx={{ p: 2, color: "error.main" }}>{error}</Typography>
           ) : filteredConversations.length === 0 ? (
             <Box sx={{ p: 3, textAlign: "center" }}>
               <Typography sx={{ color: "#6B7280", mb: 1 }}>
-                {searchQuery
-                  ? "No matching conversations"
-                  : "No conversations yet"}
+                {searchQuery ? "No matching conversations" : "No conversations yet"}
               </Typography>
               {searchQuery && (
                 <Typography
@@ -432,7 +213,7 @@ const ChatList: React.FC<ChatListProps> = ({
                   sx={{
                     color: "#31795A",
                     cursor: "pointer",
-                    "&:hover": { textDecoration: "underline" },
+                    "&:hover": { textDecoration: "underline" }
                   }}
                   onClick={() => setSearchQuery("")}
                 >
@@ -441,155 +222,135 @@ const ChatList: React.FC<ChatListProps> = ({
               )}
             </Box>
           ) : (
-            filteredConversations.map((c) => (
-              <React.Fragment key={c.conversationId}>
-                <ListItemButton
-                  selected={selectedConversationId === c.conversationId}
-                  onClick={() => handleClick(c.conversationId)}
-                  sx={{
-                    py: 1.5,
-                    px: { xs: 2, md: 2.5 },
-                    bgcolor: "#FFFFFF",
-                    "&:hover": {
-                      backgroundColor: "#F0F5F3",
-                      "& .chat-avatar": {
-                        transform: "scale(1.05)",
-                      },
-                    },
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    borderLeft: "4px solid transparent",
-                    transition: "all 0.2s ease",
-                    "&.Mui-selected, &.selected": {
-                      backgroundColor: "#E9F7EF",
-                      borderLeftColor: "#31795A",
-                    },
-                  }}
-                >
-                  <ListItemAvatar sx={{ minWidth: 0 }}>
-                    <Badge
-                      color="success"
-                      variant="dot"
-                      overlap="circular"
-                      invisible={
-                        !(
-                          c.lastSenderId !== currentUserId && !c.lastMessageRead
-                        )
-                      }
-                      sx={{
-                        "& .MuiBadge-badge": {
-                          bgcolor: "#1a5f3d",
-                          border: "2px solid #FFFFFF",
-                          boxShadow: "0 2px 6px rgba(26, 95, 61, 0.4)",
+            filteredConversations.map((c) => {
+              const other = getOtherParticipant(c);
+              const hasUnread = c.hasUnread; // Assuming useConversations hook provides this from backend
+
+              return (
+                <React.Fragment key={c.id}>
+                  <ListItemButton
+                    selected={selectedConversationId === c.id}
+                    onClick={() => handleClick(c.id)}
+                    sx={{
+                      py: 1.5,
+                      px: { xs: 2, md: 2.5 },
+                      bgcolor: "#FFFFFF",
+                      "&:hover": {
+                        backgroundColor: "#F0F5F3",
+                        "& .chat-avatar": {
+                          transform: "scale(1.05)",
                         },
-                      }}
-                    >
-                      <Avatar
-                        className="chat-avatar"
+                      },
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      borderLeft: "4px solid transparent",
+                      transition: "all 0.2s ease",
+                      "&.Mui-selected, &.selected": {
+                        backgroundColor: "#E9F7EF",
+                        borderLeftColor: "#31795A",
+                      },
+                    }}
+                  >
+                    <ListItemAvatar sx={{ minWidth: 0 }}>
+                      <Badge
+                        color="success"
+                        variant="dot"
+                        overlap="circular"
+                        invisible={!hasUnread}
                         sx={{
-                          bgcolor: "#244034",
-                          width: 48,
-                          height: 48,
-                          fontSize: "1.1rem",
-                          fontWeight: 600,
-                          transition: "transform 0.2s ease",
-                          boxShadow: "0 2px 8px rgba(36,64,52,0.15)",
-                        }}
-                        src={
-                          // Prefer profile picture coming directly from conversation data (bucket URL)
-                          (c as any).otherParticipantProfilePicture ||
-                          profilePicturesMap[c.otherParticipantId] ||
-                          undefined
-                        }
-                      >
-                        {!(
-                          (c as any).otherParticipantProfilePicture ||
-                          profilePicturesMap[c.otherParticipantId]
-                        ) &&
-                          // Use the first letter of the most friendly name we have
-                          (
-                            namesMap[c.otherParticipantId] ||
-                            (c as any).otherParticipantName ||
-                            c.otherParticipantId
-                          )
-                            .toString()
-                            .charAt(0)
-                            .toUpperCase()}
-                      </Avatar>
-                    </Badge>
-                  </ListItemAvatar>
-
-                  <ListItemText
-                    primary={
-                      <Typography
-                        sx={{
-                          fontWeight: 600,
-                          fontFamily: "inherit",
-                          color: "#244034",
-                          fontSize: "0.95rem",
-                        }}
-                      >
-                        {/* Prefer name from conversation data (written by chat area),
-                         * then API-resolved name, and only as a last resort fall back
-                         * to a generic label / raw ID.
-                         */}
-                        {namesMap[c.otherParticipantId] ||
-                          (c as any).otherParticipantName ||
-                          (isFreelancerUser ? "Client" : c.otherParticipantId)}
-                      </Typography>
-                    }
-                    secondary={
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          maxWidth: 200,
-                          color: "#6B7280",
-                          fontSize: "0.85rem",
-                        }}
-                      >
-                        {c.lastMessage}
-                      </Typography>
-                    }
-                  />
-
-                  <Box sx={{ ml: "auto", textAlign: "right", flexShrink: 0 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "#9CA3AF",
-                        fontSize: "0.75rem",
-                        display: "block",
-                      }}
-                    >
-                      {formatTime(c.updatedAt)}
-                    </Typography>
-                    {c.lastSenderId !== currentUserId && !c.lastMessageRead && (
-                      <Box
-                        sx={{
-                          mt: 0.5,
-                          display: "flex",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: "50%",
-                            backgroundColor: "#1a5f3d",
+                          "& .MuiBadge-badge": {
+                            bgcolor: "#1a5f3d",
                             border: "2px solid #FFFFFF",
                             boxShadow: "0 2px 6px rgba(26, 95, 61, 0.4)",
+                          },
+                        }}
+                      >
+                        <Avatar
+                          className="chat-avatar"
+                          sx={{
+                            bgcolor: "#244034",
+                            width: 48,
+                            height: 48,
+                            fontSize: "1.1rem",
+                            fontWeight: 600,
+                            transition: "transform 0.2s ease",
+                            boxShadow: "0 2px 8px rgba(36,64,52,0.15)",
                           }}
-                        />
-                      </Box>
-                    )}
-                  </Box>
-                </ListItemButton>
-                <Divider component="li" sx={{ borderColor: "#F0F5F3" }} />
-              </React.Fragment>
-            ))
+                          src={other.profilePicture}
+                        >
+                          {!other.profilePicture && (other.firstName || 'U').charAt(0).toUpperCase()}
+                        </Avatar>
+                      </Badge>
+                    </ListItemAvatar>
+
+                    <ListItemText
+                      primary={
+                        <Typography
+                          sx={{
+                            fontWeight: 600,
+                            fontFamily: "inherit",
+                            color: "#244034",
+                            fontSize: "0.95rem",
+                          }}
+                        >
+                          {other.firstName}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            maxWidth: 200,
+                            color: hasUnread ? "#111827" : "#6B7280",
+                            fontWeight: hasUnread ? 600 : 400,
+                            fontSize: "0.85rem",
+                          }}
+                        >
+                          {c.lastMessage || 'No messages'}
+                        </Typography>
+                      }
+                    />
+
+                    <Box sx={{ ml: "auto", textAlign: "right", flexShrink: 0 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: hasUnread ? "#31795A" : "#9CA3AF",
+                          fontWeight: hasUnread ? 600 : 400,
+                          fontSize: "0.75rem",
+                          display: "block",
+                        }}
+                      >
+                        {formatTime(c.updatedAt)}
+                      </Typography>
+                      {hasUnread && (
+                        <Box
+                          sx={{
+                            mt: 0.5,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: "50%",
+                              backgroundColor: "#1a5f3d",
+                              border: "2px solid #FFFFFF",
+                              boxShadow: "0 2px 6px rgba(26, 95, 61, 0.4)",
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  </ListItemButton>
+                  <Divider component="li" sx={{ borderColor: "#F0F5F3" }} />
+                </React.Fragment>
+              );
+            })
           )}
         </List>
       </Box>

@@ -3,9 +3,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
-import { db, auth } from '@/lib/firebase';
-import { ref, get, set } from 'firebase/database';
-import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { authCookies } from "@/utils/cookies";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
@@ -192,91 +189,39 @@ const CandidateV1Area = () => {
       // Continue anyway - backend will enforce the rule
     }
 
-    // Ensure Firebase authentication before creating conversation
     try {
-      if (!auth.currentUser) {
-        const authToken = authCookies.getToken();
-        if (!authToken) {
-          toast.error('Authentication required. Please sign in again.');
-          return;
-        }
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to get Firebase authentication token');
-        }
-
-        const data = await response.json();
-        if (data.success && data.data?.customToken) {
-          await signInWithCustomToken(auth, data.data.customToken);
-        } else {
-          throw new Error('Invalid Firebase token response');
-        }
-      }
-    } catch (authErr: any) {
-      console.error('Firebase authentication error:', authErr);
-      toast.error('Failed to authenticate. Please try again.');
-      return;
-    }
-
-    const currentUserId = String(userData.user_id);
-    const otherId = String(candidateUserId);
-    const participants = [currentUserId, otherId].sort();
-    const conversationId = participants.join('_');
-
-    try {
-      const convRef = ref(db, `conversations/${conversationId}`);
-      const convSnap = await get(convRef);
-
-      if (!convSnap.exists()) {
-        // Build participantDetails from local state and current user
-        const participantDetails: any = {};
-        participantDetails[currentUserId] = {
-          firstName: userData.first_name || '',
-          email: userData.email || '',
-          profilePicture: userData.profile_picture || null
-        };
-        const otherCandidate = candidates.find(c => String(c.user_id) === otherId);
-        if (otherCandidate) {
-          participantDetails[otherId] = {
-            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`,
-            email: '',
-            profilePicture: otherCandidate.profile_picture || null
-          };
-        }
-
-        await set(convRef, {
-          participants,
-          participantRoles: {
-            [currentUserId]: 'client',
-            [otherId]: 'freelancer',
-          },
-          participantDetails,
-          lastMessage: '',
-          lastSenderId: '',
-          updatedAt: Date.now(),
-          createdAt: Date.now(),
-        });
-        toast.success('Chat started! Redirecting...');
-      } else {
-        toast.success('Opening chat...');
+      const token = authCookies.getToken();
+      if (!token) {
+        toast.error('Authentication required. Please sign in again.');
+        return;
       }
 
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/conversations`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ otherUserId: candidateUserId })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to start chat');
+      }
+
+      const { data } = await response.json();
+      const conversationId = data.id;
+
+      if (!conversationId) {
+        throw new Error('Invalid conversation ID received');
+      }
+
+      toast.success('Chat started! Redirecting...');
       // Redirect to the thread page to show the conversation
       router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
     } catch (err: any) {
       console.error('Failed to start chat:', err);
-      console.error('Error details:', {
-        code: err?.code,
-        message: err?.message,
-        stack: err?.stack
-      });
       toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
     }
   };

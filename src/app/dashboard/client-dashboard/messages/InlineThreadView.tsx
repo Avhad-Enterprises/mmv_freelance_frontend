@@ -1,343 +1,127 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from 'react';
 import { useUser } from "@/context/UserContext";
-import ChatHeader from "@/app/components/chatArea/ChatHeader";
-import ChatBody, { LocalMessage } from "@/app/components/chatArea/ChatBody";
-import ChatInput from "@/app/components/chatArea/ChatInput";
-import { db, auth } from "@/lib/firebase";
-import { ref, get, set, push, onValue, update } from "firebase/database";
-import { signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
+import { useSocketMessages } from '@/hooks/useSocketMessages';
+import { useSocket } from '@/context/SocketContext';
+import ChatBody from '@/app/components/chatArea/ChatBody';
+import ChatInput from '@/app/components/chatArea/ChatInput';
 import Box from "@mui/material/Box";
-import Cookies from "js-cookie";
+import { authCookies } from '@/utils/cookies';
+import axios from 'axios';
+import AuthenticatedImage from '@/app/components/common/AuthenticatedImage';
 
 interface InlineThreadViewProps {
   conversationId: string;
-  onSettingsClick?: () => void;
+  onBack?: () => void;
 }
 
-const InlineThreadView: React.FC<InlineThreadViewProps> = ({
-  conversationId,
-  onSettingsClick,
-}) => {
+interface ParticipantInfo {
+  user_id: number;
+  first_name: string;
+  last_name?: string;
+  email?: string;
+  profile_picture?: string;
+}
+
+interface ConversationDetails {
+  conversation_id: number;
+  participants: ParticipantInfo[];
+  last_message_content?: string;
+  last_message_created_at?: string;
+}
+
+const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId, onBack }) => {
   const { userData, currentRole, isLoading } = useUser();
-  const [conversation, setConversation] = useState<any | null>(null);
-  const [messages, setMessages] = useState<LocalMessage[]>([]);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
-  const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
-  const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
-  const [otherParticipantId, setOtherParticipantId] = useState<
-    string | undefined
-  >(undefined);
+  const { isConnected } = useSocket();
+  const [conversationDetails, setConversationDetails] = useState<ConversationDetails | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(true);
 
-  // Firebase Authentication Effect
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setFirebaseAuthenticated(true);
-      } else {
-        setFirebaseAuthenticated(false);
+  // Fetch conversation details
+  const fetchConversationDetails = useCallback(async () => {
+    if (!conversationId) return;
 
-        // Try to authenticate with custom token
-        const authToken = Cookies.get("auth_token");
-        if (authToken) {
-          try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`,
-              {
-                headers: {
-                  Authorization: `Bearer ${authToken}`,
-                  "Content-Type": "application/json",
-                },
-              }
-            );
+    try {
+      setLoadingDetails(true);
+      const token = authCookies.getToken();
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/conversations`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success && data.data?.customToken) {
-                await signInWithCustomToken(auth, data.data.customToken);
-              }
-            }
-          } catch (error) {
-            console.error("Firebase authentication error:", error);
-          }
+      if (response.data?.data) {
+        const found = response.data.data.find(
+          (c: ConversationDetails) => String(c.conversation_id) === conversationId
+        );
+        if (found) {
+          setConversationDetails(found);
         }
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Load conversation data
-  useEffect(() => {
-    if (!conversationId || !firebaseAuthenticated) return;
-    const load = async () => {
-      try {
-        const convRef = ref(db, `conversations/${conversationId}`);
-        const snap = await get(convRef);
-        if (snap.exists()) {
-          const conv = { id: conversationId, ...snap.val() };
-
-          // Try to resolve the other participant's public profile
-          const otherId = conv.participants?.find(
-            (p: string) => p !== String(userData?.user_id)
-          );
-
-          // Store other participant ID
-          setOtherParticipantId(otherId);
-
-          if (otherId) {
-            try {
-              const publicRes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
-                { cache: "no-cache" }
-              );
-              if (publicRes.ok) {
-                const publicData = await publicRes.json();
-                const found = (publicData.data || []).find(
-                  (f: any) => String(f.user_id) === String(otherId)
-                );
-                if (found) {
-                  conv.participantDetails = conv.participantDetails || {};
-                  conv.participantDetails[otherId] = {
-                    firstName:
-                      found.first_name || (found.username || "").split("@")[0],
-                    email: "",
-                    profilePicture: found.profile_picture || undefined,
-                  };
-                }
-              }
-            } catch (err) {
-              console.error("Failed to fetch public freelancer info", err);
-            }
-          }
-
-          setConversation(conv);
-        } else if (conversationId.includes("_") && userData?.user_id) {
-          // Handle non-existent but valid pattern conversation ID
-          const participants = conversationId.split("_").sort();
-          const currentUserId = String(userData.user_id);
-          const otherId = participants.find((p) => p !== currentUserId);
-
-          // Store other participant ID
-          setOtherParticipantId(otherId);
-
-          if (otherId && participants.includes(currentUserId)) {
-            try {
-              // Fetch other user profile info
-              let otherDetails = {
-                firstName: `User ${otherId}`,
-                email: "",
-                profilePicture: undefined,
-              };
-
-              const publicRes = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
-                { cache: "no-cache" }
-              );
-              if (publicRes.ok) {
-                const publicData = await publicRes.json();
-                const found = (publicData.data || []).find(
-                  (f: any) => String(f.user_id) === String(otherId)
-                );
-                if (found) {
-                  otherDetails = {
-                    firstName:
-                      found.first_name || (found.username || "").split("@")[0],
-                    email: "",
-                    profilePicture: found.profile_picture || undefined,
-                  };
-                }
-              }
-
-              const participantDetails = {
-                [currentUserId]: {
-                  firstName: userData.first_name || "Me",
-                  email: userData.email || "",
-                  profilePicture: userData.profile_picture || undefined,
-                },
-                [otherId]: otherDetails,
-              };
-
-              const newConvData = {
-                participants,
-                participantDetails,
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
-                lastMessage: "",
-                lastSenderId: "",
-                lastMessageRead: true,
-              };
-
-              await set(convRef, newConvData);
-              setConversation({ id: conversationId, ...newConvData });
-            } catch (createErr) {
-              console.error("Failed to auto-create conversation", createErr);
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Could not load conversation", err);
-      }
-    };
-    load();
-  }, [conversationId, userData, firebaseAuthenticated]);
-
-  // Realtime messages listener
-  useEffect(() => {
-    if (!conversationId || !firebaseAuthenticated) return;
-    setIsLoadingMessages(true);
-
-    const messagesRef = ref(db, `conversations/${conversationId}/messages`);
-
-    const unsub = onValue(messagesRef, (snap) => {
-      const data = snap.val();
-      if (!data) {
-        setMessages([]);
-        setIsLoadingMessages(false);
-        return;
-      }
-
-      const msgs: LocalMessage[] = Object.keys(data).map((key) => ({
-        id: key,
-        ...data[key],
-      }));
-      msgs.sort((a, b) => {
-        const aTime = typeof a.createdAt === "number" ? a.createdAt : 0;
-        const bTime = typeof b.createdAt === "number" ? b.createdAt : 0;
-        return aTime - bTime;
-      });
-      setMessages(msgs);
-      setIsLoadingMessages(false);
-    });
-
-    return () => unsub();
-  }, [conversationId, firebaseAuthenticated]);
-
-  // Mark messages as read
-  useEffect(() => {
-    if (
-      !conversationId ||
-      !firebaseAuthenticated ||
-      !userData ||
-      messages.length === 0
-    )
-      return;
-
-    const unreadMessages = messages.filter(
-      (msg) => msg.senderId !== String(userData.user_id) && !msg.isRead
-    );
-
-    if (unreadMessages.length === 0) return;
-
-    const markAsRead = async () => {
-      try {
-        const updates: { [key: string]: any } = {};
-
-        unreadMessages.forEach((msg) => {
-          updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] =
-            true;
-          updates[
-            `conversations/${conversationId}/messages/${msg.id}/deliveryStatus`
-          ] = "read";
-          updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] =
-            Date.now();
-        });
-
-        updates[`conversations/${conversationId}/lastMessageRead`] = true;
-
-        const dbRef = ref(db);
-        await update(dbRef, updates);
-      } catch (error) {
-        console.error("Failed to mark messages as read:", error);
-      }
-    };
-
-    const timer = setTimeout(markAsRead, 300);
-
-    return () => clearTimeout(timer);
-  }, [conversationId, firebaseAuthenticated, userData, messages]);
-
-  // Real-time listener for typing status
-  useEffect(() => {
-    if (
-      !conversationId ||
-      !conversation ||
-      !userData ||
-      !firebaseAuthenticated
-    ) {
-      setIsOtherUserTyping(false);
-      return;
+    } catch (error) {
+      console.error('Failed to fetch conversation details:', error);
+    } finally {
+      setLoadingDetails(false);
     }
+  }, [conversationId]);
 
-    const otherId = conversation.participants?.find(
-      (p: string) => p !== String(userData.user_id)
-    );
-    if (!otherId) {
-      setIsOtherUserTyping(false);
-      return;
-    }
+  useEffect(() => {
+    fetchConversationDetails();
+  }, [fetchConversationDetails]);
 
-    const typingRef = ref(
-      db,
-      `conversations/${conversationId}/typing/${otherId}`
-    );
+  // Use socket messages hook
+  const {
+    messages,
+    sendMessage,
+    loadMoreMessages,
+    hasMoreMessages,
+    isLoadingMore,
+    isOtherUserTyping,
+    sendTyping
+  } = useSocketMessages({
+    conversationId: conversationId,
+    currentUserId: userData?.user_id?.toString() || null
+  });
 
-    const unsub = onValue(
-      typingRef,
-      (snap) => {
-        const isTyping = snap.val() === true;
-        setIsOtherUserTyping(isTyping);
-      },
-      (err) => {
-        console.error("Typing status listener error:", err);
-        setIsOtherUserTyping(false);
-      }
-    );
+  // Get other participant details
+  const otherParticipant = conversationDetails?.participants?.find(
+    p => String(p.user_id) !== String(userData?.user_id)
+  );
 
-    return () => unsub();
-  }, [conversationId, conversation, userData, firebaseAuthenticated]);
+  const displayName = otherParticipant?.first_name || 'User';
+  const displayImage = otherParticipant?.profile_picture;
+  const displayInitial = displayName.charAt(0).toUpperCase();
 
-  const handleViewProfile = (user: {
-    id?: string;
-    firstName?: string;
-    email?: string;
-  }) => {
-    // For inline view, we might not want to show profile inline
-    // or we could emit an event to parent. For now, do nothing or navigate
-    if (user.id) {
-      window.open(`/freelancer-profile/${user.id}`, "_blank");
-    }
+  // Format last active time
+  const formatLastActive = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
-  if (isLoading || !userData)
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          bgcolor: "#FFFFFF",
-        }}
-      >
-        Loading...
-      </Box>
-    );
+  const lastActiveText = conversationDetails?.last_message_created_at
+    ? formatLastActive(conversationDetails.last_message_created_at)
+    : null;
 
-  if (!firebaseAuthenticated)
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          bgcolor: "#FFFFFF",
-        }}
-      >
-        Authenticating...
-      </Box>
-    );
+  if (isLoading || !userData) return (
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
+      bgcolor: '#FFFFFF',
+    }}>
+      Loading...
+    </Box>
+  );
 
   return (
     <Box
@@ -347,16 +131,113 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({
         height: "100%",
         background: "#FFFFFF",
         overflow: "hidden",
-        fontFamily:
-          "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+        fontFamily: "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
       }}
     >
-      <ChatHeader
-        currentUserId={String(userData.user_id)}
-        conversation={conversation}
-        onSettingsClick={onSettingsClick}
-      />
+      {/* Chat Header with real participant info */}
+      <div style={{
+        padding: '12px 16px',
+        borderBottom: '1px solid rgba(49,121,90,0.1)',
+        background: '#244034',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        borderRadius: '0 30px 0 0'
+      }}>
+        {/* Back Button - merged into header */}
+        <button
+          onClick={onBack}
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            border: 'none',
+            color: 'rgba(255,255,255,0.95)',
+            cursor: 'pointer',
+            padding: '8px',
+            display: onBack ? 'flex' : 'none', // Only display if onBack is provided
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '50%',
+            transition: 'all 0.2s ease',
+            marginRight: '4px'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+          aria-label="Back to messages"
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
+        {/* Profile Picture */}
+        <div style={{
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
+          overflow: 'hidden',
+          background: 'rgba(255,255,255,0.15)',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {displayImage ? (
+            <AuthenticatedImage
+              src={displayImage}
+              alt={displayName}
+              width={44}
+              height={44}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <span style={{
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '1.1rem'
+            }}>
+              {displayInitial}
+            </span>
+          )}
+        </div>
+
+        {/* Name and Status */}
+        <div style={{ flex: 1 }}>
+          <div style={{
+            fontWeight: 600,
+            color: '#FFFFFF',
+            fontSize: '1rem',
+            marginBottom: '2px'
+          }}>
+            {loadingDetails ? 'Loading...' : displayName}
+          </div>
+          <div style={{
+            fontSize: '0.8rem',
+            color: isOtherUserTyping ? '#D2F34C' : 'rgba(255,255,255,0.7)',
+            fontWeight: isOtherUserTyping ? 500 : 400
+          }}>
+            {isOtherUserTyping ? (
+              '● Typing...'
+            ) : lastActiveText ? (
+              `Active ${lastActiveText}`
+            ) : isConnected ? (
+              'Online'
+            ) : (
+              'Offline'
+            )}
+          </div>
+        </div>
+
+        {/* Connection indicator */}
+        <div style={{
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          background: isConnected ? '#4ade80' : '#f87171',
+          boxShadow: isConnected ? '0 0 8px #4ade80' : '0 0 8px #f87171'
+        }} />
+      </div>
+
+      {/* Chat Body */}
       <div
         style={{
           flex: 1,
@@ -370,49 +251,19 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({
           messages={messages}
           currentUserId={String(userData.user_id)}
           isOtherUserTyping={isOtherUserTyping}
+          hasMoreMessages={hasMoreMessages}
+          isLoadingMore={isLoadingMore}
+          onLoadMore={loadMoreMessages}
+          isConnected={isConnected}
         />
         <ChatInput
           conversationId={conversationId}
           currentUserId={String(userData.user_id)}
           userRole={currentRole}
-          otherParticipantId={otherParticipantId}
-          onSend={async (text) => {
-            if (!conversationId || !conversation || !userData) return;
-            const senderId = String(userData.user_id);
-            const otherId = conversation.participants?.find(
-              (p: string) => p !== senderId
-            );
-            if (!otherId) return;
-
-            const trimmed = text.trim();
-            if (!trimmed) return;
-
-            try {
-              const messagesRef = ref(
-                db,
-                `conversations/${conversationId}/messages`
-              );
-              const newMessageRef = push(messagesRef);
-              await set(newMessageRef, {
-                senderId,
-                receiverId: otherId,
-                text: trimmed,
-                createdAt: Date.now(),
-                isRead: false,
-                deliveryStatus: "sent",
-              });
-
-              const convRef = ref(db, `conversations/${conversationId}`);
-              await update(convRef, {
-                lastMessage: trimmed,
-                updatedAt: Date.now(),
-                lastSenderId: senderId,
-                lastMessageRead: false,
-              });
-            } catch (err) {
-              console.error("Send message failed:", err);
-            }
-          }}
+          onSend={sendMessage}
+          onTyping={sendTyping}
+          disabled={!isConnected}
+          otherParticipantId={otherParticipant?.user_id?.toString()}
         />
       </div>
     </Box>

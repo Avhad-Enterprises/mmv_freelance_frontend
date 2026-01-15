@@ -13,17 +13,28 @@ const firebaseConfig = {
 };
 
 // Validate required configuration
-if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
-    throw new Error('Missing required Firebase configuration. Check your environment variables.');
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.authDomain && firebaseConfig.projectId;
+
+if (!isConfigValid) {
+  console.warn('Missing required Firebase configuration. Firebase features will be disabled.');
 }
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getDatabase(app);
-const auth = getAuth(app);
-const appId = firebaseConfig.appId || 'default-app-id';
+let app: any = null;
+let db: any = null;
+let auth: any = null;
+let appId = 'firebase-disabled';
 
-// Enable offline persistence for Realtime Database (enabled by default)
+if (isConfigValid) {
+  try {
+    app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    db = getDatabase(app);
+    auth = getAuth(app);
+    appId = firebaseConfig.appId || 'default-app-id';
+  } catch (e) {
+    console.error('Failed to initialize Firebase:', e);
+  }
+}
 
 export { db, auth, appId };
 
