@@ -8,16 +8,20 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import ChatList from "./ChatList";
 import EmptyChat from "./EmptyChat";
 import InlineThreadView from "./InlineThreadView";
+import UpdateBudgetModal from "@/app/components/chatArea/UpdateBudgetModal";
 import Typography from "@mui/material/Typography";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 
 export default function ClientMessagesPage() {
   const { userData, isLoading } = useUser();
   const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const searchParams = useSearchParams();
-  const conversationIdFromUrl = searchParams.get('conversationId');
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const conversationIdFromUrl = searchParams.get("conversationId");
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
+  const [isBudgetModalOpen, setIsBudgetModalOpen] = useState(false);
 
   // Auto-select conversation from URL query param
   useEffect(() => {
@@ -26,18 +30,27 @@ export default function ClientMessagesPage() {
     }
   }, [conversationIdFromUrl]);
 
-  if (isLoading) return (
-    <div className="dashboard-body">
-      <div className="position-relative">
-        <DashboardHeader />
-        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 400 }}>
-          <div className="spinner-border text-success" role="status">
-            <span className="visually-hidden">Loading...</span>
+  const handleNewConversation = () => {
+    // TODO: Implement new conversation flow
+    console.log("New conversation clicked");
+  };
+
+  if (isLoading)
+    return (
+      <div className="dashboard-body">
+        <div className="position-relative">
+          <DashboardHeader />
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: 400 }}
+          >
+            <div className="spinner-border text-success" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="dashboard-body">
@@ -67,15 +80,20 @@ export default function ClientMessagesPage() {
               sx={{
                 width: { xs: "100%", md: "32%" },
                 minWidth: { md: "320px" },
-                maxWidth: { md: "380px" },
+                maxWidth: { md: "450px" },
                 borderRight: { md: "1px solid rgba(49,121,90,0.1)" },
                 bgcolor: "#FFFFFF",
                 height: "100%",
               }}
             >
               <ChatList
-                onSelectConversation={isDesktop ? (id) => setSelectedConversationId(id) : undefined}
-                selectedConversationId={isDesktop ? selectedConversationId : undefined}
+                onSelectConversation={
+                  isDesktop ? (id) => setSelectedConversationId(id) : undefined
+                }
+                selectedConversationId={
+                  isDesktop ? selectedConversationId : undefined
+                }
+                onNewConversation={handleNewConversation}
               />
             </Box>
 
@@ -84,17 +102,32 @@ export default function ClientMessagesPage() {
               sx={{
                 flex: 1,
                 display: { xs: "none", md: "block" },
-                background: selectedConversationId ? "#FFFFFF" : "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
+                background: selectedConversationId
+                  ? "#FFFFFF"
+                  : "linear-gradient(180deg, #F0F5F3 0%, #E9F7EF 100%)",
                 height: "100%",
+                borderRadius: { md: "0 30px 30px 0" },
+                overflow: "hidden",
               }}
             >
               {selectedConversationId ? (
-                <InlineThreadView conversationId={selectedConversationId} />
+                <InlineThreadView
+                  conversationId={selectedConversationId}
+                  onSettingsClick={() => setIsBudgetModalOpen(true)}
+                />
               ) : (
                 <EmptyChat />
               )}
             </Box>
           </Paper>
+
+          {/* Budget Update Modal */}
+          <UpdateBudgetModal
+            isOpen={isBudgetModalOpen}
+            onClose={() => setIsBudgetModalOpen(false)}
+            currentUserId={userData?.user_id ? String(userData.user_id) : ""}
+            otherParticipantId={undefined}
+          />
         </div>
       </div>
     </div>

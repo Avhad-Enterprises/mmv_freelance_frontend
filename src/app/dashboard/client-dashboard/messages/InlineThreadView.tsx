@@ -1,27 +1,33 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
-import ChatHeader from '@/app/components/chatArea/ChatHeader';
-import ChatBody, { LocalMessage } from '@/app/components/chatArea/ChatBody';
-import ChatInput from '@/app/components/chatArea/ChatInput';
-import { db, auth } from '@/lib/firebase';
-import { ref, get, set, push, onValue, update } from 'firebase/database';
-import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import ChatHeader from "@/app/components/chatArea/ChatHeader";
+import ChatBody, { LocalMessage } from "@/app/components/chatArea/ChatBody";
+import ChatInput from "@/app/components/chatArea/ChatInput";
+import { db, auth } from "@/lib/firebase";
+import { ref, get, set, push, onValue, update } from "firebase/database";
+import { signInWithCustomToken, onAuthStateChanged } from "firebase/auth";
 import Box from "@mui/material/Box";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 interface InlineThreadViewProps {
   conversationId: string;
+  onSettingsClick?: () => void;
 }
 
-const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) => {
+const InlineThreadView: React.FC<InlineThreadViewProps> = ({
+  conversationId,
+  onSettingsClick,
+}) => {
   const { userData, currentRole, isLoading } = useUser();
   const [conversation, setConversation] = useState<any | null>(null);
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(true);
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [firebaseAuthenticated, setFirebaseAuthenticated] = useState(false);
-  const [otherParticipantId, setOtherParticipantId] = useState<string | undefined>(undefined);
+  const [otherParticipantId, setOtherParticipantId] = useState<
+    string | undefined
+  >(undefined);
 
   // Firebase Authentication Effect
   useEffect(() => {
@@ -32,15 +38,18 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         setFirebaseAuthenticated(false);
 
         // Try to authenticate with custom token
-        const authToken = Cookies.get('auth_token');
+        const authToken = Cookies.get("auth_token");
         if (authToken) {
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
-              headers: {
-                'Authorization': `Bearer ${authToken}`,
-                'Content-Type': 'application/json'
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  "Content-Type": "application/json",
+                },
               }
-            });
+            );
 
             if (response.ok) {
               const data = await response.json();
@@ -49,7 +58,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
               }
             }
           } catch (error) {
-            console.error('Firebase authentication error:', error);
+            console.error("Firebase authentication error:", error);
           }
         }
       }
@@ -69,38 +78,46 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
           const conv = { id: conversationId, ...snap.val() };
 
           // Try to resolve the other participant's public profile
-          const otherId = conv.participants?.find((p: string) => p !== String(userData?.user_id));
-          
+          const otherId = conv.participants?.find(
+            (p: string) => p !== String(userData?.user_id)
+          );
+
           // Store other participant ID
           setOtherParticipantId(otherId);
 
           if (otherId) {
             try {
-              const publicRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+              const publicRes = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
+                { cache: "no-cache" }
+              );
               if (publicRes.ok) {
                 const publicData = await publicRes.json();
-                const found = (publicData.data || []).find((f: any) => String(f.user_id) === String(otherId));
+                const found = (publicData.data || []).find(
+                  (f: any) => String(f.user_id) === String(otherId)
+                );
                 if (found) {
                   conv.participantDetails = conv.participantDetails || {};
                   conv.participantDetails[otherId] = {
-                    firstName: found.first_name || (found.username || '').split('@')[0],
-                    email: '',
-                    profilePicture: found.profile_picture || undefined
+                    firstName:
+                      found.first_name || (found.username || "").split("@")[0],
+                    email: "",
+                    profilePicture: found.profile_picture || undefined,
                   };
                 }
               }
             } catch (err) {
-              console.error('Failed to fetch public freelancer info', err);
+              console.error("Failed to fetch public freelancer info", err);
             }
           }
 
           setConversation(conv);
-        } else if (conversationId.includes('_') && userData?.user_id) {
+        } else if (conversationId.includes("_") && userData?.user_id) {
           // Handle non-existent but valid pattern conversation ID
-          const participants = conversationId.split('_').sort();
+          const participants = conversationId.split("_").sort();
           const currentUserId = String(userData.user_id);
-          const otherId = participants.find(p => p !== currentUserId);
-          
+          const otherId = participants.find((p) => p !== currentUserId);
+
           // Store other participant ID
           setOtherParticipantId(otherId);
 
@@ -109,30 +126,36 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
               // Fetch other user profile info
               let otherDetails = {
                 firstName: `User ${otherId}`,
-                email: '',
-                profilePicture: undefined
+                email: "",
+                profilePicture: undefined,
               };
 
-              const publicRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+              const publicRes = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
+                { cache: "no-cache" }
+              );
               if (publicRes.ok) {
                 const publicData = await publicRes.json();
-                const found = (publicData.data || []).find((f: any) => String(f.user_id) === String(otherId));
+                const found = (publicData.data || []).find(
+                  (f: any) => String(f.user_id) === String(otherId)
+                );
                 if (found) {
                   otherDetails = {
-                    firstName: found.first_name || (found.username || '').split('@')[0],
-                    email: '',
-                    profilePicture: found.profile_picture || undefined
+                    firstName:
+                      found.first_name || (found.username || "").split("@")[0],
+                    email: "",
+                    profilePicture: found.profile_picture || undefined,
                   };
                 }
               }
 
               const participantDetails = {
                 [currentUserId]: {
-                  firstName: userData.first_name || 'Me',
-                  email: userData.email || '',
-                  profilePicture: userData.profile_picture || undefined
+                  firstName: userData.first_name || "Me",
+                  email: userData.email || "",
+                  profilePicture: userData.profile_picture || undefined,
                 },
-                [otherId]: otherDetails
+                [otherId]: otherDetails,
               };
 
               const newConvData = {
@@ -140,20 +163,20 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
                 participantDetails,
                 createdAt: Date.now(),
                 updatedAt: Date.now(),
-                lastMessage: '',
-                lastSenderId: '',
-                lastMessageRead: true
+                lastMessage: "",
+                lastSenderId: "",
+                lastMessageRead: true,
               };
 
               await set(convRef, newConvData);
               setConversation({ id: conversationId, ...newConvData });
             } catch (createErr) {
-              console.error('Failed to auto-create conversation', createErr);
+              console.error("Failed to auto-create conversation", createErr);
             }
           }
         }
       } catch (err) {
-        console.error('Could not load conversation', err);
+        console.error("Could not load conversation", err);
       }
     };
     load();
@@ -179,8 +202,8 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         ...data[key],
       }));
       msgs.sort((a, b) => {
-        const aTime = typeof a.createdAt === 'number' ? a.createdAt : 0;
-        const bTime = typeof b.createdAt === 'number' ? b.createdAt : 0;
+        const aTime = typeof a.createdAt === "number" ? a.createdAt : 0;
+        const bTime = typeof b.createdAt === "number" ? b.createdAt : 0;
         return aTime - bTime;
       });
       setMessages(msgs);
@@ -192,7 +215,13 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
 
   // Mark messages as read
   useEffect(() => {
-    if (!conversationId || !firebaseAuthenticated || !userData || messages.length === 0) return;
+    if (
+      !conversationId ||
+      !firebaseAuthenticated ||
+      !userData ||
+      messages.length === 0
+    )
+      return;
 
     const unreadMessages = messages.filter(
       (msg) => msg.senderId !== String(userData.user_id) && !msg.isRead
@@ -205,9 +234,13 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         const updates: { [key: string]: any } = {};
 
         unreadMessages.forEach((msg) => {
-          updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] = true;
-          updates[`conversations/${conversationId}/messages/${msg.id}/deliveryStatus`] = 'read';
-          updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] = Date.now();
+          updates[`conversations/${conversationId}/messages/${msg.id}/isRead`] =
+            true;
+          updates[
+            `conversations/${conversationId}/messages/${msg.id}/deliveryStatus`
+          ] = "read";
+          updates[`conversations/${conversationId}/messages/${msg.id}/readAt`] =
+            Date.now();
         });
 
         updates[`conversations/${conversationId}/lastMessageRead`] = true;
@@ -215,7 +248,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         const dbRef = ref(db);
         await update(dbRef, updates);
       } catch (error) {
-        console.error('Failed to mark messages as read:', error);
+        console.error("Failed to mark messages as read:", error);
       }
     };
 
@@ -226,18 +259,28 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
 
   // Real-time listener for typing status
   useEffect(() => {
-    if (!conversationId || !conversation || !userData || !firebaseAuthenticated) {
+    if (
+      !conversationId ||
+      !conversation ||
+      !userData ||
+      !firebaseAuthenticated
+    ) {
       setIsOtherUserTyping(false);
       return;
     }
 
-    const otherId = conversation.participants?.find((p: string) => p !== String(userData.user_id));
+    const otherId = conversation.participants?.find(
+      (p: string) => p !== String(userData.user_id)
+    );
     if (!otherId) {
       setIsOtherUserTyping(false);
       return;
     }
 
-    const typingRef = ref(db, `conversations/${conversationId}/typing/${otherId}`);
+    const typingRef = ref(
+      db,
+      `conversations/${conversationId}/typing/${otherId}`
+    );
 
     const unsub = onValue(
       typingRef,
@@ -246,7 +289,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         setIsOtherUserTyping(isTyping);
       },
       (err) => {
-        console.error('Typing status listener error:', err);
+        console.error("Typing status listener error:", err);
         setIsOtherUserTyping(false);
       }
     );
@@ -254,37 +297,47 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
     return () => unsub();
   }, [conversationId, conversation, userData, firebaseAuthenticated]);
 
-  const handleViewProfile = (user: { id?: string; firstName?: string; email?: string }) => {
+  const handleViewProfile = (user: {
+    id?: string;
+    firstName?: string;
+    email?: string;
+  }) => {
     // For inline view, we might not want to show profile inline
     // or we could emit an event to parent. For now, do nothing or navigate
     if (user.id) {
-      window.open(`/freelancer-profile/${user.id}`, '_blank');
+      window.open(`/freelancer-profile/${user.id}`, "_blank");
     }
   };
 
-  if (isLoading || !userData) return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      bgcolor: '#FFFFFF',
-    }}>
-      Loading...
-    </Box>
-  );
+  if (isLoading || !userData)
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          bgcolor: "#FFFFFF",
+        }}
+      >
+        Loading...
+      </Box>
+    );
 
-  if (!firebaseAuthenticated) return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      bgcolor: '#FFFFFF',
-    }}>
-      Authenticating...
-    </Box>
-  );
+  if (!firebaseAuthenticated)
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          bgcolor: "#FFFFFF",
+        }}
+      >
+        Authenticating...
+      </Box>
+    );
 
   return (
     <Box
@@ -294,12 +347,14 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
         height: "100%",
         background: "#FFFFFF",
         overflow: "hidden",
-        fontFamily: "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
+        fontFamily:
+          "system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
       }}
     >
       <ChatHeader
         currentUserId={String(userData.user_id)}
         conversation={conversation}
+        onSettingsClick={onSettingsClick}
       />
 
       <div
@@ -324,14 +379,19 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
           onSend={async (text) => {
             if (!conversationId || !conversation || !userData) return;
             const senderId = String(userData.user_id);
-            const otherId = conversation.participants?.find((p: string) => p !== senderId);
+            const otherId = conversation.participants?.find(
+              (p: string) => p !== senderId
+            );
             if (!otherId) return;
 
             const trimmed = text.trim();
             if (!trimmed) return;
 
             try {
-              const messagesRef = ref(db, `conversations/${conversationId}/messages`);
+              const messagesRef = ref(
+                db,
+                `conversations/${conversationId}/messages`
+              );
               const newMessageRef = push(messagesRef);
               await set(newMessageRef, {
                 senderId,
@@ -339,7 +399,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
                 text: trimmed,
                 createdAt: Date.now(),
                 isRead: false,
-                deliveryStatus: 'sent',
+                deliveryStatus: "sent",
               });
 
               const convRef = ref(db, `conversations/${conversationId}`);
@@ -350,7 +410,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({ conversationId }) =
                 lastMessageRead: false,
               });
             } catch (err) {
-              console.error('Send message failed:', err);
+              console.error("Send message failed:", err);
             }
           }}
         />

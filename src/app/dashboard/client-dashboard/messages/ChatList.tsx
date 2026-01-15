@@ -27,16 +27,14 @@ type ChatListProps = {
   onSelectConversation?: (id: string) => void;
   /** Currently selected conversation ID for highlighting */
   selectedConversationId?: string | null;
+  /** Callback for new conversation button */
+  onNewConversation?: () => void;
 } & Omit<ComponentProps<"div">, "ref">;
 
 const formatTime = (ts?: any) => {
   if (!ts) return "";
   const d =
-    typeof ts === "number"
-      ? new Date(ts)
-      : ts?.toDate
-        ? ts.toDate()
-        : null;
+    typeof ts === "number" ? new Date(ts) : ts?.toDate ? ts.toDate() : null;
   if (!d) return "";
   const now = new Date();
   const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
@@ -50,6 +48,7 @@ const ChatList: React.FC<ChatListProps> = ({
   threadBasePath = "/dashboard/client-dashboard/messages/thread",
   onSelectConversation,
   selectedConversationId,
+  onNewConversation,
 }) => {
   const router = useRouter();
   const { userData, isLoading } = useUser();
@@ -118,11 +117,15 @@ const ChatList: React.FC<ChatListProps> = ({
     if (!searchQuery.trim()) return conversations;
     const query = searchQuery.toLowerCase().trim();
     return conversations.filter((c) => {
-      const name = (c as any).otherParticipantName ||
+      const name =
+        (c as any).otherParticipantName ||
         namesMap[c.otherParticipantId] ||
         c.otherParticipantId;
       const message = c.lastMessage || "";
-      return name.toLowerCase().includes(query) || message.toLowerCase().includes(query);
+      return (
+        name.toLowerCase().includes(query) ||
+        message.toLowerCase().includes(query)
+      );
     });
   }, [conversations, namesMap, searchQuery]);
 
@@ -269,8 +272,63 @@ const ChatList: React.FC<ChatListProps> = ({
           variant="body2"
           sx={{ color: "rgba(255,255,255,0.75)", mb: 2, fontSize: "0.85rem" }}
         >
-          {conversations.length} conversation{conversations.length !== 1 ? "s" : ""}
+          {conversations.length} conversation
+          {conversations.length !== 1 ? "s" : ""}
         </Typography>
+
+        {/* New Conversation Button */}
+        {onNewConversation && (
+          <Box sx={{ mb: 2 }}>
+            <button
+              onClick={onNewConversation}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                background: "#D2F34C",
+                border: "none",
+                borderRadius: "10px",
+                color: "#244034",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                transition: "all 0.2s ease",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#c5e647";
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 12px rgba(210, 243, 76, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#D2F34C";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 18 18"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 3.75V14.25M3.75 9H14.25"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              New Conversation
+            </button>
+          </Box>
+        )}
 
         {/* Search Bar */}
         <Box
@@ -294,7 +352,11 @@ const ChatList: React.FC<ChatListProps> = ({
             },
           }}
         >
-          <Search size={20} color="rgba(255,255,255,0.7)" style={{ marginRight: 8, flexShrink: 0 }} />
+          <Search
+            size={20}
+            color="rgba(255,255,255,0.7)"
+            style={{ marginRight: 8, flexShrink: 0 }}
+          />
           <InputBase
             placeholder="Search conversations..."
             value={searchQuery}
@@ -360,7 +422,9 @@ const ChatList: React.FC<ChatListProps> = ({
           ) : filteredConversations.length === 0 ? (
             <Box sx={{ p: 3, textAlign: "center" }}>
               <Typography sx={{ color: "#6B7280", mb: 1 }}>
-                {searchQuery ? "No matching conversations" : "No conversations yet"}
+                {searchQuery
+                  ? "No matching conversations"
+                  : "No conversations yet"}
               </Typography>
               {searchQuery && (
                 <Typography
@@ -368,7 +432,7 @@ const ChatList: React.FC<ChatListProps> = ({
                   sx={{
                     color: "#31795A",
                     cursor: "pointer",
-                    "&:hover": { textDecoration: "underline" }
+                    "&:hover": { textDecoration: "underline" },
                   }}
                   onClick={() => setSearchQuery("")}
                 >
@@ -409,7 +473,9 @@ const ChatList: React.FC<ChatListProps> = ({
                       variant="dot"
                       overlap="circular"
                       invisible={
-                        !(c.lastSenderId !== currentUserId && !c.lastMessageRead)
+                        !(
+                          c.lastSenderId !== currentUserId && !c.lastMessageRead
+                        )
                       }
                       sx={{
                         "& .MuiBadge-badge": {
