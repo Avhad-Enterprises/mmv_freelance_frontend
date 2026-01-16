@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "@/lib/firebase";
-import { ref, onValue, get } from "firebase/database";
 import Cookies from "js-cookie";
 
 interface ConversationShape {
@@ -16,58 +14,23 @@ interface Props {
   conversation?: ConversationShape | null;
   onBack?: () => void;
   onProfileClick?: () => void;
+  isTyping?: boolean;
 }
 
-export default function ChatHeader({ currentUserId, conversation, onBack, onProfileClick }: Props) {
+export default function ChatHeader({ currentUserId, conversation, onBack, onProfileClick, isTyping = false }: Props) {
   const router = useRouter();
   const otherId = conversation?.participants?.find((p) => p !== currentUserId) || null;
   const otherDetails = otherId ? conversation?.participantDetails?.[otherId] : null;
   const [fetchedDetails, setFetchedDetails] = useState<{ firstName?: string; email?: string } | null>(null);
-  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     if (!conversation?.id || !otherId) return;
 
     setFetchedDetails(null);
 
-    // If db is not initialized (e.g. missing env vars), skip Firebase listeners
-    if (!db) return;
-
-    // Listen for typing status from Realtime Database
-    const typingRef = ref(db, `conversations/${conversation.id}/typing/${otherId}`);
-    const unsub = onValue(
-      typingRef,
-      (snap) => {
-        const typing = snap.val() === true;
-        setIsTyping(typing);
-      },
-      (err) => {
-        console.error("Conversation typing listener error:", err);
-      }
-    );
-
     // If there are no details available from the conversation, try to fetch from public API
     (async () => {
       if (!otherDetails && otherId) {
-        // Try to get user details from Realtime Database
-        try {
-          // Double check db existence
-          if (db) {
-            const userRef = ref(db, `users/${otherId}`);
-            const userSnap = await get(userRef);
-            if (userSnap.exists()) {
-              const data = userSnap.val();
-              setFetchedDetails({
-                firstName: data.firstName || data.first_name || data.username || "",
-                email: data.email || "",
-              });
-              return;
-            }
-          }
-        } catch (err) {
-          console.error("Failed to fetch participant from Realtime Database users", err);
-        }
-
         try {
           const res = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
@@ -103,8 +66,6 @@ export default function ChatHeader({ currentUserId, conversation, onBack, onProf
         }
       }
     })();
-
-    return () => unsub();
   }, [conversation?.id, otherId]);
 
   const normalizeName = (n?: string | null) => {

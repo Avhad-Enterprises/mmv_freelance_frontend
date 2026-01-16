@@ -60,7 +60,7 @@ const CandidateAside = ({ }: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
-    const currentUserId = userData?.user_id ? String(userData.user_id) : null;
+    const currentUserId = userData?.user_id ? String(userData.user_id) : undefined;
     const { conversations } = useConversations(currentUserId);
 
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
@@ -73,9 +73,7 @@ const CandidateAside = ({ }: IProps) => {
     const profilePictureUrl = userData?.profile_picture || null;
 
     // Check for unread messages
-    const hasUnreadMessages = conversations.some(convo =>
-        convo.lastSenderId !== currentUserId && !convo.lastMessageRead
-    );
+    const hasUnreadMessages = conversations.some(convo => convo.hasUnread);
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);

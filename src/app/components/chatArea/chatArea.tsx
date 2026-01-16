@@ -329,6 +329,7 @@ const ChatArea: React.FC = () => {
               currentUserId={userData?.user_id?.toString()}
               onBack={() => setSelectedConversation(null)}
               onProfileClick={handleProfileClick}
+              isTyping={isOtherUserTyping}
             />
 
             <ChatBody

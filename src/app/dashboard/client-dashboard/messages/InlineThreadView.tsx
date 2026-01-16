@@ -156,7 +156,7 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({
       <ChatHeader
         currentUserId={currentUserId}
         conversation={conversation}
-        onSettingsClick={onSettingsClick}
+        onProfileClick={onSettingsClick}
         onBack={onBack}
         isTyping={isOtherUserTyping}
       />

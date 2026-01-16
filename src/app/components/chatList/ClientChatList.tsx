@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
 import { MessageCircle } from 'lucide-react';
-import useConversations, { ConversationSummary } from "@/hooks/useConversations";
+import { useConversations, Conversation } from "@/hooks/useConversations";
 
 interface Props {
-  currentUserId: string | null;
-  onSelect?: (conversation: ConversationSummary) => void;
+  currentUserId: string | undefined;
+  onSelect?: (conversation: Conversation) => void;
 }
 
 function formatTime(ts?: any) {
-  if (!ts?.toDate) return "";
-  const d = ts.toDate();
+  if (!ts) return "";
+  const d = new Date(ts);
   const now = new Date();
   const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
   if (diff < 60) return `${diff}s`;
@@ -20,7 +20,7 @@ function formatTime(ts?: any) {
 }
 
 export default function ClientChatList({ currentUserId, onSelect }: Props) {
-  const { conversations, loading, error } = useConversations(currentUserId);
+  const { conversations, isLoading } = useConversations(currentUserId);
 
   if (!currentUserId) return <div>Please sign in to view messages.</div>;
 
@@ -35,13 +35,15 @@ export default function ClientChatList({ currentUserId, onSelect }: Props) {
           <p style={{ margin: 0, fontSize: '0.875rem', color: '#D1D5DB' }}>Recent conversations</p>
         </div>
       </div>
-      {loading && <div>Loading...</div>}
-      {error && <div style={{ color: "red" }}>{error}</div>}
+      {isLoading && <div>Loading...</div>}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {conversations.map((c) => (
+        {conversations.map((c) => {
+          const otherParticipantId = c.participants.find(p => p !== currentUserId) || '';
+          const otherDetails = c.participantDetails[otherParticipantId];
+          return (
           <button
-            key={c.conversationId}
+            key={c.id}
             onClick={() => onSelect?.(c)}
             style={{
               display: "flex",
@@ -56,19 +58,20 @@ export default function ClientChatList({ currentUserId, onSelect }: Props) {
             }}
           >
             <div style={{ width: 48, height: 48, borderRadius: "50%", background: "#244034", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
-              {c.otherParticipantId.charAt(0).toUpperCase()}
+              {otherDetails?.firstName?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-                <div style={{ fontWeight: 600 }}>{c.otherParticipantId}</div>
-                <div style={{ fontSize: 12, color: "#9CA3AF" }}>{formatTime(c.updatedAt)}</div>
+                <div style={{ fontWeight: 600 }}>{otherDetails?.firstName || otherParticipantId}</div>
+                <div style={{ fontSize: 12, color: "#9CA3AF" }}>{c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : ''}</div>
               </div>
               <div style={{ color: "#6B7280", marginTop: 4, fontSize: 14 }}>{c.lastMessage || "No messages yet"}</div>
-              <div style={{ marginTop: 6, fontSize: 12, color: "#9CA3AF" }}>{c.otherParticipantRole}</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: "#9CA3AF" }}>User</div>
             </div>
           </button>
-        ))}
-        {conversations.length === 0 && !loading && <div>No conversations yet.</div>}
+          );
+        })}
+        {conversations.length === 0 && !isLoading && <div>No conversations yet.</div>}
       </div>
     </div>
   );

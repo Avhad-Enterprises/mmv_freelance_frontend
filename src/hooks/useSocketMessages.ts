@@ -76,7 +76,7 @@ export function useSocketMessages({
                 text: msg.content,
                 createdAt: new Date(msg.created_at),
                 isRead: msg.is_read,
-                deliveryStatus: msg.is_read ? 'read' : 'sent'
+                deliveryStatus: (msg.is_read ? 'read' : 'sent') as 'read' | 'sent'
             })).sort((a, b) => (a.createdAt?.getTime() || 0) - (b.createdAt?.getTime() || 0)); // Ensure ascending order
 
             if (isLoadMore) {
