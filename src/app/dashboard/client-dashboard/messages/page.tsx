@@ -89,7 +89,10 @@ export default function ClientMessagesPage() {
               }}
             >
               {selectedConversationId ? (
-                <InlineThreadView conversationId={selectedConversationId} />
+                <InlineThreadView
+                  conversationId={selectedConversationId}
+                  onBack={() => setSelectedConversationId(null)}
+                />
               ) : (
                 <EmptyChat />
               )}

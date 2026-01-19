@@ -1,6 +1,7 @@
 .candidates-profile.bg-color {
     background: $light-bg;
 }
+
 .candidate-profile-card {
     overflow: hidden;
     background: #fff;
@@ -8,9 +9,11 @@
     position: relative;
     border: 1px solid rgba($color: #244034, $alpha: 0.1);
     @include transition (0.2s);
+
     &:hover {
         box-shadow: 0px 20px 35px rgba(22, 105, 70, 0.05);
     }
+
     &.grid-layout {
         padding: 27px 18px 30px;
         display: flex;
@@ -19,55 +22,74 @@
         min-height: 380px;
         height: 100%;
         justify-content: space-between;
+
         .save-btn {
             color: #b9b9b9;
             position: absolute;
-            top:10px;
+            top: 10px;
             right: 10px;
             font-size: 18px;
+
             &:hover {
                 color: $color-three;
             }
         }
+
         .cadidate-avatar {
             flex-shrink: 0;
         }
+
         .candidate-name {
             flex-shrink: 0;
         }
+
         .candidate-post {
             flex-shrink: 0;
         }
+
         .cadidate-skills {
             flex-shrink: 0;
         }
+
         .candidate-info {
             flex-shrink: 0;
         }
     }
+
     &.favourite::before {
         content: '';
         position: absolute;
         width: 60px;
         height: 60px;
         background: $color-five;
-        top:-30px;
+        top: -30px;
         left: -30px;
         transform: rotate(45deg);
     }
+
     &.favourite::after {
         content: "\f586";
         font-family: bootstrap-icons !important;
         position: absolute;
         color: #fff;
         font-size: 13px;
-        top:4px;
+        top: 4px;
         left: 7px;
     }
+
     .cadidate-avatar {
         width: 80px;
         height: 80px;
         border-radius: 50%;
+        overflow: hidden;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 1 / 1;
+        }
+
         &.online:before {
             content: '';
             position: absolute;
@@ -75,23 +97,28 @@
             height: 11px;
             border-radius: 50%;
             background: #00A939;
-            top:5px;
+            top: 5px;
             right: 8px;
         }
     }
+
     .candidate-name {
         font-family: var(--gorditas-font);
         font-size: 18px;
+
         a:hover {
             color: $color-three;
         }
     }
+
     .candidate-post {
         font-size: 15px;
         color: rgba($color: #000, $alpha: 0.4);
     }
+
     .cadidate-skills {
         margin: 0 -2px;
+
         li {
             margin: 0 2px 5px;
             line-height: 25px;
@@ -101,22 +128,26 @@
             font-weight: 500;
             color: rgba($color: #000, $alpha: 0.55);
             background: rgba($color: #31795A, $alpha: 0.1);
+
             &.more {
                 background: $color-two;
                 color: #000;
             }
         }
     }
+
     .candidate-info span {
         font-size: 15px;
         color: rgba($color: $color-one, $alpha: 0.6);
     }
+
     .candidate-info div {
         font-size: 15px;
         font-weight: 500;
         color: $color-one;
         margin: 2px 0 0;
     }
+
     .profile-btn {
         font-size: 14px;
         font-weight: 500;
@@ -127,10 +158,12 @@
         text-align: center;
         padding: 0 18px;
         border-radius: 40px;
+
         &:hover {
             background: $color-three;
         }
     }
+
     .msg-btn {
         font-size: 14px;
         font-weight: 500;
@@ -141,23 +174,28 @@
         text-align: center;
         padding: 0 15px;
         border-radius: 40px;
+
         &:hover {
             background: $color-three;
             border-color: $color-three;
             color: #fff;
         }
     }
+
     &.list-layout {
         padding: 27px 30px 38px;
+
         .cadidate-skills {
             position: static;
             left: auto;
             bottom: auto;
         }
+
         .right-side {
             width: calc(100% - 80px);
             padding-left: 30px;
         }
+
         .save-btn {
             width: 40px;
             height: 40px;
@@ -166,6 +204,7 @@
             font-weight: 900;
             color: $color-five;
             font-size: 18px;
+
             &:hover {
                 color: #fff;
                 background: $color-five;
@@ -174,39 +213,46 @@
         }
     }
 }
+
 // Candidates Profile Details
 .candidates-profile-details {
     position: relative;
+
     .inner-card {
         background: #fff;
         border-radius: 10px;
         padding: 25px 35px 20px;
+
         &.border-style {
             border: 1px solid #DEDEDE;
             position: relative;
             border-radius: 15px;
             padding: 35px 35px 20px;
+
             .title {
                 position: absolute;
                 background: #fff;
                 padding: 0 10px;
-                top:-18px;
+                top: -18px;
                 left: 25px;
                 z-index: 1;
             }
         }
     }
+
     .title {
         font-size: 28px;
         font-weight: 500;
         font-family: var(--gorditas-font);
         margin-bottom: 22px;
     }
+
     .video-post {
         background: url(../images/candidates/img_10.jpg) no-repeat center;
         background-size: cover;
         height: 430px;
         border-radius: 15px;
+
         .video-icon {
             width: 65px;
             height: 65px;
@@ -215,50 +261,60 @@
             font-size: 45px;
             line-height: 65px;
             padding-left: 7px;
+
             &:hover {
                 background: $color-three;
                 color: #fff;
             }
         }
     }
+
     .time-line-data .info {
-       padding: 0 0 45px 65px;
-       &:before {
+        padding: 0 0 45px 65px;
+
+        &:before {
             content: '';
             position: absolute;
             left: 22px;
-            top:66px;
+            top: 66px;
             bottom: 7%;
             width: 1px;
             background: #E1E1E1;
-       }
-       &:last-child {
+        }
+
+        &:last-child {
             padding-bottom: 0;
+
             &::before {
                 display: none;
             }
-       }
-       .numb {
+        }
+
+        .numb {
             width: 45px;
             height: 45px;
             color: $color-five;
             border: 1px solid $color-five;
             position: absolute;
             left: 0;
-            top:3px;
-       }
-       .text_1 {
+            top: 3px;
+        }
+
+        .text_1 {
             font-size: 14px;
             color: $color-five;
-       }
-       h4 {
+        }
+
+        h4 {
             font-size: 18px;
             font-family: var(--gorditas-font);
             margin: 5px 0 12px;
-       }
+        }
     }
+
     .skill-tags {
         margin: 0 -8px;
+
         li {
             font-size: 16px;
             color: $color-four;
@@ -267,6 +323,7 @@
             padding: 0 30px;
             border-radius: 30px;
             background: #EFF6F3;
+
             &.more {
                 width: 45px;
                 height: 45px;
@@ -278,51 +335,61 @@
             }
         }
     }
+
     .candidate-portfolio-slider .slick-dots {
         padding: 0;
         margin: 0;
         position: absolute;
         right: 10px;
-        top:-35px;
+        top: -35px;
     }
 }
+
 .cadidate-profile-sidebar {
     .bg-wrapper {
         background: #fff;
         border-radius: 15px;
         padding: 0 20px 25px;
+
         &.bg-color {
             background: $light-bg;
         }
     }
+
     .cadidate-bio {
         .cadidate-avatar {
             width: 80px;
             height: 80px;
         }
+
         .cadidate-name {
             font-family: var(--gorditas-font);
             font-size: 20px;
             margin: 18px 0 20px;
         }
+
         .invite-btn {
             font-size: 15px;
             letter-spacing: -0.5px;
             color: #008FDF;
             text-decoration: underline;
         }
+
         ul li {
             border-top: 1px solid #E6E6E6;
             padding: 14px 0;
+
             span {
                 font-size: 15px;
                 color: rgba($color: $color-one, $alpha: 0.6);
             }
+
             div {
                 font-size: 15px;
                 font-weight: 500;
                 color: $color-one;
                 margin: 4px 0 0;
+
                 a:hover {
                     text-decoration: underline;
                     color: $color-one;
@@ -330,22 +397,26 @@
             }
         }
     }
+
     .sidebar-title {
         font-family: var(--gorditas-font);
         font-size: 20px;
         margin: 0 0 15px;
     }
+
     .map-area {
         height: 235px;
         border-radius: 10px;
         overflow: hidden;
     }
+
     .email-form {
         p {
             font-size: 15px;
             line-height: 22px;
             padding: 20px 0 0;
         }
+
         label {
             font-size: 13px;
             font-weight: 500;
@@ -353,6 +424,7 @@
             width: 65px;
             display: inline;
         }
+
         input {
             width: calc(100% - 65px);
             height: 45px;
@@ -362,6 +434,7 @@
             padding: 0 15px;
             font-size: 13px;
         }
+
         textarea {
             width: calc(100% - 65px);
             height: 135px;

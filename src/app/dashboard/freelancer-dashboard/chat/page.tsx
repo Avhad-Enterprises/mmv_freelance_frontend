@@ -74,7 +74,10 @@ export default function FreelancerChatPage() {
               }}
             >
               {selectedConversationId ? (
-                <InlineThreadView conversationId={selectedConversationId} />
+                <InlineThreadView
+                  conversationId={selectedConversationId}
+                  onBack={() => setSelectedConversationId(null)}
+                />
               ) : (
                 <EmptyChat />
               )}

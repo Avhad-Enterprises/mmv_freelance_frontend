@@ -7,6 +7,31 @@
     Developed by : (me@heloshape.com) / (www.me.heloshape.com)
 */
 
+/* Mobile Header Overlap Fix */
+@media (max-width: 991px) {
+  .main-page-wrapper {
+    padding-top: 90px;
+  }
+
+  /* Fix inner banner gap on tablet/mobile */
+  .inner-banner-one {
+    margin-top: -90px;
+    padding-top: 180px;
+  }
+}
+
+@media (max-width: 767px) {
+  .main-page-wrapper {
+    padding-top: 85px;
+  }
+
+  /* Fix inner banner gap on mobile */
+  .inner-banner-one {
+    margin-top: -85px;
+    padding-top: 145px;
+  }
+}
+
 /* Chat area responsive helpers */
 .chat-area-container {
   display: flex;
@@ -795,6 +820,13 @@
   .candidate-profile-card .cadidate-avatar {
     width: 60px;
     height: 60px;
+
+    img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover;
+      aspect-ratio: 1 / 1;
+    }
   }
 
   .candidate-profile-card.list-layout .right-side {
