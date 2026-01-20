@@ -41,7 +41,7 @@ const menu_data: IMenuData[] = [
   },
   {
     id: 4,
-    link: '/coming-soon',
+    link: '/blog',
     title: 'Blog',
   },
   {

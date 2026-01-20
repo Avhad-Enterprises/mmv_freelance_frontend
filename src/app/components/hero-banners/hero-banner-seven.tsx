@@ -9,6 +9,7 @@ import JobCategorySelect from '../select/job-category';
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import understroke from '@/assets/images/assets/picture 1.png';
 import { authCookies } from '@/utils/cookies';
+import { useUser } from '@/context/UserContext';
 
 interface DecodedToken {
   exp: number;
@@ -18,6 +19,7 @@ const HeroBannerSeven = () => {
   const router = useRouter();
   const { handleSubmit, setCategoryVal, setSearchText } = useSearchFormSubmit();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { userData, userRoles, isLoading } = useUser();
 
   useEffect(() => {
     // Check authentication status from cookies
@@ -48,8 +50,18 @@ const HeroBannerSeven = () => {
       const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
       if (loginButton) loginButton.click();
     } else {
-      // Redirect to coming soon page
-      router.push('/coming-soon');
+      // Check user roles
+      const normalizedRoles = userRoles.map(r => r.toUpperCase());
+      if (normalizedRoles.includes('CLIENT')) {
+        // Redirect to client submit job page
+        router.push('/dashboard/client-dashboard/submit-job');
+      } else if (normalizedRoles.includes('VIDEOEDITOR') || normalizedRoles.includes('VIDEOGRAPHER')) {
+        // Redirect to projects listing page
+        router.push('/job-list');
+      } else {
+        // Default fallback
+        router.push('/job-list');
+      }
     }
   };
 
