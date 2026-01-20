@@ -38,7 +38,7 @@ const FeatureOne = () => {
                 <li>Protected escrow payments</li>
               </ul>
               <Link href="/register" className="btn-one lg mt-50 md-mt-30">
-                Post a Job
+                Post a Project
               </Link>
             </div>
           </div>
