@@ -1,6 +1,6 @@
 import "./globals.scss";
 import { Metadata } from "next";
-import Head from "next/head";
+
 import localFont from 'next/font/local';
 import Script from 'next/script';
 import { EB_Garamond } from "next/font/google";
@@ -53,15 +53,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/assets/images/fav-icon/MMV-Tab-Icon.png" sizes="any" />
-        <link rel="icon" href="/assets/images/fav-icon/MMV-Tab-Icon.png" sizes="1024x1024" type="image/png" />
-        <link rel="apple-touch-icon" href="/assets/images/fav-icon/MMV-Tab-Icon.png" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>
       <body suppressHydrationWarning={true} className={`${gordita.variable} ${garamond.variable}`}>
-        <Head>
-          <title>MMV</title>
-        </Head>
         <ClientProviders>
           {children}
           <CookieConsentBanner />

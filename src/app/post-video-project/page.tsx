@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import PostVideoProjectArea from "../components/post-video-project/post-video-project-area";
 
 export const metadata: Metadata = {
-    title: "Post a Video Project",
+    
 };
 
 const PostVideoProjectPage = () => {

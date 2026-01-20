@@ -26,9 +26,8 @@ const formatDuration = (seconds: number | undefined): string => {
   if (seconds < 60) return `${seconds} sec`;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  return `${minutes} min${
-    remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ""
-  }`;
+  return `${minutes} min${remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ""
+    }`;
 };
 
 interface DashboardJobDetailsAreaProps {
@@ -436,8 +435,7 @@ const DashboardJobDetailsArea = ({
     } catch (err: any) {
       console.error("Failed to start chat:", err);
       toast.error(
-        `Failed to start chat: ${
-          err?.response?.data?.message || err?.message || "Unknown error"
+        `Failed to start chat: ${err?.response?.data?.message || err?.message || "Unknown error"
         }`
       );
     } finally {
@@ -453,8 +451,18 @@ const DashboardJobDetailsArea = ({
       >
         <div className="position-relative">
           <DashboardHeader />
-
-          <section className="job-details pt-50 pb-50">
+          <style jsx>{`
+            .job-details-responsive {
+              padding-top: 0px;
+              padding-bottom: 50px;
+            }✌🏻
+            @media (min-width: 992px) {
+              .job-details-responsive {
+                padding-top: 50px;
+              }
+            }
+          `}</style>
+          <section className="job-details job-details-responsive">
             <div className="container-fluid">
               <div className="row">
                 {/* Left Side: Details - Green Background */}
@@ -556,8 +564,8 @@ const DashboardJobDetailsArea = ({
                           {job.client_first_name && job.client_last_name
                             ? `${job.client_first_name} ${job.client_last_name}`
                             : job.client_company_name
-                            ? job.client_company_name
-                            : "Anonymous Client"}
+                              ? job.client_company_name
+                              : "Anonymous Client"}
                         </span>
                       </div>
                       {job.client_company_name && (
@@ -572,9 +580,8 @@ const DashboardJobDetailsArea = ({
                           <span>Budget</span>
                           <div>
                             {job.currency
-                              ? `${
-                                  job.currency
-                                } ${job.budget?.toLocaleString()}`
+                              ? `${job.currency
+                              } ${job.budget?.toLocaleString()}`
                               : `$${job.budget?.toLocaleString()}`}
                           </div>
                         </li>
@@ -629,13 +636,13 @@ const DashboardJobDetailsArea = ({
                         style={
                           !isApplied
                             ? {
-                                backgroundColor: "#3d6f5d",
-                                borderColor: "#3d6f5d",
-                                color: "white",
-                                borderRadius: "8px",
-                                padding: "12px 24px",
-                                fontWeight: "500",
-                              }
+                              backgroundColor: "#3d6f5d",
+                              borderColor: "#3d6f5d",
+                              color: "white",
+                              borderRadius: "8px",
+                              padding: "12px 24px",
+                              fontWeight: "500",
+                            }
                             : undefined
                         }
                       >
@@ -674,11 +681,10 @@ const DashboardJobDetailsArea = ({
                         ) : (
                           <>
                             <i
-                              className={`bi ${
-                                isSaved
-                                  ? "bi-heart-fill text-danger"
-                                  : "bi-heart"
-                              } me-2`}
+                              className={`bi ${isSaved
+                                ? "bi-heart-fill text-danger"
+                                : "bi-heart"
+                                } me-2`}
                             ></i>
                             {isSaved ? "Saved" : "Save Job"}
                           </>

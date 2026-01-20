@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import CommissionExplainedArea from "../components/commission-explained/commission-explained-area";
 
 export const metadata: Metadata = {
-    title: "Commission Explained",
+    
 };
 
 const CommissionExplainedPage = () => {

@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import HowToHireArea from "../components/how-to-hire/how-to-hire-area";
 
 export const metadata: Metadata = {
-    title: "How to Hire",
+    
 };
 
 const HowToHirePage = () => {

@@ -71,9 +71,8 @@ const CompletedProjectsArea = () => {
             project_category: app.project_category,
             budget: app.budget,
             currency: app.currency || "INR",
-            client_name: `${app.client_first_name || ""} ${
-              app.client_last_name || ""
-            }`.trim(),
+            client_name: `${app.client_first_name || ""} ${app.client_last_name || ""
+              }`.trim(),
             client_company: app.client_company_name || "N/A",
             submission_id: app.submission_id,
             submitted_files: app.submitted_files,
@@ -184,9 +183,7 @@ const CompletedProjectsArea = () => {
                           : project.project_title}
                       </a>
                     </h4>
-                    <span className="badge bg-success">
-                      <i className="bi bi-check-circle me-1"></i>Completed
-                    </span>
+
                   </div>
                 </div>
 
@@ -224,12 +221,7 @@ const CompletedProjectsArea = () => {
                               : project.project_title}
                           </a>
                         </h4>
-                        <span
-                          className="badge bg-success"
-                          style={{ fontSize: "10px" }}
-                        >
-                          <i className="bi bi-check-circle me-1"></i>Completed
-                        </span>
+
                       </div>
                     </div>
 
@@ -286,9 +278,10 @@ const CompletedProjectsArea = () => {
                             backgroundColor: "#31795A",
                             color: "white",
                             border: "none",
-                            padding: "8px 16px",
-                            borderRadius: "6px",
+                            padding: "6px 15px",
+                            borderRadius: "20px",
                             fontWeight: "500",
+                            fontSize: "13px",
                           }}
                         >
                           View Details

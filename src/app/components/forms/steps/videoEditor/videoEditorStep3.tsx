@@ -88,7 +88,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
     if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
     return true;
-  };  const onSubmit = async (data: any) => {
+  }; const onSubmit = async (data: any) => {
     // Geocoding with automatic fallback - no errors shown to users
     setIsGeocoding(true);
     clearErrors("full_address");
@@ -640,7 +640,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
               <div className="input-group-meta position-relative uniform-height mb-3">
                 <textarea
                   className="form-control"
-                  style={{ 
+                  style={{
                     minHeight: '100px',
                     backgroundColor: 'var(--bg-white, #fff)',
                     marginBottom: '10px',
@@ -672,7 +672,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              /* disabled={isGeocoding} */
+            /* disabled={isGeocoding} */
             >
               {/* {isGeocoding ? "Verifying Address..." : "Next"} */}
               Next
@@ -863,7 +863,7 @@ if (typeof document !== 'undefined') {
       color: #155724;
     }
   `;
-  
+
   const styleId = 'videoeditor-step3-styles-unique';
   if (!document.getElementById(styleId)) {
     style.id = styleId;

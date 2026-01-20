@@ -381,7 +381,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         applied_projects_id: applicationId,
         status: newStatus,
       };
-      
+
       if (newStatus === 3 && rejectionReason) {
         payload.rejection_reason = rejectionReason;
       }
@@ -571,7 +571,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
 
     const currentUserId = userData.user_id.toString();
     const targetUserId = applicant.user_id.toString();
-    
+
     // Sort IDs to match Firebase pattern
     const conversationId = [currentUserId, targetUserId].sort().join('_');
 
@@ -583,7 +583,7 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
     <div className="dashboard-body">
       <div className="position-relative">
         <DashboardHeader />
-        <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+        <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-40 lg-mb-30 gap-3">
           <h2 className="main-title m0">
             {selectedApplicant ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}` : selectedProjectForApplicants ? `Applications for: ${selectedProjectForApplicants.title}` : (isPostingJob ? "Post a New Project" : "My Projects")}
           </h2>
@@ -630,9 +630,9 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
           // Jobs View
           <>
             {isPostingJob ? (
-              <PostJobForm 
-                onBackToList={handleReturnToList} 
-                editProject={editingProject} 
+              <PostJobForm
+                onBackToList={handleReturnToList}
+                editProject={editingProject}
               />
             ) : (
               <JobsList

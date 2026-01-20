@@ -652,7 +652,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
                 <textarea
                   className="form-control"
                   // --- CHANGE 1: Added background color style to match other inputs ---
-                  style={{ 
+                  style={{
                     minHeight: '100px',
                     backgroundColor: 'var(--bg-white, #fff)'
                   }}
@@ -682,7 +682,7 @@ const VideographerStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) =>
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              /* disabled={isGeocoding} */
+            /* disabled={isGeocoding} */
             >
               {/* {isGeocoding ? "Verifying Address..." : "Next"} */}
               Next
@@ -881,7 +881,7 @@ if (typeof document !== 'undefined') {
       font-family: inherit !important;
       font-size: 14px !important;
     }`;
-  
+
   // To prevent creating duplicate style tags on hot reloads
   const styleId = 'videographer-step3-styles-unique';
   if (!document.getElementById(styleId)) {
