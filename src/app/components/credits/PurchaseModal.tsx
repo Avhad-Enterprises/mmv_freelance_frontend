@@ -305,21 +305,26 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                     {/* Footer */}
                     <div className="modal-footer border-0 pt-0">
                         {step === "confirm" && (
-                            <>
+                            <div className="d-flex w-100 gap-3">
                                 <button
                                     type="button"
-                                    className="btn btn-outline-secondary"
+                                    className="btn btn-outline-secondary flex-grow-1"
                                     onClick={handleClose}
                                     style={{
                                         borderRadius: '8px',
-                                        padding: '12px 24px'
+                                        padding: '12px 24px',
+                                        height: '48px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontWeight: '500'
                                     }}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
-                                    className="dash-btn-two tran3s"
+                                    className="dash-btn-two tran3s flex-grow-1"
                                     onClick={handlePurchase}
                                     style={{
                                         backgroundColor: '#3d6f5d',
@@ -327,12 +332,16 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                                         color: 'white',
                                         borderRadius: '8px',
                                         padding: '12px 24px',
+                                        height: '48px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                         fontWeight: '500'
                                     }}
                                 >
                                     Pay {formatAmount(selectedPackage.price)}
                                 </button>
-                            </>
+                            </div>
                         )}
 
                         {step === "success" && (

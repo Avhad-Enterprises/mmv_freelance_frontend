@@ -9,7 +9,7 @@ import PricingOne from "../components/pricing/pricing-one";
 
 
 export const metadata: Metadata = {
-  title: "Pricing",
+  
 };
 
 const PricingPage = () => {

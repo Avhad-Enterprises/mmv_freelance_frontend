@@ -242,8 +242,7 @@ const CandidateV1Area = () => {
     } catch (err: any) {
       console.error("Failed to start chat:", err);
       toast.error(
-        `Failed to start chat: ${
-          err?.response?.data?.message || err?.message || "Unknown error"
+        `Failed to start chat: ${err?.response?.data?.message || err?.message || "Unknown error"
         }`
       );
     }

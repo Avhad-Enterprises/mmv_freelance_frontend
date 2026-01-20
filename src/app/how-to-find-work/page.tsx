@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import HowToFindWorkArea from "../components/how-to-find-work/how-to-find-work-area";
 
 export const metadata: Metadata = {
-    title: "How to Find Work",
+    
 };
 
 const HowToFindWorkPage = () => {

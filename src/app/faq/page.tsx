@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import FaqArea from "../components/faqs/faq-area";
 
 export const metadata: Metadata = {
-  title: "Faq",
+  
 };
 
 const FaqPage = () => {

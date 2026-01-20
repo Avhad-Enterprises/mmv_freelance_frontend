@@ -108,7 +108,7 @@ const JobListThree = ({
     // Use local state for category and skill filtering
     if (selectedCategories.length > 0) {
       filteredData = filteredData.filter((item) =>
-        item.project_category && selectedCategories.some(cat => 
+        item.project_category && selectedCategories.some(cat =>
           cat.toLowerCase() === item.project_category?.toLowerCase()
         )
       );
@@ -117,7 +117,7 @@ const JobListThree = ({
     if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
         item.skills_required?.some(
-          (jobSkill) => jobSkill && selectedSkills.some(skill => 
+          (jobSkill) => jobSkill && selectedSkills.some(skill =>
             skill.toLowerCase() === jobSkill.toLowerCase()
           )
         )
@@ -222,7 +222,7 @@ const JobListThree = ({
   // --- Render Logic ---
   if (loading) {
     return (
-      <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
+      <section className="job-listing-three pt-110 lg-pt-80 md-pt-60 sm-pt-40 pb-160 xl-pb-150 lg-pb-80">
         <div className="container">
           <p>Loading jobs...</p>
         </div>
@@ -232,108 +232,108 @@ const JobListThree = ({
 
   return (
     <>
-      <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
-      <div className="container">
-        <div className="row">
-          <div className="col-xl-3 col-lg-4">
-            <button
-              type="button"
-              className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#filteroffcanvas"
-            >
-              <i className="bi bi-funnel"></i>
-              Filter
-            </button>
-            <FilterArea
-              all_categories={categories}
-              all_skills={skills}
-              onCategoryChange={setSelectedCategories}
-              onSkillChange={setSelectedSkills}
-              selectedCategories={selectedCategories}
-              selectedSkills={selectedSkills}
-            />
-          </div>
+      <section className="job-listing-three pt-110 lg-pt-80 md-pt-60 sm-pt-40 pb-160 xl-pb-150 lg-pb-80">
+        <div className="container">
+          <div className="row">
+            <div className="col-xl-3 col-lg-4">
+              <button
+                type="button"
+                className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filteroffcanvas"
+              >
+                <i className="bi bi-funnel"></i>
+                Filter
+              </button>
+              <FilterArea
+                all_categories={categories}
+                all_skills={skills}
+                onCategoryChange={setSelectedCategories}
+                onSkillChange={setSelectedSkills}
+                selectedCategories={selectedCategories}
+                selectedSkills={selectedSkills}
+              />
+            </div>
 
-          <div className="col-xl-9 col-lg-8">
-            <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
-              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                <div className="total-job-found">
-                  All <span className="text-dark fw-500">{filterItems.length}</span> projects found
-                </div>
-                <div className="d-flex align-items-center">
-                  <div className="short-filter d-flex align-items-center">
-                    <div className="text-dark fw-500 me-2">Sort:</div>
-                    <NiceSelect
-                      options={[
-                        { value: "", label: "Price Sort" },
-                        { value: "price-low-to-high", label: "Low to High" },
-                        { value: "price-high-to-low", label: "High to Low" },
-                      ]}
-                      defaultCurrent={0}
-                      onChange={handleShort}
-                      name="Price Sort"
-                    />
+            <div className="col-xl-9 col-lg-8">
+              <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
+                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                  <div className="total-job-found">
+                    All <span className="text-dark fw-500">{filterItems.length}</span> projects found
                   </div>
-                  <button
-                    onClick={() => setJobType("list")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
-                    title="Active List"
-                  >
-                    <i className="bi bi-list"></i>
-                  </button>
-                  <button
-                    onClick={() => setJobType("grid")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
-                    title="Active Grid"
-                  >
-                    <i className="bi bi-grid"></i>
-                  </button>
+                  <div className="d-flex align-items-center">
+                    <div className="short-filter d-flex align-items-center">
+                      <div className="text-dark fw-500 me-2">Sort:</div>
+                      <NiceSelect
+                        options={[
+                          { value: "", label: "Price Sort" },
+                          { value: "price-low-to-high", label: "Low to High" },
+                          { value: "price-high-to-low", label: "High to Low" },
+                        ]}
+                        defaultCurrent={0}
+                        onChange={handleShort}
+                        name="Price Sort"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setJobType("list")}
+                      className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
+                      title="Active List"
+                    >
+                      <i className="bi bi-list"></i>
+                    </button>
+                    <button
+                      onClick={() => setJobType("grid")}
+                      className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
+                      title="Active Grid"
+                    >
+                      <i className="bi bi-grid"></i>
+                    </button>
+                  </div>
                 </div>
+
+                {/* View now depends on the jobType state */}
+                <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
+                  <div className="row">
+                    {currentItems &&
+                      currentItems.map((job) => (
+                        <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
+                          <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
+                  {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
+                </div>
+
+                {currentItems && currentItems.length === 0 && (
+                  <div className="text-center mt-5">
+                    <h3>No projects found</h3>
+                    <p>Try adjusting your filters to find what you're looking for.</p>
+                  </div>
+                )}
+
+                {currentItems && currentItems.length > 0 && (
+                  <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                    <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                      Showing <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
+                      <span className="text-dark fw-500">
+                        {Math.min(itemOffset + itemsPerPage, filterItems.length)}
+                      </span> of <span className="text-dark fw-500">{filterItems.length}</span>
+                    </p>
+                    {filterItems.length > itemsPerPage && (
+                      <Pagination pageCount={pageCount} handlePageClick={handlePageClick} />
+                    )}
+                  </div>
+                )}
               </div>
-
-              {/* View now depends on the jobType state */}
-              <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
-                <div className="row">
-                  {currentItems &&
-                    currentItems.map((job) => (
-                      <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
-                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
-              </div>
-
-              {currentItems && currentItems.length === 0 && (
-                <div className="text-center mt-5">
-                  <h3>No projects found</h3>
-                  <p>Try adjusting your filters to find what you're looking for.</p>
-                </div>
-              )}
-
-              {currentItems && currentItems.length > 0 && (
-                <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
-                  <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                    Showing <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
-                    <span className="text-dark fw-500">
-                      {Math.min(itemOffset + itemsPerPage, filterItems.length)}
-                    </span> of <span className="text-dark fw-500">{filterItems.length}</span>
-                  </p>
-                  {filterItems.length > itemsPerPage && (
-                    <Pagination pageCount={pageCount} handlePageClick={handlePageClick} />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <SaveJobLoginModal onLoginSuccess={handleLoginSuccess} />
+      </section>
+      <SaveJobLoginModal onLoginSuccess={handleLoginSuccess} />
     </>
   );
 };

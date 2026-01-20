@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import FreelancerFaqArea from "../components/freelancer-faq/freelancer-faq-area";
 
 export const metadata: Metadata = {
-    title: "Freelancer FAQ",
+    
 };
 
 const FreelancerFaqPage = () => {

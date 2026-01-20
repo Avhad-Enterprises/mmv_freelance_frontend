@@ -166,15 +166,17 @@ const JobsList: React.FC<JobsListProps> = ({
                           backgroundColor: '#31795A',
                           color: 'white',
                           border: 'none',
-                          padding: '6px 12px',
+                          padding: '8px 16px',
                           borderRadius: '6px',
                           fontSize: '14px',
-                          fontWeight: '500'
+                          fontWeight: '500',
+                          minWidth: '130px',
+                          textAlign: 'center'
                         }}
                       >
                         View Applications
                       </button>
-                      
+
                       {/* Allow editing for pending projects (status 0) */}
                       {project.status === 0 && (
                         <>
@@ -186,15 +188,17 @@ const JobsList: React.FC<JobsListProps> = ({
                               backgroundColor: '#31795A',
                               color: 'white',
                               border: 'none',
-                              padding: '6px 12px',
+                              padding: '8px 16px',
                               borderRadius: '6px',
                               fontSize: '14px',
-                              fontWeight: '500'
+                              fontWeight: '500',
+                              minWidth: '130px',
+                              textAlign: 'center'
                             }}
                           >
                             Edit Project
                           </button>
-                          
+
                           <button
                             className="btn"
                             onClick={() => onCloseJob(project)}
@@ -202,10 +206,12 @@ const JobsList: React.FC<JobsListProps> = ({
                               backgroundColor: '#dc3545',
                               color: 'white',
                               border: 'none',
-                              padding: '6px 12px',
+                              padding: '8px 16px',
                               borderRadius: '6px',
                               fontSize: '14px',
-                              fontWeight: '500'
+                              fontWeight: '500',
+                              minWidth: '130px',
+                              textAlign: 'center'
                             }}
                           >
                             Close Project

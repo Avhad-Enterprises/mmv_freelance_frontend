@@ -59,7 +59,7 @@ const HeroBannerSeven = () => {
   };
 
   return (
-    <div className="hero-banner-seven position-relative pt-200 lg-pt-150 pb-110 md-pb-40">
+    <div className="hero-banner-seven position-relative pt-200 lg-pt-150 md-pt-100 sm-pt-60 pb-110 md-pb-40">
       <div className="container">
         <div className="position-relative">
           <div className="row">

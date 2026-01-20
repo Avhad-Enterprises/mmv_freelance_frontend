@@ -280,10 +280,19 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }
 
   return (
     <>
-      <section className="candidates-profile pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
+      <section className="candidates-profile pt-110 lg-pt-80 md-pt-60 sm-pt-40 pb-160 xl-pb-150 lg-pb-80">
         <div className="container">
           <div className="row">
             <div className="col-xl-3 col-lg-4">
+              <button
+                type="button"
+                className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filteroffcanvas"
+              >
+                <i className="bi bi-funnel"></i>
+                Filter
+              </button>
               <CandidateV1FilterArea
                 onSkillChange={setSelectedSkills}
                 onLocationChange={setSelectedLocations}

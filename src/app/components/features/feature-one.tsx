@@ -6,7 +6,7 @@ import imgi from "@/assets/images/assets/picture 2.png"; // fixed path
 // FeatureImgData
 export function FeatureImgData() {
   return (
-    <div className="img-data position-relative text-center md-mt-50">
+    <div className="img-data position-relative text-center md-mt-50 d-none d-lg-block">
       <Image
         src={imgi}
         alt="feature image"
@@ -21,7 +21,7 @@ export function FeatureImgData() {
 
 const FeatureOne = () => {
   return (
-    <section className="text-feature-one position-relative pt-180 xl-pt-150 lg-pt-100 md-pt-80 pb-180 xl-pb-150">
+    <section className="text-feature-one position-relative pt-180 xl-pt-150 lg-pt-100 md-pt-80 pb-180 xl-pb-150 md-pb-80">
       <div className="container">
         <div className="row align-items-center">
           <div className="col-lg-5 order-lg-last">

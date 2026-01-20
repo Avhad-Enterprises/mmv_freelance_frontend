@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import CandidateDetailsArea from "../components/candidate-details/candidate-details-area";
 
 export const metadata: Metadata = {
-  title: "Candidate Details v1",
+  
 };
 
 const CandidateProfileDetailsPage = () => {

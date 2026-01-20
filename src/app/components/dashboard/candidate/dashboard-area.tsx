@@ -245,7 +245,7 @@ const DashboardArea = ({ }: IProps) => {
                           </p>
                         )}
                       </div>
-                      <div className="col-lg-4 text-lg-end">
+                      <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
                         <Link
                           href="/dashboard/freelancer-dashboard/profile"
                           className="dash-btn-two"

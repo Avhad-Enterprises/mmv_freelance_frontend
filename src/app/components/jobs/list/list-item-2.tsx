@@ -6,12 +6,12 @@ import { IJobType } from "@/types/job-data-type";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
 
 // UPDATED: Added 'isActive' to the component's props
-const ListItemTwo = ({ 
-  item, 
-  onToggleSave, 
-  isActive 
-}: { 
-  item: IJobType; 
+const ListItemTwo = ({
+  item,
+  onToggleSave,
+  isActive
+}: {
+  item: IJobType;
   onToggleSave?: (job: IJobType) => void;
   isActive: boolean; // Receive active state as a prop
 }) => {
@@ -47,9 +47,8 @@ const ListItemTwo = ({
                 <h4 className="candidate-name mb-0">
                   <Link href={`/job-details/${item.projects_task_id}`} className="tran3s">
                     {item.project_title
-                      ? `${item.project_title.slice(0, 22)}${
-                          item.project_title.length > 22 ? ".." : ""
-                        }`
+                      ? `${item.project_title.slice(0, 22)}${item.project_title.length > 22 ? ".." : ""
+                      }`
                       : ""}
                   </Link>
                 </h4>
@@ -79,7 +78,7 @@ const ListItemTwo = ({
               </div>
             </div>
 
-            <div className="col-xl-3 col-md-4">
+            <div className="col-xl-3 col-md-4 mt-3 mt-md-0">
               <div className="d-flex justify-content-lg-end align-items-center">
                 {onToggleSave && (
                   <button
