@@ -63,6 +63,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
 
   return (
     <header className="dashboard-header">
+      <style jsx global>{`
+        .header-job-post-btn {
+          white-space: nowrap;
+        }
+        @media (max-width: 767px) {
+          .header-job-post-btn {
+            font-size: 12px !important;
+            padding: 5px 8px !important;
+            min-width: auto !important;
+            height: 35px !important;
+            line-height: 25px !important;
+          }
+        }
+      `}</style>
       <div className="d-flex align-items-center justify-content-between">
         {/* Left side - User Role */}
         <div className="d-flex align-items-center">
@@ -109,7 +123,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
           */}
 
           {/* Notifications */}
-          <div className="profile-notification ms-2 ms-md-5 me-4">
+          <div className="profile-notification ms-1 ms-md-5 me-1 me-md-4">
             <button
               className="noti-btn dropdown-toggle"
               type="button"
@@ -147,7 +161,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
 
             <ul className="dropdown-menu" aria-labelledby="notification-dropdown">
               <li>
-                <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2">
+                <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2 gap-3">
                   <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Notifications</h4>
                   {unreadCount > 0 && (
                     <button
@@ -196,7 +210,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
           <div>
             <Link
               href="/dashboard/client-dashboard/submit-job"
-              className="job-post-btn tran3s"
+              className="job-post-btn tran3s header-job-post-btn"
             >
               Post a Project
             </Link>

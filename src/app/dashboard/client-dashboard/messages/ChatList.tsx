@@ -82,6 +82,8 @@ const ChatList: React.FC<ChatListProps> = ({
     <Box
       sx={{
         height: "100%",
+        maxHeight: "100%",
+        minHeight: 0, // Critical for flex-based scrolling
         display: "flex",
         flexDirection: "column",
         fontFamily:
@@ -163,8 +165,9 @@ const ChatList: React.FC<ChatListProps> = ({
       <Box
         sx={{
           overflowY: "auto",
+          overflowX: "hidden",
           flex: 1,
-          maxHeight: "calc(100% - 140px)",
+          minHeight: 0, // Critical for flex children to enable scrolling
           bgcolor: "#FFFFFF",
           "&::-webkit-scrollbar": {
             width: "6px",

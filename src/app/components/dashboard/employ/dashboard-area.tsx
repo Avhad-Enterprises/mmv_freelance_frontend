@@ -35,10 +35,10 @@ type ProfileCompletion = {
 
 // props type 
 type IProps = {
-    // No props needed, using context
+  // No props needed, using context
 }
 
-const EmployDashboardArea = ({}: IProps) => {
+const EmployDashboardArea = ({ }: IProps) => {
   const decoded = useDecodedToken();
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [metrics, setMetrics] = useState({
@@ -54,7 +54,7 @@ const EmployDashboardArea = ({}: IProps) => {
   // Fetch projects and metrics
   useEffect(() => {
     const fetchData = async () => {
-      
+
       // Fetch profile completion only once for authenticated users
       if (!profileFetchedRef.current && decoded) {
         try {
@@ -75,11 +75,11 @@ const EmployDashboardArea = ({}: IProps) => {
           setLoading(false);
           return;
         }
-        
+
         try {
           // Fetch client profile to get client_id
           const profileRes = await makeGetRequest(`api/v1/clients/profile`);
-          
+
           if (profileRes?.data?.success && profileRes?.data?.data?.profile?.client_id) {
             const clientId = profileRes.data.data.profile.client_id;
             // Update decoded with client_id for future use
@@ -96,20 +96,20 @@ const EmployDashboardArea = ({}: IProps) => {
 
       try {
         const token = authCookies.getToken();
-        
+
         // Fetch projects for this client
         const projectsRes = await makeGetRequest(`api/v1/projects-tasks/client/${decoded.client_id}`);
-        
+
         if (projectsRes?.data?.data) {
           const projectsData = projectsRes.data.data;
           setProjects(projectsData);
-          
+
           // Calculate metrics based on numeric status values
           // Status: 0 = Pending/Awaiting Assignment, 1 = In Progress, 2 = Completed
           const totalProjects = projectsData.length;
           const activeProjects = projectsData.filter((p: ProjectItem) => p.status === 1).length; // In Progress
           const completedProjects = projectsData.filter((p: ProjectItem) => p.status === 2).length; // Completed
-          
+
           // Get total applicants count efficiently using count endpoints
           let totalApplicants = 0;
           try {
@@ -126,14 +126,14 @@ const EmployDashboardArea = ({}: IProps) => {
                 return 0;
               }
             });
-            
+
             // Wait for all count requests to complete
             const applicantCounts = await Promise.all(applicantPromises);
             totalApplicants = applicantCounts.reduce((sum, count) => sum + count, 0);
           } catch (error) {
             totalApplicants = 0;
           }
-          
+
           const finalMetrics = { totalProjects, activeProjects, totalApplicants, completedProjects };
           setMetrics(finalMetrics);
           setProjects([...projectsData]); // Re-render with applicant counts
@@ -145,7 +145,7 @@ const EmployDashboardArea = ({}: IProps) => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [decoded]);
 
@@ -173,7 +173,7 @@ const EmployDashboardArea = ({}: IProps) => {
         {/* header end */}
 
         <h2 className="main-title">Client Dashboard</h2>
-        
+
         {loading ? (
           <div className="text-center py-5">
             <div className="spinner-border" role="status">
@@ -183,19 +183,19 @@ const EmployDashboardArea = ({}: IProps) => {
         ) : (
           <>
             <div className="row">
-              <CardItem 
-                img={icon_1} 
-                title="Total Projects" 
+              <CardItem
+                img={icon_1}
+                title="Total Projects"
                 value={`${metrics.totalProjects}`}
               />
-              <CardItem 
-                img={icon_3} 
-                title="Active Projects" 
+              <CardItem
+                img={icon_3}
+                title="Active Projects"
                 value={`${metrics.activeProjects}`}
               />
-              <CardItem 
-                img={icon_2} 
-                title="Total Applicants" 
+              <CardItem
+                img={icon_2}
+                title="Total Applicants"
                 value={`${metrics.totalApplicants}`}
               />
             </div>
@@ -232,9 +232,9 @@ const EmployDashboardArea = ({}: IProps) => {
                           </p>
                         )}
                       </div>
-                      <div className="col-lg-4 text-lg-end">
-                        <Link 
-                          href="/dashboard/client-dashboard/profile" 
+                      <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                        <Link
+                          href="/dashboard/client-dashboard/profile"
                           className="dash-btn-two"
                         >
                           Go to My Profile

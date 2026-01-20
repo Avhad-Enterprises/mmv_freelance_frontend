@@ -153,11 +153,11 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
       console.log('Rejection Reason (raw):', rejectionReason);
       console.log('Rejection Reason (trimmed):', rejectionReason.trim());
       console.log('====================================');
-      
+
       // Pass rejection reason to the update handler
       onUpdateApplicantStatus(
-        selectedProjectForApplicants.project_id, 
-        applicantToReject.applied_projects_id, 
+        selectedProjectForApplicants.project_id,
+        applicantToReject.applied_projects_id,
         3,
         rejectionReason.trim() // Pass the rejection reason
       );
@@ -206,6 +206,121 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
           background-color: #31795A !important;
           color: #fff !important;
         }
+
+        /* Mobile-First Applicant Card Styles */
+        .applicant-card-mobile {
+          padding: 20px;
+          min-height: auto;
+        }
+
+        .applicant-card-content {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .applicant-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .applicant-name-section {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .applicant-name-section .candidate-name {
+          font-size: 16px;
+          line-height: 1.3;
+          margin: 0;
+          word-break: break-word;
+        }
+
+        .applicant-actions-mobile {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .applicant-actions-mobile .save-btn {
+          width: 36px;
+          height: 36px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        /* Info Grid - 2 columns on mobile, 3 on larger screens */
+        .applicant-info-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 12px;
+          padding: 12px;
+          background: #f8f9fa;
+          border-radius: 8px;
+        }
+
+        .applicant-info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .applicant-info-item .info-label {
+          font-size: 11px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .applicant-info-item .info-value {
+          font-size: 14px;
+          line-height: 1.3;
+        }
+
+        .applicant-skills-row {
+          padding-top: 4px;
+        }
+
+        /* Tablet and Desktop adjustments */
+        @media (min-width: 576px) {
+          .applicant-card-mobile {
+            padding: 24px;
+          }
+
+          .applicant-info-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+
+          .applicant-name-section .candidate-name {
+            font-size: 18px;
+          }
+        }
+
+        @media (min-width: 992px) {
+          .applicant-card-mobile {
+            padding: 30px 25px;
+          }
+
+          .applicant-header {
+            gap: 16px;
+          }
+
+          .applicant-info-grid {
+            grid-template-columns: repeat(3, 1fr);
+            padding: 16px;
+          }
+
+          .applicant-info-item .info-label {
+            font-size: 12px;
+          }
+
+          .applicant-info-item .info-value {
+            font-size: 15px;
+          }
+        }
       `}</style>
 
       <div className="candidate-profile-area">
@@ -235,145 +350,112 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
             applicants.map(applicant => {
               const status = getStatusInfo(applicant.status);
               return (
-                <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25" style={{ minHeight: '160px', padding: '30px 25px' }}>
-                  <div className="d-flex align-items-start">
-                    <div className="cadidate-avatar online position-relative d-block me-auto ms-auto" style={{ flexShrink: 0 }}>
-                      <AuthenticatedImage
-                        src={applicant.profile_picture || "/images/default-avatar.png"}
-                        alt="Candidate"
-                        width={80}
-                        height={80}
-                        className="lazy-img rounded-circle"
-                        style={{ objectFit: 'cover' }}
-                        unoptimized
-                        fallbackSrc="/images/default-avatar.png"
-                      />
-                    </div>
-                    <div className="right-side" style={{ width: '100%', paddingLeft: '20px' }}>
-                      {/* First Row: Name, Bid Amount, Status, Date, Actions */}
-                      <div className="row gx-2 align-items-center mb-2">
-                        <div className="col-xl-2 col-md-12 mb-xl-0 mb-2">
-                          <div className="position-relative">
-                            <h4 className="candidate-name mb-0" style={{ fontSize: '16px', lineHeight: '1.4' }}>
-                              {applicant.first_name} {applicant.last_name}
-                            </h4>
-                          </div>
-                        </div>
-
-                        <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
-                          <div className="candidate-info">
-                            <span style={{ fontSize: '12px', color: '#666' }}>Bid Amount</span>
-                            <div className="fw-bold text-success" style={{ fontSize: '15px', marginTop: '4px' }}>
-                              {selectedProjectForApplicants?.bidding_enabled 
-                                ? formatBudget(applicant.bid_amount || 0, selectedProjectForApplicants?.currency || 'USD') 
-                                : 'N/A'}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
-                          <div className="candidate-info">
-                            <span style={{ fontSize: '12px', color: '#666' }}>Application Status</span>
-                            <div className={`fw-bold ${status.className}`} style={{ fontSize: '14px', marginTop: '4px' }}>{status.text}</div>
-                          </div>
-                        </div>
-
-                        <div className="col-xl-2 col-md-3 col-sm-6 mb-xl-0 mb-2">
-                          <div className="candidate-info">
-                            <span style={{ fontSize: '12px', color: '#666' }}>Applied Date</span>
-                            <div style={{ fontSize: '14px', marginTop: '4px' }}>{applicant.applied_date ? new Date(applicant.applied_date as string).toLocaleDateString() : 'N/A'}</div>
-                          </div>
-                        </div>
-
-                        <div className="col-xl-4 col-md-12">
-                          <div className="d-flex justify-content-lg-end align-items-center flex-wrap gap-2">
-                            <button
-                              type="button"
-                              className="save-btn text-center rounded-circle tran3s"
-                              onClick={() => onToggleSave(applicant.user_id)}
-                              title={savedApplicants.includes(applicant.user_id) ? "Unsave" : "Save"}
-                              style={{ width: '36px', height: '36px' }}
-                            >
-                              <i className={`bi ${savedApplicants.includes(applicant.user_id) ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
-                            </button>
-
-                            <div className="dropdown">
-                              <button
-                                className="btn btn-sm dropdown-toggle profile-btn tran3s"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                              >
-                                Actions
-                              </button>
-                              <ul className="dropdown-menu">
-                                <li>
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() => onViewProfile(applicant.user_id)}
-                                  >
-                                    <i className="bi bi-person me-2"></i>View Profile
-                                  </button>
-                                </li>
-                                <li>
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() => onOpenChat(applicant)}
-                                  >
-                                    <i className="bi bi-chat-dots me-2"></i>Message
-                                  </button>
-                                </li>
-                                <li>
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() => handleViewBidMessage(applicant)}
-                                  >
-                                    <i className="bi bi-file-text me-2"></i>View Proposal
-                                  </button>
-                                </li>
-                                {applicant.status !== 1 && applicant.status !== 2 && applicant.status !== 3 && (
-                                  <li>
-                                    <button
-                                      className="dropdown-item"
-                                      onClick={() => handleApproveClick(applicant)}
-                                      style={{ color: '#31795A', fontWeight: '500' }}
-                                    >
-                                      Approve
-                                    </button>
-                                  </li>
-                                )}
-                                {applicant.status === 0 && (
-                                  <li>
-                                    <button
-                                      className="dropdown-item"
-                                      onClick={() => handleRejectClick(applicant)}
-                                      style={{ color: '#dc3545', fontWeight: '500' }}
-                                    >
-                                      Reject
-                                    </button>
-                                  </li>
-                                )}
-                                {/* Mark as Completed removed - completion is based on submission flow */}
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
+                <div key={applicant.applied_projects_id} className="candidate-profile-card position-relative list-layout mb-25 applicant-card-mobile">
+                  {/* Mobile-First Layout */}
+                  <div className="applicant-card-content">
+                    {/* Header: Avatar + Name + Actions */}
+                    <div className="applicant-header">
+                      <div className="cadidate-avatar online position-relative" style={{ flexShrink: 0 }}>
+                        <AuthenticatedImage
+                          src={applicant.profile_picture || "/images/default-avatar.png"}
+                          alt="Candidate"
+                          width={60}
+                          height={60}
+                          className="lazy-img rounded-circle"
+                          style={{ objectFit: 'cover' }}
+                          unoptimized
+                          fallbackSrc="/images/default-avatar.png"
+                        />
                       </div>
-
-                      {/* Second Row: Skills */}
-                      <div className="row">
-                        <div className="col-12">
-                          <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap" style={{ gap: '6px' }}>
-                            {applicant.skills && applicant.skills.slice(0, 3).map((skill, i) => (
-                              <li key={i} className="text-nowrap">{skill}</li>
-                            ))}
-                            {applicant.skills && applicant.skills.length > 3 && (
-                              <li className="more">+{applicant.skills.length - 3}</li>
+                      <div className="applicant-name-section">
+                        <h4 className="candidate-name mb-0">{applicant.first_name} {applicant.last_name}</h4>
+                      </div>
+                      <div className="applicant-actions-mobile">
+                        <button
+                          type="button"
+                          className="save-btn text-center rounded-circle tran3s"
+                          onClick={() => onToggleSave(applicant.user_id)}
+                          title={savedApplicants.includes(applicant.user_id) ? "Unsave" : "Save"}
+                        >
+                          <i className={`bi ${savedApplicants.includes(applicant.user_id) ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
+                        </button>
+                        <div className="dropdown">
+                          <button
+                            className="btn btn-sm dropdown-toggle profile-btn tran3s"
+                            type="button"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                          >
+                            Actions
+                          </button>
+                          <ul className="dropdown-menu dropdown-menu-end">
+                            <li>
+                              <button className="dropdown-item" onClick={() => onViewProfile(applicant.user_id)}>
+                                <i className="bi bi-person me-2"></i>View Profile
+                              </button>
+                            </li>
+                            <li>
+                              <button className="dropdown-item" onClick={() => onOpenChat(applicant)}>
+                                <i className="bi bi-chat-dots me-2"></i>Message
+                              </button>
+                            </li>
+                            <li>
+                              <button className="dropdown-item" onClick={() => handleViewBidMessage(applicant)}>
+                                <i className="bi bi-file-text me-2"></i>View Proposal
+                              </button>
+                            </li>
+                            {applicant.status !== 1 && applicant.status !== 2 && applicant.status !== 3 && (
+                              <li>
+                                <button className="dropdown-item" onClick={() => handleApproveClick(applicant)} style={{ color: '#31795A', fontWeight: '500' }}>
+                                  Approve
+                                </button>
+                              </li>
+                            )}
+                            {applicant.status === 0 && (
+                              <li>
+                                <button className="dropdown-item" onClick={() => handleRejectClick(applicant)} style={{ color: '#dc3545', fontWeight: '500' }}>
+                                  Reject
+                                </button>
+                              </li>
                             )}
                           </ul>
                         </div>
                       </div>
                     </div>
+
+                    {/* Info Grid: 2x2 on mobile, 4 columns on desktop */}
+                    <div className="applicant-info-grid">
+                      <div className="applicant-info-item">
+                        <span className="info-label">Bid Amount</span>
+                        <span className="info-value text-success fw-bold">
+                          {selectedProjectForApplicants?.bidding_enabled
+                            ? formatBudget(applicant.bid_amount || 0, selectedProjectForApplicants?.currency || 'USD')
+                            : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="applicant-info-item">
+                        <span className="info-label">Application Status</span>
+                        <span className={`info-value fw-bold ${status.className}`}>{status.text}</span>
+                      </div>
+                      <div className="applicant-info-item">
+                        <span className="info-label">Applied Date</span>
+                        <span className="info-value">{applicant.applied_date ? new Date(applicant.applied_date as string).toLocaleDateString() : 'N/A'}</span>
+                      </div>
+                    </div>
+
+                    {/* Skills Row */}
+                    {applicant.skills && applicant.skills.length > 0 && (
+                      <div className="applicant-skills-row">
+                        <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap" style={{ gap: '6px', marginBottom: 0 }}>
+                          {applicant.skills.slice(0, 3).map((skill, i) => (
+                            <li key={i} className="text-nowrap">{skill}</li>
+                          ))}
+                          {applicant.skills.length > 3 && (
+                            <li className="more">+{applicant.skills.length - 3}</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -431,8 +513,8 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                 <p className="text-muted small">The freelancer will be notified of your decision along with the reason provided.</p>
               </div>
               <div className="modal-footer border-0 pt-0">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-outline-secondary"
                   onClick={handleCancelReject}
                   style={{
@@ -442,8 +524,8 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
                 >
                   Cancel
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger"
                   onClick={handleConfirmReject}
                   disabled={!rejectionReason.trim()}

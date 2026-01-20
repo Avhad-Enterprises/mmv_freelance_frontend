@@ -7,7 +7,7 @@ import Details from "./details";
 import CandidateProfileBreadcrumb from "../components/candidate-details/profile-bredcrumb";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  
 };
 
 const ContactPage = () => {

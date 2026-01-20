@@ -466,8 +466,26 @@ const DashboardJobBrowseArea = () => {
             }}
           />
 
-          {/* Horizontal Filter Area - Matching Client Candidate Filter Style */}
-          <div className="bg-white card-box border-20 mb-30">
+          {/* Mobile Filter Button */}
+          <button
+            type="button"
+            className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-30"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#dashboardFilterOffcanvas"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#31795A',
+              borderRadius: '30px',
+              border: '1px solid #31795A',
+              padding: '10px 0'
+            }}
+          >
+            <i className="bi bi-funnel me-2"></i>
+            Filter Projects
+          </button>
+
+          {/* Horizontal Filter Area - Desktop Only */}
+          <div className="bg-white card-box border-20 mb-30 d-none d-lg-block">
             <div className="p-4 rounded-3" style={{ backgroundColor: '#f0f5f3' }}>
               <div className="row g-3 align-items-end">
                 {/* Skills Filter - Multi Select */}
@@ -734,6 +752,136 @@ const DashboardJobBrowseArea = () => {
                 )}
               </>
             )}
+          </div>
+        </div>
+      </div>
+      <div className="offcanvas offcanvas-start" tabIndex={-1} id="dashboardFilterOffcanvas" aria-labelledby="dashboardFilterOffcanvasLabel" style={{ zIndex: 99999 }}>
+        <div className="filter-area-tab">
+          <button type="button" className="btn-close text-reset d-lg-none position-absolute top-0 end-0 m-4" data-bs-dismiss="offcanvas" aria-label="Close" style={{ zIndex: 10 }}></button>
+
+          <div className="offcanvas-body p-4">
+            <div className="main-title fw-500 text-dark text-center mb-4 mt-2">Filter By</div>
+
+            <div className="light-bg border-20 ps-4 pe-4 pt-25 pb-30">
+
+              {/* Pricing Type */}
+              <div className="filter-block bottom-line pb-25">
+                <div className="filter-title fw-500 text-dark mb-3">Pricing Type</div>
+                <select
+                  className="form-select"
+                  value={biddingFilter}
+                  onChange={(e) => {
+                    setBiddingFilter(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="all">All Projects</option>
+                  <option value="bidding">Bidding Only</option>
+                  <option value="fixed">Fixed Price Only</option>
+                </select>
+              </div>
+
+              {/* Skills */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Skills</div>
+                <Select
+                  isMulti
+                  options={availableSkills.map(skill => ({ value: skill, label: skill }))}
+                  value={selectedSkills.map(skill => ({ value: skill, label: skill }))}
+                  onChange={(selectedOptions) => {
+                    setSelectedSkills(selectedOptions ? selectedOptions.map(option => option.value) : []);
+                    setItemOffset(0);
+                  }}
+                  isLoading={loadingSkills}
+                  isDisabled={loadingSkills}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder={loadingSkills ? "Loading skills..." : "Select Skills"}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: '48px',
+                      borderColor: '#dee2e6',
+                    }),
+                  }}
+                />
+              </div>
+
+              {/* Currency */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Currency</div>
+                <select
+                  className="form-select"
+                  value={currencyFilter}
+                  onChange={(e) => {
+                    setCurrencyFilter(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="all">All Currencies</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="JPY">JPY (¥)</option>
+                  <option value="AUD">AUD (A$)</option>
+                  <option value="CAD">CAD (C$)</option>
+                  <option value="CHF">CHF (Fr)</option>
+                  <option value="CNY">CNY (¥)</option>
+                  <option value="NZD">NZD (NZ$)</option>
+                  <option value="SGD">SGD (S$)</option>
+                  <option value="HKD">HKD (HK$)</option>
+                  <option value="KRW">KRW (₩)</option>
+                  <option value="SEK">SEK (kr)</option>
+                  <option value="NOK">NOK (kr)</option>
+                  <option value="DKK">DKK (kr)</option>
+                  <option value="MXN">MXN ($)</option>
+                  <option value="BRL">BRL (R$)</option>
+                  <option value="ZAR">ZAR (R)</option>
+                  <option value="RUB">RUB (₽)</option>
+                  <option value="TRY">TRY (₺)</option>
+                  <option value="AED">AED (د.إ)</option>
+                  <option value="SAR">SAR (﷼)</option>
+                  <option value="MYR">MYR (RM)</option>
+                  <option value="THB">THB (฿)</option>
+                  <option value="IDR">IDR (Rp)</option>
+                  <option value="PHP">PHP (₱)</option>
+                  <option value="PLN">PLN (zł)</option>
+                  <option value="CZK">CZK (Kč)</option>
+                  <option value="ILS">ILS (₪)</option>
+                </select>
+              </div>
+
+              {/* Sort By */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Sort By</div>
+                <select
+                  className="form-select"
+                  value={shortValue}
+                  onChange={(e) => {
+                    setShortValue(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Default</option>
+                  <option value="price-low-to-high">Price: Low to High</option>
+                  <option value="price-high-to-low">Price: High to Low</option>
+                </select>
+              </div>
+
+              {/* Reset Button */}
+              <button
+                onClick={() => {
+                  handleReset();
+                }}
+                className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
+              >
+                Reset Filter
+              </button>
+            </div>
           </div>
         </div>
       </div>

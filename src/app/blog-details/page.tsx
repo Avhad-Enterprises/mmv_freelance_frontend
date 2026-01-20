@@ -9,7 +9,7 @@ import BlogDetailsArea from "../components/blogs/blog-details";
 import blog_data from "@/data/blog-data";
 
 export const metadata: Metadata = {
-  title: "Blog Details",
+  
 };
 
 const BlogDetailsPage = () => {

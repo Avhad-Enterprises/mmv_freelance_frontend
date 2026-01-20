@@ -142,7 +142,7 @@ const CandidateAside = ({ }: IProps) => {
 
                     {/* User Info */}
                     <div className="user-data">
-                        <div className="user-avatar position-relative d-block text-center">
+                        <div className="user-avatar position-relative d-block text-center" style={{ marginBottom: '23px' }}>
                             <div className="online position-relative rounded-circle d-inline-block" style={{
                                 width: '75px',
                                 height: '75px',
@@ -279,6 +279,14 @@ const CandidateAside = ({ }: IProps) => {
 
                 </div>
             </aside>
+            {/* Overlay for mobile sidebar */}
+            {isOpenSidebar && (
+                <div
+                    onClick={() => setIsOpenSidebar(false)}
+                    className="offcanvas-backdrop fade show"
+                    style={{ zIndex: 9998 }}
+                ></div>
+            )}
             {/* <DeleteAccountModal /> */}
             <LogoutModal />
 

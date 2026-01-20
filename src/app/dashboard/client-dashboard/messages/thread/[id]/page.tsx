@@ -16,7 +16,7 @@ export default function ThreadPage() {
       <div className="position-relative">
         <DashboardHeader />
 
-        <div className="bg-white border-30" style={{ overflow: "hidden", height: "calc(100vh - 180px)" }}>
+        <div className="bg-white border-30" style={{ overflow: "hidden", height: "calc(100vh - 100px)" }}>
           <InlineThreadView
             conversationId={conversationId}
             onBack={() => router.back()}

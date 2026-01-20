@@ -11,7 +11,7 @@ import HowItWorks from "../components/how-it-works/how-it-works";
 import FeedbackOne from "../components/feedBacks/feedback-one";
 
 export const metadata: Metadata = {
-  title: "About us",
+  
 };
 
 const AboutUsPage = () => {
@@ -43,8 +43,7 @@ const AboutUsPage = () => {
         {/* feedback one end */}
 
         {/* job portal intro start */}
-        <JobPortalIntro top_border={true} />
-        {/* job portal intro end */}
+
 
         {/* footer start */}
         <FooterOne />

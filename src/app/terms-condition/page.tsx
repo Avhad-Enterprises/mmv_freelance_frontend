@@ -8,7 +8,7 @@ import CandidateProfileBreadcrumb from "../components/candidate-details/profile-
 import TermsAndConditions from "./details";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  
 };
 
 const TermsAndConditionsPage = () => {

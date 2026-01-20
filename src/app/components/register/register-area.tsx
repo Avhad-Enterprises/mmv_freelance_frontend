@@ -177,7 +177,7 @@ const RegisterArea = () => {
   );
 
   return (
-    <section className="registration-section position-relative pt-100 lg-pt-80 pb-150 lg-pb-80">
+    <section className="registration-section position-relative pt-40 lg-pt-60 pb-150 lg-pb-80">
       <div className="container">
         <div className="user-data-form">
           <div className="text-center">

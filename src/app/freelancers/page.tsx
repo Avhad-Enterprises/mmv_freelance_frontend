@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import CandidateClientView from './CandidateClientView';
 
 export const metadata: Metadata = {
-  title: "Candidate v1",
+  
 };
 
 const CandidatePage = () => {
