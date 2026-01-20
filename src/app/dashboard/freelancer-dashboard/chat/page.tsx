@@ -29,13 +29,14 @@ export default function FreelancerChatPage() {
         <DashboardHeader />
         <h2 className="main-title">Messages</h2>
 
-        <div className="bg-white border-30" style={{ overflow: "hidden" }}>
+        <div className="bg-white border-30" style={{ overflow: "hidden", height: "calc(100vh - 100px)", maxHeight: "calc(100vh - 100px)" }}>
           <Paper
             elevation={0}
             sx={{
               display: "flex",
-              height: { xs: "calc(100vh - 200px)", md: "calc(100vh - 240px)" },
-              minHeight: { xs: 520, md: 560 },
+              flexDirection: { xs: "column", md: "row" },
+              height: "100%",
+              maxHeight: "100%",
               borderRadius: "30px",
               overflow: "hidden",
               width: "100%",
@@ -55,6 +56,10 @@ export default function FreelancerChatPage() {
                 borderRight: { md: "1px solid rgba(49,121,90,0.1)" },
                 bgcolor: "#FFFFFF",
                 height: "100%",
+                maxHeight: "100%",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
               <ChatList
