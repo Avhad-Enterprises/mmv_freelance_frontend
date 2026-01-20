@@ -150,8 +150,8 @@ const BiddingModal: React.FC<BiddingModalProps> = ({
               type="button"
               className="btn btn-primary"
               style={{
-                backgroundColor: '#00BF58',
-                borderColor: '#00BF58'
+                backgroundColor: '#3d6f5d',
+                borderColor: '#3d6f5d'
               }}
               disabled={isSubmitting}
               onClick={handleSubmit}
