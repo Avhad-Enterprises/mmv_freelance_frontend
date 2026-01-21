@@ -138,9 +138,9 @@ const InfoSection = ({ title, sectionKey, children, editingSection, onEdit, onSa
 
   return (
     <div className="bg-white card-box border-20 mt-30">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center flex-wrap mb-4" style={{ gap: '1rem' }}>
         <h4 className="dash-title-three">{title}</h4>
-        <div>
+        <div className="mt-3 mt-sm-0">
           {!editingSection ? (
             <button className="dash-btn-two" style={{ minWidth: '100px', padding: '8px 16px' }} onClick={() => onEdit(sectionKey)}>
               Edit

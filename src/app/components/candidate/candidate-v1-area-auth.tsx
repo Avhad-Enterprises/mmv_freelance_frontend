@@ -516,7 +516,7 @@ const CandidateV1Area = () => {
           </h2>
           {selectedFreelancer && (
             <button
-              className="dash-btn-two tran3s"
+              className="dash-btn-two tran3s mt-3 mt-sm-0"
               onClick={() => setSelectedFreelancer(null)}
             >
               ← Back to Candidates
@@ -537,7 +537,26 @@ const CandidateV1Area = () => {
               onSearch={setSearchQuery}
             />
 
-            <div className="bg-white card-box border-20 mb-40">
+            {/* Mobile Filter Button */}
+            <button
+              type="button"
+              className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-30"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#candidateFilterOffcanvas"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#31795A',
+                borderRadius: '30px',
+                border: '1px solid #31795A',
+                padding: '10px 0'
+              }}
+            >
+              <i className="bi bi-funnel me-2"></i>
+              Filter Candidates
+            </button>
+
+            {/* Desktop Filter Area - Hidden on mobile */}
+            <div className="bg-white card-box border-20 mb-40 d-none d-lg-block">
               <CandidateV1FilterArea
                 onSkillChange={setSelectedSkills}
                 onLocationChange={setSelectedLocations}
@@ -649,6 +668,159 @@ const CandidateV1Area = () => {
             </div>
           </>
         )}
+      </div>
+
+      {/* Mobile Filter Offcanvas */}
+      <div className="offcanvas offcanvas-start" tabIndex={-1} id="candidateFilterOffcanvas" aria-labelledby="candidateFilterOffcanvasLabel" style={{ zIndex: 99999 }}>
+        <div className="filter-area-tab">
+          <button type="button" className="btn-close text-reset d-lg-none position-absolute top-0 end-0 m-4" data-bs-dismiss="offcanvas" aria-label="Close" style={{ zIndex: 10 }}></button>
+
+          <div className="offcanvas-body p-4">
+            <div className="main-title fw-500 text-dark text-center mb-4 mt-2">Filter By</div>
+
+            <div className="light-bg border-20 ps-4 pe-4 pt-25 pb-30">
+
+              {/* Skills */}
+              <div className="filter-block bottom-line pb-25">
+                <div className="filter-title fw-500 text-dark mb-3">Skills</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedSkills.includes(e.target.value)) {
+                      setSelectedSkills([...selectedSkills, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Skills</option>
+                  {allSkills.map(skill => (
+                    <option key={skill} value={skill} disabled={selectedSkills.includes(skill)}>
+                      {skill}
+                    </option>
+                  ))}
+                </select>
+                {selectedSkills.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedSkills.map(skill => (
+                      <div
+                        key={skill}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#00BF58', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{skill}</span>
+                        <button
+                          onClick={() => setSelectedSkills(selectedSkills.filter(s => s !== skill))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Superpowers */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Superpowers</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedSuperpowers.includes(e.target.value)) {
+                      setSelectedSuperpowers([...selectedSuperpowers, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Superpowers</option>
+                  {allSuperpowers.map(sp => (
+                    <option key={sp} value={sp} disabled={selectedSuperpowers.includes(sp)}>
+                      {sp}
+                    </option>
+                  ))}
+                </select>
+                {selectedSuperpowers.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedSuperpowers.map(sp => (
+                      <div
+                        key={sp}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#FF6B35', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{sp}</span>
+                        <button
+                          onClick={() => setSelectedSuperpowers(selectedSuperpowers.filter(s => s !== sp))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Location */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Location</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedLocations.includes(e.target.value)) {
+                      setSelectedLocations([...selectedLocations, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Location</option>
+                  {allLocations.map(loc => (
+                    <option key={loc} value={loc} disabled={selectedLocations.includes(loc)}>
+                      {loc}
+                    </option>
+                  ))}
+                </select>
+                {selectedLocations.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedLocations.map(loc => (
+                      <div
+                        key={loc}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#00BF58', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{loc}</span>
+                        <button
+                          onClick={() => setSelectedLocations(selectedLocations.filter(l => l !== loc))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Reset Button */}
+              <div className="mt-40">
+                <button
+                  onClick={() => {
+                    clearFilters();
+                    // Close offcanvas
+                    const offcanvasElement = document.getElementById('candidateFilterOffcanvas');
+                    if (offcanvasElement) {
+                      const bsOffcanvas = (window as any).bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+                      bsOffcanvas?.hide();
+                    }
+                  }}
+                  className="btn-ten fw-500 text-white w-100 text-center tran3s"
+                >
+                  Reset Filter
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

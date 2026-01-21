@@ -10,6 +10,7 @@ import search from "@/assets/dashboard/images/icon/icon_10.svg";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification, Notification } from "@/context/NotificationContext";
+import { usePathname } from "next/navigation";
 
 // Notification item component
 type NotificationItemProps = {
@@ -38,6 +39,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
   const { unreadCount, notifications, markAsRead, markAllAsRead } = useNotification();
+  const pathname = usePathname();
+
+  // Detect if we're in client dashboard
+  const isClientDashboard = pathname?.includes('/client-dashboard');
 
   // Helper function to format notification time
   const formatNotificationTime = (createdAt: string | undefined): string => {
@@ -206,13 +211,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
             </ul>
           </div>
 
-          {/* Post Job Button */}
+          {/* Dynamic Button based on Dashboard Type */}
           <div>
             <Link
-              href="/dashboard/client-dashboard/submit-job"
+              href={isClientDashboard ? "/dashboard/client-dashboard/submit-job" : "/dashboard/freelancer-dashboard/browse-jobs"}
               className="job-post-btn tran3s header-job-post-btn"
             >
-              Post a Project
+              {isClientDashboard ? "Post a Project" : "Browse Project"}
             </Link>
           </div>
         </div>

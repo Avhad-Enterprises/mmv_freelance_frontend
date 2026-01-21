@@ -66,23 +66,11 @@ const AppliedJobsArea = ({ }: IProps) => {
           throw new Error(`Failed to fetch applications: ${response.statusText}`);
         }
         const resData = await response.json();
-        
-        // Debug logging
-        console.log('=== FREELANCER: Fetched Applications ===');
-        console.log('Raw API Response:', resData);
-        console.log('First application (if exists):', resData.data?.[0]);
-        console.log('======================================');
-        
+
         if (!resData?.data) {
           throw new Error(resData?.message || 'Failed to fetch applications: Data not found');
         }
         const jobData: IJob[] = (resData.data || []).map((job: any) => {
-          // Debug logging for each job
-          // Debug logging for each job
-          console.log(`Job: ${job.project_title}, Raw Status: ${job.status}`);
-          console.log(`RejectionReason: ${job.rejection_reason}`);
-          console.log(`ComparisonRejectionReason: ${job.comparison_rejection_reason}`);
-          
           return {
             projects_task_id: Number(job.projects_task_id),
             project_title: job.project_title || 'Untitled Project',
@@ -326,8 +314,8 @@ const AppliedJobsArea = ({ }: IProps) => {
                         <div className="candidate-info">
                           <span>Your Bid</span>
                           <div className="fw-bold text-success">
-                            {job.bidding_enabled && job.bid_amount 
-                              ? formatBudget(job.bid_amount, job.currency) 
+                            {job.bidding_enabled && job.bid_amount
+                              ? formatBudget(job.bid_amount, job.currency)
                               : 'NA'
                             }
                           </div>
@@ -356,7 +344,7 @@ const AppliedJobsArea = ({ }: IProps) => {
                         </a>
                       </div>
                     </div>
-                    
+
                     {/* Rejection Reason Display */}
                     {/* Rejection Reason Display */}
                     {job.status === 'Rejected' && (
@@ -370,22 +358,22 @@ const AppliedJobsArea = ({ }: IProps) => {
                             boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
                           }}>
                             <div className="d-flex align-items-start">
-                              <i className="bi bi-exclamation-circle-fill me-3" style={{ 
-                                color: '#dc3545', 
+                              <i className="bi bi-exclamation-circle-fill me-3" style={{
+                                color: '#dc3545',
                                 fontSize: '20px',
                                 marginTop: '2px'
                               }}></i>
                               <div className="flex-grow-1">
-                                <h6 className="mb-2" style={{ 
-                                  color: '#721c24', 
+                                <h6 className="mb-2" style={{
+                                  color: '#721c24',
                                   fontWeight: '600',
                                   fontSize: '15px'
                                 }}>
                                   <i className="bi bi-x-circle me-2"></i>Application Rejected
                                 </h6>
-                                <p className="mb-0" style={{ 
-                                  fontSize: '14px', 
-                                  color: '#721c24', 
+                                <p className="mb-0" style={{
+                                  fontSize: '14px',
+                                  color: '#721c24',
                                   whiteSpace: 'pre-wrap',
                                   lineHeight: '1.6'
                                 }}>

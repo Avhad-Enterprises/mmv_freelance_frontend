@@ -1,9 +1,48 @@
+"use client";
 import React from "react";
 import Image from "next/image";
+import { useRouter } from 'next/navigation';
 import icon from "@/assets/images/icon/icon_46.svg";
 import img from "@/assets/images/assets/img_41.png";
+import { useUser } from '@/context/UserContext';
 
 const FancyBannerSeven = () => {
+  const router = useRouter();
+  const { userData, userRoles, isLoading } = useUser();
+
+  const handlePostJob = () => {
+    const isAuthenticated = !!userData && !isLoading;
+    if (!isAuthenticated) {
+      // Show login modal
+      const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+      if (loginButton) loginButton.click();
+    } else {
+      // Check user roles
+      const normalizedRoles = userRoles.map(r => r.toUpperCase());
+      if (normalizedRoles.includes('CLIENT')) {
+        // Redirect to client submit job page
+        router.push('/dashboard/client-dashboard/submit-job');
+      } else if (normalizedRoles.includes('VIDEOEDITOR') || normalizedRoles.includes('VIDEOGRAPHER')) {
+        // Redirect to projects listing page
+        router.push('/job-list');
+      } else {
+        // Default fallback
+        router.push('/job-list');
+      }
+    }
+  };
+
+  const handleStartEarning = () => {
+    const isAuthenticated = !!userData && !isLoading;
+    if (!isAuthenticated) {
+      // Show login modal
+      const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+      if (loginButton) loginButton.click();
+    } else {
+      // Always redirect to projects listing page
+      router.push('/job-list');
+    }
+  };
   return (
     <section className="fancy-banner-six mt-150 xl-mt-120 lg-mt-100">
       <div className="container">
@@ -29,14 +68,14 @@ const FancyBannerSeven = () => {
                   Join world's leading marketplace for video creators today.
                 </p>
                 <div className="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                  <a href="/coming-soon" className="upload-btn position-relative d-flex align-items-center justify-content-center">
+                  <button onClick={handlePostJob} className="upload-btn position-relative d-flex align-items-center justify-content-center">
                     <span className="fw-500 ms-2 text-white">
                       Post a Job for Free
                     </span>
-                  </a>
-                  <a href="/coming-soon" className="upload-btn d-flex align-items-center justify-content-center">
+                  </button>
+                  <button onClick={handleStartEarning} className="upload-btn d-flex align-items-center justify-content-center">
                     <span className="fw-500 text-white">Start Earning Now</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

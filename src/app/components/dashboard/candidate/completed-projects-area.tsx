@@ -278,10 +278,10 @@ const CompletedProjectsArea = () => {
                             backgroundColor: "#31795A",
                             color: "white",
                             border: "none",
-                            padding: "6px 15px",
-                            borderRadius: "20px",
+                            padding: "1px 23px",
+                            borderRadius: "25px",
                             fontWeight: "500",
-                            fontSize: "13px",
+                            fontSize: "14px",
                           }}
                         >
                           View Details

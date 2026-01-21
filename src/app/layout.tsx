@@ -32,7 +32,7 @@ const gordita = localFont({
     },
   ],
   variable: '--gorditas-font'
-})
+});
 
 const garamond = EB_Garamond({
   weight: ["400", "500", "600", "700", "800"],
@@ -41,8 +41,44 @@ const garamond = EB_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "MMV",
-  description: "Make My Vid",
+  title: {
+    default: "MMV - Make My Vid | Hire Top Video Editors & Videographers",
+    template: "%s | MMV - Make My Vid",
+  },
+  description: "Connect with 50,000+ verified video editors and videographers. Find top talent for your video projects or showcase your skills and get hired. Secure payments, seamless collaboration.",
+  keywords: ["video editing", "videographer", "freelance video editor", "hire videographer", "video production", "video freelancer", "make my vid", "MMV"],
+  authors: [{ name: "MMV Team" }],
+  creator: "Make My Vid",
+  publisher: "Make My Vid",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Make My Vid",
+    title: "MMV - Make My Vid | Hire Top Video Editors & Videographers",
+    description: "Connect with 50,000+ verified video editors and videographers. Find top talent for your video projects.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MMV - Make My Vid | Hire Top Video Editors & Videographers",
+    description: "Connect with 50,000+ verified video editors and videographers.",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
+  themeColor: "#31795A",
 };
 
 export default function RootLayout({

@@ -337,7 +337,7 @@ const SavedCandidateArea = () => {
 
     // TODO: SOCKET.IO IMPLEMENTATION
     // Firebase chat implementation has been commented out and replaced with Socket.io
-    
+
     /* OLD FIREBASE IMPLEMENTATION - COMMENTED OUT
     if (!db || !auth) {
       toast.error("Chat service is currently unavailable.");
@@ -443,11 +443,11 @@ const SavedCandidateArea = () => {
       // Socket.io Implementation: Create conversation via API
       const currentUserId = String(userData.user_id);
       const otherId = String(candidateId);
-      
+
       // Use the existing Socket.io based chat system
       // The conversation creation and navigation is now handled via REST API + Socket.io
       toast.success('Opening chat...');
-      
+
       // Navigate to chat - the chat system will handle conversation creation via Socket.io
       router.push(`/dashboard/client-dashboard/messages?userId=${candidateId}`);
     } catch (err: any) {
@@ -471,7 +471,7 @@ const SavedCandidateArea = () => {
             {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "My Saved Candidates"}
           </h2>
           {selectedFreelancer && (
-            <button className="dash-btn-two tran3s" onClick={() => setSelectedFreelancer(null)}>
+            <button className="dash-btn-two tran3s mt-3 mt-sm-0" onClick={() => setSelectedFreelancer(null)}>
               ← Back to Saved Candidates
             </button>
           )}

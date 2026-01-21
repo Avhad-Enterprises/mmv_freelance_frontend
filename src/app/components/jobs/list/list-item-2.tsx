@@ -53,7 +53,7 @@ const ListItemTwo = ({
                   </Link>
                 </h4>
 
-                <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
+                <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap mt-2">
                   {item.skills_required && item.skills_required.slice(0, 3).map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}

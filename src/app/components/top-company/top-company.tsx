@@ -72,7 +72,7 @@ const TopCompany = () => {
           <div className="col-sm-5">
             <div className="d-flex justify-content-sm-end">
               {/* Replaced Next.js Link with standard <a> tag */}
-              <a href="/coming-soon" className="btn-six d-none d-sm-inline-block">Explore All Creators</a>
+              <a href="/freelancers" className="btn-six d-none d-sm-inline-block">Explore All Creators</a>
             </div>
           </div>
         </div>
@@ -95,7 +95,7 @@ const TopCompany = () => {
 
         <div className="text-center mt-30 d-sm-none">
           {/* Replaced Next.js Link with standard <a> tag */}
-          <a href="/coming-soon" className="btn-six">Explore More</a>
+          <a href="/freelancers" className="btn-six">Explore More</a>
         </div>
       </div>
     </section>
