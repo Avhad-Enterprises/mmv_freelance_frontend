@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import FilterArea from "../filter/filter-area";
 import ListItemTwo from "./list-item-2";
 import JobGridItem from "../grid/job-grid-item";
@@ -47,6 +47,19 @@ const JobListThree = ({
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   // Add view type state for toggle functionality
   const [jobType, setJobType] = useState<string>("list");
+  // Add search state
+  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce search input for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Redux
   const dispatch = useAppDispatch();
@@ -131,10 +144,11 @@ const JobListThree = ({
       );
     }
 
-    if (search_key) {
+    // Use local search state instead of Redux search_key
+    if (debouncedSearchText.trim()) {
       filteredData = filteredData.filter((item) =>
-        item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
-        item.project_description?.toLowerCase().includes(search_key.toLowerCase())
+        item.project_title?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        item.project_description?.toLowerCase().includes(debouncedSearchText.toLowerCase())
       );
     }
 
@@ -150,7 +164,7 @@ const JobListThree = ({
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
-    all_jobs, shortValue, search_key,
+    all_jobs, shortValue, debouncedSearchText,
   ]);
 
   // --- Event Handlers ---
@@ -163,6 +177,20 @@ const JobListThree = ({
   const handleShort = (item: { value: string; label: string }) => {
     setShortValue(item.value);
   };
+
+  // Handle search clear
+  const handleClearSearch = useCallback(() => {
+    setSearchText("");
+    setDebouncedSearchText("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Handle ESC key to clear search
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      handleClearSearch();
+    }
+  }, [handleClearSearch]);
 
   const handleToggleSave = async (job: IJobType) => {
     if (!decoded || !decoded.user_id) {
@@ -257,6 +285,98 @@ const JobListThree = ({
 
             <div className="col-xl-9 col-lg-8">
               <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
+                {/* Search Bar */}
+                <div className="search-bar mb-30">
+                  <div className="position-relative">
+                    <label htmlFor="project-search" className="visually-hidden">
+                      Search projects
+                    </label>
+                    <input
+                      id="project-search"
+                      ref={searchInputRef}
+                      type="search"
+                      placeholder="Search projects by title or description..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                      className="form-control"
+                      aria-label="Search projects by title or description"
+                      aria-describedby="search-help"
+                      style={{
+                        padding: '12px 45px 12px 20px',
+                        borderRadius: '10px',
+                        border: '2px solid #E9F7EF',
+                        fontSize: '15px',
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#31795A'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#E9F7EF'}
+                    />
+                    <span id="search-help" className="visually-hidden">
+                      Press Escape to clear search
+                    </span>
+                    {searchText ? (
+                      <button
+                        onClick={handleClearSearch}
+                        aria-label="Clear search"
+                        type="button"
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#31795A',
+                          fontSize: '20px',
+                          padding: '4px 8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.708.708L7.293 8l-3.647 3.646.708.707L8 8.707z"/>
+                        </svg>
+                      </button>
+                    ) : (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          color: '#D1D5DB',
+                          pointerEvents: 'none',
+                        }}
+                        aria-hidden="true"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="11" cy="11" r="8"/>
+                          <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                      </span>
+                    )}
+                    {searchText && searchText !== debouncedSearchText && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '45px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          fontSize: '12px',
+                          color: '#6B7280',
+                        }}
+                        aria-live="polite"
+                      >
+                        Searching...
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
                   <div className="total-job-found">
                     All <span className="text-dark fw-500">{filterItems.length}</span> projects found

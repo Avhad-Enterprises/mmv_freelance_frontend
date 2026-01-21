@@ -47,7 +47,7 @@ const FeatureTen = () => {
                   parent="accordionOne"
                 />
               </div>
-              <Link href="/coming-soon" className="btn-five mt-45 md-mt-30">Learn More</Link>
+              {/* <Link href="/coming-soon" className="btn-five mt-45 md-mt-30">Learn More</Link> */}
             </div>
           </div>
           <div className="col-lg-7 col-md-11 m-auto order-lg-first">
