@@ -872,6 +872,43 @@ if (typeof document !== 'undefined') {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         z-index: 999;
       }
+      
+      /* Mobile responsive styles for country list */
+      @media (max-width: 768px) {
+        .react-tel-input .country-list {
+          width: calc(100vw - 40px) !important;
+          max-width: 350px !important;
+          left: 50% !important;
+          transform: translateX(-50%);
+          position: fixed !important;
+          max-height: 60vh !important;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .react-tel-input .country-list {
+          width: calc(100vw - 20px) !important;
+          max-height: 70vh !important;
+        }
+        
+        .react-tel-input .country-list .country {
+          padding: 12px 10px !important;
+          font-size: 15px !important;
+        }
+        
+        .react-tel-input .country-list .country .country-name {
+          font-size: 14px !important;
+        }
+        
+        .react-tel-input .country-list .country .dial-code {
+          font-size: 13px !important;
+        }
+        
+        .react-tel-input .search-box {
+          font-size: 16px !important;
+          padding: 12px 10px 12px 40px !important;
+        }
+      }
       .react-tel-input .search {
         position: sticky;
         top: 0;

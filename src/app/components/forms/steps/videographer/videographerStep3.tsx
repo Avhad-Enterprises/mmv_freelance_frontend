@@ -794,6 +794,35 @@ if (typeof document !== 'undefined') {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 999;
     }
+
+    /* Mobile responsiveness for country dropdown */
+    @media (max-width: 768px) {
+      .react-tel-input .country-list {
+        width: calc(100vw - 40px) !important;
+        max-width: 350px !important;
+        left: 50% !important;
+        transform: translateX(-50%);
+        position: fixed !important;
+        max-height: 60vh !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .react-tel-input .country-list {
+        width: calc(100vw - 20px) !important;
+        max-height: 70vh !important;
+      }
+      
+      .react-tel-input .country-list .country {
+        padding: 12px !important;
+        font-size: 16px !important;
+      }
+      
+      .react-tel-input .search-box {
+        padding: 12px 12px 12px 40px !important;
+        font-size: 16px !important;
+      }
+    }
     .react-tel-input .search {
       position: sticky;
       top: 0;

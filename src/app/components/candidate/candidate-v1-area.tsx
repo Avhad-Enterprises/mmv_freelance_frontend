@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import toast from 'react-hot-toast';
 import SaveCandidateLoginModal from "@/app/components/common/popup/save-candidate-login-modal";
@@ -48,6 +48,18 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedSuperpowers, setSelectedSuperpowers] = useState<string[]>([]);
   const [sortValue, setSortValue] = useState("");
+  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce search input for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -209,6 +221,20 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }
     onLoginSuccess();
   };
 
+  // Handle search clear
+  const handleClearSearch = useCallback(() => {
+    setSearchText("");
+    setDebouncedSearchText("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Handle ESC key to clear search
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      handleClearSearch();
+    }
+  }, [handleClearSearch]);
+
   // --- Pagination Handler ---
   const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected + 1); // ReactPaginate is 0-indexed, our state is 1-indexed
@@ -240,14 +266,27 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }
       );
     }
 
+    // Filter by search text (using debounced value)
+    if (debouncedSearchText.trim()) {
+      filtered = filtered.filter(c =>
+        c.first_name?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        c.last_name?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        c.username?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        c.profile_title?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        c.skills?.some(skill => skill.toLowerCase().includes(debouncedSearchText.toLowerCase())) ||
+        c.superpowers?.some(sp => sp.toLowerCase().includes(debouncedSearchText.toLowerCase()))
+      );
+    }
+
     setFilteredCandidates(filtered);
     setCurrentPage(1);
-  }, [selectedSkills, selectedLocations, selectedSuperpowers, candidates]);
+  }, [selectedSkills, selectedLocations, selectedSuperpowers, candidates, debouncedSearchText]);
 
   const clearFilters = () => {
     setSelectedSkills([]);
     setSelectedLocations([]);
     setSelectedSuperpowers([]);
+    setSearchText("");
     setFilteredCandidates(candidates);
     setCurrentPage(1);
   };
@@ -307,6 +346,98 @@ const CandidateV1Area = ({ isAuthenticated = false, onLoginSuccess = () => { } }
             </div>
             <div className="col-xl-9 col-lg-8">
               <div className="ms-xxl-5 ms-xl-3">
+                {/* Search Bar */}
+                <div className="search-bar mb-30">
+                  <div className="position-relative">
+                    <label htmlFor="candidate-search" className="visually-hidden">
+                      Search candidates
+                    </label>
+                    <input
+                      id="candidate-search"
+                      ref={searchInputRef}
+                      type="search"
+                      placeholder="Search candidates by name, skills, or superpowers..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                      className="form-control"
+                      aria-label="Search candidates by name, skills, or superpowers"
+                      aria-describedby="candidate-search-help"
+                      style={{
+                        padding: '12px 45px 12px 20px',
+                        borderRadius: '10px',
+                        border: '2px solid #E9F7EF',
+                        fontSize: '15px',
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#31795A'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#E9F7EF'}
+                    />
+                    <span id="candidate-search-help" className="visually-hidden">
+                      Press Escape to clear search
+                    </span>
+                    {searchText ? (
+                      <button
+                        onClick={handleClearSearch}
+                        aria-label="Clear search"
+                        type="button"
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#31795A',
+                          fontSize: '20px',
+                          padding: '4px 8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.708.708L7.293 8l-3.647 3.646.708.707L8 8.707z"/>
+                        </svg>
+                      </button>
+                    ) : (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          color: '#D1D5DB',
+                          pointerEvents: 'none',
+                        }}
+                        aria-hidden="true"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="11" cy="11" r="8"/>
+                          <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                      </span>
+                    )}
+                    {searchText && searchText !== debouncedSearchText && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '45px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          fontSize: '12px',
+                          color: '#6B7280',
+                        }}
+                        aria-live="polite"
+                      >
+                        Searching...
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
                   <div className="total-job-found">
                     All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
