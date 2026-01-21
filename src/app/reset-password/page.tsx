@@ -21,7 +21,7 @@ const ResetPasswordPage = () => {
 
   return (
     <Wrapper>
-      <div className="main-page-wrapper">
+      <div className="paddingTop: '1rem'">
         <Header />
         <ResetPasswordArea />
         <FooterOne />

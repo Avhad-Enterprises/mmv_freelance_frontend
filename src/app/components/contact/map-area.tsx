@@ -27,7 +27,7 @@
 
 const MapArea: React.FC = () => {
   return (
-    <div className="map-banner pt-40 lg-pt-60 md-pt-60" style={{ height: '700px', width: '100%', position: 'relative' }}>
+    <div className="map-banner" style={{ height: '700px', width: '100%', position: 'relative', margin: 0, padding: 0, marginTop: '-26px' }}>
       <div className="gmap_canvas h-100 w-100">
         <iframe
           className="gmap_iframe"

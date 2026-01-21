@@ -386,14 +386,6 @@ const EmployJobArea: FC<EmployJobAreaProps> = ({ startInPostMode = false }) => {
         payload.rejection_reason = rejectionReason;
       }
 
-      // Debug logging
-      console.log('=== FRONTEND: Sending Update Request ===');
-      console.log('Application ID:', applicationId);
-      console.log('New Status:', newStatus);
-      console.log('Rejection Reason:', rejectionReason);
-      console.log('Payload:', payload);
-      console.log('======================================');
-
       // Update application status using the correct endpoint
       await makePatchRequest(`api/v1/applications/update-status`, payload);
 

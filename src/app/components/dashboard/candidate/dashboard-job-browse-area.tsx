@@ -330,7 +330,7 @@ const DashboardJobBrowseArea = () => {
     const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
 
     return (
-      <div className={`candidate-profile-card grid-layout`}>
+      <div className={`candidate-profile-card grid-layout d-flex flex-column`} style={{ minHeight: '100%' }}>
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
@@ -419,7 +419,7 @@ const DashboardJobBrowseArea = () => {
           </div>
         </div>
 
-        <div className="d-flex justify-content-center">
+        <div className="d-flex justify-content-start align-items-center mt-auto pt-4 pt-md-4">
           <a
             onClick={() => setSelectedJob(item)}
             className="profile-btn tran3s ms-md-2 cursor-pointer"

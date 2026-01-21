@@ -84,7 +84,7 @@ const DynamicCandidateProfilePage = () => {
 
   return (
     <Wrapper>
-      <div className="main-page-wrapper">
+      <div style={{ paddingTop: '1rem' }}>
         <Header />
         <CandidateProfileBreadcrumb title={breadcrumbTitle} subtitle="Candidate Profile" />
         {error && (
