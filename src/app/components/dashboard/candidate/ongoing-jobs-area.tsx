@@ -438,10 +438,10 @@ const OngoingJobsArea = ({ }: IProps) => {
                         <div className="col-lg-8 col-md-6">
                           <div className="row gx-3">
                             <div className="col-6 col-md-3 mb-2 mb-md-0">
-                                <div className="candidate-info">
-                                  <span>Budget</span>
-                                  <div>{formatBudget(job.budget ?? 0, job.currency)}</div>
-                                </div>
+                              <div className="candidate-info">
+                                <span>Budget</span>
+                                <div>{formatBudget(job.budget ?? 0, job.currency)}</div>
+                              </div>
                             </div>
                             <div className="col-6 col-md-3 mb-2 mb-md-0">
                               <div className="candidate-info">
@@ -470,7 +470,7 @@ const OngoingJobsArea = ({ }: IProps) => {
                       </div>
                       <div className="row">
                         <div className="col-12">
-                          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                          <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center flex-wrap gap-3">
                             <ul className="cadidate-skills style-none d-flex align-items-center flex-wrap">
                               {job.skills_required &&
                                 job.skills_required.slice(0, 5).map((s, i) => (
@@ -485,7 +485,7 @@ const OngoingJobsArea = ({ }: IProps) => {
                                   </li>
                                 )}
                             </ul>
-                            <div className="d-flex align-items-center gap-2">
+                            <div className="d-flex flex-wrap align-items-center gap-2 mt-2 mt-lg-0 w-100 w-lg-auto">
                               <a
                                 onClick={() => setSelectedJob(job)}
                                 className="profile-btn tran3s ms-md-2 cursor-pointer"
@@ -571,22 +571,22 @@ const OngoingJobsArea = ({ }: IProps) => {
                               boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
                             }}>
                               <div className="d-flex align-items-start">
-                                <i className="bi bi-exclamation-circle-fill me-3" style={{ 
-                                  color: '#dc3545', 
+                                <i className="bi bi-exclamation-circle-fill me-3" style={{
+                                  color: '#dc3545',
                                   fontSize: '20px',
                                   marginTop: '2px'
                                 }}></i>
                                 <div className="flex-grow-1">
-                                  <h6 className="mb-2" style={{ 
-                                    color: '#721c24', 
+                                  <h6 className="mb-2" style={{
+                                    color: '#721c24',
                                     fontWeight: '600',
                                     fontSize: '15px'
                                   }}>
                                     <i className="bi bi-x-circle me-2"></i>Submission Rejected
                                   </h6>
-                                  <p className="mb-0" style={{ 
-                                    fontSize: '14px', 
-                                    color: '#721c24', 
+                                  <p className="mb-0" style={{
+                                    fontSize: '14px',
+                                    color: '#721c24',
                                     whiteSpace: 'pre-wrap',
                                     lineHeight: '1.6'
                                   }}>
@@ -648,22 +648,22 @@ const OngoingJobsArea = ({ }: IProps) => {
                     boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
                   }}>
                     <div className="d-flex align-items-start">
-                      <i className="bi bi-exclamation-circle-fill me-3" style={{ 
-                        color: '#dc3545', 
+                      <i className="bi bi-exclamation-circle-fill me-3" style={{
+                        color: '#dc3545',
                         fontSize: '20px',
                         marginTop: '2px'
                       }}></i>
                       <div className="flex-grow-1">
-                        <h6 className="mb-2" style={{ 
-                          color: '#721c24', 
+                        <h6 className="mb-2" style={{
+                          color: '#721c24',
                           fontWeight: '600',
                           fontSize: '15px'
                         }}>
                           <i className="bi bi-x-circle me-2"></i>Submission Rejected
                         </h6>
-                        <p className="mb-0" style={{ 
-                          fontSize: '14px', 
-                          color: '#721c24', 
+                        <p className="mb-0" style={{
+                          fontSize: '14px',
+                          color: '#721c24',
                           whiteSpace: 'pre-wrap',
                           lineHeight: '1.6'
                         }}>
@@ -807,22 +807,22 @@ const OngoingJobsArea = ({ }: IProps) => {
                           boxShadow: '0 2px 4px rgba(220, 53, 69, 0.1)'
                         }}>
                           <div className="d-flex align-items-start">
-                            <i className="bi bi-exclamation-circle-fill me-3" style={{ 
-                              color: '#dc3545', 
+                            <i className="bi bi-exclamation-circle-fill me-3" style={{
+                              color: '#dc3545',
                               fontSize: '20px',
                               marginTop: '2px'
                             }}></i>
                             <div className="flex-grow-1">
-                              <h6 className="mb-2" style={{ 
-                                color: '#721c24', 
+                              <h6 className="mb-2" style={{
+                                color: '#721c24',
                                 fontWeight: '600',
                                 fontSize: '15px'
                               }}>
                                 <i className="bi bi-x-circle me-2"></i>Rejection Reason
                               </h6>
-                              <p className="mb-0" style={{ 
-                                fontSize: '14px', 
-                                color: '#721c24', 
+                              <p className="mb-0" style={{
+                                fontSize: '14px',
+                                color: '#721c24',
                                 whiteSpace: 'pre-wrap',
                                 lineHeight: '1.6'
                               }}>

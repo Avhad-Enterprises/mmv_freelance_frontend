@@ -49,7 +49,7 @@ const CommissionExplainedArea = () => {
                             <ul className="style-none list-item">
                                 <li><strong>Reducing Competition:</strong> By requiring Keys, we eliminate low-effort spam applications, meaning your proposal competes against fewer, higher-quality freelancers.</li>
                                 <li><strong>Client Acquisition Marketing:</strong> Aggressive campaigns to ensure a constant flow of high-budget video job postings.</li>
-                                <li><strong>Secure ESCROW Protection:</strong> Managing payments and holding client funds securely before you start work.</li>
+                                <li><strong>Secure Payment Protection:</strong> Managing payments and holding client funds securely before you start work (Escrow Coming Soon).</li>
                             </ul>
                         </div>
 
@@ -58,7 +58,7 @@ const CommissionExplainedArea = () => {
                             <p>Let’s say you spot a remote video editing project with a budget of $1,000, and the service fee for this project type is set at 10%.</p>
                             <ul className="style-none list-item">
                                 <li><strong>The Application:</strong> You decide this is the perfect job for you. You use 1 Key to Abundance from your balance to send your proposal.</li>
-                                <li><strong>The Hired Status:</strong> The client loves your proposal and hires you. They deposit $1,000 into Escrow.</li>
+                                <li><strong>The Hired Status:</strong> The client loves your proposal and hires you. They deposit $1,000 (Escrow Coming Soon).</li>
                                 <li><strong>Work & Delivery:</strong> You complete the video edit and submit it for final approval.</li>
                                 <li><strong>Payment Release:</strong> The client approves the work and releases funds.</li>
                             </ul>

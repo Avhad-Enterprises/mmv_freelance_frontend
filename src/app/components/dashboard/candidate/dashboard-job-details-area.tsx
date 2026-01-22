@@ -455,19 +455,77 @@ const DashboardJobDetailsArea = ({
             .job-details-responsive {
               padding-top: 0px;
               padding-bottom: 50px;
-            }✌🏻
+            }
             @media (min-width: 992px) {
               .job-details-responsive {
                 padding-top: 50px;
               }
             }
+            /* Mobile: Reorder cards using flexbox */
+            @media (max-width: 991px) {
+              .job-details-row {
+                display: flex;
+                flex-direction: column;
+              }
+              .mobile-header {
+                order: 1;
+                display: block !important;
+              }
+              .job-details-sidebar {
+                order: 2;
+                margin-left: 0 !important;
+                margin-top: 20px;
+                margin-bottom: 30px;
+              }
+              .job-details-content {
+                order: 3;
+              }
+              .job-details-header {
+                display: none;
+              }
+              .job-details-sidebar .job-company-info {
+                margin-left: 0 !important;
+              }
+            }
+            /* Desktop: Proper column layout with sidebar at top right */
+            @media (min-width: 992px) {
+              .mobile-header {
+                display: none !important;
+              }
+              .job-details-row {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+              }
+              .job-details-content {
+                padding-right: 1rem;
+              }
+              .job-details-sidebar {
+                position: sticky;
+                top: 20px;
+                align-self: flex-start;
+                height: fit-content;
+              }
+            }
           `}</style>
           <section className="job-details job-details-responsive">
             <div className="container-fluid">
-              <div className="row">
-                {/* Left Side: Details - Green Background */}
-                <div className="col-xxl-9 col-xl-8">
-                  <div className="details-post-data me-xxl-5 pe-xxl-4">
+              <div className="row job-details-row">
+                {/* Mobile Header - Only visible on mobile */}
+                <div className="col-12 mobile-header" style={{ display: 'none' }}>
+                  <button onClick={onBack} className="btn-two mb-20">
+                    &larr; Back to Projects
+                  </button>
+                  <div className="post-date">
+                    Posted on: {job.created_at?.slice(0, 10)}
+                  </div>
+                  <h3 className="post-title">{job.project_title}</h3>
+                </div>
+
+                {/* Left Side: Header + All Content */}
+                <div className="col-xxl-9 col-xl-8 job-details-content">
+                  {/* Header: Back button, Posted date, Title - Desktop only */}
+                  <div className="job-details-header">
                     <button onClick={onBack} className="btn-two mb-20">
                       &larr; Back to Projects
                     </button>
@@ -476,82 +534,70 @@ const DashboardJobDetailsArea = ({
                       Posted on: {job.created_at?.slice(0, 10)}
                     </div>
                     <h3 className="post-title">{job.project_title}</h3>
+                  </div>
 
-                    <div className="post-block border-style mt-50 lg-mt-30">
-                      <div className="d-flex align-items-center">
-                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">
-                          1
-                        </div>
-                        <h4 className="block-title">Project Description</h4>
+                  {/* Project Description */}
+                  <div className="post-block border-style mt-50 lg-mt-30">
+                    <div className="d-flex align-items-center">
+                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">
+                        1
                       </div>
-                      <p className="mt-25 mb-20">{job.project_description}</p>
-                      {job.additional_notes && (
-                        <p>
-                          <strong>Additional Notes:</strong>{" "}
-                          {job.additional_notes}
-                        </p>
-                      )}
+                      <h4 className="block-title">Project Description</h4>
                     </div>
+                    <p className="mt-25 mb-20">{job.project_description}</p>
+                    {job.additional_notes && (
+                      <p>
+                        <strong>Additional Notes:</strong>{" "}
+                        {job.additional_notes}
+                      </p>
+                    )}
+                  </div>
 
-                    {/* <div className="post-block border-style mt-50 lg-mt-30">
-                      <div className="d-flex align-items-center">
-                        <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
-                        <h4 className="block-title">Project Specifications</h4>
+                  {/* Required Skills */}
+                  <div className="post-block border-style mt-40 lg-mt-30">
+                    <div className="d-flex align-items-center">
+                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">
+                        2
                       </div>
-                      <ul className="list-type-two style-none mt-25 mb-15">
-                        <li><strong>Project Type:</strong> {job.projects_type} </li>
-                        <li><strong>Project Format:</strong> {job.project_format}</li>
-                        <li><strong>Audio / Voiceover:</strong> {job.audio_voiceover} </li>
-                        <li><strong>Video Length:</strong> {formatDuration(job.video_length)} </li>
-                        <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
-                        {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
-                      </ul>
-                    </div> */}
+                      <h4 className="block-title">Required Skills</h4>
+                    </div>
+                    <ul className="list-type-two style-none mt-25 mb-15">
+                      {job.skills_required?.map((skill, idx) => (
+                        <li key={idx}>{skill}</li>
+                      ))}
+                    </ul>
+                  </div>
 
+                  {/* Reference Links */}
+                  {job.reference_links && job.reference_links.length > 0 && (
                     <div className="post-block border-style mt-40 lg-mt-30">
                       <div className="d-flex align-items-center">
                         <div className="block-numb text-center fw-500 text-white rounded-circle me-2">
-                          2
+                          3
                         </div>
-                        <h4 className="block-title">Required Skills</h4>
+                        <h4 className="block-title">Reference Links</h4>
                       </div>
                       <ul className="list-type-two style-none mt-25 mb-15">
-                        {job.skills_required?.map((skill, idx) => (
-                          <li key={idx}>{skill}</li>
+                        {job.reference_links.map((link, i) => (
+                          <li key={i}>
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {link}
+                            </a>
+                          </li>
                         ))}
                       </ul>
                     </div>
-
-                    {job.reference_links && job.reference_links.length > 0 && (
-                      <div className="post-block border-style mt-40 lg-mt-30">
-                        <div className="d-flex align-items-center">
-                          <div className="block-numb text-center fw-500 text-white rounded-circle me-2">
-                            4
-                          </div>
-                          <h4 className="block-title">Reference Links</h4>
-                        </div>
-                        <ul className="list-type-two style-none mt-25 mb-15">
-                          {job.reference_links.map((link, i) => (
-                            <li key={i}>
-                              <a
-                                href={link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {link}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </div>
 
                 {/* Right Side: Metadata - White Island */}
-                <div className="col-xxl-3 col-xl-4">
+                <div className="col-xxl-3 col-xl-4 job-details-sidebar">
                   <div
-                    className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50 bg-white rounded-3 p-4"
+                    className="job-company-info ms-xl-5 ms-xxl-0 bg-white rounded-3 p-4"
                     style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
                   >
                     <div className="text-center mb-3">

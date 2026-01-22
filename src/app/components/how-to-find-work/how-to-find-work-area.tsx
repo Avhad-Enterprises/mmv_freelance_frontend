@@ -19,7 +19,7 @@ const howToFindWorkData = [
     {
         id: 4,
         title: 'Secure & Create',
-        desc: 'Wait for Escrow funding, then start the work.'
+        desc: 'Wait for funding (Escrow Coming Soon), then start the work.'
     }
 ];
 

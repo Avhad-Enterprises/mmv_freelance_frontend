@@ -86,7 +86,7 @@ const CreditsArea: React.FC = () => {
 
     return (
         <div className="dashboard-body">
-            <div className="position-relative">
+            <div className="position-relative" style={{ overflow: "hidden" }}>
                 <DashboardHeader />
                 <h2 className="main-title">Keys to Abundance</h2>
 

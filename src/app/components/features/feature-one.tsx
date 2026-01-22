@@ -35,7 +35,7 @@ const FeatureOne = () => {
               <ul className="list-style-one style-none">
                 <li>Seamless search & filters</li>
                 <li>Verified top-tier creators</li>
-                <li>Protected escrow payments</li>
+                <li>Protected payments (Escrow Coming Soon)</li>
               </ul>
               <Link href="/register" className="btn-one lg mt-50 md-mt-30">
                 Post a Project
