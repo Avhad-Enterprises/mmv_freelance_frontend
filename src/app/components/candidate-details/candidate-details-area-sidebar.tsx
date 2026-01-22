@@ -109,6 +109,41 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
 
+                {/* --- MOBILE PROFILE SIDEBAR --- */}
+                <div className="cadidate-profile-sidebar ms-xl-5 ms-xxl-0 md-mt-10 d-lg-none">
+                  <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40">
+                    <div className="pt-25">
+                      <div className="cadidate-avatar m-auto">
+                        {profile_picture && profile_picture.trim() !== '' ? (
+                          <img
+                            src={profile_picture}
+                            alt="avatar"
+                            width={85}
+                            height={85}
+                            className="lazy-img rounded-circle w-100"
+                            style={{ objectFit: 'cover', width: '85px', height: '85px' }}
+                          />
+                        ) : (
+                          <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
+                        )}
+                      </div>
+                    </div>
+                    <h3 className="cadidate-name text-center">
+                      {first_name} {last_name}
+                    </h3>
+                    <CandidateBio
+                      bio={{
+                        location: `${city || 'N/A'}, ${country || 'N/A'}`,
+                        email,
+                        rateAmount: formattedRate,
+                        availability,
+                        experience_level,
+                        role_name,
+                      }}
+                    />
+                  </div>
+                </div>
+
                 <div className="inner-card border-style mb-65 lg-mb-40">
                   <h3 className="title">Bio</h3>
                   <p>{bio}</p>
@@ -194,7 +229,7 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
 
             <div className="col-xxl-3 col-lg-4">
               <div className="cadidate-profile-sidebar ms-xl-5 ms-xxl-0 md-mt-60">
-                <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40">
+                <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40 d-none d-lg-block">
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
                       {profile_picture && profile_picture.trim() !== '' ? (

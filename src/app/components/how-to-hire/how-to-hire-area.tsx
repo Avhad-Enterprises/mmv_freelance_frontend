@@ -18,7 +18,7 @@ const howToHireData = [
     {
         id: 3,
         title: 'Secure Milestone Payments',
-        desc: 'Once you choose a creator, you fund the project. Your payment is held securely in our Escrow system. Funds are only released to the freelancer once you approve the final video.',
+        desc: 'Once you choose a creator, you fund the project. Your payment is held securely in our system (Escrow Coming Soon). Funds are only released to the freelancer once you approve the final video.',
         highlight: 'The Benefit',
         highlightText: 'Total financial peace of mind.'
     },
