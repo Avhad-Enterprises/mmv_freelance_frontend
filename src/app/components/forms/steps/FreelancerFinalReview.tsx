@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import toast from "react-hot-toast";
+import { markSignupBonusReceived } from "@/context/SignupBonusContext";
 
 type Props = {
   formData: any;
@@ -95,6 +96,11 @@ const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reg
       const respData = await response.json();
       if (!response.ok) {
         throw new Error(respData.message || 'Registration failed');
+      }
+
+      // Check if signup bonus was received and mark it for popup
+      if (respData.data?.signupBonus?.success) {
+        markSignupBonusReceived();
       }
 
       await handleRegister(respData);

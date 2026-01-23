@@ -49,6 +49,12 @@ const TYPE_CONFIG: Record<
         bgColor: "#fd7e1420",
         icon: "👤",
     },
+    signup_bonus: {
+        label: "Signup Bonus",
+        color: "#28a745",
+        bgColor: "#28a74520",
+        icon: "🎁",
+    },
 };
 
 const FILTER_OPTIONS = [

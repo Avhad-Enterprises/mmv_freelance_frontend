@@ -5,6 +5,35 @@ import { UserProvider } from "@/context/UserContext";
 import CandidateAside from "@/app/components/dashboard/candidate/aside";
 import FreelancerAuth from "@/middleware/freelancer-auth";
 import Wrapper from "@/layouts/wrapper";
+import { SignupBonusProvider, useSignupBonus } from "@/context/SignupBonusContext";
+import { SignupBonusPopup } from "@/app/components/credits";
+
+// Inner component that uses the SignupBonus context
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const { showBonusPopup, dismissBonusPopup, checkAndShowBonusPopup } = useSignupBonus();
+
+  useEffect(() => {
+    // Check if we should show the bonus popup on mount
+    checkAndShowBonusPopup();
+  }, [checkAndShowBonusPopup]);
+
+  return (
+    <>
+      <div style={{ paddingTop: '1rem' }}>
+        <div className='dashboard-layout'>
+          <CandidateAside />
+          {children}
+        </div>
+      </div>
+      
+      {/* Signup Bonus Popup */}
+      <SignupBonusPopup 
+        isOpen={showBonusPopup} 
+        onClose={dismissBonusPopup} 
+      />
+    </>
+  );
+}
 
 export default function CandidateDashboardLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -25,12 +54,9 @@ export default function CandidateDashboardLayout({ children }: { children: React
       <Wrapper>
         <UserProvider>
           <SidebarProvider>
-            <div style={{ paddingTop: '1rem' }}>
-              <div className='dashboard-layout'>
-                <CandidateAside />
-                {children}
-              </div>
-            </div>
+            <SignupBonusProvider>
+              <DashboardContent>{children}</DashboardContent>
+            </SignupBonusProvider>
           </SidebarProvider>
         </UserProvider>
       </Wrapper>

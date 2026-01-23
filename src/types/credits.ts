@@ -11,6 +11,7 @@ export interface CreditBalance {
     credits_balance: number;
     total_credits_purchased: number;
     credits_used: number;
+    signup_bonus_claimed?: boolean;
 }
 
 // ============================================
@@ -47,7 +48,8 @@ export type TransactionType =
     | "deduction"
     | "refund"
     | "admin_add"
-    | "admin_deduct";
+    | "admin_deduct"
+    | "signup_bonus";
 
 export interface CreditTransaction {
     transaction_id: number;
