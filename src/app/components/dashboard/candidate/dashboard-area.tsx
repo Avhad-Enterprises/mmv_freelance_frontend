@@ -10,6 +10,7 @@ import { makeGetRequest } from "@/utils/api";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { authCookies } from "@/utils/cookies";
 import Link from "next/link";
+import { SignupBonusPopup } from "@/app/components/credits";
 
 type ApplicationItem = {
   applied_projects_id: number;
@@ -79,6 +80,33 @@ const DashboardArea = ({ }: IProps) => {
   const [profileCompletion, setProfileCompletion] = useState<ProfileCompletion | null>(null);
   const [loading, setLoading] = useState(true);
   const profileFetchedRef = useRef(false);
+  
+  // Signup bonus popup state
+  const [showBonusPopup, setShowBonusPopup] = useState(false);
+
+  // Check for signup bonus on first login
+  useEffect(() => {
+    const checkSignupBonus = () => {
+      // Check if this is a new user who just registered and received bonus
+      const signupBonusReceived = sessionStorage.getItem('signup_bonus_received');
+      const signupBonusShown = sessionStorage.getItem('signup_bonus_shown');
+      
+      if (signupBonusReceived === 'true' && signupBonusShown !== 'true') {
+        // Show the popup after a short delay for better UX
+        setTimeout(() => {
+          setShowBonusPopup(true);
+        }, 500);
+      }
+    };
+    
+    checkSignupBonus();
+  }, []);
+
+  const handleCloseBonusPopup = () => {
+    setShowBonusPopup(false);
+    // Mark as shown so it doesn't appear again
+    sessionStorage.setItem('signup_bonus_shown', 'true');
+  };
 
   // Fetch applications and metrics
   useEffect(() => {
@@ -186,6 +214,13 @@ const DashboardArea = ({ }: IProps) => {
       <div className="position-relative">
         <DashboardHeader />
         <h2 className="main-title">Freelancer Dashboard</h2>
+
+        {/* Signup Bonus Popup */}
+        <SignupBonusPopup 
+          isOpen={showBonusPopup} 
+          onClose={handleCloseBonusPopup}
+          creditsReceived={5}
+        />
 
         {loading ? (
           <div className="text-center py-5">

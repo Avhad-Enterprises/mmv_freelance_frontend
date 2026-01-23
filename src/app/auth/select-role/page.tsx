@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authCookies } from '@/utils/cookies';
 import Link from 'next/link';
-import { markSignupBonusReceived } from '@/context/SignupBonusContext';
 
 // Types
 type UserIntent = 'hire' | 'work' | null;
@@ -495,9 +494,10 @@ const SelectRoleContent = () => {
                     authCookies.setToken(data.data.token, true);
                 }
 
-                // Check if signup bonus was received (for freelancer roles)
+                // Check if signup bonus was given (for videographer/video_editor)
                 if (data.data.signupBonus?.success) {
-                    markSignupBonusReceived();
+                    sessionStorage.setItem('signup_bonus_received', 'true');
+                    sessionStorage.removeItem('signup_bonus_shown');
                 }
 
                 // Small delay to ensure token is saved

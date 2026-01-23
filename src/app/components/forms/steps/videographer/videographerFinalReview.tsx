@@ -3,7 +3,6 @@ import React from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { Country } from "country-state-city";
-import { markSignupBonusReceived } from "@/context/SignupBonusContext";
 
 type Props = {
   formData: any;
@@ -125,9 +124,10 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
         throw new Error(respData.message || 'Registration failed');
       }
 
-      // Registration successful - check if signup bonus was received
-      if (respData.data?.signupBonus?.success) {
-        markSignupBonusReceived();
+      // Check if signup bonus was received and set sessionStorage flag
+      if (respData.signupBonus?.success) {
+        sessionStorage.setItem('signup_bonus_received', 'true');
+        sessionStorage.removeItem('signup_bonus_shown');
       }
 
       // Registration successful - show success message and redirect

@@ -120,26 +120,7 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
                             <div className="order-sm-0">
                                 <div className="value fw-500 d-flex align-items-center gap-2" style={{ color: stat.id === "available" ? stat.color : undefined }}>
                                     {stat.value.toLocaleString()}
-                                    {/* Show bonus badge only if bonus was claimed AND user still has credits (bonus not fully used) */}
-                                    {stat.id === "available" && 
-                                     balance?.signup_bonus_claimed && 
-                                     (balance?.credits_balance ?? 0) > 0 &&
-                                     (balance?.credits_used ?? 0) < 5 && (
-                                        <span 
-                                            className="badge"
-                                            style={{ 
-                                                backgroundColor: "#28a745", 
-                                                color: "white",
-                                                fontSize: "10px",
-                                                padding: "4px 8px",
-                                                borderRadius: "12px",
-                                                fontWeight: "500"
-                                            }}
-                                            title="Includes free keys from signup bonus"
-                                        >
-                                            🎁 +5 Bonus
-                                        </span>
-                                    )}
+                                   
                                 </div>
                                 <span>{stat.label}</span>
                             </div>
