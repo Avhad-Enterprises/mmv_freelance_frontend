@@ -2,6 +2,7 @@ import React from "react";
 import DashboardHeader from "./dashboard-header-minus";
 import ChangePasswordArea from "./change-password";
 import LinkedAccountsSection from "../settings/linked-accounts";
+import DeleteAccountSection from "../settings/delete-account";
 import { useSidebar } from "@/context/SidebarContext";
 
 type IProps = {
@@ -27,6 +28,10 @@ const DashboardSettingArea = ({ }: IProps) => {
         {/* linked accounts area */}
         <LinkedAccountsSection />
         {/* linked accounts area end */}
+
+        {/* delete account area */}
+        <DeleteAccountSection userRole="freelancer" />
+        {/* delete account area end */}
       </div>
     </div>
   );
