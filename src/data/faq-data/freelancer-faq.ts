@@ -18,8 +18,8 @@ export const freelancer_faq_data: IFaqItem[] = [
     },
     {
         id: '4',
-        title: 'How does the Escrow payment system protect freelancers?',
-        desc: 'Our Escrow system ensures you are paid for every project by requiring the client to fund milestones before you start working. Once the project shows as "Funded" on your dashboard, the money is held securely by MakeMyVid.io and released to you immediately upon the client\'s approval of the final deliverable.'
+        title: 'How does the Payment System (Escrow Coming Soon) protect freelancers?',
+        desc: 'Our Payment System (Escrow Coming Soon) ensures you are paid for every project by requiring the client to fund milestones before you start working. Once the project shows as "Funded" on your dashboard, the money is held securely by MakeMyVid.io and released to you immediately upon the client\'s approval of the final deliverable.'
     },
     {
         id: '5',

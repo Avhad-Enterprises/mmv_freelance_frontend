@@ -124,6 +124,12 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
         throw new Error(respData.message || 'Registration failed');
       }
 
+      // Check if signup bonus was received and set sessionStorage flag
+      if (respData.signupBonus?.success) {
+        sessionStorage.setItem('signup_bonus_received', 'true');
+        sessionStorage.removeItem('signup_bonus_shown');
+      }
+
       // Registration successful - show success message and redirect
       toast.success('Registration completed successfully!', { id: loadingToast });
       setTimeout(() => {

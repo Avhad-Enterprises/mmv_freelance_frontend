@@ -494,6 +494,12 @@ const SelectRoleContent = () => {
                     authCookies.setToken(data.data.token, true);
                 }
 
+                // Check if signup bonus was given (for videographer/video_editor)
+                if (data.data.signupBonus?.success) {
+                    sessionStorage.setItem('signup_bonus_received', 'true');
+                    sessionStorage.removeItem('signup_bonus_shown');
+                }
+
                 // Small delay to ensure token is saved
                 await new Promise(resolve => setTimeout(resolve, 100));
 

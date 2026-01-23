@@ -11,4 +11,5 @@ export { default as TransactionHistory } from "./TransactionHistory";
 export { default as HowCreditsWork } from "./HowCreditsWork";
 export { default as InsufficientCreditsModal } from "./InsufficientCreditsModal";
 export { default as ConfirmApplyModal } from "./ConfirmApplyModal";
+export { default as SignupBonusPopup } from "./SignupBonusPopup";
 export type { TransactionHistoryRef } from "./TransactionHistory";
