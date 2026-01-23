@@ -118,8 +118,9 @@ const CreditStats: React.FC<CreditStatsProps> = ({ balance, loading = false }) =
                                 <Image src={stat.icon} alt={stat.label} className="lazy-img" />
                             </div>
                             <div className="order-sm-0">
-                                <div className="value fw-500" style={{ color: stat.id === "available" ? stat.color : undefined }}>
+                                <div className="value fw-500 d-flex align-items-center gap-2" style={{ color: stat.id === "available" ? stat.color : undefined }}>
                                     {stat.value.toLocaleString()}
+                                   
                                 </div>
                                 <span>{stat.label}</span>
                             </div>
