@@ -77,14 +77,15 @@ const DeleteAccountSection: React.FC<DeleteAccountSectionProps> = ({
 
   return (
     <div className="delete-account-section mt-45">
+      {/* Headline moved outside the box and styled with primary text color */}
+      <h4 className="main-title mb-3" style={{ color: '#244034' }}>
+        Delete Account Permanently
+      </h4>
       <div className="bg-white card-box border-20">
         <div className="user-avatar-setting">
           {/* Header Section */}
           <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-3">
             <div className="flex-grow-1">
-              <h4 className="main-title" style={{ color: '#dc3545', marginBottom: '8px' }}>
-                Delete Account Permanently
-              </h4>
               <p className="fs-16" style={{ color: '#6c757d', marginBottom: '0' }}>
                 This action cannot be undone. Please proceed with caution.
               </p>
