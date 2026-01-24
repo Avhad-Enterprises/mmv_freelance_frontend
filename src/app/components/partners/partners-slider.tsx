@@ -1,32 +1,8 @@
 "use client";
 import React from "react";
 import Slider from "react-slick";
-import Image, { StaticImageData } from "next/image";
-
-// ===== Import all carousal images manually =====
-import logo_1 from "@/assets/images/logo/carousal_1.png";
-import logo_2 from "@/assets/images/logo/carousal_2.png";
-import logo_3 from "@/assets/images/logo/carousal_3.png";
-import logo_4 from "@/assets/images/logo/carousal_4.png";
-import logo_5 from "@/assets/images/logo/carousal_5.png";
-import logo_6 from "@/assets/images/logo/carousal_6.png";
-import logo_7 from "@/assets/images/logo/carousal_7.png";
-import logo_8 from "@/assets/images/logo/carousal_8.png";
-import logo_9 from "@/assets/images/logo/carousal_9.png";
-import logo_10 from "@/assets/images/logo/carousal_10.jpg";
-import logo_11 from "@/assets/images/logo/carousal_11.jpg";
-import logo_12 from "@/assets/images/logo/carousal_12.png";
-import logo_13 from "@/assets/images/logo/carousal_13.png";
-import logo_14 from "@/assets/images/logo/carousal_14.png";
-import logo_15 from "@/assets/images/logo/carousal_15.png";
-import logo_16 from "@/assets/images/logo/carousal_16.png";
-import logo_17 from "@/assets/images/logo/carousal_17.png";
-import logo_18 from "@/assets/images/logo/carousal_18.png";
-import logo_19 from "@/assets/images/logo/carousal_19.png";
-import logo_20 from "@/assets/images/logo/carousal_20.png";
-// 👉 You can continue adding up to carousal_60 if needed
-// import logo_21 from "@/assets/images/logo/carousal_21.png";
-// ...
+import Image from "next/image";
+import { TrustedCompany } from "@/types/cms.types";
 
 // ===== Slider settings =====
 const slider_setting = {
@@ -50,46 +26,62 @@ const slider_setting = {
   ],
 };
 
-// ===== Logo array =====
-const logos: StaticImageData[] = [
-  logo_1,
-  logo_2,
-  logo_3,
-  logo_4,
-  logo_5,
-  logo_6,
-  logo_7,
-  logo_8,
-  logo_9,
-  logo_10,
-  logo_11,
-  logo_12,
-  logo_13,
-  logo_14,
-  logo_15,
-  logo_16,
-  logo_17,
-  logo_18,
-  logo_19,
-  logo_20,
-];
+interface PartnersSliderProps {
+  companies: TrustedCompany[];
+}
 
 // ===== Component =====
-const PartnersSlider = () => {
+const PartnersSlider: React.FC<PartnersSliderProps> = ({ companies }) => {
+  // If no companies data, return null or show empty state
+  if (!companies || companies.length === 0) {
+    return null;
+  }
+
+  // Dynamic slider settings based on number of companies
+  const companiesCount = companies.length;
+  const dynamicSliderSettings = {
+    ...slider_setting,
+    slidesToShow: Math.min(6, companiesCount), // Don't show more slides than available
+    infinite: companiesCount > 1, // Only enable infinite loop if more than 1 company
+    autoplay: companiesCount > 1, // Only autoplay if more than 1 company
+    responsive: [
+      {
+        breakpoint: 1400,
+        settings: { slidesToShow: Math.min(5, companiesCount) },
+      },
+      {
+        breakpoint: 992,
+        settings: { slidesToShow: Math.min(4, companiesCount) },
+      },
+      {
+        breakpoint: 768,
+        settings: { slidesToShow: Math.min(3, companiesCount) },
+      },
+      {
+        breakpoint: 576,
+        settings: { slidesToShow: Math.min(2, companiesCount) },
+      },
+    ],
+  };
+
   return (
-    <Slider {...slider_setting} className="partner-slider">
-      {logos.map((logo, i) => (
-        <div key={i} className="item">
-          <div className="logo d-flex align-items-center justify-content-center" style={{ height: '100px', padding: '8px' }}>
-            <Image
-              src={logo}
-              alt={`carousal logo ${i + 1}`}
+    <Slider {...dynamicSliderSettings} className="partner-slider">
+      {companies.map((company) => (
+        <div key={company.id} className="item">
+          <div
+            className="logo d-flex align-items-center justify-content-center"
+            style={{ height: "100px", padding: "8px" }}
+          >
+            <img
+              src={company.logo_url}
+              alt={company.company_name}
+              title={company.company_name}
               style={{
-                width: '100%',
-                maxWidth: '160px',
-                height: 'auto',
-                maxHeight: '80px',
-                objectFit: 'contain',
+                width: "100%",
+                maxWidth: "160px",
+                height: "auto",
+                maxHeight: "80px",
+                objectFit: "contain",
               }}
             />
           </div>

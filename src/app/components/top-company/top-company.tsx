@@ -177,4 +177,3 @@ const TopCompany = () => {
 };
 
 export default TopCompany;
-

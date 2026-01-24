@@ -6,7 +6,7 @@ import Image from "next/image";
 import Wrapper from "@/layouts/wrapper";
 import Header from "@/layouts/headers/header";
 import FooterOne from "@/layouts/footers/footer-one";
-import shape from '@/assets/images/shape/shape_24.svg';
+import shape from "@/assets/images/shape/shape_24.svg";
 import PartnersSlider from "./components/partners/partners-slider";
 import HeroBannerSeven from "./components/hero-banners/hero-banner-seven";
 import { CategoryCardWrapper } from "./components/category/category-section-2";
@@ -15,6 +15,7 @@ import { FaqItems } from "./components/faqs/faq-one";
 import FancyBannerSeven from "./components/fancy-banner/fancy-banner-7";
 import TopCompany from "./components/top-company/top-company";
 import FeedbackOne from "./components/feedBacks/feedback-one";
+import { useLandingPageContent } from "@/hooks/useCmsLanding";
 
 // Data for How It Works section
 const howItWorksData = {
@@ -28,65 +29,112 @@ const howItWorksData = {
     {
       id: 2,
       title: "Connect & Collaborate",
-      description: "Find Your Perfect Match. Receive proposals from vetted video professionals, review portfolios, and select the ideal talent.",
-      icon: "/assets/images/assets/c2.png"
+      description:
+        "Find Your Perfect Match. Receive proposals from vetted video professionals, review portfolios, and select the ideal talent.",
+      icon: "/assets/images/assets/c2.png",
     },
     {
       id: 3,
       title: "Hire & Deliver Brilliance",
-      description: "Seamless Execution. Hire securely, manage projects, and get exceptional video content delivered on time.",
-      icon: "/assets/images/assets/c3.png"
-    }
+      description:
+        "Seamless Execution. Hire securely, manage projects, and get exceptional video content delivered on time.",
+      icon: "/assets/images/assets/c3.png",
+    },
   ],
   freelancer: [
     {
       id: 1,
       title: "Build Your Creator Profile",
-      description: "Showcase Your Best Work. Create a compelling profile, highlight video skills, and upload your stunning portfolio.",
-      icon: "/assets/images/assets/f1.png"
+      description:
+        "Showcase Your Best Work. Create a compelling profile, highlight video skills, and upload your stunning portfolio.",
+      icon: "/assets/images/assets/f1.png",
     },
     {
       id: 2,
       title: "Discover Global Opportunities",
-      description: "Bid on Exciting Projects. Explore a steady stream of video jobs, editing and videography gigs from clients worldwide.",
-      icon: "/assets/images/assets/f2.png"
+      description:
+        "Bid on Exciting Projects. Explore a steady stream of video jobs, editing and videography gigs from clients worldwide.",
+      icon: "/assets/images/assets/f2.png",
     },
     {
       id: 3,
       title: "Deliver & Get Paid Securely",
-      description: "Focus on Your Craft. Complete projects, collaborate efficiently, and receive payment securely directly to your account.",
-      icon: "/assets/images/assets/f3.png"
-    }
-  ]
+      description:
+        "Focus on Your Craft. Complete projects, collaborate efficiently, and receive payment securely directly to your account.",
+      icon: "/assets/images/assets/f3.png",
+    },
+  ],
 };
 
 const HomeSix = () => {
   const searchParams = useSearchParams();
-  const [activeRole, setActiveRole] = useState<'client' | 'freelancer'>('client');
+  const [activeRole, setActiveRole] = useState<"client" | "freelancer">(
+    "client"
+  );
+
+  // Fetch CMS content
+  const { data: cmsContent, isLoading, error } = useLandingPageContent();
 
   useEffect(() => {
-    if (searchParams.get('login') === 'true') {
+    if (searchParams.get("login") === "true") {
       setTimeout(() => {
-        if (typeof document !== 'undefined') {
-          const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+        if (typeof document !== "undefined") {
+          const loginButton = document.querySelector(
+            '[data-bs-target="#loginModal"]'
+          ) as HTMLElement;
           if (loginButton) loginButton.click();
         }
       }, 100);
     }
   }, [searchParams]);
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <Wrapper>
+        <div className="main-page-wrapper">
+          <Header />
+          <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "70vh" }}
+          >
+            <div className="text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3">Loading content...</p>
+            </div>
+          </div>
+          <FooterOne />
+        </div>
+      </Wrapper>
+    );
+  }
+
+  // Error state
+  if (error) {
+    console.error("CMS Error:", error);
+    // Continue with rendering, components will handle missing data gracefully
+  }
+
   return (
     <Wrapper>
       <div className="main-page-wrapper">
         <Header />
 
-        <HeroBannerSeven />
+        <HeroBannerSeven heroData={cmsContent?.hero || []} />
 
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <div className="container">
-            <div className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30" style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}>Trusted by</div>
+            <div
+              className="title fw-500 text-dark text-uppercase text-center mb-65 lg-mb-30"
+              style={{ fontSize: "clamp(1rem, 2vw, 1.25rem)" }}
+            >
+              Trusted by
+            </div>
           </div>
-          <PartnersSlider />
+
+          <PartnersSlider companies={cmsContent?.trustedCompanies || []} />
         </div>
 
         <section className="category-section-two bg-color position-relative mt-45 md-mt-10 pt-150 xl-pt-130 lg-pt-80 pb-170 xl-pb-130 lg-pb-70">
@@ -94,12 +142,20 @@ const HomeSix = () => {
             <div className="row justify-content-between">
               <div className="col-sm-8">
                 <div className="title-three">
-                  <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>Find Your Perfect Video Production Services.</h2>
+                  <h2
+                    className="main-font wow fadeInUp"
+                    data-wow-delay="0.3s"
+                    style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)" }}
+                  >
+                    Find Your Perfect Video Production Services.
+                  </h2>
                 </div>
               </div>
               <div className="col-sm-4">
                 <div className="d-none d-sm-flex justify-content-sm-end mt-15">
-                  <Link href="/job-list" className="btn-six">All Categories</Link>
+                  <Link href="/job-list" className="btn-six">
+                    All Categories
+                  </Link>
                 </div>
               </div>
             </div>
@@ -107,7 +163,9 @@ const HomeSix = () => {
             <CategoryCardWrapper />
             {/* CategoryCardWrapper */}
             <div className="text-center d-sm-none mt-50">
-              <Link href="/job-list" className="btn-six">All Categories</Link>
+              <Link href="/job-list" className="btn-six">
+                All Categories
+              </Link>
             </div>
           </div>
           <Image src={shape} alt="shape" className="lazy-img shapes shape_01" />
@@ -119,20 +177,53 @@ const HomeSix = () => {
             <div className="d-flex justify-content-center mb-30 lg-mb-20">
               <div className="role-toggle-container">
                 <button
-                  onClick={() => setActiveRole('client')}
-                  className={`role-toggle-btn ${activeRole === 'client' ? 'active' : ''}`}
+                  onClick={() => setActiveRole("client")}
+                  className={`role-toggle-btn ${
+                    activeRole === "client" ? "active" : ""
+                  }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
-                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"></rect>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="me-2"
+                  >
+                    <rect
+                      width="20"
+                      height="14"
+                      x="2"
+                      y="7"
+                      rx="2"
+                      ry="2"
+                    ></rect>
                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                   </svg>
                   For Clients
                 </button>
                 <button
-                  onClick={() => setActiveRole('freelancer')}
-                  className={`role-toggle-btn ${activeRole === 'freelancer' ? 'active' : ''}`}
+                  onClick={() => setActiveRole("freelancer")}
+                  className={`role-toggle-btn ${
+                    activeRole === "freelancer" ? "active" : ""
+                  }`}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="me-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="me-2"
+                  >
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -144,7 +235,9 @@ const HomeSix = () => {
             </div>
 
             <div className="title-one text-center mb-60 lg-mb-40">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Your journey to abundance starts here</h2>
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">
+                Your journey to abundance starts here
+              </h2>
             </div>
 
             <div className="border-bottom">
@@ -164,7 +257,9 @@ const HomeSix = () => {
                           className="lazy-img"
                         />
                       </div>
-                      <div className="title fw-500 text-lg text-dark mt-25 lg-mt-20 mb-10">{item.title}</div>
+                      <div className="title fw-500 text-lg text-dark mt-25 lg-mt-20 mb-10">
+                        {item.title}
+                      </div>
                       <p>{item.description}</p>
                     </div>
                   </div>
@@ -305,7 +400,7 @@ const HomeSix = () => {
               :global(.category-section-two .title-three h2) {
                 font-size: 1.5rem;
               }
-              
+
               :global(.partner-logos .title) {
                 font-size: 1rem;
               }
@@ -314,27 +409,33 @@ const HomeSix = () => {
         </section>
         {/* How It Works Two end */}
 
-        <FeatureTen />
+        <FeatureTen whyChooseUsData={cmsContent?.whyChooseUs || []} />
         {/* text feature end */}
 
         {/* top company start */}
-        <TopCompany />
-        <FeedbackOne />
+        <TopCompany featuredCreators={cmsContent?.featuredCreators || []} />
+        <FeedbackOne successStories={cmsContent?.successStories || []} />
 
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
           <div className="container">
             <div className="title-one text-center">
-              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">Questions & Answers</h2>
+              <h2 className="main-font wow fadeInUp" data-wow-delay="0.3s">
+                Questions & Answers
+              </h2>
             </div>
             <div className="mt-60 lg-mt-30">
               <div className="row">
-                <div className="col-xxl-11 m-auto wow fadeInUp" data-wow-delay="0.3s">
-                  <FaqItems />
+                <div
+                  className="col-xxl-11 m-auto wow fadeInUp"
+                  data-wow-delay="0.3s"
+                >
+                  <FaqItems faqs={cmsContent?.faqs || []} />
                 </div>
               </div>
             </div>
             <div className="text-center mt-50 lg-mt-30 wow fadeInUp">
-              <div className="btn-eight fw-500">Don't find the answer? We can help.
+              <div className="btn-eight fw-500">
+                Don't find the answer? We can help.
                 <Link href="/faq">Click here</Link>
               </div>
             </div>
