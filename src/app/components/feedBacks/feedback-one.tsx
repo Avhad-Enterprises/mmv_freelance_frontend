@@ -32,34 +32,34 @@ const default_feedback_data: {
   rating: number;
   rating_text: string;
 }[] = [
-  {
-    id: 1,
-    title:
-      "MakeMyVid.io unlocked a global talent pool of freelance video editors for our campaigns. Unmatched quality, affordable rates, every time.",
-    name: "Rajeev Aggarwal",
-    user_title: "Partner, That Fig Tree, Singapore",
-    rating: 5.0,
-    rating_text: "Excellent",
-  },
-  {
-    id: 2,
-    title:
-      "We wanted dedicated videographers in 9 cities for our UK-India tour. MakeMyVid.io help us connect with right talent and streamlined our entire production workflow.",
-    name: "Sanam Arora",
-    user_title: "Founder, NISAU-UK, London",
-    rating: 4.9,
-    rating_text: "Excellent",
-  },
-  {
-    id: 3,
-    title:
-      "Zero commission for videographers? It's revolutionary. I've doubled my gigs this quarter. The platform consistently provides freelance videography projects and connect me with amazing clients. It's truly built for video creators.",
-    name: "Ravinder Singh",
-    user_title: "Freelance Videographer, Chandigarh, India",
-    rating: 5.0,
-    rating_text: "Excellent",
-  },
-];
+    {
+      id: 1,
+      title:
+        "MakeMyVid.io unlocked a global talent pool of freelance video editors for our campaigns. Unmatched quality, affordable rates, every time.",
+      name: "Rajeev Aggarwal",
+      user_title: "Partner, That Fig Tree, Singapore",
+      rating: 5.0,
+      rating_text: "Excellent",
+    },
+    {
+      id: 2,
+      title:
+        "We wanted dedicated videographers in 9 cities for our UK-India tour. MakeMyVid.io help us connect with right talent and streamlined our entire production workflow.",
+      name: "Sanam Arora",
+      user_title: "Founder, NISAU-UK, London",
+      rating: 4.9,
+      rating_text: "Excellent",
+    },
+    {
+      id: 3,
+      title:
+        "Zero commission for videographers? It's revolutionary. I've doubled my gigs this quarter. The platform consistently provides freelance videography projects and connect me with amazing clients. It's truly built for video creators.",
+      name: "Ravinder Singh",
+      user_title: "Freelance Videographer, Chandigarh, India",
+      rating: 5.0,
+      rating_text: "Excellent",
+    },
+  ];
 
 interface FeedbackOneProps {
   successStories?: SuccessStory[];
@@ -80,14 +80,14 @@ const FeedbackOne: React.FC<FeedbackOneProps> = ({
   const displayData =
     successStories.length > 0
       ? successStories.map((story) => ({
-          id: story.id,
-          title: story.testimonial,
-          name: story.client_name,
-          user_title: story.client_title || "",
-          rating: story.rating || 5.0,
-          rating_text:
-            story.rating && story.rating >= 4.5 ? "Excellent" : "Great",
-        }))
+        id: story.cms_id,
+        title: story.testimonial,
+        name: story.client_name,
+        user_title: story.client_title || "",
+        rating: story.rating || 5.0,
+        rating_text:
+          story.rating && story.rating >= 4.5 ? "Excellent" : "Great",
+      }))
       : default_feedback_data;
 
   // Dynamic slider settings based on number of stories
@@ -116,9 +116,8 @@ const FeedbackOne: React.FC<FeedbackOneProps> = ({
   };
   return (
     <section
-      className={`feedback-section-one ${
-        style_3 ? "pt-120 lg-pt-100" : "pt-180 xl-pt-150 lg-pt-100"
-      } ${about_p ? "pb-80 lg-pb-20" : ""}`}
+      className={`feedback-section-one ${style_3 ? "pt-120 lg-pt-100" : "pt-180 xl-pt-150 lg-pt-100"
+        } ${about_p ? "pb-80 lg-pb-20" : ""}`}
     >
       <style jsx>{`
         .feedback-block-one {
@@ -204,11 +203,10 @@ const FeedbackOne: React.FC<FeedbackOneProps> = ({
                         <li key={index}>
                           <a href="#">
                             <i
-                              className={`bi ${
-                                index < Math.round(item.rating)
+                              className={`bi ${index < Math.round(item.rating)
                                   ? "bi-star-fill"
                                   : "bi-star"
-                              }`}
+                                }`}
                               style={{ color: "white" }}
                             ></i>
                           </a>

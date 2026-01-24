@@ -122,7 +122,7 @@ const HomeSix = () => {
       <div className="main-page-wrapper">
         <Header />
 
-        <HeroBannerSeven heroData={cmsContent?.hero || []} />
+        <HeroBannerSeven heroData={cmsContent?.hero ? [cmsContent.hero] : []} />
 
         <div className="partner-logos border-0 pt-45 pb-45 ps-3 pe-3">
           <div className="container">
@@ -178,9 +178,8 @@ const HomeSix = () => {
               <div className="role-toggle-container">
                 <button
                   onClick={() => setActiveRole("client")}
-                  className={`role-toggle-btn ${
-                    activeRole === "client" ? "active" : ""
-                  }`}
+                  className={`role-toggle-btn ${activeRole === "client" ? "active" : ""
+                    }`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -208,9 +207,8 @@ const HomeSix = () => {
                 </button>
                 <button
                   onClick={() => setActiveRole("freelancer")}
-                  className={`role-toggle-btn ${
-                    activeRole === "freelancer" ? "active" : ""
-                  }`}
+                  className={`role-toggle-btn ${activeRole === "freelancer" ? "active" : ""
+                    }`}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -413,7 +411,7 @@ const HomeSix = () => {
         {/* text feature end */}
 
         {/* top company start */}
-        <TopCompany featuredCreators={cmsContent?.featuredCreators || []} />
+        <TopCompany creators={cmsContent?.featuredCreators || []} />
         <FeedbackOne successStories={cmsContent?.successStories || []} />
 
         <section className="faq-section position-relative mt-180 xl-mt-150 lg-mt-80">
