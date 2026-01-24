@@ -67,7 +67,7 @@ const PartnersSlider: React.FC<PartnersSliderProps> = ({ companies }) => {
   return (
     <Slider {...dynamicSliderSettings} className="partner-slider">
       {companies.map((company) => (
-        <div key={company.id} className="item">
+        <div key={company.cms_id} className="item">
           <div
             className="logo d-flex align-items-center justify-content-center"
             style={{ height: "100px", padding: "8px" }}

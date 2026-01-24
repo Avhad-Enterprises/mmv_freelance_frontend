@@ -11,7 +11,7 @@ export interface CMSResponse<T> {
  * Hero Section - Main banner content
  */
 export interface HeroSection {
-  id: number;
+  cms_id: number;
   title: string;
   subtitle?: string;
   hero_left_image?: string;
@@ -29,7 +29,7 @@ export interface HeroSection {
  * Trusted Company - Partner logos
  */
 export interface TrustedCompany {
-  id: number;
+  cms_id: number;
   company_name: string;
   logo_url: string;
   description?: string;
@@ -45,7 +45,7 @@ export interface TrustedCompany {
  * Why Choose Us - Feature points with 5 expandable items
  */
 export interface WhyChooseUs {
-  id: number;
+  cms_id: number;
   title: string;
   description?: string;
   point_1?: string;
@@ -70,12 +70,15 @@ export interface WhyChooseUs {
  * Featured Creator - Highlighted creator profiles
  */
 export interface FeaturedCreator {
-  id: number;
+  cms_id: number;
   name: string;
   title?: string;
   bio?: string;
   profile_image?: string;
   portfolio_url?: string;
+  user_id?: number;
+  city?: string;
+  country?: string;
   social_linkedin?: string;
   social_twitter?: string;
   social_instagram?: string;
@@ -96,7 +99,7 @@ export interface FeaturedCreator {
  * Success Story - Client testimonials
  */
 export interface SuccessStory {
-  id: number;
+  cms_id: number;
   client_name: string;
   client_title?: string;
   client_image?: string;
@@ -117,7 +120,7 @@ export interface SuccessStory {
  * Landing FAQ - Frequently asked questions
  */
 export interface LandingFaq {
-  id: number;
+  cms_id: number;
   question: string;
   answer: string;
   category?: string;
@@ -134,7 +137,7 @@ export interface LandingFaq {
  * Complete Landing Page Content
  */
 export interface LandingPageContent {
-  hero: HeroSection[];
+  hero: HeroSection;
   trustedCompanies: TrustedCompany[]; // Changed from trusted_companies
   whyChooseUs: WhyChooseUs[]; // Changed from why_choose_us
   featuredCreators: FeaturedCreator[]; // Changed from featured_creators

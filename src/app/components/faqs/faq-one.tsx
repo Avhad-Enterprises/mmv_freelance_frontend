@@ -11,28 +11,28 @@ const default_faq_data: {
   isShow?: boolean;
   parent: string;
 }[] = [
-  {
-    id: "One",
-    title:
-      "What are the costs involved for clients to hire video editors or videographers?",
-    desc: "Clients can post video editing projects for free and hire videographers online with no upfront costs. MakeMyVid.io operates on a transparent, project-based model. There are no hidden fees or platform charges for clients to outsource video editing or production.",
-    parent: "accordionTwo",
-  },
-  {
-    id: "Two",
-    title: "How does MakeMyVid.io ensure quality video talent?",
-    desc: "MakeMyVid.io features vetted video editors, professional videographers, and expert motion graphic artists. Every video freelancer undergoes a rigorous screening process, and client reviews are transparent. We are dedicated to connecting you with high-quality video talent for all your video creation needs, ensuring professional video production services.",
-    isShow: true,
-    parent: "accordionTwo",
-  },
-  {
-    id: "Three",
-    title:
-      "How do freelance videographers and video editors get paid on MakeMyVid.io and what are the fees?",
-    desc: "Freelance videographers on MakeMyVid.io benefit from 0% commission on projects. This means video creators get paid securely and retain 100% of their earnings. Videographers are paid directly by clients. Freelance Video Editors are charged flat 12.5% commission on each payout. Our secure payment system ensures timely and reliable transfers for all video editing gigs.",
-    parent: "accordionTwo",
-  },
-];
+    {
+      id: "One",
+      title:
+        "What are the costs involved for clients to hire video editors or videographers?",
+      desc: "Clients can post video editing projects for free and hire videographers online with no upfront costs. MakeMyVid.io operates on a transparent, project-based model. There are no hidden fees or platform charges for clients to outsource video editing or production.",
+      parent: "accordionTwo",
+    },
+    {
+      id: "Two",
+      title: "How does MakeMyVid.io ensure quality video talent?",
+      desc: "MakeMyVid.io features vetted video editors, professional videographers, and expert motion graphic artists. Every video freelancer undergoes a rigorous screening process, and client reviews are transparent. We are dedicated to connecting you with high-quality video talent for all your video creation needs, ensuring professional video production services.",
+      isShow: true,
+      parent: "accordionTwo",
+    },
+    {
+      id: "Three",
+      title:
+        "How do freelance videographers and video editors get paid on MakeMyVid.io and what are the fees?",
+      desc: "Freelance videographers on MakeMyVid.io benefit from 0% commission on projects. This means video creators get paid securely and retain 100% of their earnings. Videographers are paid directly by clients. Freelance Video Editors are charged flat 12.5% commission on each payout. Our secure payment system ensures timely and reliable transfers for all video editing gigs.",
+      parent: "accordionTwo",
+    },
+  ];
 
 interface FaqItemsProps {
   faqs?: LandingFaq[];
@@ -43,12 +43,12 @@ export function FaqItems({ faqs = [] }: FaqItemsProps) {
   const displayData =
     faqs.length > 0
       ? faqs.map((faq, index) => ({
-          id: `faq-${faq.id}`,
-          title: faq.question,
-          desc: faq.answer,
-          isShow: index === 0,
-          parent: "accordionTwo",
-        }))
+        id: `faq-${faq.cms_id}`,
+        title: faq.question,
+        desc: faq.answer,
+        isShow: index === 0,
+        parent: "accordionTwo",
+      }))
       : default_faq_data;
 
   return (

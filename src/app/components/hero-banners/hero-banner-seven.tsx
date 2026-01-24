@@ -10,6 +10,7 @@ import useSearchFormSubmit from "@/hooks/use-search-form-submit";
 import understroke from "@/assets/images/assets/picture 1.png";
 import { authCookies } from "@/utils/cookies";
 import { HeroSection } from "@/types/cms.types";
+import { useUser } from "@/context/UserContext";
 
 interface DecodedToken {
   exp: number;
@@ -166,20 +167,22 @@ const HeroBannerSeven: React.FC<HeroBannerSevenProps> = ({ heroData }) => {
 
       {/* ✅ Larger images positioned in the middle */}
       <Image
-        src={screen_2}
+        src={hero?.hero_right_image || screen_2}
         alt="screen-img"
         width={800}
         height={1000}
         className="lazy-img shapes screen01"
         style={{ transform: "translateY(-50%)", top: "50%" }}
+        unoptimized={!!hero?.hero_right_image}
       />
       <Image
-        src={screen_1}
+        src={hero?.hero_left_image || screen_1}
         alt="screen-img"
         width={800}
         height={1000}
         className="lazy-img shapes screen02"
         style={{ transform: "translateY(-50%)", top: "50%" }}
+        unoptimized={!!hero?.hero_left_image}
       />
     </div>
   );
