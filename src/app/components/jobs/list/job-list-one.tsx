@@ -30,7 +30,7 @@ const JobListOne = () => {
                   href="/job-list"
                   className="btn-six d-none d-lg-inline-block"
                 >
-                  Explore all jobs
+                  Explore all projects
                 </Link>
               </div>
             </div>
@@ -42,7 +42,7 @@ const JobListOne = () => {
 
           <div className="text-center mt-40 d-lg-none">
             <Link href="/job-list" className="btn-six">
-              Explore all jobs
+              Explore all projects
             </Link>
           </div>
 

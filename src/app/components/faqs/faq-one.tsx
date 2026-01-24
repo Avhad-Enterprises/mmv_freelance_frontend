@@ -60,7 +60,7 @@ export function FaqItems({ faqs = [] }: FaqItemsProps) {
           isShow={f.isShow}
           title={f.title}
           desc={f.desc}
-          parent={f.parent}
+          parent={"accordionTwo"}
         />
       ))}
     </div>

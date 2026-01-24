@@ -40,7 +40,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
   }
 
   if (!job) {
-    return <p className="text-center py-5">Job not found.</p>;
+    return <p className="text-center py-5">Project not found.</p>;
   }
 
   return (

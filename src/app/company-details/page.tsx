@@ -9,7 +9,7 @@ import CompanyDetailsArea from "../components/company-details/company-details-ar
 import OpenPosition from "../components/company-details/open-position";
 
 export const metadata: Metadata = {
-  title: "Company Details",
+  
 };
 
 const CompanyDetailsPage = () => {

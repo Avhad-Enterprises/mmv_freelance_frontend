@@ -21,7 +21,7 @@ const ListItemThree = ({ item }: { item: IJobType }) => {
       <div className="main-wrapper h-100 w-100">
         <a onClick={() => handleAddWishlist(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive?'active':''}`}
-          title={`${isActive?'Remove Job':'Save Job'}`}
+          title={`${isActive?'Remove Project':'Save Project'}`}
         >
           <i className="bi bi-bookmark-dash"></i>
         </a>

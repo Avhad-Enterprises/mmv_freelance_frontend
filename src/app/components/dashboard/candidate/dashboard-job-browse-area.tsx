@@ -12,6 +12,7 @@ import { resetFilter } from "@/redux/features/filterSlice";
 import useDecodedToken from "@/hooks/useDecodedToken";
 import { useSidebar } from "@/context/SidebarContext";
 import { getCategoryIcon, getCategoryColor, getCategoryTextColor } from "@/utils/categoryIcons";
+import { formatBudget } from "@/utils/currencyUtils";
 import SaveJobLoginModal from "@/app/components/common/popup/save-job-login-modal";
 import toast from "react-hot-toast";
 import Select from 'react-select';
@@ -30,6 +31,7 @@ const DashboardJobBrowseArea = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [biddingFilter, setBiddingFilter] = useState<string>("all"); // "all", "bidding", "fixed"
+  const [currencyFilter, setCurrencyFilter] = useState<string>("all"); // Currency filter state
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [shortValue, setShortValue] = useState<string>("");
@@ -37,6 +39,11 @@ const DashboardJobBrowseArea = () => {
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [loadingSkills, setLoadingSkills] = useState<boolean>(true);
+  
+  // EMC Recommendation state
+  const [isFreelancer, setIsFreelancer] = useState<boolean>(false);
+  const [freelancerSuperpowers, setFreelancerSuperpowers] = useState<string[]>([]);
+  const [recommendedCount, setRecommendedCount] = useState<number>(0);
 
   const itemsPerPage = 10;
 
@@ -60,13 +67,51 @@ const DashboardJobBrowseArea = () => {
           }
         }
 
-        const [jobsRes, userRes] = await Promise.all([
-          makeGetRequest("api/v1/projects-tasks/listings"),
-          makeGetRequest("api/v1/users/me"),
-        ]);
+        let jobsData: IJobType[] = [];
+        
+        // Check if user is a freelancer (VIDEO_EDITOR or VIDEOGRAPHER)
+        const userRoles = decoded?.roles || [];
+        const freelancerRoles = ['VIDEO_EDITOR', 'VIDEOGRAPHER'];
+        const userIsFreelancer = userRoles.some((role: string) => 
+          freelancerRoles.includes(role.toUpperCase())
+        );
+        setIsFreelancer(userIsFreelancer);
+        
+        // Debug logging for EMC
+        console.log('[EMC Debug] decoded token:', decoded);
+        console.log('[EMC Debug] userRoles:', userRoles);
+        console.log('[EMC Debug] userIsFreelancer:', userIsFreelancer);
 
-        const jobsData = jobsRes.data.data || [];
+        if (userIsFreelancer && decoded?.user_id) {
+          // Use EMC Recommendation API for freelancers
+          try {
+            console.log('[EMC Debug] Calling EMC API...');
+            const emcResponse = await makeGetRequest("api/v1/emc/recommended-projects");
+            console.log('[EMC Debug] EMC Response:', emcResponse.data);
+            if (emcResponse.data?.success) {
+              jobsData = emcResponse.data.data || [];
+              setFreelancerSuperpowers(emcResponse.data.meta?.freelancerSuperpowers || []);
+              setRecommendedCount(emcResponse.data.meta?.recommendedCount || 0);
+            } else {
+              // Fallback to regular listings if EMC fails
+              const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+              jobsData = jobsRes.data.data || [];
+            }
+          } catch (emcError) {
+            console.log("EMC API not available, falling back to regular listings");
+            const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+            jobsData = jobsRes.data.data || [];
+          }
+        } else {
+          // Regular listings for clients or guests
+          const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+          jobsData = jobsRes.data.data || [];
+        }
+
         setAllJobs(jobsData);
+
+        // Fetch user data
+        const userRes = await makeGetRequest("api/v1/users/me");
 
         // Get user currency
         const userData = userRes.data?.data;
@@ -91,7 +136,7 @@ const DashboardJobBrowseArea = () => {
 
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        toast.error("Failed to load jobs. Please try again.");
+        toast.error("Failed to load projects. Please try again.");
       } finally {
         setLoading(false);
         setLoadingSkills(false);
@@ -120,6 +165,11 @@ const DashboardJobBrowseArea = () => {
       filteredData = filteredData.filter((item) => item.bidding_enabled === false);
     }
 
+    // Filter by currency
+    if (currencyFilter !== "all") {
+      filteredData = filteredData.filter((item) => item.currency === currencyFilter);
+    }
+
     if (projects_type) {
       filteredData = filteredData.filter(
         (item) => item.projects_type?.toLowerCase() === projects_type.toLowerCase()
@@ -145,7 +195,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, projects_type,
-    all_jobs, search_key, biddingFilter, shortValue,
+    all_jobs, search_key, biddingFilter, currencyFilter, shortValue,
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -197,6 +247,7 @@ const DashboardJobBrowseArea = () => {
     dispatch(resetFilter());
     setSelectedSkills([]);
     setBiddingFilter("all");
+    setCurrencyFilter("all");
     setShortValue("");
     setItemOffset(0);
     toast.success("Filters reset successfully");
@@ -214,13 +265,23 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || shortValue !== "";
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
     return (
-      <div className={`candidate-profile-card list-layout mb-25`}>
+      <div className={`candidate-profile-card list-layout mb-25 ${item.isRecommended ? 'border-success' : ''}`} style={item.isRecommended ? { borderLeft: '4px solid #28a745' } : {}}>
+        {/* EMC Recommended Badge - Works for both Video Editor and Videographer */}
+        {/* {item.isRecommended && (
+          <span
+            className="badge bg-success d-flex align-items-center gap-1 position-absolute"
+            style={{ fontSize: '11px', padding: '5px 10px', top: '10px', right: '60px', zIndex: 10 }}
+            title={`Matches your superpower: ${item.matchedCategory}`}
+          >
+            <i className="bi bi-star-fill"></i> Recommended
+          </span>
+        )} */}
         <div className="d-flex">
           <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
             <a onClick={() => setSelectedJob(item)} className="rounded-circle cursor-pointer">
@@ -251,6 +312,13 @@ const DashboardJobBrowseArea = () => {
                         : ""}
                     </a>
                   </h4>
+                  {/* Show matched category below title */}
+                  {item.isRecommended && item.matchedCategory && (
+                    <small className="text-success d-block mt-1" style={{ fontSize: '11px' }}>
+                      <i className="bi bi-check-circle-fill me-1"></i>
+                      Matches: {item.matchedCategory}
+                    </small>
+                  )}
                 </div>
               </div>
               <div className="col-lg-2 col-md-4 col-sm-6">
@@ -322,11 +390,24 @@ const DashboardJobBrowseArea = () => {
     const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
 
     return (
-      <div className={`candidate-profile-card grid-layout`}>
+      <div 
+        className={`candidate-profile-card grid-layout d-flex flex-column ${item.isRecommended ? 'border-success' : ''}`} 
+        style={{ minHeight: '100%', ...(item.isRecommended ? { borderTop: '3px solid #28a745' } : {}) }}
+      >
+        {/* EMC Recommended Badge */}
+        {item.isRecommended && (
+          <span
+            className="badge bg-success d-flex align-items-center gap-1 position-absolute"
+            style={{ fontSize: '10px', padding: '4px 8px', top: '10px', left: '10px', zIndex: 10 }}
+            title={`Matches your superpower: ${item.matchedCategory}`}
+          >
+            <i className="bi bi-star-fill"></i> Recommended
+          </span>
+        )}
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
-          title={isActive ? 'Unsave Job' : 'Save Job'}
+          title={isActive ? 'Unsave Project' : 'Save Project'}
           style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <i className={`bi ${isActive ? "bi-heart-fill text-danger" : "bi-heart"}`}></i>
@@ -356,6 +437,13 @@ const DashboardJobBrowseArea = () => {
               {project_title}
             </a>
           </h4>
+          {/* Show matched category below title */}
+          {item.isRecommended && item.matchedCategory && (
+            <small className="text-success d-block mb-2" style={{ fontSize: '11px' }}>
+              <i className="bi bi-check-circle-fill me-1"></i>
+              Matches: {item.matchedCategory}
+            </small>
+          )}
 
           <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
             {item.skills_required && item.skills_required.slice(0, 2).map((s, i) => (
@@ -391,7 +479,7 @@ const DashboardJobBrowseArea = () => {
 
         <div className="candidate-info text-center mb-3">
           <span>Budget</span>
-          <div>{item.currency ? `${item.currency} ${budget ?? 0}` : `$${budget ?? 0}`}</div>
+          <div>{formatBudget(budget ?? 0, item.currency)}</div>
         </div>
 
         <div className="candidate-info text-center mb-3">
@@ -411,7 +499,7 @@ const DashboardJobBrowseArea = () => {
           </div>
         </div>
 
-        <div className="d-flex justify-content-center">
+        <div className="d-flex justify-content-start align-items-center mt-auto pt-4 pt-md-4">
           <a
             onClick={() => setSelectedJob(item)}
             className="profile-btn tran3s ms-md-2 cursor-pointer"
@@ -437,7 +525,7 @@ const DashboardJobBrowseArea = () => {
           <h2 className="main-title mb-30">Browse Projects</h2>
 
           <DashboardSearchBar
-            placeholder="Search jobs by title, description, skills..."
+            placeholder="Search projects by title, description, skills..."
             onSearch={(query) => {
               if (query.trim()) {
                 const filtered = all_jobs.filter(job =>
@@ -458,8 +546,26 @@ const DashboardJobBrowseArea = () => {
             }}
           />
 
-          {/* Horizontal Filter Area - Matching Client Candidate Filter Style */}
-          <div className="bg-white card-box border-20 mb-30">
+          {/* Mobile Filter Button */}
+          <button
+            type="button"
+            className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-30"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#dashboardFilterOffcanvas"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#31795A',
+              borderRadius: '30px',
+              border: '1px solid #31795A',
+              padding: '10px 0'
+            }}
+          >
+            <i className="bi bi-funnel me-2"></i>
+            Filter Projects
+          </button>
+
+          {/* Horizontal Filter Area - Desktop Only */}
+          <div className="bg-white card-box border-20 mb-30 d-none d-lg-block">
             <div className="p-4 rounded-3" style={{ backgroundColor: '#f0f5f3' }}>
               <div className="row g-3 align-items-end">
                 {/* Skills Filter - Multi Select */}
@@ -506,8 +612,54 @@ const DashboardJobBrowseArea = () => {
                   </select>
                 </div>
 
+                {/* Currency Filter */}
+                <div className="col-lg-2 col-md-6">
+                  <div className="filter-title fw-500 text-dark mb-2">Currency</div>
+                  <select
+                    className="form-select"
+                    value={currencyFilter}
+                    onChange={(e) => {
+                      setCurrencyFilter(e.target.value);
+                      setItemOffset(0);
+                    }}
+                    style={{ height: '48px' }}
+                  >
+                    <option value="all">All Currencies</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="AUD">AUD (A$)</option>
+                    <option value="CAD">CAD (C$)</option>
+                    <option value="CHF">CHF (Fr)</option>
+                    <option value="CNY">CNY (¥)</option>
+                    <option value="NZD">NZD (NZ$)</option>
+                    <option value="SGD">SGD (S$)</option>
+                    <option value="HKD">HKD (HK$)</option>
+                    <option value="KRW">KRW (₩)</option>
+                    <option value="SEK">SEK (kr)</option>
+                    <option value="NOK">NOK (kr)</option>
+                    <option value="DKK">DKK (kr)</option>
+                    <option value="MXN">MXN ($)</option>
+                    <option value="BRL">BRL (R$)</option>
+                    <option value="ZAR">ZAR (R)</option>
+                    <option value="RUB">RUB (₽)</option>
+                    <option value="TRY">TRY (₺)</option>
+                    <option value="AED">AED (د.إ)</option>
+                    <option value="SAR">SAR (﷼)</option>
+                    <option value="MYR">MYR (RM)</option>
+                    <option value="THB">THB (฿)</option>
+                    <option value="IDR">IDR (Rp)</option>
+                    <option value="PHP">PHP (₱)</option>
+                    <option value="PLN">PLN (zł)</option>
+                    <option value="CZK">CZK (Kč)</option>
+                    <option value="ILS">ILS (₪)</option>
+                  </select>
+                </div>
+
                 {/* Sort Filter */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <div className="filter-title fw-500 text-dark mb-2">Sort By</div>
                   <select
                     className="form-select"
@@ -525,12 +677,12 @@ const DashboardJobBrowseArea = () => {
                 </div>
 
                 {/* Reset Filters Button */}
-                <div className="col-lg-3 col-md-6">
+                <div className="col-lg-2 col-md-6">
                   <button
                     onClick={handleReset}
                     className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
                   >
-                    Reset Filters
+                    Reset
                   </button>
                 </div>
               </div>
@@ -546,6 +698,20 @@ const DashboardJobBrowseArea = () => {
                       <span style={{ color: 'white' }}>{biddingFilter === "bidding" ? "Bidding Enabled" : "Fixed Price"}</span>
                       <button
                         onClick={() => setBiddingFilter("all")}
+                        className="btn-close ms-2"
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
+                  {currencyFilter !== "all" && (
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
+                      style={{ backgroundColor: '#4A90E2', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>Currency: {currencyFilter}</span>
+                      <button
+                        onClick={() => setCurrencyFilter("all")}
                         className="btn-close ms-2"
                         style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
                         aria-label="Remove filter"
@@ -586,11 +752,40 @@ const DashboardJobBrowseArea = () => {
             </div>
           </div>
 
+          {/* EMC Recommendation Banner - Only for Freelancers */}
+          {isFreelancer && recommendedCount > 0 && (
+            <div 
+              className="alert d-flex align-items-center mb-20" 
+              role="alert"
+              style={{ 
+                backgroundColor: '#e8f5e9', 
+                border: '1px solid #28a745',
+                borderRadius: '10px',
+                padding: '15px 20px'
+              }}
+            >
+              <i className="bi bi-star-fill text-success me-3" style={{ fontSize: '24px' }}></i>
+              <div>
+                <strong className="text-success">
+                  {recommendedCount} Recommended Project{recommendedCount > 1 ? 's' : ''} for You!
+                </strong>
+                <p className="mb-0 text-muted" style={{ fontSize: '13px' }}>
+                  Based on your superpowers: {freelancerSuperpowers.join(', ')}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Jobs Display Area */}
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
               <div className="total-job-found">
-                All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
+                All <span className="text-dark fw-500">{filterItems.length}</span> projects found
+                {isFreelancer && recommendedCount > 0 && (
+                  <span className="text-success ms-2">
+                    ({recommendedCount} recommended)
+                  </span>
+                )}
               </div>
             </div>
 
@@ -623,7 +818,7 @@ const DashboardJobBrowseArea = () => {
                 {/* Empty State */}
                 {currentItems && currentItems.length === 0 && (
                   <div className="text-center mt-5">
-                    <h3>No jobs found</h3>
+                    <h3>No projects found</h3>
                     <p>Try adjusting your filters to find what you're looking for.</p>
                   </div>
                 )}
@@ -666,6 +861,136 @@ const DashboardJobBrowseArea = () => {
                 )}
               </>
             )}
+          </div>
+        </div>
+      </div>
+      <div className="offcanvas offcanvas-start" tabIndex={-1} id="dashboardFilterOffcanvas" aria-labelledby="dashboardFilterOffcanvasLabel" style={{ zIndex: 99999 }}>
+        <div className="filter-area-tab">
+          <button type="button" className="btn-close text-reset d-lg-none position-absolute top-0 end-0 m-4" data-bs-dismiss="offcanvas" aria-label="Close" style={{ zIndex: 10 }}></button>
+
+          <div className="offcanvas-body p-4">
+            <div className="main-title fw-500 text-dark text-center mb-4 mt-2">Filter By</div>
+
+            <div className="light-bg border-20 ps-4 pe-4 pt-25 pb-30">
+
+              {/* Pricing Type */}
+              <div className="filter-block bottom-line pb-25">
+                <div className="filter-title fw-500 text-dark mb-3">Pricing Type</div>
+                <select
+                  className="form-select"
+                  value={biddingFilter}
+                  onChange={(e) => {
+                    setBiddingFilter(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="all">All Projects</option>
+                  <option value="bidding">Bidding Only</option>
+                  <option value="fixed">Fixed Price Only</option>
+                </select>
+              </div>
+
+              {/* Skills */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Skills</div>
+                <Select
+                  isMulti
+                  options={availableSkills.map(skill => ({ value: skill, label: skill }))}
+                  value={selectedSkills.map(skill => ({ value: skill, label: skill }))}
+                  onChange={(selectedOptions) => {
+                    setSelectedSkills(selectedOptions ? selectedOptions.map(option => option.value) : []);
+                    setItemOffset(0);
+                  }}
+                  isLoading={loadingSkills}
+                  isDisabled={loadingSkills}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  placeholder={loadingSkills ? "Loading skills..." : "Select Skills"}
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: '48px',
+                      borderColor: '#dee2e6',
+                    }),
+                  }}
+                />
+              </div>
+
+              {/* Currency */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Currency</div>
+                <select
+                  className="form-select"
+                  value={currencyFilter}
+                  onChange={(e) => {
+                    setCurrencyFilter(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="all">All Currencies</option>
+                  <option value="INR">INR (₹)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="JPY">JPY (¥)</option>
+                  <option value="AUD">AUD (A$)</option>
+                  <option value="CAD">CAD (C$)</option>
+                  <option value="CHF">CHF (Fr)</option>
+                  <option value="CNY">CNY (¥)</option>
+                  <option value="NZD">NZD (NZ$)</option>
+                  <option value="SGD">SGD (S$)</option>
+                  <option value="HKD">HKD (HK$)</option>
+                  <option value="KRW">KRW (₩)</option>
+                  <option value="SEK">SEK (kr)</option>
+                  <option value="NOK">NOK (kr)</option>
+                  <option value="DKK">DKK (kr)</option>
+                  <option value="MXN">MXN ($)</option>
+                  <option value="BRL">BRL (R$)</option>
+                  <option value="ZAR">ZAR (R)</option>
+                  <option value="RUB">RUB (₽)</option>
+                  <option value="TRY">TRY (₺)</option>
+                  <option value="AED">AED (د.إ)</option>
+                  <option value="SAR">SAR (﷼)</option>
+                  <option value="MYR">MYR (RM)</option>
+                  <option value="THB">THB (฿)</option>
+                  <option value="IDR">IDR (Rp)</option>
+                  <option value="PHP">PHP (₱)</option>
+                  <option value="PLN">PLN (zł)</option>
+                  <option value="CZK">CZK (Kč)</option>
+                  <option value="ILS">ILS (₪)</option>
+                </select>
+              </div>
+
+              {/* Sort By */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Sort By</div>
+                <select
+                  className="form-select"
+                  value={shortValue}
+                  onChange={(e) => {
+                    setShortValue(e.target.value);
+                    setItemOffset(0);
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Default</option>
+                  <option value="price-low-to-high">Price: Low to High</option>
+                  <option value="price-high-to-low">Price: High to Low</option>
+                </select>
+              </div>
+
+              {/* Reset Button */}
+              <button
+                onClick={() => {
+                  handleReset();
+                }}
+                className="btn-ten fw-500 text-white w-100 text-center tran3s mt-30"
+              >
+                Reset Filter
+              </button>
+            </div>
           </div>
         </div>
       </div>

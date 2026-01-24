@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Fragment, type FC } from "react";
+import { useRouter } from 'next/navigation';
 import PostJobForm from "./PostJobForm";
 import { makeGetRequest, makePatchRequest } from "@/utils/api";
 import toast from 'react-hot-toast';
 import { useSidebar } from '@/context/SidebarContext';
+import { useUser } from "@/context/UserContext";
 import DashboardHeader from "../candidate/dashboard-header";
 import DashboardSearchBar from "../common/DashboardSearchBar";
 import ApplicantsList from "./ApplicantsList";
@@ -20,6 +22,7 @@ export interface ProjectSummary {
   category: string;
   budget: number;
   status: number;
+  bidding_enabled?: boolean;
 }
 
 export interface Applicant {
@@ -50,6 +53,8 @@ interface Submission {
 }
 
 const OngoingJobArea: FC = () => {
+  const router = useRouter();
+  const { userData } = useUser();
   const { setIsOpenSidebar } = useSidebar();
   const [isPostingJob, setIsPostingJob] = useState(false);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -72,6 +77,11 @@ const OngoingJobArea: FC = () => {
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [showSubmissionModal, setShowSubmissionModal] = useState(false);
   const [reviewingSubmission, setReviewingSubmission] = useState(false);
+
+  // Rejection Modal States
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [submissionToReject, setSubmissionToReject] = useState<Submission | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
 
   // State for viewing applicant profiles
   const [selectedApplicant, setSelectedApplicant] = useState<IFreelancer | null>(null);
@@ -118,7 +128,7 @@ const OngoingJobArea: FC = () => {
 
       setProjects(processedData);
     } catch (err: any) {
-      const message = err.response?.data?.message || err.message || "Failed to load your jobs.";
+      const message = err.response?.data?.message || err.message || "Failed to load your projects.";
       setError(message);
       setProjects([]);
     } finally {
@@ -405,8 +415,33 @@ const OngoingJobArea: FC = () => {
     setSelectedSubmission(null);
   };
 
+  // Open rejection modal
+  const handleInitiateRejection = (submission: Submission) => {
+    setSubmissionToReject(submission);
+    setRejectionReason('');
+    setShowRejectModal(true);
+    // Close the submission detail modal to show the rejection modal clearly
+    handleCloseSubmissionModal();
+  };
+
+  const handleCloseRejectModal = () => {
+    setShowRejectModal(false);
+    setSubmissionToReject(null);
+    setRejectionReason('');
+  };
+
+  const handleConfirmReject = () => {
+    if (!submissionToReject) return;
+    if (!rejectionReason.trim()) {
+      toast.error("Please provide a reason for rejection");
+      return;
+    }
+    handleReviewSubmission(submissionToReject.submission_id, 2, rejectionReason);
+    handleCloseRejectModal();
+  };
+
   // Approve/Reject Submission
-  const handleReviewSubmission = async (submissionId: number, status: 1 | 2) => {
+  const handleReviewSubmission = async (submissionId: number, status: 1 | 2, reason?: string) => {
     setReviewingSubmission(true);
 
     try {
@@ -421,7 +456,10 @@ const OngoingJobArea: FC = () => {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({
+            status,
+            rejection_reason: reason
+          }),
         }
       );
 
@@ -441,7 +479,7 @@ const OngoingJobArea: FC = () => {
 
         if (status === 1) {
           // Approved - project is now completed
-          toast.success('Submission approved! Project marked as completed.');
+          toast.success('Submission approved! Redirecting to Completed Projects...');
           handleCloseSubmissionModal();
 
           // Remove the completed project from ongoing projects list immediately
@@ -453,12 +491,14 @@ const OngoingJobArea: FC = () => {
           setSelectedProjectForSubmissions(null);
           setSubmissions([]);
 
-          // Refresh to get latest data from server
-          fetchClientData();
+          // Redirect to completed projects page after a short delay
+          setTimeout(() => {
+            router.push('/dashboard/client-dashboard/completed-projects');
+          }, 1500);
         } else {
           // Rejected
           toast.success('Submission rejected. Freelancer can resubmit.');
-          handleCloseSubmissionModal();
+          // handleCloseSubmissionModal(); // Already closed when initiating rejection
         }
       }
     } catch (error: any) {
@@ -483,6 +523,7 @@ const OngoingJobArea: FC = () => {
   // Project Task Status Info - for ongoing projects list
   const getProjectStatusInfo = (status: number) => {
     switch (status) {
+      // 0: Awaiting Assignment, 1: In Progress, 2: Completed
       case 0: return { text: "Awaiting Assignment", className: "text-warning" };
       case 1: return { text: "In Progress", className: "text-success" };
       case 2: return { text: "Completed", className: "text-info" };
@@ -611,9 +652,20 @@ const OngoingJobArea: FC = () => {
     setSelectedApplicant(null);
   };
 
-  const handleOpenChat = (applicant: Applicant) => {
-    // TODO: Implement chat functionality
-    toast(`Chat with ${applicant.first_name} ${applicant.last_name} - Coming soon!`);
+  const handleOpenChat = (applicant: Applicant | { user_id: number; status?: number }) => {
+    if (!applicant.user_id || !userData?.user_id) {
+      toast.error('Unable to start chat: User information not available');
+      return;
+    }
+
+    const currentUserId = userData.user_id.toString();
+    const targetUserId = applicant.user_id.toString();
+
+    // Sort IDs to match Firebase pattern
+    const conversationId = [currentUserId, targetUserId].sort().join('_');
+
+    // Navigate to messages page
+    router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
   };
 
   return (
@@ -621,7 +673,7 @@ const OngoingJobArea: FC = () => {
       <div className="dashboard-body">
         <div className="position-relative">
           <DashboardHeader />
-          <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30">
+          <div className="d-sm-flex align-items-center justify-content-between mb-40 lg-mb-30 mt-4 mt-md-0">
             <h2 className="main-title m0">
               {selectedApplicant
                 ? `Profile: ${selectedApplicant.first_name} ${selectedApplicant.last_name}`
@@ -632,13 +684,13 @@ const OngoingJobArea: FC = () => {
                     : (isPostingJob ? "Post a New Job" : "Ongoing Projects")}
             </h2>
             {selectedApplicant && (
-              <button className="dash-btn-two tran3s" onClick={handleBackToApplicants}>
+              <button className="dash-btn-two tran3s mt-3 mt-sm-0" onClick={handleBackToApplicants}>
                 ← Back to Applicants
               </button>
             )}
             {(selectedProjectForApplicants || selectedProjectForSubmissions) && !selectedApplicant && (
-              <button className="dash-btn-two tran3s" onClick={handleBackToJobs}>
-                ← Back to Jobs
+              <button className="dash-btn-two tran3s mt-3 mt-sm-0" onClick={handleBackToJobs}>
+                ← Back to Projects
               </button>
             )}
           </div>
@@ -648,6 +700,7 @@ const OngoingJobArea: FC = () => {
               selectedApplicant={selectedApplicant}
               loadingProfile={loadingProfile}
               onBackToApplicants={handleBackToApplicants}
+              onMessage={(userId) => handleOpenChat({ user_id: userId })}
             />
           ) : selectedProjectForSubmissions ? (
             // Submissions View
@@ -681,17 +734,26 @@ const OngoingJobArea: FC = () => {
                         const statusInfo = getSubmissionStatusInfo(submission.status);
                         return (
                           <tr key={submission.submission_id} className="align-middle">
-                            <td>
+                            <td style={{ maxWidth: '150px' }}>
                               <div className="d-flex align-items-center">
                                 <img
                                   src={submission.freelancer_profile_picture || 'https://via.placeholder.com/50'}
                                   alt={submission.freelancer_name}
-                                  className="rounded-circle me-3"
-                                  style={{ width: 50, height: 50, objectFit: 'cover' }}
+                                  className="rounded-circle me-2 flex-shrink-0"
+                                  style={{ width: 40, height: 40, objectFit: 'cover' }}
                                 />
-                                <div>
-                                  <div className="job-name fw-500">{submission.freelancer_name}</div>
-                                  <small className="text-muted">{submission.freelancer_email}</small>
+                                <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                                  <div className="job-name fw-500" style={{
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  }}>{submission.freelancer_name}</div>
+                                  <small className="text-muted d-block" style={{
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: '100px'
+                                  }}>{submission.freelancer_email}</small>
                                 </div>
                               </div>
                             </td>
@@ -975,10 +1037,10 @@ const OngoingJobArea: FC = () => {
                     <button
                       type="button"
                       className="btn btn-danger"
-                      onClick={() => handleReviewSubmission(selectedSubmission.submission_id, 2)}
+                      onClick={() => handleInitiateRejection(selectedSubmission)}
                       disabled={reviewingSubmission}
                     >
-                      {reviewingSubmission ? 'Processing...' : 'Reject'}
+                      Reject
                     </button>
                     <button
                       type="button"
@@ -990,6 +1052,57 @@ const OngoingJobArea: FC = () => {
                     </button>
                   </>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Reason Modal */}
+      {showRejectModal && submissionToReject && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100000 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-danger">Reject Submission</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCloseRejectModal}
+                  disabled={reviewingSubmission}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Please provide a reason for rejecting this submission. This will be visible to the freelancer.</p>
+                <div className="mb-3">
+                  <label htmlFor="rejectionReason" className="form-label fw-semibold">Rejection Reason <span className="text-danger">*</span></label>
+                  <textarea
+                    id="rejectionReason"
+                    className="form-control"
+                    rows={4}
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="e.g., The submitted files do not meet the requirements..."
+                  ></textarea>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCloseRejectModal}
+                  disabled={reviewingSubmission}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleConfirmReject}
+                  disabled={reviewingSubmission || !rejectionReason.trim()}
+                >
+                  {reviewingSubmission ? 'Rejecting...' : 'Confirm Rejection'}
+                </button>
               </div>
             </div>
           </div>

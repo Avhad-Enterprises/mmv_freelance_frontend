@@ -88,7 +88,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     const filenameRegex = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9]+$/;
     if (!filenameRegex.test(file.name)) return "Filename can only contain letters, numbers, hyphens, and underscores.";
     return true;
-  };  const onSubmit = async (data: any) => {
+  }; const onSubmit = async (data: any) => {
     // Geocoding with automatic fallback - no errors shown to users
     setIsGeocoding(true);
     clearErrors("full_address");
@@ -640,7 +640,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
               <div className="input-group-meta position-relative uniform-height mb-3">
                 <textarea
                   className="form-control"
-                  style={{ 
+                  style={{
                     minHeight: '100px',
                     backgroundColor: 'var(--bg-white, #fff)',
                     marginBottom: '10px',
@@ -672,7 +672,7 @@ const VideoEditorStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              /* disabled={isGeocoding} */
+            /* disabled={isGeocoding} */
             >
               {/* {isGeocoding ? "Verifying Address..." : "Next"} */}
               Next
@@ -783,6 +783,35 @@ if (typeof document !== 'undefined') {
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       z-index: 999;
     }
+
+    /* Mobile responsiveness for country dropdown */
+    @media (max-width: 768px) {
+      .react-tel-input .country-list {
+        width: calc(100vw - 40px) !important;
+        max-width: 350px !important;
+        left: 50% !important;
+        transform: translateX(-50%);
+        position: fixed !important;
+        max-height: 60vh !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .react-tel-input .country-list {
+        width: calc(100vw - 20px) !important;
+        max-height: 70vh !important;
+      }
+      
+      .react-tel-input .country-list .country {
+        padding: 12px !important;
+        font-size: 16px !important;
+      }
+      
+      .react-tel-input .search-box {
+        padding: 12px 12px 12px 40px !important;
+        font-size: 16px !important;
+      }
+    }
     .react-tel-input .search {
       position: sticky;
       top: 0;
@@ -863,7 +892,7 @@ if (typeof document !== 'undefined') {
       color: #155724;
     }
   `;
-  
+
   const styleId = 'videoeditor-step3-styles-unique';
   if (!document.getElementById(styleId)) {
     style.id = styleId;

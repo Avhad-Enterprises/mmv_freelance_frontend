@@ -31,7 +31,7 @@ const SaveJobLoginModal: React.FC<SaveJobLoginModalProps> = ({ onLoginSuccess })
             ></button>
 
             <div className="text-center">
-              <h2 id="saveJobLoginModalLabel">Login to Save Jobs</h2>
+              <h2 id="saveJobLoginModalLabel">Login to Save Projects</h2>
               <p className="mb-2">You need to be logged in to save jobs.</p>
               <p>
                 Don't have an account?{" "}

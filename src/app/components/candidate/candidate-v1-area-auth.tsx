@@ -1,12 +1,10 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/context/UserContext';
-import { db, auth } from '@/lib/firebase';
-import { ref, get, set } from 'firebase/database';
-import { signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 import { authCookies } from "@/utils/cookies";
+import axios from "axios";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import CandidateListItem from "@/app/components/candidate/candidate-list-item-sidebar";
 import CandidateV1FilterArea from "@/app/components/candidate/filter/candidate-v1-filter-area-hori";
@@ -73,19 +71,23 @@ interface ApiCandidate {
   experience: any;
 }
 
-
 const CandidateV1Area = () => {
   // State variables for data and UI control
   const [candidates, setCandidates] = useState<ApiCandidate[]>([]);
-  const [filteredCandidates, setFilteredCandidates] = useState<ApiCandidate[]>([]);
+  const [filteredCandidates, setFilteredCandidates] = useState<ApiCandidate[]>(
+    []
+  );
   const [savedCandidates, setSavedCandidates] = useState<number[]>([]);
-  const [favoriteIds, setFavoriteIds] = useState<{ [candidateId: number]: number }>({});
+  const [favoriteIds, setFavoriteIds] = useState<{
+    [candidateId: number]: number;
+  }>({});
   const [loading, setLoading] = useState(true);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // New state for viewing a single candidate profile
-  const [selectedFreelancer, setSelectedFreelancer] = useState<IFreelancer | null>(null);
+  const [selectedFreelancer, setSelectedFreelancer] =
+    useState<IFreelancer | null>(null);
   const [loadingProfile, setLoadingProfile] = useState<boolean>(false);
 
   // Filter and sort states
@@ -104,67 +106,74 @@ const CandidateV1Area = () => {
     const amount = parseFloat(amountStr);
     if (isNaN(amount)) return `${amountStr} ${currencyCode}`;
     try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode, minimumFractionDigits: 2 }).format(amount);
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currencyCode,
+        minimumFractionDigits: 2,
+      }).format(amount);
     } catch (e) {
       return `${amount.toFixed(2)} ${currencyCode}`;
     }
   };
 
   // Helper function to map ApiCandidate to IFreelancer
-  const mapApiCandidateToIFreelancer = useCallback((apiCandidate: ApiCandidate): IFreelancer => {
-    const youtubeVideos = (apiCandidate.portfolio_links || [])
-      .filter(link => link.includes("youtube.com/watch?v="))
-      .map(link => {
-        const videoId = link.split('v=')[1]?.split('&')[0] || '';
-        return { id: videoId, url: link };
-      })
-      .filter(video => video.id !== '');
+  const mapApiCandidateToIFreelancer = useCallback(
+    (apiCandidate: ApiCandidate): IFreelancer => {
+      const youtubeVideos = (apiCandidate.portfolio_links || [])
+        .filter((link) => link.includes("youtube.com/watch?v="))
+        .map((link) => {
+          const videoId = link.split("v=")[1]?.split("&")[0] || "";
+          return { id: videoId, url: link };
+        })
+        .filter((video) => video.id !== "");
 
-    return {
-      user_id: apiCandidate.user_id,
-      first_name: apiCandidate.first_name,
-      last_name: apiCandidate.last_name,
-      bio: apiCandidate.bio || apiCandidate.short_description || null,
-      profile_picture: apiCandidate.profile_picture || null,
-      skills: apiCandidate.skills || [],
-      superpowers: apiCandidate.superpowers || [],
-      languages: apiCandidate.languages || [],
-      city: apiCandidate.city || null,
-      country: apiCandidate.country || null,
-      email: '',
-      rate_amount: apiCandidate.rate_amount || "0.00",
-      currency: apiCandidate.currency || "USD",
-      availability: apiCandidate.availability || "not specified",
-      latitude: apiCandidate.latitude || null,
-      longitude: apiCandidate.longitude || null,
-      profile_title: apiCandidate.profile_title || null,
-      short_description: apiCandidate.short_description || null,
-      youtube_videos: youtubeVideos,
-      experience_level: apiCandidate.experience_level || null,
-      work_type: apiCandidate.work_type || null,
-      hours_per_week: apiCandidate.hours_per_week || null,
-      kyc_verified: apiCandidate.kyc_verified,
-      aadhaar_verification: apiCandidate.aadhaar_verification,
-      hire_count: apiCandidate.hire_count,
-      review_id: apiCandidate.review_id,
-      total_earnings: apiCandidate.total_earnings,
-      time_spent: apiCandidate.time_spent,
-      role_name: apiCandidate.role_name || null,
-      experience: apiCandidate.experience || [],
-      education: apiCandidate.education || [],
-      previous_works: apiCandidate.previous_works || [],
-      certification: apiCandidate.certification || [],
-      services: apiCandidate.services || [],
-      portfolio_links: apiCandidate.portfolio_links || [],
-    };
-  }, []);
+      return {
+        user_id: apiCandidate.user_id,
+        first_name: apiCandidate.first_name,
+        last_name: apiCandidate.last_name,
+        bio: apiCandidate.bio || apiCandidate.short_description || null,
+        profile_picture: apiCandidate.profile_picture || null,
+        skills: apiCandidate.skills || [],
+        superpowers: apiCandidate.superpowers || [],
+        languages: apiCandidate.languages || [],
+        city: apiCandidate.city || null,
+        country: apiCandidate.country || null,
+        email: "",
+        rate_amount: apiCandidate.rate_amount || "0.00",
+        currency: apiCandidate.currency || "USD",
+        availability: apiCandidate.availability || "not specified",
+        latitude: apiCandidate.latitude || null,
+        longitude: apiCandidate.longitude || null,
+        profile_title: apiCandidate.profile_title || null,
+        short_description: apiCandidate.short_description || null,
+        youtube_videos: youtubeVideos,
+        experience_level: apiCandidate.experience_level || null,
+        work_type: apiCandidate.work_type || null,
+        hours_per_week: apiCandidate.hours_per_week || null,
+        kyc_verified: apiCandidate.kyc_verified,
+        aadhaar_verification: apiCandidate.aadhaar_verification,
+        hire_count: apiCandidate.hire_count,
+        review_id: apiCandidate.review_id,
+        total_earnings: apiCandidate.total_earnings,
+        time_spent: apiCandidate.time_spent,
+        role_name: apiCandidate.role_name || null,
+        experience: apiCandidate.experience || [],
+        education: apiCandidate.education || [],
+        previous_works: apiCandidate.previous_works || [],
+        certification: apiCandidate.certification || [],
+        services: apiCandidate.services || [],
+        portfolio_links: apiCandidate.portfolio_links || [],
+      };
+    },
+    []
+  );
 
   const router = useRouter();
   const { userData } = useUser();
 
   const handleStartChat = async (candidateUserId: number) => {
     if (!userData) {
-      toast.error('Please sign in to message freelancers');
+      toast.error("Please sign in to message freelancers");
       return;
     }
 
@@ -174,110 +183,68 @@ const CandidateV1Area = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/applications/check-can-chat/${candidateUserId}`,
         {
           headers: {
-            'Authorization': `Bearer ${authCookies.getToken()}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${authCookies.getToken()}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
       if (permissionResponse.ok) {
         const permissionData = await permissionResponse.json();
         if (!permissionData.canChat) {
-          toast.error('You can only message freelancers who have applied to your projects.');
+          toast.error(
+            "You can only message freelancers who have applied to your projects."
+          );
           return;
         }
       }
     } catch (permErr) {
-      console.error('Error checking chat permission:', permErr);
+      console.error("Error checking chat permission:", permErr);
       // Continue anyway - backend will enforce the rule
     }
 
-    // Ensure Firebase authentication before creating conversation
     try {
-      if (!auth.currentUser) {
-        const authToken = authCookies.getToken();
-        if (!authToken) {
-          toast.error('Authentication required. Please sign in again.');
-          return;
-        }
-
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/firebase-token`, {
-          headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to get Firebase authentication token');
-        }
-
-        const data = await response.json();
-        if (data.success && data.data?.customToken) {
-          await signInWithCustomToken(auth, data.data.customToken);
-        } else {
-          throw new Error('Invalid Firebase token response');
-        }
-      }
-    } catch (authErr: any) {
-      console.error('Firebase authentication error:', authErr);
-      toast.error('Failed to authenticate. Please try again.');
-      return;
-    }
-
-    const currentUserId = String(userData.user_id);
-    const otherId = String(candidateUserId);
-    const participants = [currentUserId, otherId].sort();
-    const conversationId = participants.join('_');
-
-    try {
-      const convRef = ref(db, `conversations/${conversationId}`);
-      const convSnap = await get(convRef);
-
-      if (!convSnap.exists()) {
-        // Build participantDetails from local state and current user
-        const participantDetails: any = {};
-        participantDetails[currentUserId] = {
-          firstName: userData.first_name || '',
-          email: userData.email || '',
-          profilePicture: userData.profile_picture || null
-        };
-        const otherCandidate = candidates.find(c => String(c.user_id) === otherId);
-        if (otherCandidate) {
-          participantDetails[otherId] = {
-            firstName: otherCandidate.first_name || `${otherCandidate.username || ''}`,
-            email: '',
-            profilePicture: otherCandidate.profile_picture || null
-          };
-        }
-
-        await set(convRef, {
-          participants,
-          participantRoles: {
-            [currentUserId]: 'client',
-            [otherId]: 'freelancer',
-          },
-          participantDetails,
-          lastMessage: '',
-          lastSenderId: '',
-          updatedAt: Date.now(),
-          createdAt: Date.now(),
-        });
-        toast.success('Chat started! Redirecting...');
-      } else {
-        toast.success('Opening chat...');
+      const token = authCookies.getToken();
+      if (!token) {
+        toast.error("Authentication required. Please sign in again.");
+        return;
       }
 
-      // Redirect to the thread page to show the conversation
-      router.push(`/dashboard/client-dashboard/messages?conversationId=${conversationId}`);
+      // Validate candidateUserId
+      const otherUserIdNum = Number(candidateUserId);
+      if (isNaN(otherUserIdNum)) {
+        toast.error("Invalid user ID. Cannot start chat.");
+        return;
+      }
+
+      // Create or get conversation via REST API
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/conversations`,
+        {
+          otherUserId: otherUserIdNum,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const conversationId =
+        response.data?.data?.conversation_id || response.data?.data?.id;
+
+      if (!conversationId) {
+        throw new Error("Invalid conversation ID received");
+      }
+
+      toast.success("Chat started! Redirecting...");
+      router.push(
+        `/dashboard/client-dashboard/messages?conversationId=${conversationId}`
+      );
     } catch (err: any) {
-      console.error('Failed to start chat:', err);
-      console.error('Error details:', {
-        code: err?.code,
-        message: err?.message,
-        stack: err?.stack
-      });
-      toast.error(`Failed to start chat: ${err?.message || 'Unknown error'}`);
+      console.error("Failed to start chat:", err);
+      toast.error(
+        `Failed to start chat: ${err?.response?.data?.message || err?.message || "Unknown error"
+        }`
+      );
     }
   };
 
@@ -286,11 +253,16 @@ const CandidateV1Area = () => {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`, { cache: 'no-cache' });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
+          { cache: "no-cache" }
+        );
         if (!response.ok) throw new Error(`HTTP Status ${response.status}`);
 
         const responseData = await response.json();
-        const candidatesData: ApiCandidate[] = Array.isArray(responseData.data) ? responseData.data : [];
+        const candidatesData: ApiCandidate[] = Array.isArray(responseData.data)
+          ? responseData.data
+          : [];
         setCandidates(candidatesData);
         setFilteredCandidates(candidatesData);
       } catch (err: any) {
@@ -314,14 +286,19 @@ const CandidateV1Area = () => {
           return;
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/my-favorites`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to fetch favorites');
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/my-favorites`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch favorites");
 
         const result = await response.json();
         if (result.data && Array.isArray(result.data)) {
-          const savedIds = result.data.map((fav: any) => fav.freelancer_user_id || fav.freelancer_id);
+          const savedIds = result.data.map(
+            (fav: any) => fav.freelancer_user_id || fav.freelancer_id
+          );
           const favIds = result.data.reduce((acc: any, fav: any) => {
             const userId = fav.freelancer_user_id || fav.freelancer_id;
             acc[userId] = fav.id;
@@ -358,33 +335,39 @@ const CandidateV1Area = () => {
 
     try {
       if (isCurrentlySaved) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ freelancer_id: candidateId })
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/remove-freelancer`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ freelancer_id: candidateId }),
+          }
+        );
 
         if (!response.ok) throw new Error("Failed to remove from favorites");
 
-        setSavedCandidates(prev => prev.filter(id => id !== candidateId));
-        setFavoriteIds(prev => {
+        setSavedCandidates((prev) => prev.filter((id) => id !== candidateId));
+        setFavoriteIds((prev) => {
           const newFavs = { ...prev };
           delete newFavs[candidateId];
           return newFavs;
         });
-        toast.success('Removed from favorites!');
+        toast.success("Removed from favorites!");
       } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ freelancer_id: candidateId })
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/favorites/add-freelancer`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ freelancer_id: candidateId }),
+          }
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -393,9 +376,9 @@ const CandidateV1Area = () => {
 
         const result = await response.json();
 
-        setSavedCandidates(prev => [...prev, candidateId]);
-        setFavoriteIds(prev => ({ ...prev, [candidateId]: result.data.id }));
-        toast.success('Added to favorites!');
+        setSavedCandidates((prev) => [...prev, candidateId]);
+        setFavoriteIds((prev) => ({ ...prev, [candidateId]: result.data.id }));
+        toast.success("Added to favorites!");
       }
     } catch (err: any) {
       console.error("Error toggling favorite:", err);
@@ -413,35 +396,41 @@ const CandidateV1Area = () => {
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(c =>
-        c.first_name?.toLowerCase().includes(query) ||
-        c.last_name?.toLowerCase().includes(query) ||
-        c.username?.toLowerCase().includes(query) ||
-        c.profile_title?.toLowerCase().includes(query) ||
-        c.bio?.toLowerCase().includes(query) ||
-        c.short_description?.toLowerCase().includes(query) ||
-        c.skills?.some(skill => skill.toLowerCase().includes(query)) ||
-        c.superpowers?.some(sp => sp.toLowerCase().includes(query)) ||
-        c.city?.toLowerCase().includes(query) ||
-        c.country?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (c) =>
+          c.first_name?.toLowerCase().includes(query) ||
+          c.last_name?.toLowerCase().includes(query) ||
+          c.username?.toLowerCase().includes(query) ||
+          c.profile_title?.toLowerCase().includes(query) ||
+          c.bio?.toLowerCase().includes(query) ||
+          c.short_description?.toLowerCase().includes(query) ||
+          c.skills?.some((skill) => skill.toLowerCase().includes(query)) ||
+          c.superpowers?.some((sp) => sp.toLowerCase().includes(query)) ||
+          c.city?.toLowerCase().includes(query) ||
+          c.country?.toLowerCase().includes(query)
       );
     }
 
     if (selectedSkills.length > 0) {
-      filtered = filtered.filter(c =>
-        selectedSkills.every(skill => c.skills?.includes(skill))
+      filtered = filtered.filter((c) =>
+        selectedSkills.every((skill) => c.skills?.includes(skill))
       );
     }
 
     if (selectedSuperpowers.length > 0) {
-      filtered = filtered.filter(c =>
-        selectedSuperpowers.every(superpower => c.superpowers?.includes(superpower))
+      filtered = filtered.filter((c) =>
+        selectedSuperpowers.every((superpower) =>
+          c.superpowers?.includes(superpower)
+        )
       );
     }
 
     if (selectedLocations.length > 0) {
-      filtered = filtered.filter(c =>
-        c.city && c.country && selectedLocations.includes(`${c.city}, ${c.country}`)
+      filtered = filtered.filter(
+        (c) =>
+          c.city &&
+          c.country &&
+          selectedLocations.includes(`${c.city}, ${c.country}`)
       );
     }
 
@@ -463,10 +452,14 @@ const CandidateV1Area = () => {
     let sorted = [...filteredCandidates];
     switch (value) {
       case "price-low-to-high":
-        sorted.sort((a, b) => parseFloat(a.rate_amount) - parseFloat(b.rate_amount));
+        sorted.sort(
+          (a, b) => parseFloat(a.rate_amount) - parseFloat(b.rate_amount)
+        );
         break;
       case "price-high-to-low":
-        sorted.sort((a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount));
+        sorted.sort(
+          (a, b) => parseFloat(b.rate_amount) - parseFloat(a.rate_amount)
+        );
         break;
       default:
         applyFilters();
@@ -478,7 +471,7 @@ const CandidateV1Area = () => {
   // --- New Handlers for Profile View ---
   const handleViewProfile = (candidateId: number) => {
     setLoadingProfile(true);
-    const candidate = candidates.find(c => c.user_id === candidateId);
+    const candidate = candidates.find((c) => c.user_id === candidateId);
     if (candidate) {
       setSelectedFreelancer(mapApiCandidateToIFreelancer(candidate));
     } else {
@@ -491,12 +484,25 @@ const CandidateV1Area = () => {
   // --- Derived State for Rendering ---
   const indexOfLast = currentPage * ITEMS_PER_PAGE;
   const indexOfFirst = indexOfLast - ITEMS_PER_PAGE;
-  const currentDisplayCandidates = filteredCandidates.slice(indexOfFirst, indexOfLast);
+  const currentDisplayCandidates = filteredCandidates.slice(
+    indexOfFirst,
+    indexOfLast
+  );
   const totalPages = Math.ceil(filteredCandidates.length / ITEMS_PER_PAGE);
 
-  const allSkills = Array.from(new Set(candidates.flatMap(c => c.skills || [])));
-  const allSuperpowers = Array.from(new Set(candidates.flatMap(c => c.superpowers || [])));
-  const allLocations = Array.from(new Set(candidates.filter(c => c.city && c.country).map(c => `${c.city}, ${c.country}`)));
+  const allSkills = Array.from(
+    new Set(candidates.flatMap((c) => c.skills || []))
+  );
+  const allSuperpowers = Array.from(
+    new Set(candidates.flatMap((c) => c.superpowers || []))
+  );
+  const allLocations = Array.from(
+    new Set(
+      candidates
+        .filter((c) => c.city && c.country)
+        .map((c) => `${c.city}, ${c.country}`)
+    )
+  );
 
   return (
     <div className="dashboard-body">
@@ -504,10 +510,15 @@ const CandidateV1Area = () => {
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-20 lg-mb-10">
           <h2 className="main-title m0">
-            {selectedFreelancer ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}` : "Candidates"}
+            {selectedFreelancer
+              ? `Profile: ${selectedFreelancer.first_name} ${selectedFreelancer.last_name}`
+              : "Candidates"}
           </h2>
           {selectedFreelancer && (
-            <button className="dash-btn-two tran3s" onClick={() => setSelectedFreelancer(null)}>
+            <button
+              className="dash-btn-two tran3s mt-3 mt-sm-0"
+              onClick={() => setSelectedFreelancer(null)}
+            >
               ← Back to Candidates
             </button>
           )}
@@ -526,7 +537,26 @@ const CandidateV1Area = () => {
               onSearch={setSearchQuery}
             />
 
-            <div className="bg-white card-box border-20 mb-40">
+            {/* Mobile Filter Button */}
+            <button
+              type="button"
+              className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-30"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#candidateFilterOffcanvas"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#31795A',
+                borderRadius: '30px',
+                border: '1px solid #31795A',
+                padding: '10px 0'
+              }}
+            >
+              <i className="bi bi-funnel me-2"></i>
+              Filter Candidates
+            </button>
+
+            {/* Desktop Filter Area - Hidden on mobile */}
+            <div className="bg-white card-box border-20 mb-40 d-none d-lg-block">
               <CandidateV1FilterArea
                 onSkillChange={setSelectedSkills}
                 onLocationChange={setSelectedLocations}
@@ -544,7 +574,11 @@ const CandidateV1Area = () => {
             <div className="candidate-profile-area">
               <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
                 <div className="total-job-found">
-                  All <span className="text-dark fw-500">{filteredCandidates.length}</span> candidates found
+                  All{" "}
+                  <span className="text-dark fw-500">
+                    {filteredCandidates.length}
+                  </span>{" "}
+                  candidates found
                 </div>
                 <div className="d-flex align-items-center">
                   <div className="short-filter d-flex align-items-center">
@@ -564,48 +598,229 @@ const CandidateV1Area = () => {
               </div>
 
               <div className="accordion-box list-style show">
-                {loading && <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
-                {error && <p className="text-danger text-center p-5">{error}</p>}
+                {loading && (
+                  <div className="text-center p-5">
+                    <div className="spinner-border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                )}
+                {error && (
+                  <p className="text-danger text-center p-5">{error}</p>
+                )}
 
-                {!loading && !error && currentDisplayCandidates.map((apiCandidate) => (
-                  <CandidateListItem
-                    key={apiCandidate.user_id}
-                    isSaved={savedCandidates.includes(apiCandidate.user_id)}
-                    onToggleSave={handleToggleSave}
-                    onViewProfile={handleViewProfile}
-                    item={{
-                      user_id: apiCandidate.user_id,
-                      username: apiCandidate.username,
-                      first_name: apiCandidate.first_name,
-                      last_name: apiCandidate.last_name,
-                      profile_picture: apiCandidate.profile_picture || undefined,
-                      city: apiCandidate.city || '',
-                      country: apiCandidate.country || '',
-                      skill: apiCandidate.skills,
-                      post: apiCandidate.profile_title || 'Freelancer',
-                      budget: `${formatCurrency(apiCandidate.rate_amount, apiCandidate.currency)} / hr`,
-                      location: '',
-                      total_earnings: apiCandidate.total_earnings,
-                    }}
-                  />
-                ))}
+                {!loading &&
+                  !error &&
+                  currentDisplayCandidates.map((apiCandidate) => (
+                    <CandidateListItem
+                      key={apiCandidate.user_id}
+                      isSaved={savedCandidates.includes(apiCandidate.user_id)}
+                      onToggleSave={handleToggleSave}
+                      onViewProfile={handleViewProfile}
+                      item={{
+                        user_id: apiCandidate.user_id,
+                        username: apiCandidate.username,
+                        first_name: apiCandidate.first_name,
+                        last_name: apiCandidate.last_name,
+                        profile_picture:
+                          apiCandidate.profile_picture || undefined,
+                        city: apiCandidate.city || "",
+                        country: apiCandidate.country || "",
+                        skill: apiCandidate.skills,
+                        post: apiCandidate.profile_title || "Freelancer",
+                        budget: `${formatCurrency(
+                          apiCandidate.rate_amount,
+                          apiCandidate.currency
+                        )} / hr`,
+                        location: "",
+                        total_earnings: apiCandidate.total_earnings,
+                      }}
+                    />
+                  ))}
 
                 {!loading && currentDisplayCandidates.length === 0 && (
-                  <div className="text-center p-5"><h4>No candidates found</h4><p>Try adjusting your filters</p></div>
+                  <div className="text-center p-5">
+                    <h4>No candidates found</h4>
+                    <p>Try adjusting your filters</p>
+                  </div>
                 )}
               </div>
 
               {totalPages > 1 && (
                 <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
                   <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                    Showing <span className="text-dark fw-500">{indexOfFirst + 1} to {Math.min(indexOfLast, filteredCandidates.length)}</span> of <span className="text-dark fw-500">{filteredCandidates.length}</span>
+                    Showing{" "}
+                    <span className="text-dark fw-500">
+                      {indexOfFirst + 1} to{" "}
+                      {Math.min(indexOfLast, filteredCandidates.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="text-dark fw-500">
+                      {filteredCandidates.length}
+                    </span>
                   </p>
-                  <Pagination pageCount={totalPages} handlePageClick={handlePageClick} />
+                  <Pagination
+                    pageCount={totalPages}
+                    handlePageClick={handlePageClick}
+                  />
                 </div>
               )}
             </div>
           </>
         )}
+      </div>
+
+      {/* Mobile Filter Offcanvas */}
+      <div className="offcanvas offcanvas-start" tabIndex={-1} id="candidateFilterOffcanvas" aria-labelledby="candidateFilterOffcanvasLabel" style={{ zIndex: 99999 }}>
+        <div className="filter-area-tab">
+          <button type="button" className="btn-close text-reset d-lg-none position-absolute top-0 end-0 m-4" data-bs-dismiss="offcanvas" aria-label="Close" style={{ zIndex: 10 }}></button>
+
+          <div className="offcanvas-body p-4">
+            <div className="main-title fw-500 text-dark text-center mb-4 mt-2">Filter By</div>
+
+            <div className="light-bg border-20 ps-4 pe-4 pt-25 pb-30">
+
+              {/* Skills */}
+              <div className="filter-block bottom-line pb-25">
+                <div className="filter-title fw-500 text-dark mb-3">Skills</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedSkills.includes(e.target.value)) {
+                      setSelectedSkills([...selectedSkills, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Skills</option>
+                  {allSkills.map(skill => (
+                    <option key={skill} value={skill} disabled={selectedSkills.includes(skill)}>
+                      {skill}
+                    </option>
+                  ))}
+                </select>
+                {selectedSkills.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedSkills.map(skill => (
+                      <div
+                        key={skill}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#00BF58', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{skill}</span>
+                        <button
+                          onClick={() => setSelectedSkills(selectedSkills.filter(s => s !== skill))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Superpowers */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Superpowers</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedSuperpowers.includes(e.target.value)) {
+                      setSelectedSuperpowers([...selectedSuperpowers, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Superpowers</option>
+                  {allSuperpowers.map(sp => (
+                    <option key={sp} value={sp} disabled={selectedSuperpowers.includes(sp)}>
+                      {sp}
+                    </option>
+                  ))}
+                </select>
+                {selectedSuperpowers.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedSuperpowers.map(sp => (
+                      <div
+                        key={sp}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#FF6B35', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{sp}</span>
+                        <button
+                          onClick={() => setSelectedSuperpowers(selectedSuperpowers.filter(s => s !== sp))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Location */}
+              <div className="filter-block bottom-line pb-25 mt-25">
+                <div className="filter-title fw-500 text-dark mb-3">Location</div>
+                <select
+                  className="form-select"
+                  onChange={(e) => {
+                    if (e.target.value && !selectedLocations.includes(e.target.value)) {
+                      setSelectedLocations([...selectedLocations, e.target.value]);
+                    }
+                    e.target.value = '';
+                  }}
+                  style={{ height: '48px' }}
+                >
+                  <option value="">Select Location</option>
+                  {allLocations.map(loc => (
+                    <option key={loc} value={loc} disabled={selectedLocations.includes(loc)}>
+                      {loc}
+                    </option>
+                  ))}
+                </select>
+                {selectedLocations.length > 0 && (
+                  <div className="d-flex flex-wrap gap-2 mt-3">
+                    {selectedLocations.map(loc => (
+                      <div
+                        key={loc}
+                        className="btn-eight fw-500 d-flex align-items-center"
+                        style={{ backgroundColor: '#00BF58', color: 'white', padding: '5px 10px' }}
+                      >
+                        <span style={{ color: 'white', fontSize: '14px' }}>{loc}</span>
+                        <button
+                          onClick={() => setSelectedLocations(selectedLocations.filter(l => l !== loc))}
+                          className="btn-close ms-2"
+                          style={{ width: '8px', height: '8px', filter: 'brightness(0) invert(1)' }}
+                        ></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Reset Button */}
+              <div className="mt-40">
+                <button
+                  onClick={() => {
+                    clearFilters();
+                    // Close offcanvas
+                    const offcanvasElement = document.getElementById('candidateFilterOffcanvas');
+                    if (offcanvasElement) {
+                      const bsOffcanvas = (window as any).bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+                      bsOffcanvas?.hide();
+                    }
+                  }}
+                  className="btn-ten fw-500 text-white w-100 text-center tran3s"
+                >
+                  Reset Filter
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ const ContactArea = () => {
   return (
     <section className="contact-us-section pt-100 lg-pt-80">
       <div className="container">
-        <div className="border-bottom pb-150 lg-pb-80">
+        <div className="pb-150 lg-pb-80">
           <div className="title-one text-center mb-70 lg-mb-40">
             <h2>Get in touch</h2>
           </div>
@@ -33,34 +33,34 @@ const ContactArea = () => {
                   </div> */}
 
                   <div className="address-block-one text-center mb-40 wow fadeInUp">
-  <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
-    <Image src={icon_2} alt="icon" />
-  </div>
+                    <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">
+                      <Image src={icon_2} alt="icon" />
+                    </div>
 
-  <h5 className="title">Contact Info</h5>
+                    <h5 className="title">Contact Info</h5>
 
-  {/* Email */}
-  <p>
-    <a href="mailto:info@makemyvid.io" className="email">
-      info@makemyvid.io
-    </a>
-  </p>
+                    {/* Email */}
+                    <p>
+                      <a href="mailto:info@makemyvid.io" className="email">
+                        info@makemyvid.io
+                      </a>
+                    </p>
 
-  {/* India phone */}
-  <p>
-    Open a chat or give us a call at <br />
-    <a href="tel:+917977484292" className="call">
-      +91&nbsp;7977484292
-    </a>
-  </p>
+                    {/* India phone */}
+                    <p>
+                      Open a chat or give us a call at <br />
+                      <a href="tel:+917977484292" className="call">
+                        +91&nbsp;7977484292
+                      </a>
+                    </p>
 
-  {/* UK phone */}
-  <p>
-    <a href="tel:+447542550969" className="call">
-      UK Enquiries: +44&nbsp;7542550969
-    </a>
-  </p>
-</div>
+                    {/* UK phone */}
+                    <p>
+                      <a href="tel:+447542550969" className="call">
+                        UK Enquiries: +44&nbsp;7542550969
+                      </a>
+                    </p>
+                  </div>
 
                 </div>
 
@@ -73,11 +73,11 @@ const ContactArea = () => {
                     <p>
                       <a href="#" className="webaddress">
                         11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092.
-                      </a> 
+                      </a>
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="col-md-4">
                   <div className="address-block-one text-center mb-40 wow fadeInUp">
                     <div className="icon rounded-circle d-flex align-items-center justify-content-center m-auto">

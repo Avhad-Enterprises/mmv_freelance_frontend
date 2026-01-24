@@ -8,7 +8,7 @@ import FooterOne from "@/layouts/footers/footer-one";
 import BlogDetailsArea from "../../components/blogs/blog-details"; // Adjusted path to your component
 
 export const metadata: Metadata = {
-  title: "Blog Details",
+  
 };
 
 const BlogDetailsDynamicPage = ({ params }: { params: { id: string } }) => {

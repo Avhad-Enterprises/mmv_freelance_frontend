@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import FilterArea from "../filter/filter-area";
 import ListItemTwo from "./list-item-2";
 import JobGridItem from "../grid/job-grid-item";
@@ -47,6 +47,19 @@ const JobListThree = ({
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   // Add view type state for toggle functionality
   const [jobType, setJobType] = useState<string>("list");
+  // Add search state
+  const [searchText, setSearchText] = useState<string>("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState<string>("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Debounce search input for better performance
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Redux
   const dispatch = useAppDispatch();
@@ -108,7 +121,7 @@ const JobListThree = ({
     // Use local state for category and skill filtering
     if (selectedCategories.length > 0) {
       filteredData = filteredData.filter((item) =>
-        item.project_category && selectedCategories.some(cat => 
+        item.project_category && selectedCategories.some(cat =>
           cat.toLowerCase() === item.project_category?.toLowerCase()
         )
       );
@@ -117,7 +130,7 @@ const JobListThree = ({
     if (selectedSkills.length > 0) {
       filteredData = filteredData.filter((item) =>
         item.skills_required?.some(
-          (jobSkill) => jobSkill && selectedSkills.some(skill => 
+          (jobSkill) => jobSkill && selectedSkills.some(skill =>
             skill.toLowerCase() === jobSkill.toLowerCase()
           )
         )
@@ -131,10 +144,11 @@ const JobListThree = ({
       );
     }
 
-    if (search_key) {
+    // Use local search state instead of Redux search_key
+    if (debouncedSearchText.trim()) {
       filteredData = filteredData.filter((item) =>
-        item.project_title?.toLowerCase().includes(search_key.toLowerCase()) ||
-        item.project_description?.toLowerCase().includes(search_key.toLowerCase())
+        item.project_title?.toLowerCase().includes(debouncedSearchText.toLowerCase()) ||
+        item.project_description?.toLowerCase().includes(debouncedSearchText.toLowerCase())
       );
     }
 
@@ -150,7 +164,7 @@ const JobListThree = ({
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedCategories, selectedSkills, projects_type,
-    all_jobs, shortValue, search_key,
+    all_jobs, shortValue, debouncedSearchText,
   ]);
 
   // --- Event Handlers ---
@@ -163,6 +177,20 @@ const JobListThree = ({
   const handleShort = (item: { value: string; label: string }) => {
     setShortValue(item.value);
   };
+
+  // Handle search clear
+  const handleClearSearch = useCallback(() => {
+    setSearchText("");
+    setDebouncedSearchText("");
+    searchInputRef.current?.focus();
+  }, []);
+
+  // Handle ESC key to clear search
+  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      handleClearSearch();
+    }
+  }, [handleClearSearch]);
 
   const handleToggleSave = async (job: IJobType) => {
     if (!decoded || !decoded.user_id) {
@@ -222,7 +250,7 @@ const JobListThree = ({
   // --- Render Logic ---
   if (loading) {
     return (
-      <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
+      <section className="job-listing-three pt-110 lg-pt-80 md-pt-60 sm-pt-40 pb-160 xl-pb-150 lg-pb-80">
         <div className="container">
           <p>Loading jobs...</p>
         </div>
@@ -232,108 +260,200 @@ const JobListThree = ({
 
   return (
     <>
-      <section className="job-listing-three pt-110 lg-pt-80 pb-160 xl-pb-150 lg-pb-80">
-      <div className="container">
-        <div className="row">
-          <div className="col-xl-3 col-lg-4">
-            <button
-              type="button"
-              className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#filteroffcanvas"
-            >
-              <i className="bi bi-funnel"></i>
-              Filter
-            </button>
-            <FilterArea
-              all_categories={categories}
-              all_skills={skills}
-              onCategoryChange={setSelectedCategories}
-              onSkillChange={setSelectedSkills}
-              selectedCategories={selectedCategories}
-              selectedSkills={selectedSkills}
-            />
-          </div>
+      <section className="job-listing-three pt-110 lg-pt-80 md-pt-60 sm-pt-40 pb-160 xl-pb-150 lg-pb-80">
+        <div className="container">
+          <div className="row">
+            <div className="col-xl-3 col-lg-4">
+              <button
+                type="button"
+                className="filter-btn w-100 pt-2 pb-2 h-auto fw-500 tran3s d-lg-none mb-40"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#filteroffcanvas"
+              >
+                <i className="bi bi-funnel"></i>
+                Filter
+              </button>
+              <FilterArea
+                all_categories={categories}
+                all_skills={skills}
+                onCategoryChange={setSelectedCategories}
+                onSkillChange={setSelectedSkills}
+                selectedCategories={selectedCategories}
+                selectedSkills={selectedSkills}
+              />
+            </div>
 
-          <div className="col-xl-9 col-lg-8">
-            <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
-              <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
-                <div className="total-job-found">
-                  All <span className="text-dark fw-500">{filterItems.length}</span> jobs found
-                </div>
-                <div className="d-flex align-items-center">
-                  <div className="short-filter d-flex align-items-center">
-                    <div className="text-dark fw-500 me-2">Sort:</div>
-                    <NiceSelect
-                      options={[
-                        { value: "", label: "Price Sort" },
-                        { value: "price-low-to-high", label: "Low to High" },
-                        { value: "price-high-to-low", label: "High to Low" },
-                      ]}
-                      defaultCurrent={0}
-                      onChange={handleShort}
-                      name="Price Sort"
+            <div className="col-xl-9 col-lg-8">
+              <div className="job-post-item-wrapper ms-xxl-5 ms-xl-3">
+                {/* Search Bar */}
+                <div className="search-bar mb-30">
+                  <div className="position-relative">
+                    <label htmlFor="project-search" className="visually-hidden">
+                      Search projects
+                    </label>
+                    <input
+                      id="project-search"
+                      ref={searchInputRef}
+                      type="search"
+                      placeholder="Search projects by title or description..."
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      onKeyDown={handleSearchKeyDown}
+                      className="form-control"
+                      aria-label="Search projects by title or description"
+                      aria-describedby="search-help"
+                      style={{
+                        padding: '12px 45px 12px 20px',
+                        borderRadius: '10px',
+                        border: '2px solid #E9F7EF',
+                        fontSize: '15px',
+                        outline: 'none',
+                        transition: 'border-color 0.2s ease',
+                      }}
+                      onFocus={(e) => e.currentTarget.style.borderColor = '#31795A'}
+                      onBlur={(e) => e.currentTarget.style.borderColor = '#E9F7EF'}
                     />
+                    <span id="search-help" className="visually-hidden">
+                      Press Escape to clear search
+                    </span>
+                    {searchText ? (
+                      <button
+                        onClick={handleClearSearch}
+                        aria-label="Clear search"
+                        type="button"
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          background: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          color: '#31795A',
+                          fontSize: '20px',
+                          padding: '4px 8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                          <path d="M8 8.707l3.646 3.647.708-.707L8.707 8l3.647-3.646-.707-.708L8 7.293 4.354 3.646l-.708.708L7.293 8l-3.647 3.646.708.707L8 8.707z"/>
+                        </svg>
+                      </button>
+                    ) : (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          color: '#D1D5DB',
+                          pointerEvents: 'none',
+                        }}
+                        aria-hidden="true"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="11" cy="11" r="8"/>
+                          <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                      </span>
+                    )}
+                    {searchText && searchText !== debouncedSearchText && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          right: '45px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          fontSize: '12px',
+                          color: '#6B7280',
+                        }}
+                        aria-live="polite"
+                      >
+                        Searching...
+                      </span>
+                    )}
                   </div>
-                  <button
-                    onClick={() => setJobType("list")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
-                    title="Active List"
-                  >
-                    <i className="bi bi-list"></i>
-                  </button>
-                  <button
-                    onClick={() => setJobType("grid")}
-                    className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
-                    title="Active Grid"
-                  >
-                    <i className="bi bi-grid"></i>
-                  </button>
                 </div>
+
+                <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+                  <div className="total-job-found">
+                    All <span className="text-dark fw-500">{filterItems.length}</span> projects found
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <div className="short-filter d-flex align-items-center">
+                      <div className="text-dark fw-500 me-2">Sort:</div>
+                      <NiceSelect
+                        options={[
+                          { value: "", label: "Price Sort" },
+                          { value: "price-low-to-high", label: "Low to High" },
+                          { value: "price-high-to-low", label: "High to Low" },
+                        ]}
+                        defaultCurrent={0}
+                        onChange={handleShort}
+                        name="Price Sort"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setJobType("list")}
+                      className={`style-changer-btn text-center rounded-circle tran3s ms-2 list-btn ${jobType === "grid" ? "active" : ""}`}
+                      title="Active List"
+                    >
+                      <i className="bi bi-list"></i>
+                    </button>
+                    <button
+                      onClick={() => setJobType("grid")}
+                      className={`style-changer-btn text-center rounded-circle tran3s ms-2 grid-btn ${jobType === "list" ? "active" : ""}`}
+                      title="Active Grid"
+                    >
+                      <i className="bi bi-grid"></i>
+                    </button>
+                  </div>
+                </div>
+
+                {/* View now depends on the jobType state */}
+                <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
+                  <div className="row">
+                    {currentItems &&
+                      currentItems.map((job) => (
+                        <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
+                          <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
+                  {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
+                </div>
+
+                {currentItems && currentItems.length === 0 && (
+                  <div className="text-center mt-5">
+                    <h3>No projects found</h3>
+                    <p>Try adjusting your filters to find what you're looking for.</p>
+                  </div>
+                )}
+
+                {currentItems && currentItems.length > 0 && (
+                  <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
+                    <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
+                      Showing <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
+                      <span className="text-dark fw-500">
+                        {Math.min(itemOffset + itemsPerPage, filterItems.length)}
+                      </span> of <span className="text-dark fw-500">{filterItems.length}</span>
+                    </p>
+                    {filterItems.length > itemsPerPage && (
+                      <Pagination pageCount={pageCount} handlePageClick={handlePageClick} />
+                    )}
+                  </div>
+                )}
               </div>
-
-              {/* View now depends on the jobType state */}
-              <div className={`accordion-box grid-style ${jobType === "grid" ? "show" : ""}`}>
-                <div className="row">
-                  {currentItems &&
-                    currentItems.map((job) => (
-                      <div key={job.projects_task_id} className="col-xl-4 col-lg-6 col-md-4 col-sm-6 mb-30 d-flex">
-                        <JobGridItem item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              <div className={`accordion-box list-style ${jobType === "list" ? "show" : ""}`}>
-                {currentItems && currentItems.map((job) => <ListItemTwo key={job.projects_task_id} item={job} onToggleSave={handleToggleSave} isActive={decoded && decoded.user_id ? wishlist.some((p) => p.projects_task_id === job.projects_task_id) : false} />)}
-              </div>
-
-              {currentItems && currentItems.length === 0 && (
-                <div className="text-center mt-5">
-                  <h3>No jobs found</h3>
-                  <p>Try adjusting your filters to find what you're looking for.</p>
-                </div>
-              )}
-
-              {currentItems && currentItems.length > 0 && (
-                <div className="pt-30 lg-pt-20 d-sm-flex align-items-center justify-content-between">
-                  <p className="m0 order-sm-last text-center text-sm-start xs-pb-20">
-                    Showing <span className="text-dark fw-500">{itemOffset + 1}</span> to{" "}
-                    <span className="text-dark fw-500">
-                      {Math.min(itemOffset + itemsPerPage, filterItems.length)}
-                    </span> of <span className="text-dark fw-500">{filterItems.length}</span>
-                  </p>
-                  {filterItems.length > itemsPerPage && (
-                    <Pagination pageCount={pageCount} handlePageClick={handlePageClick} />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    <SaveJobLoginModal onLoginSuccess={handleLoginSuccess} />
+      </section>
+      <SaveJobLoginModal onLoginSuccess={handleLoginSuccess} />
     </>
   );
 };

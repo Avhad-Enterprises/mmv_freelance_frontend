@@ -28,7 +28,7 @@ const JobAlertItem = ({
         <div>{location}</div>
         <div>{category}</div>
       </td>
-      <td>Jobs found {found}</td>
+      <td>Projects found {found}</td>
       <td>{time}</td>
       <td>
         <div className="action-dots float-end">

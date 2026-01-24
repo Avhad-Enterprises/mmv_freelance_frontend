@@ -177,7 +177,7 @@ const RegisterArea = () => {
   );
 
   return (
-    <section className="registration-section position-relative pt-100 lg-pt-80 pb-150 lg-pb-80">
+    <section className="registration-section position-relative pt-40 lg-pt-60 pb-150 lg-pb-80">
       <div className="container">
         <div className="user-data-form">
           <div className="text-center">
@@ -244,7 +244,7 @@ const RegisterArea = () => {
             </div>
 
             {/* Apple Sign Up */}
-            <div className="col-sm-4 col-6">
+            {/* <div className="col-sm-4 col-6">
               <div className="mt-10 position-relative">
                 <SocialLoginButton
                   provider="apple"
@@ -263,7 +263,7 @@ const RegisterArea = () => {
                   </small>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Info text for OAuth registration */}

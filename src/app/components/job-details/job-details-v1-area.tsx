@@ -48,6 +48,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   const [isApplying, setIsApplying] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
   const [applicationId, setApplicationId] = useState<number | null>(null);
+  const [applicationStatus, setApplicationStatus] = useState<number | null>(null);
   const [isCheckingApplication, setIsCheckingApplication] = useState(true);
 
   // Ref to prevent duplicate useEffect runs
@@ -135,13 +136,16 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         if (application && application.applied_projects_id && application.projects_task_id === job.projects_task_id) {
           setIsApplied(true);
           setApplicationId(application.applied_projects_id);
+          setApplicationStatus(application.status); // Store application status
         } else {
           setIsApplied(false);
           setApplicationId(null);
+          setApplicationStatus(null);
         }
       } else {
         setIsApplied(false);
         setApplicationId(null);
+        setApplicationStatus(null);
       }
 
     } catch (error: any) {
@@ -223,6 +227,17 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
       return;
     }
 
+    // Check if application is already approved (status = 1) or completed (status = 2)
+    if (applicationStatus === 1) {
+      toast.error('Cannot withdraw from an ongoing project. Please contact support if you have concerns.');
+      return;
+    }
+
+    if (applicationStatus === 2) {
+      toast.error('Cannot withdraw from a completed project.');
+      return;
+    }
+
     if (isApplying) {
       return;
     }
@@ -268,19 +283,19 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
         const response = await api.delete('api/v1/saved/unsave-project', { data: payload });
 
         if (response.data?.success) {
-          toast.success('Job unsaved successfully');
+          toast.success('Project unsaved successfully');
           setIsSaved(false);
         } else {
-          toast.error(response.data?.message || 'Failed to unsave job');
+          toast.error(response.data?.message || 'Failed to unsave project');
         }
       } else {
         const response = await api.post('api/v1/saved/save-project', payload);
 
         if (response.data?.data?.saved_projects_id) {
-          toast.success('Job saved successfully!');
+          toast.success('Project saved successfully!');
           setIsSaved(true);
         } else {
-          toast.error(response.data?.message || 'Failed to save job');
+          toast.error(response.data?.message || 'Failed to save project');
         }
       }
     } catch (error: any) {
@@ -299,72 +314,93 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
 
   return (
     <>
+      <style jsx>{`
+        /* Mobile: Reorder cards using flexbox */
+        @media (max-width: 991px) {
+          .job-details-row {
+            display: flex;
+            flex-direction: column;
+          }
+          .job-details-header {
+            order: 1;
+          }
+          .job-details-sidebar {
+            order: 2;
+            margin-left: 0 !important;
+            margin-top: 30px;
+          }
+          .job-details-description {
+            order: 3;
+          }
+          .job-details-skills {
+            order: 4;
+          }
+        }
+        /* Desktop: Proper column layout */
+        @media (min-width: 992px) {
+          .job-details-description,
+          .job-details-skills {
+            padding-right: 3rem;
+          }
+        }
+      `}</style>
       <section className="job-details pt-100 lg-pt-80 pb-130 lg-pb-80">
         <div className="container">
-          <div className="row">
-            {/* Left Side: Details */}
-            <div className="col-xxl-9 col-xl-8">
-              <div className="details-post-data me-xxl-5 pe-xxl-4">
+          <div className="row job-details-row">
+            {/* Header: Back button, Posted date, Title */}
+            <div className="col-12 job-details-header">
+              <Link href="/job-list" className="btn-two mb-20">
+                &larr; Back to Projects
+              </Link>
 
-                <Link href="/job-list" className="btn-two mb-20">
-                  &larr; Back to Jobs
-                </Link>
+              <div className="post-date">
+                Posted on: {job.created_at?.slice(0, 10)}
+              </div>
+              <h3 className="post-title">{job.project_title}</h3>
+            </div>
 
-                <div className="post-date">
-                  Posted on: {job.created_at?.slice(0, 10)}
+            {/* Left Side: Project Description */}
+            <div className="col-xxl-9 col-xl-8 job-details-description">
+              <div className="post-block border-style mt-50 lg-mt-30">
+                <div className="d-flex align-items-center">
+                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
+                  <h4 className="block-title">Project Description</h4>
                 </div>
-                <h3 className="post-title">{job.project_title}</h3>
-                <div className="post-block border-style mt-50 lg-mt-30">
-                  <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
-                    <h4 className="block-title">Project Description</h4>
-                  </div>
-                  <p className="mt-25 mb-20">{job.project_description}</p>
-                  {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
-                </div>
-                <div className="post-block border-style mt-50 lg-mt-30">
-                  <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
-                    <h4 className="block-title">Project Specifications</h4>
-                  </div>
-                  <ul className="list-type-two style-none mt-25 mb-15">
-                    <li><strong>Project Type:</strong> {job.projects_type} </li>
-                    <li><strong>Project Format:</strong> {job.project_format}</li>
-                    <li><strong>Audio / Voiceover:</strong> {job.audio_voiceover} </li>
-                    <li><strong>Video Length:</strong> {formatDuration(job.video_length)} </li>
-                    <li><strong>Preferred Video Style:</strong> {job.preferred_video_style}</li>
-                    {job.audio_description && <li><strong>Audio Details:</strong> {job.audio_description}</li>}
-                  </ul>
-                </div>
-                <div className="post-block border-style mt-40 lg-mt-30">
-                  <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
-                    <h4 className="block-title">Required Skills</h4>
-                  </div>
-                  <ul className="list-type-two style-none mt-25 mb-15">
-                    {job.skills_required?.map((skill, idx) => (
-                      <li key={idx}>{skill}</li>
-                    ))}
-                  </ul>
-                </div>
-                {job.reference_links && job.reference_links.length > 0 && (
-                  <div className="post-block border-style mt-40 lg-mt-30">
-                    <div className="d-flex align-items-center">
-                      <div className="block-numb text-center fw-500 text-white rounded-circle me-2">4</div>
-                      <h4 className="block-title">Reference Links</h4>
-                    </div>
-                    <ul className="list-type-two style-none mt-25 mb-15">
-                      {job.reference_links.map((link, i) => (
-                        <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <p className="mt-25 mb-20">{job.project_description}</p>
+                {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
               </div>
             </div>
 
-            {/* Right Side: Metadata */}
-            <div className="col-xxl-3 col-xl-4">
+            {/* Left Side: Required Skills */}
+            <div className="col-xxl-9 col-xl-8 job-details-skills">
+              <div className="post-block border-style mt-40 lg-mt-30">
+                <div className="d-flex align-items-center">
+                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
+                  <h4 className="block-title">Required Skills</h4>
+                </div>
+                <ul className="list-type-two style-none mt-25 mb-15">
+                  {job.skills_required?.map((skill, idx) => (
+                    <li key={idx}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+              {job.reference_links && job.reference_links.length > 0 && (
+                <div className="post-block border-style mt-40 lg-mt-30">
+                  <div className="d-flex align-items-center">
+                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                    <h4 className="block-title">Reference Links</h4>
+                  </div>
+                  <ul className="list-type-two style-none mt-25 mb-15">
+                    {job.reference_links.map((link, i) => (
+                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Right Side: Project Details Card / Sidebar */}
+            <div className="col-xxl-3 col-xl-4 job-details-sidebar">
               <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50">
                 <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize">
                   {job.project_title}
@@ -400,17 +436,22 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                       disabled={true}
                       style={{ opacity: 0.6, cursor: 'not-allowed' }}
                     >
-                      {job.status === 3 ? '🚫 Job Closed' : '✅ Freelancer Assigned'}
+                      {job.status === 3 ? '🚫 Project Closed' : '✅ Freelancer Assigned'}
                     </button>
                   ) : (
                     <button
                       className="btn-one w-100 mt-25"
                       onClick={handleApplyClick}
-                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication}
+                      disabled={isApplying || userRole === 'CLIENT' || isCheckingApplication || (isApplied && applicationStatus !== 0)}
                     >
                       {isCheckingApplication ? 'Checking...' :
                         isApplying ? (isApplied ? 'Withdrawing...' : 'Applying...') :
-                          isApplied ? <>✅ Applied<br />Click To Withdraw</> : 'Apply Now'}
+                          isApplied ?
+                            (applicationStatus === 0 ? <>✅ Applied<br />Click To Withdraw</> :
+                              applicationStatus === 1 ? '✅ Application Accepted' :
+                                applicationStatus === 2 ? '✅ Project Completed' :
+                                  '✅ Applied') :
+                            'Apply Now'}
                     </button>
                   )}
 
@@ -419,14 +460,14 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                     onClick={handleSaveJobClick}
                     disabled={isSaving}
                   >
-                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Job'}
+                    {isSaving ? 'Saving...' : isSaved ? '❤️ Saved' : '🤍 Save Project'}
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section >
+      </section>
 
       <ApplyLoginModal onLoginSuccess={handleLoginSuccess} />
     </>

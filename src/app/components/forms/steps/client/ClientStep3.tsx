@@ -89,9 +89,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
   const validateBusinessDocument = (files: FileList | null): boolean | string => {
     if (!files || files.length === 0) return true; // Optional field
     if (files.length > 5) return "Maximum 5 files allowed.";
-    
+
     const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-    
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size === 0) return `File "${file.name}" is empty. Please choose a valid document.`;
@@ -432,9 +432,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                 >
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {selectedBusinessDocuments.length > 0
-                      ? `${selectedBusinessDocuments.length} file${selectedBusinessDocuments.length > 1 ? 's' : ''} selected (${selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024 < 1024 
-                          ? `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB`
-                          : `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / (1024 * 1024)).toFixed(1)} MB`})`
+                      ? `${selectedBusinessDocuments.length} file${selectedBusinessDocuments.length > 1 ? 's' : ''} selected (${selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024 < 1024
+                        ? `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / 1024).toFixed(1)} KB`
+                        : `${(selectedBusinessDocuments.reduce((total, file) => total + file.size, 0) / (1024 * 1024)).toFixed(1)} MB`})`
                       : "Choose Business Documents"}
                   </span>
                   {selectedBusinessDocuments.length > 0 && (
@@ -489,7 +489,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               {errors.business_document && (
                 <div className="text-danger mt-1">{String(errors.business_document.message)}</div>
               )}
-              
+
               {/* Display list of selected files */}
               {(() => {
                 return null;
@@ -501,9 +501,9 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   </div>
                   <div style={{ border: '1px solid #dee2e6', borderRadius: '4px', padding: '15px', backgroundColor: '#f8f9fa' }}>
                     {selectedBusinessDocuments.map((file, index) => (
-                      <div 
-                        key={index} 
-                        style={{ 
+                      <div
+                        key={index}
+                        style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
@@ -517,8 +517,8 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                           <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: '500', color: '#333' }}>{file.name}</div>
                             <small style={{ color: '#6c757d' }}>
-                              {file.size / 1024 < 1024 
-                                ? `${(file.size / 1024).toFixed(1)} KB` 
+                              {file.size / 1024 < 1024
+                                ? `${(file.size / 1024).toFixed(1)} KB`
                                 : `${(file.size / (1024 * 1024)).toFixed(2)} MB`}
                               {' • '}
                               {file.type ? file.type.split('/')[1]?.toUpperCase() || 'FILE' : 'FILE'}
@@ -532,12 +532,12 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                             // Remove individual file
                             const newFiles = selectedBusinessDocuments.filter((_, i) => i !== index);
                             setSelectedBusinessDocuments(newFiles);
-                            
+
                             // Update the file input
                             const dt = new DataTransfer();
                             newFiles.forEach(f => dt.items.add(f));
                             setValue("business_document", dt.files.length > 0 ? dt.files : null);
-                            
+
                             if (newFiles.length === 0) {
                               const input = document.getElementById('business-document-input') as HTMLInputElement;
                               if (input) input.value = '';
@@ -723,7 +723,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
                   <div className="input-group-meta position-relative uniform-height">
                     <textarea
                       className="form-control"
-                      style={{ 
+                      style={{
                         minHeight: '100px',
                         backgroundColor: 'var(--bg-white, #fff)'
                       }}
@@ -749,7 +749,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
               type="button"
               className="btn-one w-100 mt-30"
               onClick={prevStep}
-              // disabled={isGeocoding} // Commented out since geocoding is disabled
+            // disabled={isGeocoding} // Commented out since geocoding is disabled
             >
               Previous
             </button>
@@ -758,7 +758,7 @@ const ClientStep3: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
             <button
               type="submit"
               className="btn-one w-100 mt-30"
-              // disabled={isGeocoding} // Commented out since geocoding is disabled
+            // disabled={isGeocoding} // Commented out since geocoding is disabled
             >
               {/* {isGeocoding ? "Verifying Address..." : "Next"} // Commented out since geocoding is disabled */}
               Next
@@ -871,6 +871,43 @@ if (typeof document !== 'undefined') {
         margin-top: 5px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         z-index: 999;
+      }
+      
+      /* Mobile responsive styles for country list */
+      @media (max-width: 768px) {
+        .react-tel-input .country-list {
+          width: calc(100vw - 40px) !important;
+          max-width: 350px !important;
+          left: 50% !important;
+          transform: translateX(-50%);
+          position: fixed !important;
+          max-height: 60vh !important;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .react-tel-input .country-list {
+          width: calc(100vw - 20px) !important;
+          max-height: 70vh !important;
+        }
+        
+        .react-tel-input .country-list .country {
+          padding: 12px 10px !important;
+          font-size: 15px !important;
+        }
+        
+        .react-tel-input .country-list .country .country-name {
+          font-size: 14px !important;
+        }
+        
+        .react-tel-input .country-list .country .dial-code {
+          font-size: 13px !important;
+        }
+        
+        .react-tel-input .search-box {
+          font-size: 16px !important;
+          padding: 12px 10px 12px 40px !important;
+        }
       }
       .react-tel-input .search {
         position: sticky;

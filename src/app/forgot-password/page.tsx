@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
 
   return (
     <Wrapper>
-      <div className="main-page-wrapper">
+      <div className="paddingTop: '1rem'">
         <Header />
         <ForgotPasswordArea />
         <FooterOne />

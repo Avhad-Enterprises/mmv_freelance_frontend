@@ -23,6 +23,7 @@ const HeroBannerSeven: React.FC<HeroBannerSevenProps> = ({ heroData }) => {
   const router = useRouter();
   const { handleSubmit, setCategoryVal, setSearchText } = useSearchFormSubmit();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { userData, userRoles, isLoading } = useUser();
 
   // Get the first hero section (typically there's only one active)
   const hero = heroData.length > 0 ? heroData[0] : null;
@@ -58,8 +59,18 @@ const HeroBannerSeven: React.FC<HeroBannerSevenProps> = ({ heroData }) => {
       ) as HTMLElement;
       if (loginButton) loginButton.click();
     } else {
-      // Redirect to coming soon page
-      router.push("/coming-soon");
+      // Check user roles
+      const normalizedRoles = userRoles.map(r => r.toUpperCase());
+      if (normalizedRoles.includes('CLIENT')) {
+        // Redirect to client submit job page
+        router.push('/dashboard/client-dashboard/submit-job');
+      } else if (normalizedRoles.includes('VIDEOEDITOR') || normalizedRoles.includes('VIDEOGRAPHER')) {
+        // Redirect to projects listing page
+        router.push('/job-list');
+      } else {
+        // Default fallback
+        router.push('/job-list');
+      }
     }
   };
 
@@ -69,7 +80,7 @@ const HeroBannerSeven: React.FC<HeroBannerSevenProps> = ({ heroData }) => {
   };
 
   return (
-    <div className="hero-banner-seven position-relative pt-200 lg-pt-150 pb-110 md-pb-40">
+    <div className="hero-banner-seven position-relative pt-200 lg-pt-150 md-pt-100 sm-pt-60 pb-110 md-pb-40">
       <div className="container">
         <div className="position-relative">
           <div className="row">

@@ -24,7 +24,7 @@ const PricingOne = ({ style_2 = false }: { style_2?: boolean }) => {
                   <ul className="style-none">
                     <li>15 job posting </li>
                     <li>7 featured job </li>
-                    <li>Job post live for 30 days </li>
+                    <li>Project post live for 30 days </li>
                   </ul>
                   <a href="#" className="get-plan-btn tran3s w-100 mt-30">
                     Choose Plan
@@ -41,7 +41,7 @@ const PricingOne = ({ style_2 = false }: { style_2?: boolean }) => {
                   <ul className="style-none">
                     <li>30 job posting </li>
                     <li>15 featured job </li>
-                    <li>Job post live for 60 days </li>
+                    <li>Project post live for 60 days </li>
                   </ul>
                   <a href="#" className="get-plan-btn tran3s w-100 mt-30">
                     Choose Plan
@@ -57,7 +57,7 @@ const PricingOne = ({ style_2 = false }: { style_2?: boolean }) => {
                   <ul className="style-none">
                     <li>60 job posting </li>
                     <li>30 featured job </li>
-                    <li>Job post live for 130 days </li>
+                    <li>Project post live for 130 days </li>
                   </ul>
                   <a href="#" className="get-plan-btn tran3s w-100 mt-30">
                     Choose Plan

@@ -30,16 +30,20 @@ import nav_6_active from "@/assets/dashboard/images/icon/icon_6_active.svg";
 import nav_7 from "@/assets/dashboard/images/icon/icon_7.svg";
 import nav_7_active from "@/assets/dashboard/images/icon/icon_7_active.svg";
 import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
+import nav_14 from "@/assets/dashboard/images/icon/icon_14.svg";
+import nav_15 from "@/assets/dashboard/images/icon/icon_15.svg";
+import nav_16 from "@/assets/dashboard/images/icon/icon_16.svg";
 
 
 const nav_data = [
     { id: 1, icon: nav_1, icon_active: nav_1_active, link: "/dashboard/client-dashboard", title: "Dashboard" },
     { id: 2, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/client-dashboard/profile", title: "My Profile" },
-    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/jobs", title: "My Jobs" },
+    { id: 3, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/jobs", title: "My Projects" },
     { id: 6, icon: nav_6, icon_active: nav_6_active, link: "/dashboard/client-dashboard/saved-candidate", title: "Saved Candidate" },
-    { id: 7, icon: nav_2, icon_active: nav_2_active, link: "/dashboard/client-dashboard/Candidates", title: "Candidates" },
+    { id: 7, icon: nav_16, icon_active: nav_16, link: "/dashboard/client-dashboard/Candidates", title: "Candidates" },
+    { id: 9, icon: nav_14, icon_active: nav_14, link: "/dashboard/client-dashboard/ongoing-projects", title: "Ongoing Projects" },
+    { id: 11, icon: nav_15, icon_active: nav_15, link: "/dashboard/client-dashboard/completed-projects", title: "Completed Projects" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Chat" },
-    { id: 9, icon: nav_3, icon_active: nav_3_active, link: "/dashboard/client-dashboard/ongoing-projects", title: "Ongoing Projects" },
     { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/client-dashboard/setting", title: "Account Settings" },
 ];
 
@@ -51,7 +55,7 @@ const EmployAside = ({ }: IProps) => {
     const pathname = usePathname();
     const { isOpenSidebar, setIsOpenSidebar } = useSidebar();
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
-    const currentUserId = userData?.user_id ? String(userData.user_id) : null;
+    const currentUserId = userData?.user_id ? String(userData.user_id) : undefined;
     const { conversations } = useConversations(currentUserId);
 
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
@@ -64,9 +68,7 @@ const EmployAside = ({ }: IProps) => {
     const profilePictureUrl = userData?.profile_picture || null;
 
     // Check for unread messages
-    const hasUnreadMessages = conversations.some(convo =>
-        convo.lastSenderId !== currentUserId && !convo.lastMessageRead
-    );
+    const hasUnreadMessages = conversations.some(convo => convo.hasUnread);
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -135,7 +137,7 @@ const EmployAside = ({ }: IProps) => {
 
                     {/* User Info */}
                     <div className="user-data">
-                        <div className="user-avatar position-relative d-block text-center">
+                        <div className="user-avatar position-relative d-block text-center " style={{ marginBottom: '23px' }}>
                             <div className="online position-relative rounded-circle d-inline-block" style={{
                                 width: '75px',
                                 height: '75px',
@@ -288,6 +290,15 @@ const EmployAside = ({ }: IProps) => {
 
                 </div>
             </aside>
+
+            {/* Overlay for mobile sidebar */}
+            {isOpenSidebar && (
+                <div
+                    onClick={() => setIsOpenSidebar(false)}
+                    className="offcanvas-backdrop fade show"
+                    style={{ zIndex: 9998 }}
+                ></div>
+            )}
 
             {/* <DeleteAccountModal /> */}
             <LogoutModal />

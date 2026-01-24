@@ -1,7 +1,23 @@
-import React from "react";
-import { FeaturedCreator } from "@/types/cms.types";
+'use client';
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 
-// Generic User Icon to replace local images
+// Featured freelancer IDs
+const FEATURED_FREELANCER_IDS = [293, 288, 399, 411];
+
+// Interface for freelancer data from API
+interface FeaturedFreelancer {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  profile_picture: string | null;
+  skills: string[];
+  city: string | null;
+  country: string | null;
+  profile_title: string | null;
+}
+
+// Generic User Icon fallback
 const UserIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -9,7 +25,7 @@ const UserIcon = () => (
     height="80"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="#28a745" // Green color
+    stroke="#31795A"
     strokeWidth="1"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -20,14 +36,58 @@ const UserIcon = () => (
   </svg>
 );
 
-interface TopCompanyProps {
-  featuredCreators: FeaturedCreator[];
-}
+const TopCompany = () => {
+  const [featuredFreelancers, setFeaturedFreelancers] = useState<FeaturedFreelancer[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const TopCompany: React.FC<TopCompanyProps> = ({ featuredCreators }) => {
-  // Limit to 4 creators for display
-  const displayCreators = featuredCreators.slice(0, 4);
+  useEffect(() => {
+    const fetchFeaturedFreelancers = async () => {
+      try {
+        setLoading(true);
+        // Fetch all freelancers
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/freelancers/getfreelancers-public`,
+          { cache: 'no-cache' }
+        );
 
+        if (!response.ok) throw new Error('Failed to fetch freelancers');
+
+        const data = await response.json();
+        const allFreelancers: FeaturedFreelancer[] = data.data || [];
+
+        // Filter to get only the featured ones
+        const featured = allFreelancers.filter((freelancer) =>
+          FEATURED_FREELANCER_IDS.includes(freelancer.user_id)
+        );
+
+        // Sort them in the order specified in FEATURED_FREELANCER_IDS
+        const sortedFeatured = FEATURED_FREELANCER_IDS.map((id) =>
+          featured.find((f) => f.user_id === id)
+        ).filter((f): f is FeaturedFreelancer => f !== undefined);
+
+        setFeaturedFreelancers(sortedFeatured);
+      } catch (error) {
+        console.error('Error fetching featured freelancers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedFreelancers();
+  }, []);
+
+  // Format skills display (show first 2-3 skills)
+  const formatSkills = (skills: string[]) => {
+    if (!skills || skills.length === 0) return 'Video Creator';
+    return skills.slice(0, 2).join(' | ');
+  };
+
+  // Format location
+  const formatLocation = (city: string | null, country: string | null) => {
+    if (city && country) return `${city}, ${country}`;
+    if (country) return country;
+    return '';
+  };
   return (
     <section className="top-company-section pt-100 lg-pt-60 pb-130 lg-pb-80 mt-200 xl-mt-150">
       <div className="container">
@@ -41,112 +101,75 @@ const TopCompany: React.FC<TopCompanyProps> = ({ featuredCreators }) => {
           </div>
           <div className="col-sm-5">
             <div className="d-flex justify-content-sm-end">
-              <a
-                href="/coming-soon"
-                className="btn-six d-none d-sm-inline-block"
-              >
+              <a href="/freelancers" className="btn-six d-none d-sm-inline-block">
                 Explore All Creators
               </a>
             </div>
           </div>
         </div>
 
-        <div className="row">
-          {displayCreators.length > 0 ? (
-            displayCreators.map((creator) => (
-              <div key={creator.id} className="col-lg-3 col-sm-6">
+        {loading ? (
+          <div className="row">
+            <div className="col-12 text-center py-5">
+              <div className="spinner-border text-success" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Loading featured creators...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="row">
+            {featuredFreelancers.map((freelancer) => (
+              <div key={freelancer.user_id} className="col-lg-3 col-sm-6">
                 <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                  {creator.profile_image ? (
-                    <img
-                      src={creator.profile_image}
-                      alt={creator.name}
-                      className="lazy-img m-auto"
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                    />
+                  {/* Profile Picture or Fallback Icon */}
+                  {freelancer.profile_picture ? (
+                    <div className="position-relative d-inline-block">
+                      <Image
+                        src={freelancer.profile_picture}
+                        alt={`${freelancer.first_name} ${freelancer.last_name}`}
+                        width={80}
+                        height={80}
+                        className="rounded-circle lazy-img m-auto"
+                        style={{ objectFit: 'cover' }}
+                        unoptimized
+                      />
+                    </div>
                   ) : (
                     <UserIcon />
                   )}
-                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
-                    {creator.name}
+                  
+                  {/* Name */}
+                  <div className="text-lg fw-500 text-dark mt-15 mb-10">
+                    {freelancer.first_name} {freelancer.last_name}
                   </div>
-                  <p className="mb-20">{creator.title || creator.bio || ""}</p>
+                  
+                  {/* Skills and Location */}
+                  <p className="mb-20 text-muted" style={{ minHeight: '48px' }}>
+                    {formatSkills(freelancer.skills)}
+                    {formatLocation(freelancer.city, freelancer.country) && (
+                      <>
+                        <br />
+                        <small>{formatLocation(freelancer.city, freelancer.country)}</small>
+                      </>
+                    )}
+                  </p>
+                  
+                  {/* View Profile Link */}
                   <a
-                    href={creator.portfolio_url || "/coming-soon"}
+                    href={`/freelancer-profile/${freelancer.user_id}`}
                     className="open-job-btn fw-500 tran3s"
                   >
-                    View Portfolio
+                    View Profile
                   </a>
                 </div>
               </div>
-            ))
-          ) : (
-            // Fallback to default data if no CMS data
-            <>
-              <div className="col-lg-3 col-sm-6">
-                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                  <UserIcon />
-                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
-                    Ria Sharra
-                  </div>
-                  <p className="mb-20">Wedding Film Editor | Mumbai, India</p>
-                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
-                    View Portfolio
-                  </a>
-                </div>
-              </div>
-              <div className="col-lg-3 col-sm-6">
-                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                  <UserIcon />
-                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
-                    Chen Li
-                  </div>
-                  <p className="mb-20">
-                    YouTube Video Specialist | Toronto, Canada
-                  </p>
-                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
-                    View services
-                  </a>
-                </div>
-              </div>
-              <div className="col-lg-3 col-sm-6">
-                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                  <UserIcon />
-                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
-                    Marcus V.
-                  </div>
-                  <p className="mb-20">
-                    Corporate Video Specialist | London, UK
-                  </p>
-                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
-                    View open jobs
-                  </a>
-                </div>
-              </div>
-              <div className="col-lg-3 col-sm-6">
-                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
-                  <UserIcon />
-                  <div className="text-lg fw-500 text-dark mt-15 mb-30">
-                    Aisha Khan
-                  </div>
-                  <p className="mb-20">Reels & Shorts Editor | Dubai, UAE</p>
-                  <a href="/coming-soon" className="open-job-btn fw-500 tran3s">
-                    View portfolio
-                  </a>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-30 d-sm-none">
-          <a href="/coming-soon" className="btn-six">
-            Explore More
-          </a>
+          <a href="/freelancers" className="btn-six">Explore More</a>
         </div>
       </div>
     </section>

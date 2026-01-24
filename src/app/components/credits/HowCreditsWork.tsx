@@ -37,10 +37,10 @@ const HowCreditsWork: React.FC = () => {
                         Keys are used to apply for projects on Make My Vid. Here&apos;s how it works:
                     </p>
 
-                    <div className="row">
+                    <div className="row justify-content-center">
                         {steps.map((step) => (
-                            <div key={step.number} className="col-md-4">
-                                <div className="text-center mt-25">
+                            <div key={step.number} className="col-lg-4 col-md-4 col-sm-12 mb-4 mb-md-0">
+                                <div className="text-center mt-25 position-relative">
                                     {/* Step Number Circle */}
                                     <div
                                         className="d-flex align-items-center justify-content-center mx-auto mb-15 position-relative"
@@ -92,20 +92,6 @@ const HowCreditsWork: React.FC = () => {
                                         {step.description}
                                     </p>
                                 </div>
-
-                                {/* Connector Line (except for last) */}
-                                {step.number < steps.length && (
-                                    <div
-                                        className="d-none d-md-block position-absolute"
-                                        style={{
-                                            top: "35px",
-                                            right: "-50%",
-                                            width: "100%",
-                                            height: "2px",
-                                            background: "linear-gradient(90deg, #D2F34C 0%, #e0e0e0 100%)",
-                                        }}
-                                    />
-                                )}
                             </div>
                         ))}
                     </div>

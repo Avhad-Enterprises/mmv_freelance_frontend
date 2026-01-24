@@ -33,7 +33,7 @@ const ApplyLoginModal: React.FC<ApplyLoginModalProps> = ({ onLoginSuccess }) => 
 
             <div className="text-center">
               <h2 id="applyLoginModalLabel">Login to Apply</h2>
-              <p className="mb-2">You need to be logged in to apply for this job.</p>
+              <p className="mb-2">You need to be logged in to apply for this project.</p>
               <p>
                 Don't have an account?{' '}
                 <Link href="/register" className="text-primary">

@@ -79,18 +79,35 @@ const FeatureEleven = () => {
 
               <div
                 className="video-post d-flex align-items-center justify-content-center mt-100 lg-mt-50 mb-50 lg-mb-30"
+                onClick={() => setIsVideoOpen(true)}
                 style={{
-                  backgroundImage: 'url(https://img.youtube.com/vi/XCHLXb1ycKE/maxresdefault.jpg)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
                   borderRadius: '12px',
                   minHeight: '400px',
-                  position: 'relative'
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'pointer'
                 }}
               >
-                <a onClick={() => setIsVideoOpen(true)} className="fancybox rounded-circle video-icon tran3s text-center cursor-pointer">
-                  <i className="bi bi-play"></i>
-                </a>
+                {/* Autoplay looping background video */}
+                <iframe
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '100%',
+                    height: '100%',
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '100%',
+                    minHeight: '100%',
+                    objectFit: 'cover',
+                    pointerEvents: 'none',
+                    border: 'none'
+                  }}
+                  src="https://www.youtube.com/embed/XCHLXb1ycKE?autoplay=1&mute=1&loop=1&playlist=XCHLXb1ycKE&controls=0&showinfo=0&modestbranding=1&rel=0"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                  title="Background Video"
+                />
               </div>
               <div className="border-bottom pb-50 lg-pb-10">
                 <div className="row">

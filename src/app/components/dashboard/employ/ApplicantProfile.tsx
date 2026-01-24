@@ -7,17 +7,20 @@ interface ApplicantProfileProps {
   selectedApplicant: IFreelancer | null;
   loadingProfile: boolean;
   onBackToApplicants: () => void;
+  onMessage?: (userId: number) => void;
 }
 
 const ApplicantProfile: React.FC<ApplicantProfileProps> = ({
   selectedApplicant,
   loadingProfile,
-  onBackToApplicants
+  onBackToApplicants,
+  onMessage
 }) => {
   return (
     <CandidateDetailsArea
       freelancer={selectedApplicant}
       loading={loadingProfile}
+      onMessage={onMessage}
     />
   );
 };

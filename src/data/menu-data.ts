@@ -18,9 +18,9 @@ const menu_data: IMenuData[] = [
   {
     id: 2,
     link: '/job-list',
-    title: 'Jobs',
+    title: 'Projects',
     sub_menus: [
-      { link: '/job-list', title: 'Job List style -1' },
+      { link: '/job-list', title: 'Project List style -1' },
       // {link:'/job-list-v2',title:'Job List style -2'},
       // {link:'/job-list-v3',title:'Job List style -3'},
       // {link:'/job-grid',title:'Job Grid style -1'},
@@ -41,14 +41,8 @@ const menu_data: IMenuData[] = [
   },
   {
     id: 4,
-    link: '/coming-soon',
+    link: '/blog',
     title: 'Blog',
-    sub_menus: [
-      { link: '/coming-soon', title: 'Blog' },
-      // {link:'/coming-soon',title:'Blog Grid'},
-      // {link:'/blog-v3',title:'Full width'},
-      // {link:'/blog-details',title:'Blog Details'},
-    ]
   },
   {
     id: 6,
