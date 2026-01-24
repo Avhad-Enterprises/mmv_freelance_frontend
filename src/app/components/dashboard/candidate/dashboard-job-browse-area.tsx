@@ -39,6 +39,11 @@ const DashboardJobBrowseArea = () => {
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [loadingSkills, setLoadingSkills] = useState<boolean>(true);
+  
+  // EMC Recommendation state
+  const [isFreelancer, setIsFreelancer] = useState<boolean>(false);
+  const [freelancerSuperpowers, setFreelancerSuperpowers] = useState<string[]>([]);
+  const [recommendedCount, setRecommendedCount] = useState<number>(0);
 
   const itemsPerPage = 10;
 
@@ -62,13 +67,51 @@ const DashboardJobBrowseArea = () => {
           }
         }
 
-        const [jobsRes, userRes] = await Promise.all([
-          makeGetRequest("api/v1/projects-tasks/listings"),
-          makeGetRequest("api/v1/users/me"),
-        ]);
+        let jobsData: IJobType[] = [];
+        
+        // Check if user is a freelancer (VIDEO_EDITOR or VIDEOGRAPHER)
+        const userRoles = decoded?.roles || [];
+        const freelancerRoles = ['VIDEO_EDITOR', 'VIDEOGRAPHER'];
+        const userIsFreelancer = userRoles.some((role: string) => 
+          freelancerRoles.includes(role.toUpperCase())
+        );
+        setIsFreelancer(userIsFreelancer);
+        
+        // Debug logging for EMC
+        console.log('[EMC Debug] decoded token:', decoded);
+        console.log('[EMC Debug] userRoles:', userRoles);
+        console.log('[EMC Debug] userIsFreelancer:', userIsFreelancer);
 
-        const jobsData = jobsRes.data.data || [];
+        if (userIsFreelancer && decoded?.user_id) {
+          // Use EMC Recommendation API for freelancers
+          try {
+            console.log('[EMC Debug] Calling EMC API...');
+            const emcResponse = await makeGetRequest("api/v1/emc/recommended-projects");
+            console.log('[EMC Debug] EMC Response:', emcResponse.data);
+            if (emcResponse.data?.success) {
+              jobsData = emcResponse.data.data || [];
+              setFreelancerSuperpowers(emcResponse.data.meta?.freelancerSuperpowers || []);
+              setRecommendedCount(emcResponse.data.meta?.recommendedCount || 0);
+            } else {
+              // Fallback to regular listings if EMC fails
+              const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+              jobsData = jobsRes.data.data || [];
+            }
+          } catch (emcError) {
+            console.log("EMC API not available, falling back to regular listings");
+            const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+            jobsData = jobsRes.data.data || [];
+          }
+        } else {
+          // Regular listings for clients or guests
+          const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
+          jobsData = jobsRes.data.data || [];
+        }
+
         setAllJobs(jobsData);
+
+        // Fetch user data
+        const userRes = await makeGetRequest("api/v1/users/me");
 
         // Get user currency
         const userData = userRes.data?.data;
@@ -228,7 +271,17 @@ const DashboardJobBrowseArea = () => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
     return (
-      <div className={`candidate-profile-card list-layout mb-25`}>
+      <div className={`candidate-profile-card list-layout mb-25 ${item.isRecommended ? 'border-success' : ''}`} style={item.isRecommended ? { borderLeft: '4px solid #28a745' } : {}}>
+        {/* EMC Recommended Badge - Works for both Video Editor and Videographer */}
+        {/* {item.isRecommended && (
+          <span
+            className="badge bg-success d-flex align-items-center gap-1 position-absolute"
+            style={{ fontSize: '11px', padding: '5px 10px', top: '10px', right: '60px', zIndex: 10 }}
+            title={`Matches your superpower: ${item.matchedCategory}`}
+          >
+            <i className="bi bi-star-fill"></i> Recommended
+          </span>
+        )} */}
         <div className="d-flex">
           <div className="cadidate-avatar online position-relative d-block me-auto ms-auto">
             <a onClick={() => setSelectedJob(item)} className="rounded-circle cursor-pointer">
@@ -259,6 +312,13 @@ const DashboardJobBrowseArea = () => {
                         : ""}
                     </a>
                   </h4>
+                  {/* Show matched category below title */}
+                  {item.isRecommended && item.matchedCategory && (
+                    <small className="text-success d-block mt-1" style={{ fontSize: '11px' }}>
+                      <i className="bi bi-check-circle-fill me-1"></i>
+                      Matches: {item.matchedCategory}
+                    </small>
+                  )}
                 </div>
               </div>
               <div className="col-lg-2 col-md-4 col-sm-6">
@@ -330,7 +390,20 @@ const DashboardJobBrowseArea = () => {
     const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
 
     return (
-      <div className={`candidate-profile-card grid-layout d-flex flex-column`} style={{ minHeight: '100%' }}>
+      <div 
+        className={`candidate-profile-card grid-layout d-flex flex-column ${item.isRecommended ? 'border-success' : ''}`} 
+        style={{ minHeight: '100%', ...(item.isRecommended ? { borderTop: '3px solid #28a745' } : {}) }}
+      >
+        {/* EMC Recommended Badge */}
+        {item.isRecommended && (
+          <span
+            className="badge bg-success d-flex align-items-center gap-1 position-absolute"
+            style={{ fontSize: '10px', padding: '4px 8px', top: '10px', left: '10px', zIndex: 10 }}
+            title={`Matches your superpower: ${item.matchedCategory}`}
+          >
+            <i className="bi bi-star-fill"></i> Recommended
+          </span>
+        )}
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
@@ -364,6 +437,13 @@ const DashboardJobBrowseArea = () => {
               {project_title}
             </a>
           </h4>
+          {/* Show matched category below title */}
+          {item.isRecommended && item.matchedCategory && (
+            <small className="text-success d-block mb-2" style={{ fontSize: '11px' }}>
+              <i className="bi bi-check-circle-fill me-1"></i>
+              Matches: {item.matchedCategory}
+            </small>
+          )}
 
           <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
             {item.skills_required && item.skills_required.slice(0, 2).map((s, i) => (
@@ -672,11 +752,40 @@ const DashboardJobBrowseArea = () => {
             </div>
           </div>
 
+          {/* EMC Recommendation Banner - Only for Freelancers */}
+          {isFreelancer && recommendedCount > 0 && (
+            <div 
+              className="alert d-flex align-items-center mb-20" 
+              role="alert"
+              style={{ 
+                backgroundColor: '#e8f5e9', 
+                border: '1px solid #28a745',
+                borderRadius: '10px',
+                padding: '15px 20px'
+              }}
+            >
+              <i className="bi bi-star-fill text-success me-3" style={{ fontSize: '24px' }}></i>
+              <div>
+                <strong className="text-success">
+                  {recommendedCount} Recommended Project{recommendedCount > 1 ? 's' : ''} for You!
+                </strong>
+                <p className="mb-0 text-muted" style={{ fontSize: '13px' }}>
+                  Based on your superpowers: {freelancerSuperpowers.join(', ')}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Jobs Display Area */}
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
               <div className="total-job-found">
                 All <span className="text-dark fw-500">{filterItems.length}</span> projects found
+                {isFreelancer && recommendedCount > 0 && (
+                  <span className="text-success ms-2">
+                    ({recommendedCount} recommended)
+                  </span>
+                )}
               </div>
             </div>
 

@@ -49,7 +49,10 @@ export interface IJobType {
   freelancer_profile_title?: string;
   freelancer_experience_level?: string;
 
-
+  // EMC Recommendation fields
+  matchScore?: number;
+  isRecommended?: boolean;
+  matchedCategory?: string | null;
 
   // UI-specific or fallback fields (may not come from API)
   logo?: any; // optional - for placeholder logo
