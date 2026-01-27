@@ -97,7 +97,7 @@ const TopCompany = ({ creators = [] }: TopCompanyProps) => {
   // Use return null to hide section if no creators.
 
   return (
-    <section className="top-company-section pt-100 lg-pt-60 pb-130 lg-pb-80 mt-200 xl-mt-150">
+    <section className="top-company-section pt-100 lg-pt-60 pb-130 lg-pb-80 mt-80 xl-mt-60">
       <div className="container">
         <div className="row justify-content-between align-items-center pb-40 lg-pb-10">
           <div className="col-sm-7">

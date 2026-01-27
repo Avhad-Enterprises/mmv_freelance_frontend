@@ -15,12 +15,12 @@ const FeatureTen: React.FC<FeatureTenProps> = ({ whyChooseUsData }) => {
   // Extract points into an array for easier rendering
   const points = data
     ? [
-        { title: data.point_1, description: data.point_1_description },
-        { title: data.point_2, description: data.point_2_description },
-        { title: data.point_3, description: data.point_3_description },
-        { title: data.point_4, description: data.point_4_description },
-        { title: data.point_5, description: data.point_5_description },
-      ].filter((p) => p.title || p.description)
+      { title: data.point_1, description: data.point_1_description },
+      { title: data.point_2, description: data.point_2_description },
+      { title: data.point_3, description: data.point_3_description },
+      { title: data.point_4, description: data.point_4_description },
+      { title: data.point_5, description: data.point_5_description },
+    ].filter((p) => p.title || p.description)
     : [];
 
   return (
@@ -86,9 +86,9 @@ const FeatureTen: React.FC<FeatureTenProps> = ({ whyChooseUsData }) => {
                   </>
                 )}
               </div>
-              <Link href="/coming-soon" className="btn-five mt-45 md-mt-30">
+              {/* <Link href="/coming-soon" className="btn-five mt-45 md-mt-30">
                 Learn More
-              </Link>
+              </Link> */}
             </div>
           </div>
           <div className="col-lg-7 col-md-11 m-auto order-lg-first">
