@@ -1,17 +1,12 @@
 "use client";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { isYouTubeURL, validateYouTubeURL, validatePortfolioLinks } from "@/utils/validation";
 
 type Props = {
   formData: any;
   nextStep: (data: Partial<any>) => void;
   prevStep: () => void;
-};
-
-const isYouTubeUrl = (url: string) => {
-  if (!url) return false;
-  const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
-  return youtubeRegex.test(url);
 };
 
 const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => {
@@ -38,7 +33,17 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
     register("portfolio_links", {
       validate: (value) => {
         const links = value || [];
-        return links.some((l: string) => isYouTubeUrl(l)) || "At least one valid YouTube link is required";
+        const validation = validatePortfolioLinks(links, true);
+        if (!validation.hasValidYouTubeLink) {
+          return "At least one valid YouTube link is required";
+        }
+        // Check individual links for errors
+        for (let i = 0; i < links.length; i++) {
+          if (validation.errors[i]) {
+            return validation.errors[i];
+          }
+        }
+        return true;
       }
     });
   }, [register]);
@@ -171,12 +176,19 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
   };
 
   const handlePortfolioBlur = (index: number, value: string) => {
-    if (value && !isYouTubeUrl(value)) {
-      console.error("Only YouTube links are accepted.");
+    if (value && !isYouTubeURL(value)) {
+      // Show error message to user
+      const errorMessage = "Only YouTube links are accepted. Please enter a valid YouTube URL (e.g., https://youtube.com/watch?v=... or https://youtu.be/...)";
+      console.error(errorMessage);
+      
+      // Clear the invalid input
       const currentLinks = watch("portfolio_links") || ["", "", ""];
       const updated = [...currentLinks];
       updated[index] = "";
       setValue("portfolio_links", updated);
+      
+      // You can also show a toast notification here if desired
+      // toast.error(errorMessage);
     }
   };
 
@@ -401,7 +413,7 @@ const VideoEditorStep2: React.FC<Props> = ({ formData, nextStep, prevStep }) => 
             <div key={idx} className="input-group-meta position-relative mb-2 uniform-height">
               <input
                 type="url"
-                className={`form-control ${link && !isYouTubeUrl(link) ? 'is-invalid' : ''}`}
+                className={`form-control ${link && !isYouTubeURL(link) ? 'is-invalid' : ''}`}
                 style={{ height: '60px', minHeight: '60px' }}
                 placeholder="https://www.youtube.com/..."
                 title="Please enter a valid URL"

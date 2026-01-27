@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { Country } from "country-state-city";
 import { VideoEditorFormData } from "../../MultiStepRegisterForm";
+import { validatePortfolioLinks } from '@/utils/validation';
 
 // Define the FormData interface for type safety
 interface FormData {
@@ -56,6 +57,21 @@ const VideoEditorFinalReview: React.FC<Props> = ({ formData, prevStep, handleReg
 
     if (!privacyAccepted) {
       toast.error('Please accept the Privacy Policy to continue');
+      return;
+    }
+
+    // Validate portfolio links before submission
+    const portfolioLinks: string[] = (formData.portfolio_links || []).filter((l: string) => !!l);
+    const portfolioValidation = validatePortfolioLinks(portfolioLinks, true);
+    
+    if (!portfolioValidation.hasValidYouTubeLink) {
+      toast.error('At least one valid YouTube portfolio link is required');
+      return;
+    }
+    
+    if (!portfolioValidation.isValid) {
+      const firstError = portfolioValidation.errors.find(error => error);
+      toast.error(firstError || 'Please provide valid YouTube portfolio links');
       return;
     }
 

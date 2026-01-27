@@ -1,5 +1,8 @@
+@use "mixins";
+@use "variables";
+
 .candidates-profile.bg-color {
-    background: $light-bg;
+    background: variables.$light-bg;
 }
 
 .candidate-profile-card {
@@ -8,7 +11,7 @@
     border-radius: 10px;
     position: relative;
     border: 1px solid rgba($color: #244034, $alpha: 0.1);
-    @include transition (0.2s);
+    @include mixins.transition (0.2s);
 
     &:hover {
         box-shadow: 0px 20px 35px rgba(22, 105, 70, 0.05);
@@ -31,7 +34,7 @@
             font-size: 18px;
 
             &:hover {
-                color: $color-three;
+                color: variables.$color-three;
             }
         }
 
@@ -61,7 +64,7 @@
         position: absolute;
         width: 60px;
         height: 60px;
-        background: $color-five;
+        background: variables.$color-five;
         top: -30px;
         left: -30px;
         transform: rotate(45deg);
@@ -107,7 +110,7 @@
         font-size: 18px;
 
         a:hover {
-            color: $color-three;
+            color: variables.$color-three;
         }
     }
 
@@ -130,7 +133,7 @@
             background: rgba($color: #31795A, $alpha: 0.1);
 
             &.more {
-                background: $color-two;
+                background: variables.$color-two;
                 color: #000;
             }
         }
@@ -138,13 +141,13 @@
 
     .candidate-info span {
         font-size: 15px;
-        color: rgba($color: $color-one, $alpha: 0.6);
+        color: rgba($color: variables.$color-one, $alpha: 0.6);
     }
 
     .candidate-info div {
         font-size: 15px;
         font-weight: 500;
-        color: $color-one;
+        color: variables.$color-one;
         margin: 2px 0 0;
     }
 
@@ -154,13 +157,13 @@
         letter-spacing: -0.5px;
         line-height: 40px;
         color: #fff;
-        background: $color-five;
+        background: variables.$color-five;
         text-align: center;
         padding: 0 18px;
         border-radius: 40px;
 
         &:hover {
-            background: $color-three;
+            background: variables.$color-three;
         }
     }
 
@@ -169,15 +172,15 @@
         font-weight: 500;
         letter-spacing: -0.5px;
         line-height: 38px;
-        color: $color-five;
-        border: 1px solid $color-five;
+        color: variables.$color-five;
+        border: 1px solid variables.$color-five;
         text-align: center;
         padding: 0 15px;
         border-radius: 40px;
 
         &:hover {
-            background: $color-three;
-            border-color: $color-three;
+            background: variables.$color-three;
+            border-color: variables.$color-three;
             color: #fff;
         }
     }
@@ -202,13 +205,13 @@
             line-height: 40px;
             border: 1px solid #E4E4E4;
             font-weight: 900;
-            color: $color-five;
+            color: variables.$color-five;
             font-size: 18px;
 
             &:hover {
                 color: #fff;
-                background: $color-five;
-                border-color: $color-five;
+                background: variables.$color-five;
+                border-color: variables.$color-five;
             }
         }
     }
@@ -256,14 +259,14 @@
         .video-icon {
             width: 65px;
             height: 65px;
-            background: $color-two;
+            background: variables.$color-two;
             color: #000;
             font-size: 45px;
             line-height: 65px;
             padding-left: 7px;
 
             &:hover {
-                background: $color-three;
+                background: variables.$color-three;
                 color: #fff;
             }
         }
@@ -293,8 +296,8 @@
         .numb {
             width: 45px;
             height: 45px;
-            color: $color-five;
-            border: 1px solid $color-five;
+            color: variables.$color-five;
+            border: 1px solid variables.$color-five;
             position: absolute;
             left: 0;
             top: 3px;
@@ -302,7 +305,7 @@
 
         .text_1 {
             font-size: 14px;
-            color: $color-five;
+            color: variables.$color-five;
         }
 
         h4 {
@@ -317,7 +320,7 @@
 
         li {
             font-size: 16px;
-            color: $color-four;
+            color: variables.$color-four;
             margin: 18px 8px 0;
             line-height: 45px;
             padding: 0 30px;
@@ -331,7 +334,7 @@
                 padding: 0;
                 color: #000;
                 text-align: center;
-                background: $color-two;
+                background: variables.$color-two;
             }
         }
     }
@@ -352,7 +355,7 @@
         padding: 0 20px 25px;
 
         &.bg-color {
-            background: $light-bg;
+            background: variables.$light-bg;
         }
     }
 
@@ -381,18 +384,18 @@
 
             span {
                 font-size: 15px;
-                color: rgba($color: $color-one, $alpha: 0.6);
+                color: rgba($color: variables.$color-one, $alpha: 0.6);
             }
 
             div {
                 font-size: 15px;
                 font-weight: 500;
-                color: $color-one;
+                color: variables.$color-one;
                 margin: 4px 0 0;
 
                 a:hover {
                     text-decoration: underline;
-                    color: $color-one;
+                    color: variables.$color-one;
                 }
             }
         }
@@ -420,7 +423,7 @@
         label {
             font-size: 13px;
             font-weight: 500;
-            color: $color-five;
+            color: variables.$color-five;
             width: 65px;
             display: inline;
         }

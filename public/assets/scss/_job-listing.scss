@@ -1,3 +1,6 @@
+@use "mixins";
+@use "variables";
+
 // Filter Area
 .accordion-box {
     display: none;
@@ -17,7 +20,7 @@
         box-shadow: none;
     }
     .filter-header {
-        background: $light-bg;
+        background: variables.$light-bg;
         padding-top: 25px;
         padding-bottom: 25px;
         &:before {
@@ -34,8 +37,8 @@
             right: 25px;
             top:27px;
             text-align: center;
-            color: $color-five;
-            @include transition(0.2s);
+            color: variables.$color-five;
+            @include mixins.transition(0.2s);
         }
         &.search:before {
             display: none;
@@ -45,7 +48,7 @@
         }
     }
     .light-bg {
-        background: $light-bg;
+        background: variables.$light-bg;
     }
     .main-title {
         font-size: 25px;
@@ -111,10 +114,10 @@
         }
     }
     .loccation-range-select {
-        color: $color-five;
+        color: variables.$color-five;
         font-size: 15px;
         input[type='range'] {
-            background: $color-five;
+            background: variables.$color-five;
             border-radius: 8px;
             height: 7px;
             width: 100%;
@@ -128,7 +131,7 @@
             width: 14px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid $color-three;
+            border: 2px solid variables.$color-three;
             cursor: pointer;
             pointer-events: auto;
             appearance:none;
@@ -139,7 +142,7 @@
             width: 14px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid $color-three;
+            border: 2px solid variables.$color-three;
             cursor: pointer;
             pointer-events: auto;
             appearance:none;
@@ -154,7 +157,7 @@
             font-size: 15px;
             line-height: 35px;
             padding-left: 28px;
-            @include transition(0.1s);
+            @include mixins.transition(0.1s);
             &::before {
                 content: '';
                 width: 16px;
@@ -170,7 +173,7 @@
                 top:9px;
                 font-family: "bootstrap-icons";
                 font-weight: 900;
-                @include transition(0.1s);
+                @include mixins.transition(0.1s);
             }
             span {
                 font-size: 11px;
@@ -197,16 +200,16 @@
         }
         input[type="checkbox"]:checked + label:before {
             content: "\f633";
-            background: $color-five;
+            background: variables.$color-five;
             color: #fff;
-            border-color:  $color-five;
+            border-color:  variables.$color-five;
         }
         input[type="checkbox"]:checked + label {
-            background: rgba($color: $color-five, $alpha: 0.02);
+            background: rgba($color: variables.$color-five, $alpha: 0.02);
         }
         &:hover label {
-            color: $color-five;
-            background: rgba($color: $color-five, $alpha: 0.02);
+            color: variables.$color-five;
+            background: rgba($color: variables.$color-five, $alpha: 0.02);
         }
     }
     .filter-input .hide {
@@ -222,16 +225,16 @@
         line-height: 28px;
         font-weight: 500;
         cursor: pointer;
-        background: rgba($color: $color-one, $alpha: 0.6);
+        background: rgba($color: variables.$color-one, $alpha: 0.6);
         text-align: center;
         border-radius: 5px;
-        @include transition(0.2s);
+        @include mixins.transition(0.2s);
         i {
             font-size: 18px;
             vertical-align: -4px;
         }
         &:hover {
-            background: $color-three;
+            background: variables.$color-three;
             color: #fff;
         }
     }
@@ -274,7 +277,7 @@
             right: 70%;
             position: absolute;
             border-radius: 7px;
-            background: $color-three;
+            background: variables.$color-three;
         }
         .range-input {
             position: relative;
@@ -294,7 +297,7 @@
             width: 12px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid $color-three;
+            border: 2px solid variables.$color-three;
             cursor: pointer;
             pointer-events: auto;
             appearance:none;
@@ -305,7 +308,7 @@
             width: 12px;
             border-radius: 50%;
             background: #fff;
-            border: 2px solid $color-three;
+            border: 2px solid variables.$color-three;
             cursor: pointer;
             pointer-events: auto;
             appearance:none;
@@ -322,10 +325,10 @@
             font-weight: 500;
             line-height: 20px;
             background: #fff;
-            color: $color-five;
+            color: variables.$color-five;
             border-radius: 30px;
             padding: 0 12px;
-            @include transition(0.1s);
+            @include mixins.transition(0.1s);
         }
         input[type="radio"],
         input[type="checkbox"] {
@@ -339,7 +342,7 @@
         }
         input[type="radio"]:checked + label,
         input[type="checkbox"]:checked + label {
-            background: $color-five;
+            background: variables.$color-five;
             color: #fff;
         }
     }
@@ -366,10 +369,10 @@
 }
 .filter-btn {
     font-size: 15px;
-    color: $color-one;
+    color: variables.$color-one;
     width: 86px;
     height: 32px;
-    border: 2px solid $color-one;
+    border: 2px solid variables.$color-one;
     border-radius: 6px;
     i {
         display: inline-block;
@@ -378,7 +381,7 @@
         margin-right: 2px;
     }
     &:hover {
-        background: $color-one;
+        background: variables.$color-one;
         color: #fff;
     }
 }
@@ -417,8 +420,8 @@
         display: none;
         &:hover {
             color: #fff;
-            background: $color-five;
-            border-color: $color-five;
+            background: variables.$color-five;
+            border-color: variables.$color-five;
         }
         &.active {
             display: block;
@@ -427,10 +430,10 @@
 }
 .bg-color .upper-filter .nice-select {
     background: transparent;
-    border-color: $color-one;
+    border-color: variables.$color-one;
 }
 .bg-color .upper-filter .style-changer-btn {
-    border-color: $color-one;
+    border-color: variables.$color-one;
 }
 // Modal Filter
 .popUpModal .modal-content {
@@ -481,7 +484,7 @@
         width: calc(100% - 90px);
         margin-left: 30px;
         &:hover {
-            color: $color-three;
+            color: variables.$color-three;
         }
     }
     .split-box1 {
@@ -494,7 +497,7 @@
     }
     .job-duration {
         font-size: 15px;
-        color: $color-three;
+        color: variables.$color-three;
         &:hover {
             text-decoration: underline;
         }
@@ -540,7 +543,7 @@
         &:hover {
             background: #E7F6EF;
             border-color: #E7F6EF;
-            color: $color-four;
+            color: variables.$color-four;
         }
     }
     .apply-btn {
@@ -552,22 +555,22 @@
         color: #fff;
         text-transform: uppercase;
         border-radius: 17px;
-        background: $color-three;
+        background: variables.$color-three;
         &:hover {
-            background: $color-four;
+            background: variables.$color-four;
         }
     }
     &.style-two {
         padding-top: 35px;
         padding-bottom: 35px;
         .apply-btn {
-            background: $color-five;
+            background: variables.$color-five;
             &:hover {
-                background: $color-three;
+                background: variables.$color-three;
             }
         }
         .title:hover {
-            color: $color-five;
+            color: variables.$color-five;
         }
     }
     
@@ -581,7 +584,7 @@
     padding-bottom: 6px;
     position: relative;
     cursor: pointer;
-    @include transition(0.1s);
+    @include mixins.transition(0.1s);
     &::before {
         content: '';
         position: absolute;
@@ -589,21 +592,21 @@
         height: 1px;
         left: 0;
         bottom: 0;
-        background: $color-three;
+        background: variables.$color-three;
         opacity: 0;
-        @include transition(0.1s);
+        @include mixins.transition(0.1s);
     }
     &.is-checked:before {
         opacity: 1;
     }
     &.is-checked {
-       color: $color-three; 
+       color: variables.$color-three; 
     }
     &:first-child {margin-left: 0;}
 }
 // Job Listing Two
 .job-listing-two {
-    background: $light-bg;
+    background: variables.$light-bg;
 }
 .job-list-two {
     padding: 35px 35px 30px;
@@ -613,7 +616,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    @include transition(0.2s);
+    @include mixins.transition(0.2s);
     &:hover {
         box-shadow: 0px 20px 40px rgba(22, 105, 70, 0.08);
     }
@@ -626,7 +629,7 @@
     }
     .job-duration {
        font-size: 13px;
-       color: $color-three;
+       color: variables.$color-three;
        padding: 2px 12px;
        background: #E7F6EF;
        border-radius: 3px;
@@ -641,7 +644,7 @@
        line-height: 1.416em;
        color: #000;
        &:hover {
-        color: $color-three;
+        color: variables.$color-three;
        }
     }
     .job-date {
@@ -671,9 +674,9 @@
         color: #fff;
         text-transform: uppercase;
         border-radius: 17px;
-        background: $color-three;
+        background: variables.$color-three;
         &:hover {
-            background: $color-four;
+            background: variables.$color-four;
         }
     }
     .save-btn {
@@ -689,7 +692,7 @@
         &:hover {
             background: #E7F6EF;
             border-color: #E7F6EF;
-            color: $color-four;
+            color: variables.$color-four;
         }
     }
 
@@ -697,38 +700,38 @@
         border: 1px solid #EBEBEB;
         &:hover {
             background: #F8FDE4;
-            border-color: $color-five;
+            border-color: variables.$color-five;
             box-shadow: none;
         }
         .job-duration {
             background: #E7F6EF;
-            color: $color-five;
+            color: variables.$color-five;
             &.part-time {
                 background: rgba($color: #FF5757, $alpha: 0.08);
                 color: #FF6060;
             }
         }
         .title:hover {
-            color: $color-five;
+            color: variables.$color-five;
         }
         .apply-btn {
-            background: $color-five;
+            background: variables.$color-five;
             &:hover {
-                background: $color-three;
+                background: variables.$color-three;
             }
         }
     }
 }
 // Job Listing Three
 .job-listing-three.bg-color {
-    background: $light-bg;
+    background: variables.$light-bg;
 }
 .job-list-three {
     background: #fff;
     border: 1px solid #EBEBEB;
     border-radius: 10px;
     padding: 28px 40px 30px;
-    @include transition(0.2s);
+    @include mixins.transition(0.2s);
     &:hover {
         box-shadow: 0px 20px 40px rgba(22, 105, 70, 0.08);
     }
@@ -754,7 +757,7 @@
             color: #000;
             margin-bottom: 7px;
             &:hover {
-                color: $color-five;
+                color: variables.$color-five;
             }
         }
         .info-data li {
@@ -789,7 +792,7 @@
             &:hover {
                 background: #E7F6EF;
                 border-color: #E7F6EF;
-                color: $color-four;
+                color: variables.$color-four;
             }
         }
         p {
@@ -803,7 +806,7 @@
         }
         .job-duration {
             font-size: 14px;
-            color: $color-three;
+            color: variables.$color-three;
             &:hover {
                 text-decoration: underline;
             }
@@ -820,9 +823,9 @@
             color: #fff;
             text-transform: uppercase;
             border-radius: 17px;
-            background: $color-five;
+            background: variables.$color-five;
             &:hover {
-                background: $color-four;
+                background: variables.$color-four;
             }
         }
     }
@@ -831,7 +834,7 @@
 .job-company-info {
     border-radius: 20px;
     padding: 50px 20px 30px;
-    background: $light-bg;
+    background: variables.$light-bg;
     .logo {
         height: 60px;
     }
@@ -844,10 +847,10 @@
         font-weight: 500;
         letter-spacing: -0.5px;
         color: #fff;
-        background: $color-one;
+        background: variables.$color-one;
         border-radius: 30px;
         &:hover {
-            background: $color-five;
+            background: variables.$color-five;
         }
     }
     .website-btn-two {
@@ -857,21 +860,21 @@
         text-decoration: underline;
         color: #008FDF;
         &:hover {
-            color: $color-five;
+            color: variables.$color-five;
         }
     }
     .job-meta-data span {
         font-size: 15px;
-        color: rgba($color: $color-one, $alpha: 0.6);
+        color: rgba($color: variables.$color-one, $alpha: 0.6);
     }
     .job-meta-data div {
         font-size: 15px;
         font-weight: 500;
-        color: $color-one;
+        color: variables.$color-one;
         margin: 4px 0 25px;
         a:hover {
             text-decoration: underline;
-            color: $color-one;
+            color: variables.$color-one;
         }
     }
     .job-tags {
@@ -885,10 +888,10 @@
             border-radius: 30px;
             margin: 0 4px 8px;
             padding: 0 11px;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             &:hover {
-                background: $color-one;
-                border-color: $color-one;
+                background: variables.$color-one;
+                border-color: variables.$color-one;
                 color: #fff;
             }
         }
@@ -897,7 +900,7 @@
 .job-details {
     position: relative;
     &.style-two {
-        background: $light-bg;
+        background: variables.$light-bg;
     }
     .post-date {
         color: rgba($color: #000000, $alpha: 0.5);
@@ -915,19 +918,19 @@
         a {
             font-size: 14px;
             font-weight: 500;
-            color: $color-one;
+            color: variables.$color-one;
             line-height: 33px;
             border-radius: 5px;
             padding: 0 15px;
             margin-top: 5px;
             background: rgba($color: #31795A, $alpha: 0.12);
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             i {
                 font-size: 13px;
                 margin-right: 7px;
             }
             &:hover {
-                background: $color-one;
+                background: variables.$color-one;
                 color: #fff;
             }
         }
@@ -947,7 +950,7 @@
         height: 25px;
         line-height: 25px;
         font-size: 14px;
-        background: $color-five;
+        background: variables.$color-five;
     }
     p {
         font-size: 17px;
@@ -956,9 +959,9 @@
             font-weight: 500;
             text-decoration: underline;
             color: #000;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             &:hover {
-                color: $color-three;
+                color: variables.$color-three;
             }
         }
     }
@@ -974,7 +977,7 @@
             position: absolute;
             left: 0;
             top:0;
-            color: $color-five;
+            color: variables.$color-five;
         }
     }
     .border-style .list-type-one li:before {
@@ -1009,12 +1012,12 @@
                 font-size: 15px;
                 display: block;
                 margin: 48px 0 4px;
-                color: rgba($color: $color-one, $alpha: 0.6);
+                color: rgba($color: variables.$color-one, $alpha: 0.6);
             }
             div {
                 font-size: 15px;
                 font-weight: 500;
-                color: $color-one;
+                color: variables.$color-one;
             }
         }
     }
@@ -1022,7 +1025,7 @@
 }
 // Related Job Slider
 .related-job-section {
-    background: $light-bg;
+    background: variables.$light-bg;
     .slick-arrow-one {
         position: absolute;
         right: 0;

@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "message": "Mock categories",
+  "data": [
+    { "category_name": "Videography", "is_active": true },
+    { "category_name": "Video Editing", "is_active": true },
+    { "category_name": "Animation", "is_active": false }
+  ]
+}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -9,7 +9,8 @@ import ChatList from "@/app/dashboard/client-dashboard/messages/ChatList";
 import EmptyChat from "@/app/dashboard/client-dashboard/messages/EmptyChat";
 import InlineThreadView from "@/app/dashboard/client-dashboard/messages/InlineThreadView";
 
-export default function FreelancerChatPage() {
+// Rename existing component
+const FreelancerChatContent = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const searchParams = useSearchParams();
@@ -91,5 +92,24 @@ export default function FreelancerChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function FreelancerChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="dashboard-body">
+        <div className="position-relative">
+          <DashboardHeader />
+          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 400 }}>
+            <div className="spinner-border text-success" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <FreelancerChatContent />
+    </Suspense>
   );
 }

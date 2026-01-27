@@ -1,6 +1,6 @@
 // CandidateClientView.tsx
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import Header from '@/layouts/headers/header';
 import Wrapper from '@/layouts/wrapper';
 import CandidateV1Area from '../components/candidate/candidate-v1-area';
@@ -13,7 +13,9 @@ const CandidateClientView = () => {
         <Header />
 
         {/* ✅ 2. Pass down the state and the handler function as props */}
-        <CandidateV1Area />
+        <Suspense fallback={<div className="text-center py-20">Loading...</div>}>
+          <CandidateV1Area />
+        </Suspense>
 
         <FooterOne />
       </div>

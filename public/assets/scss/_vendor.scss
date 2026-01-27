@@ -1,3 +1,5 @@
+@use "variables";
+
 .nice-select {
     -webkit-tap-highlight-color: transparent;
     background-color: #fff;
@@ -147,8 +149,8 @@
 .nice-select .option:hover,
 .nice-select .option.focus,
 .nice-select .option.selected.focus {
-    color: $color-three;
-    background: rgba($color: $color-one, $alpha: 0.03);
+    color: variables.$color-three;
+    background: rgba($color: variables.$color-one, $alpha: 0.03);
 }
 
 .nice-select .option.disabled {
@@ -1082,7 +1084,7 @@ body.compensate-for-scrollbar {
 }
 
 .slick-dots .slick-active button {
-    background: $color-three;
+    background: variables.$color-three;
 }
 
 .slick-list {

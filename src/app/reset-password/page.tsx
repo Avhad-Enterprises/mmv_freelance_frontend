@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Header from "@/layouts/headers/header";
 import Wrapper from "@/layouts/wrapper";
@@ -23,7 +23,9 @@ const ResetPasswordPage = () => {
     <Wrapper>
       <div className="paddingTop: '1rem'">
         <Header />
-        <ResetPasswordArea />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ResetPasswordArea />
+        </Suspense>
         <FooterOne />
       </div>
     </Wrapper>

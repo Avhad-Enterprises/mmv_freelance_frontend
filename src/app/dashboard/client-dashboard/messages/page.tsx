@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import Box from "@mui/material/Box";
@@ -11,7 +11,8 @@ import InlineThreadView from "./InlineThreadView";
 import Typography from "@mui/material/Typography";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 
-export default function ClientMessagesPage() {
+// Rename existing component
+const ClientMessagesContent = () => {
   const { userData, isLoading } = useUser();
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
@@ -106,5 +107,24 @@ export default function ClientMessagesPage() {
         </div>
       </div>
     </div>
+  );
+};
+
+export default function ClientMessagesPage() {
+  return (
+    <Suspense fallback={
+      <div className="dashboard-body">
+        <div className="position-relative">
+          <DashboardHeader />
+          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 400 }}>
+            <div className="spinner-border text-success" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ClientMessagesContent />
+    </Suspense>
   );
 }
