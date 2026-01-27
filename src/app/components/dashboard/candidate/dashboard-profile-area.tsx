@@ -7,6 +7,7 @@ import _ from 'lodash'; // Using lodash for deep object comparison
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
 import { authCookies } from "@/utils/cookies";
+import { validatePortfolioLinks } from "@/utils/validation";
 
 type IProps = {
   // No props needed, using context
@@ -529,12 +530,24 @@ const DashboardProfileArea = ({ }: IProps) => {
 
     // Validate portfolio links if they've been changed
     if (editedData.portfolio_links && editedData.portfolio_links.length > 0) {
-      const urlRegex = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?\&\/\/=]*)$/;
-      const invalidLinks = editedData.portfolio_links.filter((link: string) => link.trim() && !urlRegex.test(link));
-      if (invalidLinks.length > 0) {
-        toast.error('Please enter valid URLs for all portfolio links (e.g., https://example.com)');
-        setSaving(false);
-        return;
+      const nonEmptyLinks = editedData.portfolio_links.filter((link: string) => link && link.trim().length > 0);
+      
+      if (nonEmptyLinks.length > 0) {
+        const validation = validatePortfolioLinks(editedData.portfolio_links, true);
+        
+        if (!validation.hasValidYouTubeLink) {
+          toast.error('At least one valid YouTube link is required in your portfolio.');
+          setSaving(false);
+          return;
+        }
+
+        // Check for any invalid links
+        const firstErrorIndex = validation.errors.findIndex(e => e !== undefined);
+        if (firstErrorIndex !== -1 && validation.errors[firstErrorIndex]) {
+          toast.error(validation.errors[firstErrorIndex]);
+          setSaving(false);
+          return;
+        }
       }
     }
 
@@ -906,7 +919,7 @@ const DashboardProfileArea = ({ }: IProps) => {
                   <div>
                     {(editedData.portfolio_links || []).map((link, index) => (
                       <div key={index} className="input-group mb-3">
-                        <input type="url" className="form-control" value={link} placeholder="https://example.com"
+                        <input type="url" className="form-control" value={link} placeholder="https://youtube.com/watch?v=..."
                           onChange={(e) => updatePortfolioLink(index, e.target.value)} />
                         <button className="btn btn-outline-danger" type="button" onClick={() => removePortfolioLink(index)}>Remove</button>
                       </div>
