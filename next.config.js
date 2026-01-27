@@ -1,49 +1,56 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
   images: {
     unoptimized: process.env.NODE_ENV === "development", // Only unoptimized in dev
-    domains: [
-      "localhost",
-      // Google OAuth profile pictures
-      "lh3.googleusercontent.com",
-      "googleusercontent.com",
-      // Facebook OAuth profile pictures
-      "platform-lookaside.fbsbx.com",
-      "graph.facebook.com",
-      "scontent.xx.fbcdn.net",
-      // Apple OAuth (usually doesn't have profile pics but just in case)
-      "appleid.apple.com",
-      // Placeholder services
-      "via.placeholder.com",
-      "placehold.co",
-      // Your API domain for uploaded images
-      "api.mmvfreelance.com",
-    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "**.googleusercontent.com",
-        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "**.fbcdn.net",
-        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "graph.facebook.com",
-        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "platform-lookaside.fbsbx.com",
+      },
+      {
+        protocol: "https",
+        hostname: "appleid.apple.com",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
+      {
+        protocol: "https",
+        hostname: "api.mmvfreelance.com",
       },
     ],
   },
   // Optimize build output (only in production to reduce dev memory usage)
   output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
-  // Reduce bundle size
-  swcMinify: true,
   // Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

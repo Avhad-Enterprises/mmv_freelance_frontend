@@ -1,3 +1,6 @@
+@use "mixins";
+@use "variables";
+
 // FeedBack Section One
 .feedback-section-one .slick-arrow-one {
     position: absolute;
@@ -9,9 +12,9 @@
     border: 2px solid #000;
     border-radius: 30px;
     padding: 40px 40px 45px;
-    @include transition(0.25s);
+    @include mixins.transition(0.25s);
     &:hover {
-        background: $color-two;
+        background: variables.$color-two;
     }
     .logo {
         height: 50px;
@@ -57,7 +60,7 @@
 }
 .feedback-section-two .rating-title {
     font-size: 42px;
-    color: $color-three;
+    color: variables.$color-three;
 }
 .feedback-section-two .slider-wrapper {
     width: calc(100% + 33vw);
@@ -82,7 +85,7 @@
     }
     .review {
        font-size: 28px;
-       color: $color-three; 
+       color: variables.$color-three; 
     }
     .rating li a {
         font-size: 13px;
@@ -130,7 +133,7 @@
             border: 3px solid transparent;
             opacity: 1;
             margin: 0 10px;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             &.active {
                 border-color: #29503D;
             }
@@ -148,10 +151,10 @@
         text-align: center;
         font-size: 20px;
         color: #000;
-        @include transition(0.2s);
+        @include mixins.transition(0.2s);
         &:hover {
-            border-color: $color-three;
-            background: $color-three;
+            border-color: variables.$color-three;
+            background: variables.$color-three;
             color: #fff;
         }
     }
@@ -184,7 +187,7 @@
             line-height: 60px;
             color: #fff;
             cursor: pointer;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             border-left: 1px solid rgba($color: #fff, $alpha: .14);
             background: rgba($color: #fff, $alpha: .13);
             &:hover {
@@ -244,7 +247,7 @@
     }
     .review {
        font-size: 28px;
-       color: $color-three; 
+       color: variables.$color-three; 
     }
     .rating li a {
         font-size: 14px;

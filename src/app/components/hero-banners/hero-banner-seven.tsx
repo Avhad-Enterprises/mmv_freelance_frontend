@@ -1,25 +1,33 @@
-'use client'
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-import Image from 'next/image';
-import screen_1 from '@/assets/images/assets/screen_17.png';
-import screen_2 from '@/assets/images/assets/screen_18.png';
-import JobCategorySelect from '../select/job-category';
-import useSearchFormSubmit from '@/hooks/use-search-form-submit';
-import understroke from '@/assets/images/assets/picture 1.png';
-import { authCookies } from '@/utils/cookies';
-import { useUser } from '@/context/UserContext';
+"use client";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+import Image from "next/image";
+import screen_1 from "@/assets/images/assets/screen_17.png";
+import screen_2 from "@/assets/images/assets/screen_18.png";
+import JobCategorySelect from "../select/job-category";
+import useSearchFormSubmit from "@/hooks/use-search-form-submit";
+import understroke from "@/assets/images/assets/picture 1.png";
+import { authCookies } from "@/utils/cookies";
+import { HeroSection } from "@/types/cms.types";
+import { useUser } from "@/context/UserContext";
 
 interface DecodedToken {
   exp: number;
 }
 
-const HeroBannerSeven = () => {
+interface HeroBannerSevenProps {
+  heroData: HeroSection[];
+}
+
+const HeroBannerSeven: React.FC<HeroBannerSevenProps> = ({ heroData }) => {
   const router = useRouter();
   const { handleSubmit, setCategoryVal, setSearchText } = useSearchFormSubmit();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { userData, userRoles, isLoading } = useUser();
+
+  // Get the first hero section (typically there's only one active)
+  const hero = heroData.length > 0 ? heroData[0] : null;
 
   useEffect(() => {
     // Check authentication status from cookies
@@ -47,7 +55,9 @@ const HeroBannerSeven = () => {
   const handlePostProject = () => {
     if (!isAuthenticated) {
       // Show login modal
-      const loginButton = document.querySelector('[data-bs-target="#loginModal"]') as HTMLElement;
+      const loginButton = document.querySelector(
+        '[data-bs-target="#loginModal"]'
+      ) as HTMLElement;
       if (loginButton) loginButton.click();
     } else {
       // Check user roles
@@ -67,7 +77,7 @@ const HeroBannerSeven = () => {
 
   const handleFindFreelanceWork = () => {
     // Redirect to jobs page
-    router.push('/job-list');
+    router.push("/job-list");
   };
 
   return (
@@ -79,29 +89,36 @@ const HeroBannerSeven = () => {
               <h1
                 className="wow fadeInUp text-3xl md:text-4xl lg:text-5xl"
                 data-wow-delay="0.3s"
-                style={{ fontSize: 'clamp(1.5rem, 5vw, 4rem)' }}
+                style={{ fontSize: "clamp(1.5rem, 5vw, 4rem)" }}
               >
-                World's First & Only Freelance Marketplace Exclusively for{' '}
-                <span style={{ position: 'relative', display: 'inline-block' }}>
-                  <span style={{ color: '#6DB945', fontStyle: 'italic' }}>Videos</span>
+                {hero?.title ||
+                  "World's First & Only Freelance Marketplace Exclusively for"}{" "}
+                <span style={{ position: "relative", display: "inline-block" }}>
+                  <span style={{ color: "#6DB945", fontStyle: "italic" }}>
+                    Videos
+                  </span>
                   <Image
                     src={understroke}
                     alt=""
                     className="lazy-img understroke-img"
                     style={{
-                      position: 'absolute',
-                      bottom: '-120px',
-                      left: '0',
-                      width: '100%',
-                      height: 'auto',
-                      pointerEvents: 'none'
+                      position: "absolute",
+                      bottom: "-120px",
+                      left: "0",
+                      width: "100%",
+                      height: "auto",
+                      pointerEvents: "none",
                     }}
                   />
                 </span>
               </h1>
 
-              <p className="text-md mt-25 mb-40 wow fadeInUp" data-wow-delay="0.4s">
-                Hire aligned video editors and videographers anywhere across the globe
+              <p
+                className="text-md mt-25 mb-40 wow fadeInUp"
+                data-wow-delay="0.4s"
+              >
+                {hero?.subtitle ||
+                  "Hire aligned video editors and videographers anywhere across the globe"}
               </p>
             </div>
           </div>
@@ -150,22 +167,23 @@ const HeroBannerSeven = () => {
 
       {/* ✅ Larger images positioned in the middle */}
       <Image
-        src={screen_2}
+        src={hero?.hero_right_image || screen_2}
         alt="screen-img"
         width={800}
         height={1000}
         className="lazy-img shapes screen01"
-        style={{ transform: 'translateY(-50%)', top: '50%' }}
+        style={{ transform: "translateY(-50%)", top: "50%" }}
+        unoptimized={!!hero?.hero_right_image}
       />
       <Image
-        src={screen_1}
+        src={hero?.hero_left_image || screen_1}
         alt="screen-img"
         width={800}
         height={1000}
         className="lazy-img shapes screen02"
-        style={{ transform: 'translateY(-50%)', top: '50%' }}
+        style={{ transform: "translateY(-50%)", top: "50%" }}
+        unoptimized={!!hero?.hero_left_image}
       />
-
     </div>
   );
 };

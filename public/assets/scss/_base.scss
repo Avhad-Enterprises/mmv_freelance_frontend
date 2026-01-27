@@ -1,18 +1,20 @@
 // Font import
 // @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700;800&display=swap');
-@import '../fonts/gordita/stylesheet';
-@import '../fonts/bootstrap-icons-1.10.2/font';
+@use '../fonts/gordita/stylesheet';
+@use '../fonts/bootstrap-icons-1.10.2/font';
+@use "mixins";
+@use "variables";
 
 // Global Style
 ::-webkit-scrollbar{ width: 5px; }
 ::-webkit-scrollbar-track { background: #fff;}
-::-webkit-scrollbar-thumb { background: $color-two;border-radius: 0;}
+::-webkit-scrollbar-thumb { background: variables.$color-two;border-radius: 0;}
 body {
   font-family: var(--gorditas-font);
   font-weight: normal;
   font-size: 16px;
   position: relative;
-  color: $text-color;
+  color: variables.$text-color;
 }
 .main-page-wrapper {
   overflow-x: hidden;
@@ -31,7 +33,7 @@ h5,
 h6 {
   font-family: var(--eb_garamond-font);
   font-weight: 500;
-  color: $text-dark;
+  color: variables.$text-dark;
 }
 .h1,h1 {font-size: 85px; letter-spacing: -1px; line-height: 1.058em;}
 .h2,h2 {font-size: 70px; line-height: 1.041em;}
@@ -66,13 +68,13 @@ hr {opacity: 0.09; margin: 5px 0;}
       font-weight: 700;
       letter-spacing: 8px;
       display: inline-block;
-      color: rgba($color: $color-three, $alpha: 0.12);
+      color: rgba($color: variables.$color-three, $alpha: 0.12);
       position: relative;
       font-size: 50px;
       line-height: 30px;
       &::before {
         animation: letters-loading 4s infinite;
-        color: $color-three;
+        color: variables.$color-three;
         content: attr(data-text-preloader);
         left: 0;
         opacity: 0;
@@ -123,7 +125,7 @@ hr {opacity: 0.09; margin: 5px 0;}
   font-size: 25px;
   cursor: pointer;
   border-radius: 50%;
-  background: $color-one;
+  background: variables.$color-one;
   transition: all 0.3s ease-in-out;
     &:after {
     position: absolute;
@@ -164,32 +166,32 @@ hr {opacity: 0.09; margin: 5px 0;}
   text-align: center;
   border-radius: 50px;
   color: #fff;
-  background-color: $color-one;
+  background-color: variables.$color-one;
   border:2px solid transparent;
-  @include transition(0.3s);
+  @include mixins.transition(0.3s);
   &.lg {
     padding: 8px 32px;
   }
   &:hover {
-    background-color: $color-two;
-    color: $color-one;
-    border-color: $color-two;
+    background-color: variables.$color-two;
+    color: variables.$color-one;
+    border-color: variables.$color-two;
   }
   &.active {
-    background-color: $color-two;
-    color: $color-one;
-    border-color: $color-two;
+    background-color: variables.$color-two;
+    color: variables.$color-one;
+    border-color: variables.$color-two;
   }
 }
 // Custom styling for Hire Top Talents button to appear in hover state by default
 .hire-top-talents-btn {
-  background-color: $color-two !important;
-  color: $color-one !important;
-  border-color: $color-two !important;
+  background-color: variables.$color-two !important;
+  color: variables.$color-one !important;
+  border-color: variables.$color-two !important;
   &:hover {
-    background-color: $color-two !important;
-    color: $color-one !important;
-    border-color: $color-two !important;
+    background-color: variables.$color-two !important;
+    color: variables.$color-one !important;
+    border-color: variables.$color-two !important;
   }
 }
 // Custom styling for Coming Soon register button arrow
@@ -207,7 +209,7 @@ hr {opacity: 0.09; margin: 5px 0;}
   position: relative;
   padding-right: 12px;
   border-bottom: 2px solid #98BD00;
-  @include transition(0.3s);
+  @include mixins.transition(0.3s);
   &:hover {
     color: #98BD00;
     letter-spacing: 0.2px;
@@ -234,11 +236,11 @@ hr {opacity: 0.09; margin: 5px 0;}
   padding: 13px 26px;
   text-align: center;
   border-radius: 6px;
-  color: $color-one;
-  border:2px solid $color-one;
-  @include transition(0.3s);
+  color: variables.$color-one;
+  border:2px solid variables.$color-one;
+  @include mixins.transition(0.3s);
   &:hover {
-    background: $color-one;
+    background: variables.$color-one;
     color: #fff;
   }
 }
@@ -248,11 +250,11 @@ hr {opacity: 0.09; margin: 5px 0;}
   min-width: 150px;
   text-align: center;
   border-radius: 6px;
-  color: $color-one;
-  background: $color-two;
-  @include transition(0.3s);
+  color: variables.$color-one;
+  background: variables.$color-two;
+  @include mixins.transition(0.3s);
   &:hover {
-    background: $color-one;
+    background: variables.$color-one;
     color: #fff;
   }
 }
@@ -263,11 +265,11 @@ hr {opacity: 0.09; margin: 5px 0;}
   text-align: center;
   border-radius: 50px;
   color: #fff;
-  background: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
-  @include transition(0.3s);
+  background: variables.$color-one; // Changed from $color-three (bright green) to $color-one (dark green)
+  @include mixins.transition(0.3s);
   &:hover {
-    background: $color-two; // Changed hover to lime for better contrast
-    color: $color-one;
+    background: variables.$color-two; // Changed hover to lime for better contrast
+    color: variables.$color-one;
   }
 }
 .btn-five.border6 {
@@ -275,19 +277,19 @@ hr {opacity: 0.09; margin: 5px 0;}
 }
 .btn-six {
   font-weight: 500;
-  color: $color-one; // Changed from $color-three (bright green) to $color-one (dark green)
+  color: variables.$color-one; // Changed from $color-three (bright green) to $color-one (dark green)
   position: relative;
   padding-right: 12px;
-  border-bottom: 2px solid $color-one; // Changed to match text color
-  @include transition(0.3s);
+  border-bottom: 2px solid variables.$color-one; // Changed to match text color
+  @include mixins.transition(0.3s);
   &:hover {
-    color: $color-two; // Changed hover to lime
-    border-bottom-color: $color-two;
+    color: variables.$color-two; // Changed hover to lime
+    border-bottom-color: variables.$color-two;
     letter-spacing: 0.2px;
   }
   &:after {
-    border-bottom: 2px solid $color-one; // Changed to dark green
-    border-right: 2px solid $color-one; // Changed to dark green
+    border-bottom: 2px solid variables.$color-one; // Changed to dark green
+    border-right: 2px solid variables.$color-one; // Changed to dark green
     content: "";
     display: block;
     margin-top: -4px;
@@ -301,8 +303,8 @@ hr {opacity: 0.09; margin: 5px 0;}
     width: 8px;
   }
   &:hover:after {
-    border-bottom-color: $color-two;
-    border-right-color: $color-two;
+    border-bottom-color: variables.$color-two;
+    border-right-color: variables.$color-two;
   }
   &.dark {
     color: #000;
@@ -319,12 +321,12 @@ hr {opacity: 0.09; margin: 5px 0;}
   min-width: 150px;
   text-align: center;
   border-radius: 50px;
-  color: $color-three;
-  border: 1px solid $color-three;
-  @include transition(0.3s);
+  color: variables.$color-three;
+  border: 1px solid variables.$color-three;
+  @include mixins.transition(0.3s);
   &:hover {
-    background: $color-one;
-    border-color: $color-one;
+    background: variables.$color-one;
+    border-color: variables.$color-one;
     color: #fff;
   }
 }
@@ -339,15 +341,15 @@ hr {opacity: 0.09; margin: 5px 0;}
   background: #F1F6F3;
   border: 1px solid #D6ECE0;
   &.style-two {
-    border: 2px solid $color-three;
+    border: 2px solid variables.$color-three;
     background: transparent;
   }
   span {
-    color: $color-three;
+    color: variables.$color-three;
   }
   a {
     font-weight: normal;
-    color: $color-three;
+    color: variables.$color-three;
     text-decoration: underline;
   }
 }
@@ -356,7 +358,7 @@ hr {opacity: 0.09; margin: 5px 0;}
   color: #000;
   letter-spacing: -1px;
   &:hover {
-      color: $color-three; 
+      color: variables.$color-three; 
   }
   i {
     font-size: 1.4em;
@@ -366,10 +368,10 @@ hr {opacity: 0.09; margin: 5px 0;}
 .btn-ten {
   line-height: 50px;
   border-radius: 10px;
-  background: $color-five;
+  background: variables.$color-five;
   padding: 0 26px;
   &:hover {
-      background: $color-three;
+      background: variables.$color-three;
   }
 }
 .btn-eleven {
@@ -379,15 +381,15 @@ hr {opacity: 0.09; margin: 5px 0;}
   text-transform: uppercase;
   letter-spacing: 0.88px;
   color: #fff;
-  background: $color-five;
+  background: variables.$color-five;
   width: 100%;
   &:hover,&:focus {
-      background: $color-three;
+      background: variables.$color-three;
   }
 }
 // Title Style
 .title-one h2 {
-  color: $heading;
+  color: variables.$heading;
   margin: 0;
   &.main-font {
     font-family: var(--gorditas-font);
@@ -418,13 +420,13 @@ hr {opacity: 0.09; margin: 5px 0;}
 .title-two h2 {
   font-size: 64px;
   line-height: 1.062em;
-  color: $heading;
+  color: variables.$heading;
   margin: 0;
   &.color-blue {
-    color: $color-four;
+    color: variables.$color-four;
   }
   span {
-    color: $color-two;
+    color: variables.$color-two;
   }
   &.main-font {
     font-family: var(--gorditas-font);
@@ -432,7 +434,7 @@ hr {opacity: 0.09; margin: 5px 0;}
   }
 }
 .title-two .sub-title {
-  color: $color-three;
+  color: variables.$color-three;
   font-weight: 500;
   font-size: 18px;
   margin-bottom: 15px;
@@ -440,14 +442,14 @@ hr {opacity: 0.09; margin: 5px 0;}
 .title-three h2 {
   font-size: 48px;
   line-height: 1.062em;
-  color: $heading;
+  color: variables.$heading;
   margin: 0;
   &.main-font {
     font-family: var(--gorditas-font);
     color: #000;
   }
   &.color-blue {
-    color: $color-four;
+    color: variables.$color-four;
   }
 }
 .title-four h2 {

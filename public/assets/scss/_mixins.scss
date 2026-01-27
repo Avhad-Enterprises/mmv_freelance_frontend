@@ -1,3 +1,5 @@
+@use "sass:color";
+@use "sass:string";
 @mixin transition($time) {
 	-webkit-transition: all $time ease-in-out 0s;
 	-moz-transition: all $time ease-in-out 0s;
@@ -16,7 +18,7 @@
 
 
 @function _rgba($color, $opacity: 1) {
-	@return unquote("rgba(#{red($color)}, #{green($color)}, #{blue($color)}, #{$opacity})");
+	@return string.unquote("rgba(#{color.red($color)}, #{color.green($color)}, #{color.blue($color)}, #{$opacity})");
 }
 
 

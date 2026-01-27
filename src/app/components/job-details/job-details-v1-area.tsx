@@ -315,93 +315,41 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
   return (
     <>
       <style jsx>{`
-        /* Mobile: Reorder cards using flexbox */
-        @media (max-width: 991px) {
-          .job-details-row {
-            display: flex;
-            flex-direction: column;
-          }
-          .job-details-header {
-            order: 1;
-          }
-          .job-details-sidebar {
-            order: 2;
-            margin-left: 0 !important;
-            margin-top: 30px;
-          }
-          .job-details-description {
-            order: 3;
-          }
-          .job-details-skills {
-            order: 4;
+        /* Desktop: Sidebar floats right */
+        @media (min-width: 992px) {
+          .job-details-content {
+            padding-right: 2rem;
           }
         }
-        /* Desktop: Proper column layout */
-        @media (min-width: 992px) {
-          .job-details-description,
-          .job-details-skills {
-            padding-right: 3rem;
+        /* Mobile: Remove extra margins */
+        @media (max-width: 991px) {
+          .job-details-sidebar {
+            margin-bottom: 20px;
+          }
+          .job-company-info {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
           }
         }
       `}</style>
       <section className="job-details pt-100 lg-pt-80 pb-130 lg-pb-80">
         <div className="container">
-          <div className="row job-details-row">
-            {/* Header: Back button, Posted date, Title */}
-            <div className="col-12 job-details-header">
-              <Link href="/job-list" className="btn-two mb-20">
-                &larr; Back to Projects
-              </Link>
+          {/* Header: Back button, Posted date, Title - full width */}
+          <div className="mb-4">
+            <Link href="/job-list" className="btn-two mb-20">
+              &larr; Back to Projects
+            </Link>
 
-              <div className="post-date">
-                Posted on: {job.created_at?.slice(0, 10)}
-              </div>
-              <h3 className="post-title">{job.project_title}</h3>
+            <div className="post-date">
+              Posted on: {job.created_at?.slice(0, 10)}
             </div>
+            <h3 className="post-title">{job.project_title}</h3>
+          </div>
 
-            {/* Left Side: Project Description */}
-            <div className="col-xxl-9 col-xl-8 job-details-description">
-              <div className="post-block border-style mt-50 lg-mt-30">
-                <div className="d-flex align-items-center">
-                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
-                  <h4 className="block-title">Project Description</h4>
-                </div>
-                <p className="mt-25 mb-20">{job.project_description}</p>
-                {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
-              </div>
-            </div>
-
-            {/* Left Side: Required Skills */}
-            <div className="col-xxl-9 col-xl-8 job-details-skills">
-              <div className="post-block border-style mt-40 lg-mt-30">
-                <div className="d-flex align-items-center">
-                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
-                  <h4 className="block-title">Required Skills</h4>
-                </div>
-                <ul className="list-type-two style-none mt-25 mb-15">
-                  {job.skills_required?.map((skill, idx) => (
-                    <li key={idx}>{skill}</li>
-                  ))}
-                </ul>
-              </div>
-              {job.reference_links && job.reference_links.length > 0 && (
-                <div className="post-block border-style mt-40 lg-mt-30">
-                  <div className="d-flex align-items-center">
-                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
-                    <h4 className="block-title">Reference Links</h4>
-                  </div>
-                  <ul className="list-type-two style-none mt-25 mb-15">
-                    {job.reference_links.map((link, i) => (
-                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            {/* Right Side: Project Details Card / Sidebar */}
-            <div className="col-xxl-3 col-xl-4 job-details-sidebar">
-              <div className="job-company-info ms-xl-5 ms-xxl-0 lg-mt-50">
+          <div className="row">
+            {/* Sidebar: On mobile appears first, on desktop appears on right */}
+            <div className="col-lg-4 col-xl-3 order-lg-2 job-details-sidebar">
+              <div className="job-company-info ms-xl-3 lg-mt-0">
                 <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize">
                   {job.project_title}
                 </div>
@@ -464,6 +412,47 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Main Content: On mobile appears after sidebar, on desktop appears on left */}
+            <div className="col-lg-8 col-xl-9 order-lg-1 job-details-content">
+              {/* Project Description */}
+              <div className="post-block border-style mt-30 lg-mt-30">
+                <div className="d-flex align-items-center">
+                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">1</div>
+                  <h4 className="block-title">Project Description</h4>
+                </div>
+                <p className="mt-25 mb-20">{job.project_description}</p>
+                {job.additional_notes && <p><strong>Additional Notes:</strong> {job.additional_notes}</p>}
+              </div>
+
+              {/* Required Skills */}
+              <div className="post-block border-style mt-40 lg-mt-30">
+                <div className="d-flex align-items-center">
+                  <div className="block-numb text-center fw-500 text-white rounded-circle me-2">2</div>
+                  <h4 className="block-title">Required Skills</h4>
+                </div>
+                <ul className="list-type-two style-none mt-25 mb-15">
+                  {job.skills_required?.map((skill, idx) => (
+                    <li key={idx}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Reference Links */}
+              {job.reference_links && job.reference_links.length > 0 && (
+                <div className="post-block border-style mt-40 lg-mt-30">
+                  <div className="d-flex align-items-center">
+                    <div className="block-numb text-center fw-500 text-white rounded-circle me-2">3</div>
+                    <h4 className="block-title">Reference Links</h4>
+                  </div>
+                  <ul className="list-type-two style-none mt-25 mb-15">
+                    {job.reference_links.map((link, i) => (
+                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </div>

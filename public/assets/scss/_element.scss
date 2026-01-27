@@ -1,3 +1,6 @@
+@use "mixins";
+@use "variables";
+
 // Job Search One
 .job-search-one {
     z-index: 9;
@@ -50,7 +53,7 @@
 
         .search-btn {
             letter-spacing: 0.8px;
-            background: $color-two;
+            background: variables.$color-two;
             color: #000;
             border-radius: 0 10px 10px 0;
             width: 195px;
@@ -58,20 +61,20 @@
             margin-right: -1px;
 
             &:hover {
-                background: $color-three;
+                background: variables.$color-three;
                 color: #fff;
             }
         }
 
         .search-btn-two {
-            background: $color-three;
+            background: variables.$color-three;
             color: #fff;
             border-radius: 0 10px 10px 0;
             margin-right: -1px;
             margin-left: auto;
 
             &:hover {
-                background: $color-four;
+                background: variables.$color-four;
                 color: #fff;
             }
         }
@@ -92,7 +95,7 @@
 
         a {
             color: #6d8b7e;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
 
             &:hover {
                 color: #fff;
@@ -182,7 +185,7 @@
 
     a {
         color: #000;
-        @include transition(0.2s);
+        @include mixins.transition(0.2s);
 
         &:hover {
             text-decoration: underline;
@@ -195,7 +198,7 @@
     position: relative;
     font-weight: 500;
     font-size: 18px;
-    color: $color-one;
+    color: variables.$color-one;
     padding-left: 35px;
     margin-top: 24px;
 
@@ -215,7 +218,7 @@
 
 .counter-block-one h2.main-count {
     font-size: 70px;
-    color: $color-one;
+    color: variables.$color-one;
 }
 
 // Counter Block Two
@@ -254,7 +257,7 @@
 }
 
 .accordion-style-one.color-two .accordion-button {
-    color: $color-four;
+    color: variables.$color-four;
 }
 
 .accordion-style-one.color-two .accordion-button::after {
@@ -298,7 +301,7 @@
     &:not(.collapsed):after {
         content: "-";
         font-size: 24px;
-        background: $color-one;
+        background: variables.$color-one;
         color: #fff;
     }
 }
@@ -341,7 +344,7 @@
             border-radius: 50%;
             font-size: 17px;
             font-weight: 500;
-            color: $color-five;
+            color: variables.$color-five;
             background: transparent;
             border: none;
             cursor: pointer;
@@ -349,7 +352,7 @@
 
         &.active a,
         &.active button {
-            background: $color-five;
+            background: variables.$color-five;
             color: #fff;
         }
     }
@@ -357,7 +360,7 @@
 
 // Pagination Two
 .pagination-two {
-    border: 1px solid $color-five;
+    border: 1px solid variables.$color-five;
     border-radius: 4px;
     overflow: hidden;
 
@@ -368,13 +371,13 @@
         line-height: 35px;
         font-size: 15px;
         font-weight: 500;
-        color: $color-five;
-        border-right: 1px solid $color-five;
+        color: variables.$color-five;
+        border-right: 1px solid variables.$color-five;
     }
 
     .active a,
     a:hover {
-        background: rgba($color: $color-five, $alpha: 0.1);
+        background: rgba($color: variables.$color-five, $alpha: 0.1);
     }
 
     li:last-child a {
@@ -432,7 +435,7 @@
 
 // Login Modal
 .registration-section {
-    background: $light-bg;
+    background: variables.$light-bg;
 }
 
 .modal .modal-dialog {
@@ -453,11 +456,11 @@
     h2 {
         font-size: 50px;
         font-weight: normal;
-        color: $color-one;
+        color: variables.$color-one;
     }
 
     p a {
-        color: $color-five;
+        color: variables.$color-five;
 
         &:hover {
             text-decoration: underline;
@@ -538,14 +541,14 @@
         position: relative;
         font-size: 15px;
         letter-spacing: -0.5px;
-        color: $color-one;
+        color: variables.$color-one;
         cursor: pointer;
         padding-left: 22px;
         transition: all 0.1s ease-in-out;
     }
 
     .agreement-checkbox label a {
-        color: $color-five;
+        color: variables.$color-five;
         text-decoration: underline;
     }
 
@@ -584,7 +587,7 @@
 
     .agreement-checkbox a:hover {
         text-decoration: underline;
-        color: $color-five;
+        color: variables.$color-five;
     }
 
     .line {
@@ -629,8 +632,8 @@
                 color: rgba($color: #000000, $alpha: 0.5);
 
                 &.active {
-                    color: $color-five;
-                    border-color: $color-five;
+                    color: variables.$color-five;
+                    border-color: variables.$color-five;
                 }
             }
         }
