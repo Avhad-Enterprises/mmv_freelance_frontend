@@ -52,7 +52,7 @@ export function WidgetFour({ cls, style_2 }: { cls: string; style_2?: boolean })
       <h5 className={`footer-title ${style_2 ? 'text-white' : ''}`}>Company</h5>
       <ul className="footer-nav-link style-none">
         <li><Link href="/about-us">About Us</Link></li>
-        <li><Link href="/coming-soon">Careers</Link></li>
+        <li><Link href="/careers">Careers</Link></li>
         <li><Link href="/coming-soon">Press & Media</Link></li>
         <li><Link href="/privacy-policy">Privacy Policy</Link></li>
         <li><Link href="/terms-condition">Terms of Service</Link></li>
