@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import CareerDetailsClientView from "./CareerDetailsClientView";
+import CareerDetailsClientView from "@/app/careers/[id]/CareerDetailsClientView";
 
 export const metadata: Metadata = {
     title: "Job Details - Make My Vid",

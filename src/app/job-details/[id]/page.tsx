@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Wrapper from '@/layouts/wrapper';
 import Header from '@/layouts/headers/header';
 import JobDetailsV1Area from '@/app/components/job-details/job-details-v1-area';
@@ -10,13 +11,18 @@ import FooterOne from '@/layouts/footers/footer-one';
 import { IJobType } from '@/types/job-data-type';
 import { makeGetRequest } from '@/utils/api';
 
-const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
+const JobDetailsDynamicPage = () => {
+  const params = useParams();
   const [job, setJob] = useState<IJobType | null>(null);
   const [loading, setLoading] = useState(true);
 
   // --- Effect for fetching job data ---
   useEffect(() => {
     const fetchJob = async () => {
+      // If params is null/undefined or id is missing, stop.
+      // useParams returns string or string array.
+      if (!params?.id) return;
+
       try {
         const response = await makeGetRequest('api/v1/projects-tasks/listings');
         const allJobs: IJobType[] = response?.data?.data || [];
@@ -33,7 +39,7 @@ const JobDetailsDynamicPage = ({ params }: { params: { id: string } }) => {
     };
 
     fetchJob();
-  }, [params.id]);
+  }, [params?.id]);
 
   if (loading) {
     return <p className="text-center py-5">Loading...</p>;
