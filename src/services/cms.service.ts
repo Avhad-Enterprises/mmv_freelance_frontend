@@ -39,7 +39,6 @@ export const fetchLandingPageContent =
 
       // Fallback to local mock if network failed or response not ok
       if (!response || !response.ok) {
-        console.log("Falling back to local mock: /mock/landing.json");
         response = await fetch("/mock/landing.json");
       }
 

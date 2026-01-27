@@ -62,12 +62,10 @@ const CompletedProjectsArea = () => {
         const data = await response.json();
 
         if (data.success) {
-            console.log('All client projects:', data.data);
             
             // Filter for Completed projects (status === 2)
             const completedProjects = (data.data || [])
                 .filter((task: any) => {
-                    console.log(`Project "${task.project_title}" has status: ${task.status}`);
                     return task.status === 2;
                 })
                 .map((task: any) => ({
@@ -79,7 +77,6 @@ const CompletedProjectsArea = () => {
                     status: task.status
                 }));
             
-            console.log('Filtered completed projects:', completedProjects);
             setProjects(completedProjects);
         } else {
             throw new Error(data.message || 'Failed to fetch projects');
@@ -105,7 +102,6 @@ const CompletedProjectsArea = () => {
         const token = authCookies.getToken();
         if (!token) throw new Error("Authentication required");
 
-        console.log('Fetching submissions for project:', project.project_id);
         
         // Correct endpoint: /:projectId/submissions
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects-tasks/${project.project_id}/submissions`, {
@@ -113,12 +109,10 @@ const CompletedProjectsArea = () => {
         });
 
         const result = await response.json();
-        console.log('Submissions API response:', result);
 
         if (result.success && result.data) {
             // Find the approved submission (status === 1)
             const approved = result.data.find((sub: Submission) => sub.status === 1);
-            console.log('Found approved submission:', approved);
             
             if (approved) {
                 setApprovedSubmission(approved);

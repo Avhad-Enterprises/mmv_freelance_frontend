@@ -78,16 +78,11 @@ const DashboardJobBrowseArea = () => {
         setIsFreelancer(userIsFreelancer);
         
         // Debug logging for EMC
-        console.log('[EMC Debug] decoded token:', decoded);
-        console.log('[EMC Debug] userRoles:', userRoles);
-        console.log('[EMC Debug] userIsFreelancer:', userIsFreelancer);
 
         if (userIsFreelancer && decoded?.user_id) {
           // Use EMC Recommendation API for freelancers
           try {
-            console.log('[EMC Debug] Calling EMC API...');
             const emcResponse = await makeGetRequest("api/v1/emc/recommended-projects");
-            console.log('[EMC Debug] EMC Response:', emcResponse.data);
             if (emcResponse.data?.success) {
               jobsData = emcResponse.data.data || [];
               setFreelancerSuperpowers(emcResponse.data.meta?.freelancerSuperpowers || []);
@@ -98,7 +93,6 @@ const DashboardJobBrowseArea = () => {
               jobsData = jobsRes.data.data || [];
             }
           } catch (emcError) {
-            console.log("EMC API not available, falling back to regular listings");
             const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
             jobsData = jobsRes.data.data || [];
           }

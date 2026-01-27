@@ -59,7 +59,6 @@ const CompletedProjectsArea = () => {
       );
 
       const data = await response.json();
-      console.log("Freelancer applications:", data);
 
       if (data.success && data.data) {
         // Filter for completed projects (application status = 2 AND submission status = 1)
@@ -81,7 +80,6 @@ const CompletedProjectsArea = () => {
             approved_at: app.submitted_at, // Using submitted_at as proxy for approved_at
           }));
 
-        console.log("Completed projects:", completed);
         setProjects(completed);
       }
     } catch (error) {
