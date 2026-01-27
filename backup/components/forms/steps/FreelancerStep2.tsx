@@ -60,9 +60,35 @@ function toggleArrayItem(arr: string[], item: string, limit?: number) {
 
 const isYouTubeUrl = (url: string) => {
   if (!url) return false;
+  
+  const trimmedURL = url.trim();
+  
+  // Enhanced regex for more precise YouTube URL validation
+  const youtubeRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.be)\/[\w\-?&=%./]*$/i;
+  
+  if (!youtubeRegex.test(trimmedURL)) {
+    return false;
+  }
+
   try {
-    const u = new URL(url);
-    return u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be");
+    // Additional validation using URL constructor for security
+    let urlToCheck = trimmedURL;
+    if (!/^https?:\/\//i.test(urlToCheck)) {
+      urlToCheck = `https://${urlToCheck}`;
+    }
+
+    const urlObject = new URL(urlToCheck);
+    const hostname = urlObject.hostname.toLowerCase();
+    
+    // Only allow specific YouTube domains for security
+    const allowedDomains = [
+      'youtube.com',
+      'www.youtube.com',
+      'm.youtube.com',
+      'youtu.be'
+    ];
+    
+    return allowedDomains.includes(hostname);
   } catch {
     return false;
   }
@@ -244,7 +270,7 @@ const FreelancerStep2: React.FC<Props> = ({ formData, setFormData, nextStep, pre
               }}
               onBlur={(e) => {
                 if (e.target.value && !isYouTubeUrl(e.target.value)) {
-                  alert("Only YouTube links are accepted.");
+                  alert("Only YouTube links are accepted. Please enter a valid YouTube URL (e.g., https://youtube.com/watch?v=... or https://youtu.be/...)");
                   const updated = [...(formData.portfolio_links || [])];
                   updated[idx] = "";
                   setFormData((prev) => ({ ...prev, portfolio_links: updated }));

@@ -59,20 +59,30 @@ export const initiateOAuthLogin = (
  * @returns Promise with list of available providers
  */
 export const getAvailableProviders = async (): Promise<OAuthProviderConfig[]> => {
+    const apiUrl = getApiBaseUrl();
+
     try {
-        const apiUrl = getApiBaseUrl();
         const response = await fetch(`${apiUrl}/api/v1/oauth/providers`);
         const data = await response.json();
 
         if (data.success) {
             return data.data.providers;
         }
-
-        return [];
     } catch (error) {
-        console.error('Failed to fetch OAuth providers:', error);
-        return [];
+        console.warn('Failed to fetch OAuth providers from API, using mock:', error);
+        // Fallback to mock data
+        try {
+            const mockResponse = await fetch('/mock/oauth-providers.json');
+            const mockData = await mockResponse.json();
+            if (mockData.success) {
+                return mockData.data.providers;
+            }
+        } catch (mockError) {
+            console.error('Failed to fetch mock OAuth providers:', mockError);
+        }
     }
+
+    return [];
 };
 
 /**

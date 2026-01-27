@@ -100,7 +100,7 @@ export function validateURL(url: string, options: URLValidationOptions = {}): Va
 }
 
 /**
- * Checks if a URL is a valid YouTube link
+ * Checks if a URL is a valid YouTube link with enhanced security validation
  * @param url - The URL to check
  * @returns boolean indicating if URL is a YouTube link
  */
@@ -108,13 +108,40 @@ export function isYouTubeURL(url: string): boolean {
     if (!url) return false;
 
     const trimmedURL = url.trim();
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+    
+    // Enhanced regex for more precise YouTube URL validation
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.be)\/[\w\-?&=%./]*$/i;
+    
+    if (!youtubeRegex.test(trimmedURL)) {
+        return false;
+    }
 
-    return youtubeRegex.test(trimmedURL);
+    try {
+        // Additional validation using URL constructor for security
+        let urlToCheck = trimmedURL;
+        if (!/^https?:\/\//i.test(urlToCheck)) {
+            urlToCheck = `https://${urlToCheck}`;
+        }
+
+        const urlObject = new URL(urlToCheck);
+        const hostname = urlObject.hostname.toLowerCase();
+        
+        // Only allow specific YouTube domains for security
+        const allowedDomains = [
+            'youtube.com',
+            'www.youtube.com',
+            'm.youtube.com',
+            'youtu.be'
+        ];
+        
+        return allowedDomains.includes(hostname);
+    } catch {
+        return false;
+    }
 }
 
 /**
- * Validates if a string is a valid YouTube URL
+ * Validates if a string is a valid YouTube URL with enhanced security checks
  * @param url - The URL string to validate
  * @param allowEmpty - Whether to allow empty strings (default: true)
  * @returns ValidationResult with isValid status and error message
@@ -129,16 +156,58 @@ export function validateYouTubeURL(url: string, allowEmpty: boolean = true): Val
         return { isValid: false, error: 'YouTube URL is required' };
     }
 
+    // Check if URL is a YouTube URL
     if (!isYouTubeURL(trimmedURL)) {
         return {
             isValid: false,
-            error: 'Please enter a valid YouTube link'
+            error: 'Only YouTube links are allowed. Please enter a valid YouTube URL (e.g., https://youtube.com/watch?v=... or https://youtu.be/...)'
         };
+    }
+
+    // Normalize the URL
+    let normalizedURL = trimmedURL;
+    if (!/^https?:\/\//i.test(normalizedURL)) {
+        normalizedURL = `https://${normalizedURL}`;
     }
 
     return {
         isValid: true,
-        normalizedURL: trimmedURL
+        normalizedURL: normalizedURL
+    };
+}
+
+/**
+ * Validates an array of portfolio links to ensure they're all YouTube URLs
+ * @param urls - Array of URL strings
+ * @param requireAtLeastOne - Whether at least one valid YouTube link is required
+ * @returns Object with overall validity, errors per URL, and normalized URLs
+ */
+export function validatePortfolioLinks(
+    urls: string[],
+    requireAtLeastOne: boolean = true
+): {
+    isValid: boolean;
+    errors: (string | undefined)[];
+    normalizedURLs: (string | undefined)[];
+    hasValidYouTubeLink: boolean;
+} {
+    const results = urls.map(url => validateYouTubeURL(url, true));
+    const validYouTubeLinks = results.filter(r => r.isValid && r.normalizedURL);
+    
+    const hasValidYouTubeLink = validYouTubeLinks.length > 0;
+    
+    let overallValid = results.every(r => r.isValid);
+    
+    // If we require at least one YouTube link and none are found, mark as invalid
+    if (requireAtLeastOne && !hasValidYouTubeLink) {
+        overallValid = false;
+    }
+
+    return {
+        isValid: overallValid,
+        errors: results.map(r => r.error),
+        normalizedURLs: results.map(r => r.normalizedURL),
+        hasValidYouTubeLink: hasValidYouTubeLink
     };
 }
 

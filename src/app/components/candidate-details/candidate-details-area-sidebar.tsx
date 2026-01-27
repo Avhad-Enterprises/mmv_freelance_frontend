@@ -7,6 +7,7 @@ import VideoPopup from "../common/video-popup";
 import Skills from "./skills";
 import CandidateBio from "./bio";
 import { IFreelancer } from "@/app/freelancer-profile/[id]/page";
+import { extractYouTubeVideoId, getYouTubeThumbnail } from "@/utils/youtube";
 
 type CandidateDetailsAreaProps = {
   freelancer: IFreelancer | null;
@@ -155,32 +156,72 @@ const CandidateDetailsArea = ({ freelancer, loading, onMessage }: CandidateDetai
                     <h3 className="title">Portfolio Links</h3>
                     <div className="row">
                       {portfolio_links.map((link, idx) => {
-                        const isYoutube = link.includes("youtube.com/watch?v=");
-                        const videoId = isYoutube ? link.split('v=')[1]?.split('&')[0] : null;
-                        const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+                        const videoId = extractYouTubeVideoId(link);
+                        const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : null;
 
                         return (
                           <div key={idx} className="col-lg-4 col-md-6 mb-4">
-                            <div className="portfolio-item-wrapper position-relative overflow-hidden rounded-3">
-                              {isYoutube && thumbnailUrl ? (
-                                <div className="youtube-thumbnail-wrapper position-relative" style={{ paddingTop: '56.25%' }}> {/* 16:9 Aspect Ratio */}
+                            <div 
+                              className="portfolio-item-wrapper position-relative overflow-hidden rounded-3"
+                              style={{ 
+                                cursor: videoId ? 'pointer' : 'default',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (videoId) {
+                                  e.currentTarget.style.transform = 'scale(1.02)';
+                                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                              }}
+                            >
+                              {videoId && thumbnailUrl ? (
+                                <div 
+                                  className="youtube-thumbnail-wrapper position-relative" 
+                                  style={{ paddingTop: '56.25%' }}
+                                  onClick={() => handleVideoOpen(videoId)}
+                                >
                                   <Image
                                     src={thumbnailUrl}
-                                    alt={`YouTube video thumbnail for ${link}`}
+                                    alt={`YouTube video thumbnail`}
                                     fill
                                     style={{ objectFit: 'cover' }}
                                     className="img-fluid"
-                                    onClick={() => handleVideoOpen(videoId!)}
                                     unoptimized
                                   />
-                                  <button
-                                    onClick={() => handleVideoOpen(videoId!)}
-                                    className="play-icon position-absolute top-50 start-50 translate-middle border-0 bg-transparent text-white"
-                                    aria-label="Play video"
-                                    style={{ zIndex: 10, fontSize: '3rem', cursor: 'pointer' }}
+                                  {/* Play Button Overlay */}
+                                  <div 
+                                    className="play-button-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                                    style={{ 
+                                      backgroundColor: 'rgba(0,0,0,0.2)',
+                                      transition: 'background-color 0.2s ease'
+                                    }}
                                   >
-                                    <i className="bi bi-play-circle-fill"></i>
-                                  </button>
+                                    <div 
+                                      className="play-icon-circle d-flex align-items-center justify-content-center"
+                                      style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                                        borderRadius: '50%',
+                                        transition: 'transform 0.2s ease'
+                                      }}
+                                    >
+                                      <svg 
+                                        width="24" 
+                                        height="24" 
+                                        viewBox="0 0 24 24" 
+                                        fill="#FF0000"
+                                        style={{ marginLeft: '3px' }}
+                                      >
+                                        <path d="M8 5v14l11-7z"/>
+                                      </svg>
+                                    </div>
+                                  </div>
                                 </div>
                               ) : (
                                 <a

@@ -18,14 +18,22 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
     const fetchCategories = async () => {
       try {
         console.log("📂 [Categories] Fetching from API...");
-        console.log(
-          "📂 [Categories] API URL:",
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`
-        );
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = `${API_BASE}/api/v1/categories`;
+        console.log("📂 [Categories] API URL:", apiUrl);
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/categories`
-        );
+        let response: Response | null = null;
+        try {
+          response = await fetch(apiUrl);
+        } catch (networkError) {
+          console.warn("📂 [Categories] Network request failed, will try local mock.", networkError);
+        }
+
+        // If API failed or returned non-OK, try local mock file under public/mock
+        if (!response || !response.ok) {
+          console.log("📂 [Categories] Falling back to local mock: /mock/categories.json");
+          response = await fetch("/mock/categories.json");
+        }
         console.log("📂 [Categories] Response status:", response.status);
         console.log("📂 [Categories] Response OK:", response.ok);
 

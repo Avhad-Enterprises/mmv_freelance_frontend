@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -66,7 +66,8 @@ const howItWorksData = {
   ],
 };
 
-const HomeSix = () => {
+// Rename existing component to HomeSixContent
+const HomeSixContent = () => {
   const searchParams = useSearchParams();
   const [activeRole, setActiveRole] = useState<"client" | "freelancer">(
     "client"
@@ -450,4 +451,10 @@ const HomeSix = () => {
   );
 };
 
-export default HomeSix;
+export default function HomeSix() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeSixContent />
+    </Suspense>
+  );
+}

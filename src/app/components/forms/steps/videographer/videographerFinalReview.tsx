@@ -3,6 +3,7 @@ import React from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { Country } from "country-state-city";
+import { validatePortfolioLinks } from '@/utils/validation';
 
 type Props = {
   formData: any;
@@ -29,6 +30,21 @@ const VideographerFinalReview: React.FC<Props> = ({ formData, prevStep, handleRe
 
     if (!privacyAccepted) {
       toast.error('Please accept the Privacy Policy to continue');
+      return;
+    }
+
+    // Validate portfolio links before submission
+    const portfolioLinks: string[] = (data.portfolio_links || []).filter((l: string) => !!l);
+    const portfolioValidation = validatePortfolioLinks(portfolioLinks, true);
+    
+    if (!portfolioValidation.hasValidYouTubeLink) {
+      toast.error('At least one valid YouTube portfolio link is required');
+      return;
+    }
+    
+    if (!portfolioValidation.isValid) {
+      const firstError = portfolioValidation.errors.find(error => error);
+      toast.error(firstError || 'Please provide valid YouTube portfolio links');
       return;
     }
 

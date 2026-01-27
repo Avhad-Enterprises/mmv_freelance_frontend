@@ -9,8 +9,11 @@ import {
   LandingFaq,
 } from "@/types/cms.types";
 
+import { DEFAULT_TRUSTED_COMPANIES } from "@/data/defaults";
+
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1`;
 const CMS_BASE_PATH = "/cms-landing";
 
 /**
@@ -20,13 +23,25 @@ const CMS_BASE_PATH = "/cms-landing";
 export const fetchLandingPageContent =
   async (): Promise<LandingPageContent> => {
     try {
-      const response = await fetch(`${API_BASE_URL}${CMS_BASE_PATH}/public`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        cache: "no-store", // Disable caching for fresh data
-      });
+      let response: Response | null = null;
+      const url = `${API_BASE_URL}${CMS_BASE_PATH}/public`;
+      try {
+        response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store", // Disable caching for fresh data
+        });
+      } catch (networkErr) {
+        console.warn("Network error fetching landing page, will try local mock:", networkErr);
+      }
+
+      // Fallback to local mock if network failed or response not ok
+      if (!response || !response.ok) {
+        console.log("Falling back to local mock: /mock/landing.json");
+        response = await fetch("/mock/landing.json");
+      }
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -38,6 +53,16 @@ export const fetchLandingPageContent =
         throw new Error(
           result.message || "Failed to fetch landing page content"
         );
+      }
+
+      // Fallback: If no trusted companies or all inactive, use defaults
+      if (!result.data.trustedCompanies || result.data.trustedCompanies.length === 0) {
+         result.data.trustedCompanies = DEFAULT_TRUSTED_COMPANIES;
+      } else {
+         const active = result.data.trustedCompanies.filter(c => c.is_active);
+         if (active.length === 0) {
+             result.data.trustedCompanies = DEFAULT_TRUSTED_COMPANIES;
+         }
       }
 
       return result.data;

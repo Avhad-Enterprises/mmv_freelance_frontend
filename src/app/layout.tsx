@@ -1,5 +1,5 @@
 import "./globals.scss";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 
 import localFont from 'next/font/local';
 import Script from 'next/script';
@@ -73,11 +73,12 @@ export const metadata: Metadata = {
     title: "MMV - Make My Vid | Hire Top Video Editors & Videographers",
     description: "Connect with 50,000+ verified video editors and videographers.",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: "#31795A",
 };
 

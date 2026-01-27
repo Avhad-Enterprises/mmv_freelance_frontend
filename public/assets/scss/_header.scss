@@ -1,10 +1,13 @@
+@use "mixins";
+@use "variables";
+
 .theme-main-menu {
     background: #fff;
     position: relative;
     z-index: 999;
     padding: 35px 40px;
     // box-shadow: 0 13px 35px -12px rgb(35 35 35 / 10%);
-    @include transition(0.4s);
+    @include mixins.transition(0.4s);
     &.menu-overlay {
         position: absolute;
         top:0;
@@ -26,9 +29,9 @@
             margin: 8px 10px 0;
             padding: 10px;
             border-radius: 10px;
-            @include transition(0.2s);
+            @include mixins.transition(0.2s);
             &:hover {
-                background: rgba($color: $color-three, $alpha: 0.07);
+                background: rgba($color: variables.$color-three, $alpha: 0.07);
             }
             .icon {
                width: 48px;
@@ -40,8 +43,8 @@
                 margin-top: 2px;
             }
             &:hover .icon {
-                background: $color-two;
-                border-color: $color-two;
+                background: variables.$color-two;
+                border-color: variables.$color-two;
             }
         }
         .explore-all-btn {
@@ -50,20 +53,20 @@
             padding: 12px 20px;
             margin-top: 40px;
             border-radius: 0 0 10px 10px;
-            color: $color-five;
+            color: variables.$color-five;
             font-size: 17px;
             letter-spacing: -0.3px;
             .icon {
                 width: 28px;
                 height: 28px;
                 line-height: 26px;
-                border: 1px solid $color-five;
+                border: 1px solid variables.$color-five;
                 font-weight: 900;
                 text-align: center;
                 border-radius: 50%;
             }
             &:hover {
-                background: $color-five;
+                background: variables.$color-five;
                 color: #fff;
             }
         }
@@ -76,9 +79,9 @@
         position: relative;
         z-index: 99;
         border: none;
-        background: $color-three;
+        background: variables.$color-three;
     }
-    &.menu-style-one .navbar-toggler {background: $color-two;}
+    &.menu-style-one .navbar-toggler {background: variables.$color-two;}
     .navbar-toggler:focus {box-shadow: none;}
     .navbar-toggler::before,
     .navbar-toggler::after {
@@ -109,7 +112,7 @@
     }
     &.menu-style-one .navbar-toggler:before,
     &.menu-style-one .navbar-toggler:after,
-    &.menu-style-one .navbar-toggler span {background: $color-one;}
+    &.menu-style-one .navbar-toggler span {background: variables.$color-one;}
     .navbar-toggler::before {
         -webkit-transform: translate3d(0, -9px, 0) scale3d(1, 1, 1);
         transform: translate3d(0, -9px, 0) scale3d(1, 1, 1);
@@ -133,27 +136,27 @@
     font-weight: 500;
     font-size: 1em;
     line-height: initial;
-    color: $text-dark;
+    color: variables.$text-dark;
     padding: 20px 0;
     margin: 0 18px;
     position: relative;
-    @include transition(0.2s);
+    @include mixins.transition(0.2s);
 }
-.navbar .nav-item:hover .nav-link {color:$color-three;}
+.navbar .nav-item:hover .nav-link {color:variables.$color-three;}
 .navbar .dropdown-menu .dropdown-item {
     text-transform: capitalize;
     line-height: 38px; 
     padding: 0 15px;
-    color: $text-dark;
+    color: variables.$text-dark;
     font-size: 0.88em;
     background: transparent;
     position: relative;
     letter-spacing: -0.3px;
     border-radius: 5px;
-    @include transition(0.2s);
+    @include mixins.transition(0.2s);
     &:hover {
-        color:$color-four;
-        background: rgba($color: $color-three, $alpha: 0.06);
+        color:variables.$color-four;
+        background: rgba($color: variables.$color-three, $alpha: 0.06);
     }
 }
 .dashboard-menu .nav-link::before {
@@ -169,17 +172,17 @@
 }
 // Menu One
 .menu-style-one.theme-main-menu.fixed {
-    background: $color-one;
+    background: variables.$color-one;
 }
 .menu-style-one .navbar .nav-item .nav-link {color: #fff;}
-.menu-style-one .navbar .nav-item:hover .nav-link {color:$color-two;}
+.menu-style-one .navbar .nav-item:hover .nav-link {color:variables.$color-two;}
 .menu-style-one .navbar .nav-item.category-btn .nav-link {
     background: rgba($color: #fff, $alpha: 0.1);
     line-height: 33px;
     padding: 0 17px;
     border-radius: 25px;
     margin: 10px 35px 10px 0;
-    color: $color-two;
+    color: variables.$color-two;
     i {
         margin-right: 5px;
         vertical-align: -2px;
@@ -190,7 +193,7 @@
     background: #212121;
 }
 .menu-style-two .navbar .nav-item .nav-link {color: #fff;}
-.menu-style-two .navbar .nav-item:hover .nav-link {color:$color-one;}
+.menu-style-two .navbar .nav-item:hover .nav-link {color:variables.$color-one;}
 // Mega Menu
 .theme-main-menu .mega-dropdown,.theme-main-menu .navbar {position: static;}
 .navbar [class*="mega-dropdown"] .dropdown-menu {
@@ -219,7 +222,7 @@
         font-family: var(--gorditas-font);
         font-size: 14px;
         font-weight: 500;
-        color: $color-four;
+        color: variables.$color-four;
         display: inline-block;
         position: relative;
         margin: 0 0 5px;
@@ -235,18 +238,18 @@
     line-height: 14px;
     border-right: 1px solid rgba($color: #fff, $alpha: 0.27);
     &:hover {
-        color: $color-two;
+        color: variables.$color-two;
     }
 }
 .theme-main-menu .login-btn-one {
-    color: $color-two;
+    color: variables.$color-two;
     font-weight: 500;
     &:hover {
         text-decoration: underline;
     }
 }
 .theme-main-menu .login-btn-two {
-    color: $color-three;
+    color: variables.$color-three;
     &:hover {
         text-decoration: underline;
     }
@@ -257,15 +260,15 @@
     color: #fff;
     border-radius: 50px;
     &:hover {
-        background: $color-one;
-        border-color: $color-one;
+        background: variables.$color-one;
+        border-color: variables.$color-one;
     }
     &.dark-style {
         border-color: #000;
         color: #000;
         &:hover {
-            background: $color-one;
-            border-color: $color-one;
+            background: variables.$color-one;
+            border-color: variables.$color-one;
             color: #fff;
         }
     }
@@ -330,9 +333,9 @@
             font-weight: 500;
             color: #536159;
             padding: 13px 0;
-            @include transition (0.2s);
+            @include mixins.transition (0.2s);
             &:hover {
-                color: $color-three;
+                color: variables.$color-three;
             }
         }
     }
@@ -428,7 +431,7 @@
         padding: 0;
         border-radius: 0;
         margin: 0;
-        background: rgba($color: $color-two, $alpha: 0.25);
+        background: rgba($color: variables.$color-two, $alpha: 0.25);
     }
     .menu-style-one .navbar .dropdown-menu,
     .menu-style-two .navbar .dropdown-menu {background: #fff;}
