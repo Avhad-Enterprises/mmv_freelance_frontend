@@ -84,17 +84,18 @@ const CareerDetailsClientView = () => {
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-lg-10">
-                            {/* Header Card */}
-                            <div className="bg-white rounded-3 shadow-sm p-4 mb-4">
-                                <div className="d-flex align-items-center gap-4">
+                            {/* Header Card with Short Description */}
+                            <div className="bg-white rounded-3 shadow-sm p-4 p-lg-5 mb-4">
+                                <div className="d-flex flex-column flex-md-row gap-4 align-items-start">
                                     {career.company_logo && (
                                         <div
                                             style={{
                                                 width: '100px',
                                                 height: '100px',
-                                                borderRadius: '50%',
-                                                background: '#f9fafb',
-                                                border: '2px solid #e5e7eb',
+                                                borderRadius: '20px',
+                                                background: 'white',
+                                                border: '1px solid #f3f4f6',
+                                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -109,104 +110,115 @@ const CareerDetailsClientView = () => {
                                                     width: '100%',
                                                     height: '100%',
                                                     objectFit: 'contain',
-                                                    padding: '16px'
+                                                    padding: '12px'
                                                 }}
                                             />
                                         </div>
                                     )}
-                                    <div className="flex-grow-1">
-                                        <h2 className="mb-2">{career.title}</h2>
-                                        <div className="d-flex flex-wrap gap-3 align-items-center">
-                                            <span className="badge bg-success bg-opacity-10 text-success px-3 py-2">
-                                                <svg
-                                                    style={{ width: '16px', height: '16px', marginRight: '6px', marginTop: '-2px' }}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <div className="flex-grow-1 w-100">
+                                        <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                                            <div>
+                                                <h1 className="h2 mb-2 fw-bold text-dark">{career.title}</h1>
+                                                <div className="d-flex flex-wrap gap-3 align-items-center text-muted">
+                                                    <span className="d-flex align-items-center gap-1">
+                                                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        {career.office_location}
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span>
+                                                        Posted {new Date(career.created_at).toLocaleDateString('en-US', {
+                                                            month: 'long',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <Link
+                                                href={career.apply_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-primary px-4 py-2 rounded-pill"
+                                                style={{
+                                                    backgroundColor: '#244034',
+                                                    borderColor: '#244034',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                Apply Now
+                                                <svg className="ms-2" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                                 </svg>
-                                                {career.office_location}
-                                            </span>
-                                            <span className="text-muted">
-                                                Posted on {new Date(career.created_at).toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    day: 'numeric',
-                                                    year: 'numeric'
-                                                })}
-                                            </span>
+                                            </Link>
                                         </div>
+
+                                        {/* Short Description as Lead Text */}
+                                        {career.short_description && (
+                                            <div className="mt-4 pt-4 border-top">
+                                                <h5 className="mb-3 fw-bold">Role Overview</h5>
+                                                <p className="lead text-dark fs-6 mb-0" style={{ lineHeight: '1.7', opacity: 0.85 }}>
+                                                    {career.short_description}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
-                                    <Link
-                                        href={career.apply_link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-primary px-4 py-2"
-                                        style={{
-                                            background: '#244034',
-                                            border: 'none',
-                                            whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        Apply Now →
-                                    </Link>
                                 </div>
                             </div>
 
-                            {/* Description */}
-                            {career.short_description && (
-                                <div className="bg-white rounded-3 shadow-sm p-4 mb-4">
-                                    <h4 className="mb-3">About the Role</h4>
-                                    <p className="text-muted mb-0" style={{ lineHeight: '1.8' }}>
-                                        {career.short_description}
-                                    </p>
-                                </div>
-                            )}
+                            {/* Main Content: Detailed Description & Requirements */}
+                            {(career.detail_description || career.job_details) && (
+                                <div className="bg-white rounded-3 shadow-sm p-4 p-lg-5 mb-4">
+                                    {career.detail_description && (
+                                        <div className="mb-5">
+                                            <h3 className="h4 mb-4 fw-bold">Job Description</h3>
+                                            <div
+                                                className="text-muted fs-6"
+                                                style={{ lineHeight: '1.8', whiteSpace: 'pre-wrap' }}
+                                            >
+                                                {career.detail_description}
+                                            </div>
+                                        </div>
+                                    )}
 
-                            {/* Detailed Description */}
-                            {career.detail_description && (
-                                <div className="bg-white rounded-3 shadow-sm p-4 mb-4">
-                                    <h4 className="mb-3">Job Description</h4>
-                                    <div
-                                        className="text-muted"
-                                        style={{ lineHeight: '1.8', whiteSpace: 'pre-wrap' }}
-                                    >
-                                        {career.detail_description}
-                                    </div>
-                                </div>
-                            )}
+                                    {career.detail_description && career.job_details && <hr className="my-5 opacity-10" />}
 
-                            {/* Job Details */}
-                            {career.job_details && (
-                                <div className="bg-white rounded-3 shadow-sm p-4 mb-4">
-                                    <h4 className="mb-3">Requirements & Benefits</h4>
-                                    <div
-                                        className="text-muted"
-                                        style={{ lineHeight: '1.8', whiteSpace: 'pre-wrap' }}
-                                    >
-                                        {career.job_details}
-                                    </div>
+                                    {career.job_details && (
+                                        <div>
+                                            <h3 className="h4 mb-4 fw-bold">Requirements & Benefits</h3>
+                                            <div
+                                                className="text-muted fs-6"
+                                                style={{ lineHeight: '1.8', whiteSpace: 'pre-wrap' }}
+                                            >
+                                                {career.job_details}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {/* Apply CTA */}
-                            <div className="bg-white rounded-3 shadow-sm p-4 text-center">
-                                <h4 className="mb-3">Ready to Apply?</h4>
+                            <div className="bg-white rounded-3 shadow-sm p-5 text-center">
+                                <h3 className="h4 mb-3 fw-bold">Ready to take the next step?</h3>
                                 <p className="text-muted mb-4">
-                                    Join our team and be part of something amazing!
+                                    Join our team and help us build the future of video creation.
                                 </p>
                                 <Link
                                     href={career.apply_link}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="btn btn-primary btn-lg px-5"
+                                    className="btn btn-primary btn-lg px-5 rounded-pill"
                                     style={{
-                                        background: '#244034',
-                                        border: 'none'
+                                        backgroundColor: '#244034',
+                                        borderColor: '#244034'
                                     }}
                                 >
-                                    Apply for this Position →
+                                    Apply for this Position
+                                    <svg className="ms-2" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
                                 </Link>
                             </div>
 

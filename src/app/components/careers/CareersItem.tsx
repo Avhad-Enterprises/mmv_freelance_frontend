@@ -71,19 +71,6 @@ const CareersItem = ({ item }: { item: Career }) => {
 
             {/* Content Section - Bottom 40% */}
             <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                {/* Category */}
-                <p
-                    style={{
-                        fontSize: '13px',
-                        color: '#9ca3af',
-                        marginBottom: '8px',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        fontWeight: '500'
-                    }}
-                >
-                    Career Opportunity
-                </p>
 
                 {/* Job Title */}
                 <h3
@@ -91,9 +78,9 @@ const CareersItem = ({ item }: { item: Career }) => {
                         fontSize: '22px',
                         fontWeight: '700',
                         color: '#1f2937',
-                        marginBottom: '12px',
+                        marginBottom: '0px',
                         lineHeight: '1.3',
-                        minHeight: '58px',
+                        // minHeight: '58px', // Removed to reduce gap for shorter titles
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -160,7 +147,7 @@ const CareersItem = ({ item }: { item: Career }) => {
                     <Link
                         href={`/careers/${item.job_id}`}
                         style={{
-                            color: '#3b82f6',
+                            color: '#00BF58',
                             fontSize: '15px',
                             fontWeight: '600',
                             textDecoration: 'none',
@@ -171,11 +158,11 @@ const CareersItem = ({ item }: { item: Career }) => {
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.gap = '10px';
-                            e.currentTarget.style.color = '#2563eb';
+                            e.currentTarget.style.color = '#008f42';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.gap = '6px';
-                            e.currentTarget.style.color = '#3b82f6';
+                            e.currentTarget.style.color = '#00BF58';
                         }}
                     >
                         View Details
