@@ -313,10 +313,17 @@
         top: 0;
         right: 55px;
         left: 315px;
-        background: #F0F5F3;
+        background: transparent;
         padding: 30px 0;
         z-index: 1100;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
         /* ensure header appears above sidebar */
+
+        /* Scrolled state - show background */
+        &.scrolled {
+            background: #f0f5f3;
+            // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
 
         /* Medium screens: reduce left offset so header aligns with reduced sidebar width */
         @media (max-width: 1199px) {

@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
 import notifi from "@/assets/dashboard/images/icon/icon_11.svg";
@@ -38,6 +38,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
   const { unreadCount, notifications, markAsRead, markAllAsRead } = useNotification();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Detect scroll to add background color to header
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    // Check initial scroll position
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Helper function to format notification time
   const formatNotificationTime = (createdAt: string | undefined): string => {
@@ -62,7 +76,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   };
 
   return (
-    <header className="dashboard-header">
+    <header className={`dashboard-header ${isScrolled ? 'scrolled' : ''}`}>
       <style jsx global>{`
         .header-job-post-btn {
           white-space: nowrap;

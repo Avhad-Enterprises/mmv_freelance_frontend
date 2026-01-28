@@ -64,10 +64,17 @@ const ListItemTwo = ({
               </div>
             </div>
 
-            <div className="col-xl-3 col-md-4 col-sm-6">
+            <div className="col-xl-2 col-md-4 col-sm-6">
               <div className="candidate-info">
                 <span>Budget</span>
                 <div>${item.budget ?? 0}</div>
+              </div>
+            </div>
+
+            <div className="col-xl-2 col-md-4 col-sm-6">
+              <div className="candidate-info">
+                <span>Category</span>
+                <div>{item.project_category || 'Not specified'}</div>
               </div>
             </div>
 
