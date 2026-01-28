@@ -619,9 +619,36 @@ const DashboardJobDetailsArea = ({
                           Company: {job.client_company_name}
                         </div>
                       )}
+                      {/* Project Category */}
+                      {job.project_category && (
+                        <div className="mt-15">
+                          <span
+                            className="badge"
+                            style={{
+                              backgroundColor: '#e8f5e9',
+                              color: '#31795a',
+                              fontSize: '13px',
+                              padding: '8px 16px',
+                              fontWeight: '500',
+                              borderRadius: '20px',
+                            }}
+                          >
+                            <i className="bi bi-tag-fill me-2"></i>
+                            {job.project_category}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="border-top mt-40 pt-40">
                       <ul className="job-meta-data row style-none">
+                        <li className="col-6">
+                          <span>Category</span>
+                          <div>{job.project_category || 'Not specified'}</div>
+                        </li>
+                        <li className="col-6">
+                          <span>Type</span>
+                          <div>{job.projects_type || 'Not specified'}</div>
+                        </li>
                         <li className="col-6">
                           <span>Budget</span>
                           <div>
