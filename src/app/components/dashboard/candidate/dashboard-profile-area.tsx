@@ -531,10 +531,10 @@ const DashboardProfileArea = ({ }: IProps) => {
     // Validate portfolio links if they've been changed
     if (editedData.portfolio_links && editedData.portfolio_links.length > 0) {
       const nonEmptyLinks = editedData.portfolio_links.filter((link: string) => link && link.trim().length > 0);
-      
+
       if (nonEmptyLinks.length > 0) {
         const validation = validatePortfolioLinks(editedData.portfolio_links, true);
-        
+
         if (!validation.hasValidYouTubeLink) {
           toast.error('At least one valid YouTube link is required in your portfolio.');
           setSaving(false);
@@ -544,7 +544,7 @@ const DashboardProfileArea = ({ }: IProps) => {
         // Check for any invalid links
         const firstErrorIndex = validation.errors.findIndex(e => e !== undefined);
         if (firstErrorIndex !== -1 && validation.errors[firstErrorIndex]) {
-          toast.error(validation.errors[firstErrorIndex]);
+          toast.error(validation.errors[firstErrorIndex] as string);
           setSaving(false);
           return;
         }
