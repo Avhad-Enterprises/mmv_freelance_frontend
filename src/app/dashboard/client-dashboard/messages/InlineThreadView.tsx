@@ -52,16 +52,21 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({
     const loadConversation = async () => {
       try {
         const token = authCookies.getToken();
+        // The backend does not have a GET /conversations/:id endpoint (returns 404).
+        // Fetch all conversations and find the matching one instead.
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/conversations/${conversationId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/chat/conversations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        if (response.data?.data) {
-          const convData = response.data.data;
+        const conversations = response.data?.data || [];
+        const convData = conversations.find(
+          (c: any) => String(c.conversation_id) === String(conversationId)
+        );
 
+        if (convData) {
           // Build participant details from API response
           const participantDetails: Record<string, any> = {};
           const participantIds: string[] = [];
@@ -84,11 +89,31 @@ const InlineThreadView: React.FC<InlineThreadViewProps> = ({
             participants: participantIds,
             participantDetails,
           });
+        } else {
+          // If conversation not found in list, fallback to deriving participants from conversationId
+          if (conversationId.includes("_")) {
+            const parts = conversationId.split("_").sort();
+            const otherId = parts.find((p) => p !== currentUserId);
+            setOtherParticipantId(otherId);
+            setConversation({
+              id: conversationId,
+              participants: parts,
+              participantDetails: {},
+            });
+          }
         }
-      } catch (err) {
-        console.error("Failed to load conversation:", err);
-        // Try to construct from conversationId if API fails
-        if (conversationId.includes("_")) {
+      } catch (err: any) {
+        // Suppress noisy Axios 404 errors and log a friendly message.
+        if (err?.response?.status === 404) {
+          console.warn(
+            `Conversation ${conversationId} not found (404). Falling back to conversationId parsing.`
+          );
+        } else {
+          console.error("Failed to load conversation:", err);
+        }
+
+        // Fallback parsing from conversationId if possible
+        if (conversationId && conversationId.includes("_")) {
           const parts = conversationId.split("_").sort();
           const otherId = parts.find((p) => p !== currentUserId);
           setOtherParticipantId(otherId);
