@@ -12,6 +12,7 @@ import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
 import { authCookies } from "@/utils/cookies";
 import { useConversations } from "@/hooks/useConversations";
+import { useNotification } from "@/context/NotificationContext";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -33,6 +34,8 @@ import nav_8 from "@/assets/dashboard/images/icon/icon_8.svg";
 import nav_14 from "@/assets/dashboard/images/icon/icon_14.svg";
 import nav_15 from "@/assets/dashboard/images/icon/icon_15.svg";
 import nav_16 from "@/assets/dashboard/images/icon/icon_16.svg";
+import nav_notification from "@/assets/dashboard/images/icon/icon_11.svg";
+import nav_notification_active from "@/assets/dashboard/images/icon/icon_11.svg";
 
 
 const nav_data = [
@@ -45,6 +48,7 @@ const nav_data = [
     { id: 11, icon: nav_15, icon_active: nav_15, link: "/dashboard/client-dashboard/completed-projects", title: "Completed Projects" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/client-dashboard/messages", title: "Chat" },
     { id: 8, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/client-dashboard/setting", title: "Account Settings" },
+    { id: 99, icon: nav_notification, icon_active: nav_notification_active, link: "/dashboard/client-dashboard/notifications", title: "Notifications" },
 ];
 
 type IProps = {
@@ -57,6 +61,7 @@ const EmployAside = ({ }: IProps) => {
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
     const currentUserId = userData?.user_id ? String(userData.user_id) : undefined;
     const { conversations } = useConversations(currentUserId);
+    const { unreadCount } = useNotification();
 
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
@@ -69,6 +74,9 @@ const EmployAside = ({ }: IProps) => {
 
     // Check for unread messages
     const hasUnreadMessages = conversations.some(convo => convo.hasUnread);
+
+    // Check for unread notifications
+    const hasUnreadNotifications = unreadCount > 0;
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -230,7 +238,9 @@ const EmployAside = ({ }: IProps) => {
                             {nav_data.map((item) => {
                                 const isActive = pathname === item.link;
                                 const isMessagesItem = item.id === 10; // Messages item
-                                const showNotification = isMessagesItem && hasUnreadMessages;
+                                const isNotificationsItem = item.id === 99; // Notifications item
+                                const showMessageBadge = isMessagesItem && hasUnreadMessages;
+                                const showNotificationBadge = isNotificationsItem && hasUnreadNotifications;
 
                                 return (
                                     <li key={item.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
@@ -241,22 +251,34 @@ const EmployAside = ({ }: IProps) => {
                                             <Image src={isActive ? item.icon_active : item.icon} alt="icon" className="lazy-img" />
                                             <span>{item.title}</span>
                                         </Link>
-                                        {showNotification && (
+                                        {(showMessageBadge || showNotificationBadge) && (
                                             <div
                                                 className="position-absolute"
                                                 style={{
                                                     top: '12px',
                                                     right: '20px',
-                                                    width: '12px',
-                                                    height: '12px',
+                                                    minWidth: showNotificationBadge ? '20px' : '12px',
+                                                    height: showNotificationBadge ? '20px' : '12px',
                                                     borderRadius: '50%',
-                                                    backgroundColor: '#1a5f3d',
+                                                    backgroundColor: showNotificationBadge ? '#FF3B30' : '#1a5f3d',
                                                     border: '2px solid white',
-                                                    boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
+                                                    boxShadow: showNotificationBadge
+                                                        ? '0 2px 6px rgba(255, 59, 48, 0.4)'
+                                                        : '0 2px 6px rgba(26, 95, 61, 0.4)',
                                                     zIndex: 10,
-                                                    animation: 'pulse 2s infinite'
+                                                    animation: 'pulse 2s infinite',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '10px',
+                                                    fontWeight: 'bold',
+                                                    color: 'white'
                                                 }}
-                                            />
+                                            >
+                                                {showNotificationBadge && unreadCount > 0 && (
+                                                    <span>{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                                )}
+                                            </div>
                                         )}
                                     </li>
                                 );

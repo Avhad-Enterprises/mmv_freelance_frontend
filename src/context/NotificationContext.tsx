@@ -13,6 +13,8 @@ export interface Notification {
     is_read: boolean;
     type?: string;
     created_at?: string;
+    related_id?: number;      // ID of the related entity (e.g., projects_task_id, applied_projects_id)
+    related_type?: string;    // Type of related entity (e.g., 'projects_task', 'applied_projects')
     // Add other fields as needed based on your DB schema
 }
 

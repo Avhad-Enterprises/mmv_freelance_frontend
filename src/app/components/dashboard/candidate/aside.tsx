@@ -10,6 +10,7 @@ import ProfilePictureModal from "../../common/ProfilePictureModal";
 import AuthenticatedImage from "../../common/AuthenticatedImage";
 import toast from "react-hot-toast";
 import { useConversations } from "@/hooks/useConversations";
+import { useNotification } from "@/context/NotificationContext";
 
 import logo from "@/assets/dashboard/images/logo_01.png";
 import profile_icon_1 from "@/assets/dashboard/images/icon/icon_23.svg";
@@ -50,6 +51,7 @@ const nav_data = [
     { id: 11, icon: nav_18, icon_active: nav_18, link: "/dashboard/freelancer-dashboard/credits", title: "Keys" },
     { id: 10, icon: nav_5, icon_active: nav_5_active, link: "/dashboard/freelancer-dashboard/chat", title: "Chat" },
     { id: 7, icon: nav_7, icon_active: nav_7_active, link: "/dashboard/freelancer-dashboard/setting", title: "Account Settings" },
+    { id: 99, icon: nav_11, icon_active: nav_11, link: "/dashboard/freelancer-dashboard/notifications", title: "Notifications" },
 ] as const;
 
 type IProps = {
@@ -62,6 +64,7 @@ const CandidateAside = ({ }: IProps) => {
     const { userData, userRoles, currentRole, setCurrentRole, refreshUserData } = useUser();
     const currentUserId = userData?.user_id ? String(userData.user_id) : undefined;
     const { conversations } = useConversations(currentUserId);
+    const { unreadCount } = useNotification();
 
     const [showProfilePicModal, setShowProfilePicModal] = useState(false);
     const [profilePicKey, setProfilePicKey] = useState(Date.now()); // For cache busting
@@ -74,6 +77,9 @@ const CandidateAside = ({ }: IProps) => {
 
     // Check for unread messages
     const hasUnreadMessages = conversations.some(convo => convo.hasUnread);
+
+    // Check for unread notifications
+    const hasUnreadNotifications = unreadCount > 0;
 
     const handleRoleSwitch = (role: string) => {
         setCurrentRole(role);
@@ -238,7 +244,9 @@ const CandidateAside = ({ }: IProps) => {
                                 .map((m) => {
                                     const isActive = pathname === m.link;
                                     const isChatItem = m.id === 10; // Chat item
-                                    const showNotification = isChatItem && hasUnreadMessages;
+                                    const isNotificationsItem = m.id === 99; // Notifications item
+                                    const showMessageBadge = isChatItem && hasUnreadMessages;
+                                    const showNotificationBadge = isNotificationsItem && hasUnreadNotifications;
 
                                     return (
                                         <li key={m.id} onClick={() => setIsOpenSidebar(false)} className="position-relative">
@@ -246,22 +254,34 @@ const CandidateAside = ({ }: IProps) => {
                                                 <Image src={isActive ? m.icon_active : m.icon} alt="icon" className="lazy-img" />
                                                 <span>{m.title}</span>
                                             </Link>
-                                            {showNotification && (
+                                            {(showMessageBadge || showNotificationBadge) && (
                                                 <div
                                                     className="position-absolute"
                                                     style={{
                                                         top: '12px',
                                                         right: '20px',
-                                                        width: '12px',
-                                                        height: '12px',
+                                                        minWidth: showNotificationBadge ? '20px' : '12px',
+                                                        height: showNotificationBadge ? '20px' : '12px',
                                                         borderRadius: '50%',
-                                                        backgroundColor: '#1a5f3d',
+                                                        backgroundColor: showNotificationBadge ? '#FF3B30' : '#1a5f3d',
                                                         border: '2px solid white',
-                                                        boxShadow: '0 2px 6px rgba(26, 95, 61, 0.4)',
+                                                        boxShadow: showNotificationBadge
+                                                            ? '0 2px 6px rgba(255, 59, 48, 0.4)'
+                                                            : '0 2px 6px rgba(26, 95, 61, 0.4)',
                                                         zIndex: 10,
-                                                        animation: 'pulse 2s infinite'
+                                                        animation: 'pulse 2s infinite',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: '10px',
+                                                        fontWeight: 'bold',
+                                                        color: 'white'
                                                     }}
-                                                />
+                                                >
+                                                    {showNotificationBadge && unreadCount > 0 && (
+                                                        <span>{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                                    )}
+                                                </div>
                                             )}
                                         </li>
                                     );

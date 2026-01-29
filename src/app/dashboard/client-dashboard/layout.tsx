@@ -25,7 +25,7 @@ export default function EmployDashboardLayout({ children }: { children: React.Re
       <Wrapper>
         <UserProvider>
           <SidebarProvider>
-            <div style={{ paddingTop: '1rem' }}>
+            <div>
               <div className='dashboard-layout'>
                 <EmployAside />
                 {children}

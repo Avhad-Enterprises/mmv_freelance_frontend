@@ -25,7 +25,7 @@ export default function CandidateDashboardLayout({ children }: { children: React
       <Wrapper>
         <UserProvider>
           <SidebarProvider>
-            <div style={{ paddingTop: '1rem' }}>
+            <div>
               <div className='dashboard-layout'>
                 <CandidateAside />
                 {children}

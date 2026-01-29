@@ -584,6 +584,7 @@ const DashboardJobDetailsArea = ({
                               href={link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              style={{ color: '#0d6efd', textDecoration: 'underline' }}
                             >
                               {link}
                             </a>
@@ -631,9 +632,15 @@ const DashboardJobDetailsArea = ({
                               padding: '8px 16px',
                               fontWeight: '500',
                               borderRadius: '20px',
+                              whiteSpace: 'normal',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              textAlign: 'left',
+                              maxWidth: '100%',
+                              lineHeight: '1.4'
                             }}
                           >
-                            <i className="bi bi-tag-fill me-2"></i>
+                            <i className="bi bi-tag-fill me-2 flex-shrink-0"></i>
                             {job.project_category}
                           </span>
                         </div>

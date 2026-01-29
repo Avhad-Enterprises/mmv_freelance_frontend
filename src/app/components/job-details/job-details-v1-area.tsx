@@ -350,14 +350,59 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
             {/* Sidebar: On mobile appears first, on desktop appears on right */}
             <div className="col-lg-4 col-xl-3 order-lg-2 job-details-sidebar">
               <div className="job-company-info ms-xl-3 lg-mt-0">
-                <div className="text-md text-dark text-center mt-15 mb-20 text-capitalize">
-                  {job.project_title}
+                <div className="text-center mb-3">
+                  <div className="text-md text-dark text-center mt-15 mb-10 text-capitalize fw-500">
+                    {job.project_title}
+                  </div>
+                  <div className="text-sm text-muted mb-3">
+                    Posted by:{' '}
+                    <span className="fw-500 text-dark">
+                      {job.client_first_name && job.client_last_name
+                        ? `${job.client_first_name} ${job.client_last_name}`
+                        : job.client_company_name
+                          ? job.client_company_name
+                          : 'Anonymous Client'}
+                    </span>
+                  </div>
+                  {/* Project Category Badge */}
+                  {job.project_category && (
+                    <div className="mt-15">
+                      <span
+                        className="badge"
+                        style={{
+                          backgroundColor: '#e8f5e9',
+                          color: '#31795a',
+                          fontSize: '13px',
+                          padding: '8px 16px',
+                          fontWeight: '500',
+                          borderRadius: '20px',
+                          whiteSpace: 'normal',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          textAlign: 'left',
+                          maxWidth: '100%',
+                          lineHeight: '1.4'
+                        }}
+                      >
+                        <i className="bi bi-tag-fill me-2 flex-shrink-0"></i>
+                        {job.project_category}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="border-top mt-40 pt-40">
                   <ul className="job-meta-data row style-none">
                     <li className="col-6">
+                      <span>Category</span>
+                      <div>{job.project_category || 'Not specified'}</div>
+                    </li>
+                    <li className="col-6">
+                      <span>Type</span>
+                      <div>{job.projects_type || 'Not specified'}</div>
+                    </li>
+                    <li className="col-6">
                       <span>Budget</span>
-                      <div>${job.budget?.toLocaleString()}</div>
+                      <div>{job.currency ? `${job.currency} ${job.budget?.toLocaleString()}` : `$${job.budget?.toLocaleString()}`}</div>
                     </li>
                     <li className="col-6">
                       <span>Deadline</span>
@@ -448,7 +493,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   </div>
                   <ul className="list-type-two style-none mt-25 mb-15">
                     {job.reference_links.map((link, i) => (
-                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
+                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer" style={{ color: '#0d6efd', textDecoration: 'underline' }}>{link}</a></li>
                     ))}
                   </ul>
                 </div>
