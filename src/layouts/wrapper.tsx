@@ -4,7 +4,6 @@ import { resetFilter } from "@/redux/features/filterSlice";
 import { useAppDispatch } from "@/redux/hook";
 import { animationCreate } from "@/utils/utils";
 import { usePathname } from "next/navigation";
-import { ToastContainer } from "react-toastify";
 import TokenExpiryWarning from "@/app/components/common/token-expiry-warning";
 
 if (typeof window !== "undefined") {
@@ -27,8 +26,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
   }, [pathname]);
   return (
     <>
-      {children} 
-      <ToastContainer />
+      {children}
       <TokenExpiryWarning />
     </>
   );

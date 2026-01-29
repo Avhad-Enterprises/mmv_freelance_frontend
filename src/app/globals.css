@@ -3,5 +3,4 @@
 /* Use prebuilt Bootstrap CSS to avoid Sass @import deprecation warnings in Bootstrap's upstream SCSS files */
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'react-modal-video/css/modal-video.css';
-@import 'react-toastify/dist/ReactToastify.css';
 @import 'slick-carousel/slick/slick.css';

@@ -2,16 +2,16 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import {
-  CookieIcon,
-  Globe02Icon,
-  Shield01Icon,
-  ChartIcon,
-  Settings02Icon,
-  RefreshIcon,
-  Mail01Icon,
-  Building01Icon,
-  Call02Icon,
-} from "hugeicons-react";
+  Cookie,
+  Globe,
+  Shield,
+  BarChart3,
+  Settings,
+  RefreshCw,
+  Mail,
+  Building,
+  Phone,
+} from "lucide-react";
 
 const headingColor = { color: "rgb(36, 64, 52)" };
 const darkText = { color: "#111111" };
@@ -25,7 +25,7 @@ const CookiePolicy = () => {
           className="fw-bold fs-2 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CookieIcon size={32} /> Cookie Policy
+          <Cookie size={32} /> Cookie Policy
         </h1>
         <p className="text-muted mb-4">Last updated: 05/09/2025</p>
 
@@ -34,7 +34,7 @@ const CookiePolicy = () => {
           className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Globe02Icon size={28} /> 1. Introduction
+          <Globe size={28} /> 1. Introduction
         </h2>
         <h5 className="fw-medium mb-2" style={headingColor}>
           Purpose of this Policy
@@ -65,7 +65,7 @@ const CookiePolicy = () => {
           className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CookieIcon size={28} /> 2. What Are Cookies?
+          <Cookie size={28} /> 2. What Are Cookies?
         </h2>
         <h5 className="fw-medium mb-2" style={headingColor}>
           Definition
@@ -130,7 +130,7 @@ const CookiePolicy = () => {
           className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <ChartIcon size={28} /> 3. How We Use Cookies
+          <BarChart3 size={28} /> 3. How We Use Cookies
         </h2>
         <p style={darkText} className="mb-4">
           We use cookies to make sure our platform works the way you expect and to give you the best possible experience. Here's how each type of cookie helps:
@@ -208,7 +208,7 @@ const CookiePolicy = () => {
 
         {/* 4. Third-Party Cookies */}
 <h2 className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Shield01Icon size={28} /> 4. Third-Party Cookies
+  <Shield size={28} /> 4. Third-Party Cookies
 </h2>
 <p style={darkText} className="mb-3">
   In addition to the cookies we set, some cookies are placed on your device by trusted third parties. 
@@ -271,7 +271,7 @@ const CookiePolicy = () => {
 
 {/* 5. Managing Cookies */}
 <h2 className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Settings02Icon size={28} /> 5. Managing Cookies
+  <Settings size={28} /> 5. Managing Cookies
 </h2>
 <p style={darkText} className="mb-3">
   You're in control of how cookies are used on your device. Here's how you can manage them:
@@ -337,7 +337,7 @@ const CookiePolicy = () => {
 
 {/* 6. Consent to Use Cookies */}
 <h2 className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <CookieIcon size={28} /> 6. Consent to Use Cookies
+  <Cookie size={28} /> 6. Consent to Use Cookies
 </h2>
 <h5 className="fw-medium mb-2">How Consent Is Obtained</h5>
 <p style={darkText} className="mb-3">
@@ -381,7 +381,7 @@ const CookiePolicy = () => {
 
 {/* 7. Updates to This Policy */}
 <h2 className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <RefreshIcon size={28} /> 7. Updates to This Policy
+  <RefreshCw size={28} /> 7. Updates to This Policy
 </h2>
 <p style={darkText} className="mb-3">
   We may update this Cookie Policy from time to time to reflect changes in technology, legal requirements, or how we operate our platform.
@@ -407,17 +407,17 @@ const CookiePolicy = () => {
 
 {/* 8. Contact Information */}
 <h2 className="fs-4 fw-semibold mt-5 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Mail01Icon size={28} /> 8. Contact Information
+  <Mail size={28} /> 8. Contact Information
 </h2>
 <p style={darkText} className="mb-3">
   If you have any questions about this Cookie Policy, or about how we use cookies on our platform, please reach out to us.
 </p>
 <p style={darkText}>
-  <Mail01Icon className="me-2" size={18} /> Email: info@makemyvid.io
+  <Mail className="me-2" size={18} /> Email: info@makemyvid.io
   <br />
-  <Building01Icon className="me-2 mt-2" size={18} /> Office: 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092
+  <Building className="me-2 mt-2" size={18} /> Office: 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West Mumbai 400092
   <br />
-  <Call02Icon className="me-2 mt-2" size={18} /> Phone: +91 79774 84292 / +44 75425 50969
+  <Phone className="me-2 mt-2" size={18} /> Phone: +91 79774 84292 / +44 75425 50969
 </p>
 
 

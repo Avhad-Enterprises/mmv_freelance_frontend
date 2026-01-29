@@ -2,32 +2,31 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import {
-  Shield01Icon,
-  Building01Icon,
-  Mail01Icon,
-  Call02Icon,
-  File01Icon,
-  UserIcon,
-  Clock01Icon,
-  Globe02Icon,
-  LockIcon,
-  Edit01Icon,
-  CreditCardIcon,
-  CopyrightIcon,
-  Alert01Icon,
-  RefreshIcon,
-  AiPhone01Icon,
-  MapPinIcon,
-  CircleIcon,
-  CircleIcon as XCircleIcon,
-  Dollar01Icon,
-  Settings01Icon,
-  DatabaseIcon,
-  SafeIcon,
-  GameIcon,
-  RefreshIcon as RefreshCwIcon,
-  HelpCircleIcon,
-} from "hugeicons-react";
+  Shield,
+  Building,
+  Mail,
+  Phone,
+  File,
+  User,
+  Clock,
+  Globe,
+  Lock,
+  Edit,
+  CreditCard,
+  Copyright,
+  AlertTriangle,
+  RefreshCw,
+  Smartphone,
+  MapPin,
+  Circle,
+  XCircle,
+  DollarSign,
+  Settings,
+  Database,
+  Shield as SafeIcon,
+  Gamepad2,
+  HelpCircle,
+} from "lucide-react";
 
 const headingColor = { color: "rgb(36, 64, 52)" };
 const darkText = { color: "#111111" };
@@ -41,7 +40,7 @@ const TermsAndConditions = () => {
           className="fw-bold fs-2 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Shield01Icon size={30} /> Make My Vid – Terms of Service
+          <Shield size={30} /> Make My Vid – Terms of Service
         </h1>
         <p className="text-muted mb-4">Effective Date: 05/09/2025</p>
 
@@ -50,7 +49,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Building01Icon size={28} /> 1. About Us
+          <Building size={28} /> 1. About Us
         </h2>
         <p style={darkText}>
           Make My Vid ("we," "our," or "us") is a video production and editing
@@ -58,17 +57,17 @@ const TermsAndConditions = () => {
         </p>
         <div className="ps-3" style={darkText}>
           <p className="mb-2">
-            <MapPinIcon size={18} className="me-2" /> Office Address: 11, Star Trade Centre,
+            <MapPin size={18} className="me-2" /> Office Address: 11, Star Trade Centre,
             Chamunda Circle, Sodawala Lane, Borivali West, Mumbai 400092
           </p>
           <p className="mb-2">
-            <Mail01Icon size={18} className="me-2" /> Email: info@makemyvid.io
+            <Mail size={18} className="me-2" /> Email: info@makemyvid.io
           </p>
           <p className="mb-2">
-            <AiPhone01Icon size={18} className="me-2" /> Phone (India): +91 79774 84292
+            <Smartphone size={18} className="me-2" /> Phone (India): +91 79774 84292
           </p>
           <p className="mb-3">
-            <AiPhone01Icon size={18} className="me-2" /> Phone (UK): +44 75425 50969
+            <Smartphone size={18} className="me-2" /> Phone (UK): +44 75425 50969
           </p>
         </div>
         <p style={darkText}>
@@ -81,7 +80,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <File01Icon size={28} /> 2. Purpose of Our Service
+          <File size={28} /> 2. Purpose of Our Service
         </h2>
         <p style={darkText} className="mb-3">
           The purpose of Make My Vid is to provide a professional, secure, and reliable platform for clients who require video-related services, ranging from pre-production planning to final delivery of edited content. Our services are designed to help businesses, creators, agencies, and individuals bring their ideas to life through high-quality video.
@@ -178,7 +177,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <UserIcon size={28} /> 3. Your Account
+          <User size={28} /> 3. Your Account
         </h2>
         <p style={darkText} className="mb-3">
           To access and use the services offered by Make My Vid, you may be required to create an account on our platform. This ensures secure access to your projects, payment history, and communication with our team.
@@ -271,7 +270,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Clock01Icon size={28} /> 4. Service Availability
+          <Clock size={28} /> 4. Service Availability
         </h2>
         <p style={darkText} className="mb-3">
           At Make My Vid, we strive to ensure our services are consistently available and delivered to a high standard. However, the nature of video production and editing means that availability may depend on editor capacity, technical resources, and client collaboration.
@@ -346,7 +345,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Edit01Icon size={28} /> 5. Projects and Orders
+          <Edit size={28} /> 5. Projects and Orders
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Project Initiation</h5>
@@ -413,7 +412,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CircleIcon size={28} /> 6. Delivery
+          <Circle size={28} /> 6. Delivery
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Delivery Timelines</h5>
@@ -471,7 +470,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <RefreshIcon size={28} /> 7. Revisions and Client Rights if Something Goes Wrong
+          <RefreshCw size={28} /> 7. Revisions and Client Rights if Something Goes Wrong
         </h2>
         <div className="ps-3" style={darkText}>
           <p className="mb-2">
@@ -490,7 +489,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <XCircleIcon size={28} /> 8. Cancellation and Refunds
+          <XCircle size={28} /> 8. Cancellation and Refunds
         </h2>
         <p style={darkText} className="mb-3">
           We understand that project requirements may change, and clients may need to cancel or adjust orders. At the same time, video production and editing involve significant time, resources, and preparation. For this reason, our cancellation and refund policy balances fairness to clients with protection for our creative team.
@@ -566,7 +565,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Dollar01Icon size={28} /> 9. Prices and Payments
+          <DollarSign size={28} /> 9. Prices and Payments
         </h2>
         <p style={darkText} className="mb-3">
           Transparent pricing is a core principle at Make My Vid. All clients will be informed of the costs associated with their project in advance, and no hidden charges will be applied.
@@ -680,7 +679,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CopyrightIcon size={28} /> 10. Intellectual Property and Usage Rights
+          <Copyright size={28} /> 10. Intellectual Property and Usage Rights
         </h2>
         <p style={darkText} className="mb-3">
           At Make My Vid, we respect intellectual property rights and aim to ensure clarity regarding ownership and usage of all creative materials.
@@ -742,7 +741,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Alert01Icon size={28} /> 11. Our Responsibility
+          <AlertTriangle size={28} /> 11. Our Responsibility
         </h2>
         <p style={darkText} className="mb-3">
           At Make My Vid, we commit to delivering high-quality video services that meet the agreed project specifications. However, our responsibilities are subject to clear boundaries.
@@ -822,7 +821,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <DatabaseIcon size={28} /> 12. Data Protection and Privacy
+          <Database size={28} /> 12. Data Protection and Privacy
         </h2>
         <p style={darkText} className="mb-3">
           At Make My Vid, protecting your personal information and creative content is a top priority. We comply with applicable data protection regulations and implement strict security measures to ensure your data is safe at every stage of interaction.
@@ -889,7 +888,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <SafeIcon size={28} /> 13. Compliance with Law
+          <Shield size={28} /> 13. Compliance with Law
         </h2>
         <p style={darkText} className="mb-3">
           Make My Vid is committed to operating in full compliance with applicable laws and regulations across the jurisdictions we serve.
@@ -947,7 +946,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <GameIcon size={28} /> 14. Governing Law and Dispute Resolution
+          <Gamepad2 size={28} /> 14. Governing Law and Dispute Resolution
         </h2>
         <p style={darkText} className="mb-3">
           These Terms of Service, along with any disputes or claims arising from or in connection with them, shall be governed and interpreted in accordance with the laws of India, without regard to conflict of law principles.
@@ -1008,7 +1007,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <RefreshCwIcon size={28} /> 15. Changes to Terms
+          <RefreshCw size={28} /> 15. Changes to Terms
         </h2>
         <p style={darkText} className="mb-3">
           We may update or amend these Terms of Service from time to time to reflect changes in our business practices, services, technology, or applicable legal and regulatory requirements.
@@ -1076,7 +1075,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <HelpCircleIcon size={28} /> 16. Contact and Support
+          <HelpCircle size={28} /> 16. Contact and Support
         </h2>
         <p style={darkText} className="mb-3">
           We want our clients to feel supported throughout their journey with Make My Vid. If you have any questions, concerns, or require technical assistance, you can reach us using the details below:
@@ -1084,16 +1083,16 @@ const TermsAndConditions = () => {
 
         <div className="ps-3" style={darkText}>
           <p className="mb-2">
-            <Mail01Icon size={18} className="me-2" /> <strong>Email (Primary):</strong> info@makemyvid.io
+            <Mail size={18} className="me-2" /> <strong>Email (Primary):</strong> info@makemyvid.io
           </p>
           <p className="mb-2">
-            <AiPhone01Icon size={18} className="me-2" /> <strong>Phone (India):</strong> +91 79774 84292
+            <Smartphone size={18} className="me-2" /> <strong>Phone (India):</strong> +91 79774 84292
           </p>
           <p className="mb-2">
-            <AiPhone01Icon size={18} className="me-2" /> <strong>Phone (UK enquiries):</strong> +44 75425 50969
+            <Smartphone size={18} className="me-2" /> <strong>Phone (UK enquiries):</strong> +44 75425 50969
           </p>
           <p className="mb-3">
-            <MapPinIcon size={18} className="me-2" /> <strong>Office Address:</strong> 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West, Mumbai 400092
+            <MapPin size={18} className="me-2" /> <strong>Office Address:</strong> 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West, Mumbai 400092
           </p>
 
           <h5 className="fw-medium mb-2">Support Availability</h5>
@@ -1118,7 +1117,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Alert01Icon size={28} /> 17. Non-Excludable Liability
+          <AlertTriangle size={28} /> 17. Non-Excludable Liability
         </h2>
         <p style={darkText} className="mb-3">
           Nothing in these Terms excludes, limits, or attempts to exclude or limit liability where it would be unlawful to do so.
@@ -1152,7 +1151,7 @@ const TermsAndConditions = () => {
           className="fw-bold fs-2 mt-5 pt-5 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Globe02Icon size={30} /> Make My Vid – Website Terms of Use
+          <Globe size={30} /> Make My Vid – Website Terms of Use
         </h1>
         <p className="text-muted mb-4">Effective Date: 05/09/2025</p>
 
@@ -1161,7 +1160,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <LockIcon size={28} /> 1. Acceptance of Terms
+          <Lock size={28} /> 1. Acceptance of Terms
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Binding Agreement</h5>
@@ -1216,7 +1215,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Building01Icon size={28} /> 2. Who We Are
+          <Building size={28} /> 2. Who We Are
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Company Overview</h5>
@@ -1297,7 +1296,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Settings01Icon size={28} /> 3. Use of the Site
+          <Settings size={28} /> 3. Use of the Site
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Lawful Use Only</h5>
@@ -1352,7 +1351,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CopyrightIcon size={28} /> 4. Intellectual Property
+          <Copyright size={28} /> 4. Intellectual Property
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Ownership of Content</h5>
@@ -1395,7 +1394,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <File01Icon size={28} /> 5. User-Generated Content
+          <File size={28} /> 5. User-Generated Content
         </h2>
         <div className="ps-3" style={darkText}>
           <p className="mb-3">
@@ -1444,7 +1443,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <CircleIcon size={28} /> 6. Accuracy of Information
+          <Circle size={28} /> 6. Accuracy of Information
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Our Responsibility</h5>
@@ -1480,7 +1479,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Globe02Icon size={28} /> 7. Links to Third-Party Websites
+          <Globe size={28} /> 7. Links to Third-Party Websites
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) External Links</h5>
@@ -1518,7 +1517,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Clock01Icon size={28} /> 8. Availability of the Site
+          <Clock size={28} /> 8. Availability of the Site
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Access and Uptime</h5>
@@ -1549,7 +1548,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <Alert01Icon size={28} /> 9. Limitation of Liability
+          <AlertTriangle size={28} /> 9. Limitation of Liability
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) General Disclaimer</h5>
@@ -1609,7 +1608,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <DatabaseIcon size={28} /> 10. Privacy and Cookies
+          <Database size={28} /> 10. Privacy and Cookies
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Privacy Policy</h5>
@@ -1633,7 +1632,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <RefreshCwIcon size={28} /> 11. Changes to These Terms
+          <RefreshCw size={28} /> 11. Changes to These Terms
         </h2>
         <div className="ps-3" style={darkText}>
           <h5 className="fw-medium mb-2">a) Right to Update</h5>
@@ -1701,7 +1700,7 @@ const TermsAndConditions = () => {
           className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2"
           style={headingColor}
         >
-          <HelpCircleIcon size={28} /> 12. Contact Us
+          <HelpCircle size={28} /> 12. Contact Us
         </h2>
         <div className="ps-3" style={darkText}>
           <p className="mb-2">If you have any questions about these Terms or the Site, you can contact us:</p>

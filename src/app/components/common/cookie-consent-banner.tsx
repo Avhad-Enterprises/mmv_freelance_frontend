@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { consentCookies } from '@/utils/cookies';
 import { CookieConsent, DEFAULT_CONSENT } from '@/types/cookies';
-import { CookieIcon, Tick01Icon } from 'hugeicons-react';
+import { Cookie, Check } from 'lucide-react';
 
 interface CookieConsentBannerProps {
   className?: string;
@@ -57,7 +57,7 @@ const CookieConsentBanner: React.FC<CookieConsentBannerProps> = ({ className = '
       <div className={`cookie-consent-banner ${className}`}>
         <div className="banner-content">
           <div className="banner-header">
-            <CookieIcon size={24} className="cookie-icon" />
+            <Cookie size={24} className="cookie-icon" />
             <h3>Cookies & Privacy</h3>
           </div>
 
@@ -69,7 +69,7 @@ const CookieConsentBanner: React.FC<CookieConsentBannerProps> = ({ className = '
 
             <div className="cookie-categories">
               <div className="category essential">
-                <Tick01Icon size={16} />
+                <Check size={16} />
                 <span>Essential</span>
               </div>
               <div className="category optional">

@@ -1,4 +1,4 @@
-import "./globals.scss";
+import "./globals.css";
 import { Metadata, Viewport } from "next";
 
 import localFont from 'next/font/local';

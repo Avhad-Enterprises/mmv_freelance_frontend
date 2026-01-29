@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react";
 import DashboardHeader from "@/app/components/dashboard/candidate/dashboard-header";
 import EmployAside from "@/app/components/dashboard/employ/aside";
 import { makePostRequest, makePatchRequest } from "@/utils/api";
-import { RxCross1 } from "react-icons/rx";
-import { FaArrowLeft, FaCheck, FaQuestion } from "react-icons/fa";
+import { X, ArrowLeft, Check, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { useSidebar } from "@/context/SidebarContext"; // 👈 import
 
@@ -106,7 +105,7 @@ export default function ApplicationDetailsPage({
                 type="button"
                 className="btn btn-light p-2 d-flex align-items-center"
               >
-                <FaArrowLeft />
+                <ArrowLeft />
               </button>
             </Link>
             <h2 className="main-title m0">Applications</h2>
@@ -145,7 +144,7 @@ export default function ApplicationDetailsPage({
                               )
                             }
                           >
-                            <FaCheck />
+                            <Check />
                           </button>
                           <button
                             type="button"
@@ -157,7 +156,7 @@ export default function ApplicationDetailsPage({
                               )
                             }
                           >
-                            <FaQuestion />
+                            <HelpCircle />
                           </button>
                           <button
                             type="button"
@@ -169,7 +168,7 @@ export default function ApplicationDetailsPage({
                               )
                             }
                           >
-                            <RxCross1 />
+                            <X />
                           </button>
                         </div>
                       )}

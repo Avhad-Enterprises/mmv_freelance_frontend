@@ -1,7 +1,6 @@
 // Font import
 // @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700;800&display=swap');
-@use '../fonts/gordita/stylesheet';
-@use '../fonts/bootstrap-icons-1.10.2/font';
+// Fonts are loaded via Next.js font system in layout.tsx
 @use "mixins";
 @use "variables";
 
