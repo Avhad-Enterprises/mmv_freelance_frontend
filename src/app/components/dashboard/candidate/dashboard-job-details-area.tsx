@@ -584,6 +584,7 @@ const DashboardJobDetailsArea = ({
                               href={link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              style={{ color: '#0d6efd', textDecoration: 'underline' }}
                             >
                               {link}
                             </a>

@@ -132,7 +132,7 @@ const TopCompany = ({ creators = [] }: TopCompanyProps) => {
           <div className="row">
             {featuredFreelancers.map((freelancer) => (
               <div key={freelancer.user_id} className="col-lg-3 col-sm-6">
-                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp">
+                <div className="card-style-ten text-center tran3s mt-25 wow fadeInUp h-100 d-flex flex-column align-items-center">
                   {/* Profile Picture or Fallback Icon */}
                   {freelancer.profile_picture ? (
                     <div className="position-relative d-inline-block">
@@ -171,7 +171,7 @@ const TopCompany = ({ creators = [] }: TopCompanyProps) => {
                   {/* View Profile Link */}
                   <a
                     href={`/freelancer-profile/${freelancer.user_id}`}
-                    className="open-job-btn fw-500 tran3s"
+                    className="open-job-btn fw-500 tran3s mt-auto"
                   >
                     View Profile
                   </a>

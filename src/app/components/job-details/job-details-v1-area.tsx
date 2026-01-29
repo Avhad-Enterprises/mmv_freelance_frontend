@@ -493,7 +493,7 @@ const JobDetailsV1Area = ({ job }: { job: IJobType }) => {
                   </div>
                   <ul className="list-type-two style-none mt-25 mb-15">
                     {job.reference_links.map((link, i) => (
-                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
+                      <li key={i}><a href={link} target="_blank" rel="noopener noreferrer" style={{ color: '#0d6efd', textDecoration: 'underline' }}>{link}</a></li>
                     ))}
                   </ul>
                 </div>

@@ -10,6 +10,7 @@ import search from "@/assets/dashboard/images/icon/icon_10.svg";
 import { useSidebar } from "@/context/SidebarContext";
 import { useUser } from "@/context/UserContext";
 import { useNotification, Notification } from "@/context/NotificationContext";
+import { useRouter } from "next/navigation";
 
 // Notification item component
 type NotificationItemProps = {
@@ -38,7 +39,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
   const { setIsOpenSidebar } = useSidebar();
   const { currentRole } = useUser();
   const { unreadCount, notifications, markAsRead, markAllAsRead } = useNotification();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Dashboard base URL for freelancer
+  const dashboardBase = '/dashboard/freelancer-dashboard';
 
   // Detect scroll to add background color to header
   useEffect(() => {
@@ -69,6 +74,59 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
 
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+  };
+
+  // Get redirect URL based on notification type for freelancer
+  const getNotificationRedirectUrl = (notification: Notification): string | null => {
+    const { type } = notification;
+
+    switch (type) {
+      case 'hired':
+        return `${dashboardBase}/ongoing-jobs`;
+      case 'rejected':
+        return `${dashboardBase}/applied-jobs`;
+      case 'project_completed':
+        return `${dashboardBase}/completed-projects`;
+      case 'submission_approved':
+      case 'submission_rejected':
+        return `${dashboardBase}/ongoing-jobs`;
+      case 'message':
+        return `${dashboardBase}/chat`;
+      default:
+        return null;
+    }
+  };
+
+  // Handle notification click with redirect
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await markAsRead(notification.id);
+    }
+    const redirectUrl = getNotificationRedirectUrl(notification);
+    if (redirectUrl) {
+      router.push(redirectUrl);
+    }
+  };
+
+  // Determine icon based on type
+  const getNotificationIcon = (type: string | undefined): StaticImageData => {
+    switch (type) {
+      case 'proposal':
+      case 'submission':
+      case 'application_withdrawn':
+        return notify_icon_1;
+      case 'hired':
+      case 'project_completed':
+      case 'submission_approved':
+        return notify_icon_2;
+      case 'rejected':
+      case 'submission_rejected':
+        return notify_icon_3;
+      case 'message':
+        return notify_icon_1;
+      default:
+        return notify_icon_1;
+    }
   };
 
   const handleOpenSidebar = () => {
@@ -194,20 +252,20 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
                       onMouseEnter={(e) => e.currentTarget.style.background = '#244034'}
                       onMouseLeave={(e) => e.currentTarget.style.background = '#31795A'}
                     >
-                      Mark all as read
+                      Clear all
                     </button>
                   )}
                 </div>
                 <ul className="style-none notify-list">
-                  {notifications.length === 0 ? (
+                  {unreadCount === 0 ? (
                     <li className="d-flex align-items-center justify-content-center py-3">
-                      <span style={{ fontSize: '14px', color: '#666' }}>No notifications</span>
+                      <span style={{ fontSize: '14px', color: '#666' }}>No new notifications</span>
                     </li>
                   ) : (
-                    notifications.slice(0, 5).map((item: Notification) => (
-                      <div key={item.id} onClick={() => !item.is_read && markAsRead(item.id)} style={{ cursor: 'pointer' }}>
+                    notifications.filter(item => !item.is_read).slice(0, 5).map((item: Notification) => (
+                      <div key={item.id} onClick={() => handleNotificationClick(item)} style={{ cursor: 'pointer' }}>
                         <NotificationItem
-                          icon={notify_icon_1} // Use default icon or determine based on item.type
+                          icon={getNotificationIcon(item.type)}
                           main={item.message}
                           time={formatNotificationTime(item.created_at)}
                           isUnread={!item.is_read}
@@ -216,6 +274,38 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
                     ))
                   )}
                 </ul>
+                {/* View All Button */}
+                <div style={{
+                  borderTop: '1px solid #E3F0EB',
+                  padding: '12px 15px 8px',
+                  marginTop: '10px'
+                }}>
+                  <Link
+                    href="/dashboard/freelancer-dashboard/notifications"
+                    style={{
+                      display: 'block',
+                      textAlign: 'center',
+                      padding: '10px 20px',
+                      background: '#EFF6F3',
+                      color: '#31795A',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      textDecoration: 'none',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#31795A';
+                      e.currentTarget.style.color = '#fff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#EFF6F3';
+                      e.currentTarget.style.color = '#31795A';
+                    }}
+                  >
+                    View All Notifications
+                  </Link>
+                </div>
               </li>
             </ul>
           </div>
