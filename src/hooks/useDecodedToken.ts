@@ -15,7 +15,7 @@ const useDecodedToken = () => {
           const decodedPayload = JSON.parse(atob(base64Payload));
           setDecoded(decodedPayload);
         } catch (err) {
-          console.error("Token decode error", err);
+          // Token decode error
           setDecoded(null);
         }
       }

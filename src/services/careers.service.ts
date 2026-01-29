@@ -36,7 +36,7 @@ export const fetchCareers = async (): Promise<Career[]> => {
 
         return [];
     } catch (error) {
-        console.error("Error fetching careers:", error);
+
         return []; // Return empty array on error to prevent page crash
     }
 };
@@ -62,7 +62,6 @@ export const fetchCareerById = async (id: number): Promise<Career | null> => {
         const result: { data: Career } = await response.json();
         return result.data;
     } catch (error) {
-        console.error(`Error fetching career ${id}:`, error);
         return null;
     }
 };

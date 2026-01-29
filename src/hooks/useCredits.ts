@@ -75,7 +75,7 @@ export function useCredits(): UseCreditsReturn {
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : "Failed to load packages";
-            console.error("Failed to fetch packages:", message);
+            // Failed to fetch packages
         }
     }, []);
 

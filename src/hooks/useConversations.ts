@@ -64,7 +64,7 @@ export function useConversations(currentUserId: string | undefined) {
         setConversations(mapped);
       }
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
+      // Error fetching conversations
     } finally {
       setIsLoading(false);
     }
