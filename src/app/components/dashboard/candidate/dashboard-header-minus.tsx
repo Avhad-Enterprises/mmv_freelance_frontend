@@ -138,29 +138,155 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
       <style jsx global>{`
         .header-job-post-btn {
           white-space: nowrap;
+          font-weight: 600;
         }
+        
+        /* Mobile responsive header */
+        @media (max-width: 991px) {
+          .dashboard-header {
+            padding: 12px 15px !important;
+          }
+          
+          .dashboard-header .d-flex.justify-content-between {
+            gap: 8px;
+          }
+          
+          .header-job-post-btn {
+            font-size: 13px !important;
+            padding: 12px 18px !important;
+            min-width: auto !important;
+            height: 44px !important;
+            line-height: 1.2 !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            background: #2F3E35 !important;
+            color: #fff !important;
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          
+          .profile-notification {
+            margin-left: 8px !important;
+            margin-right: 8px !important;
+          }
+          
+          .profile-notification .noti-btn {
+            padding: 8px !important;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .profile-notification .noti-btn img {
+            width: 20px !important;
+            height: 20px !important;
+          }
+        }
+        
         @media (max-width: 767px) {
+          .dashboard-header {
+            padding: 10px 12px !important;
+          }
+          
+          .header-job-post-btn {
+            font-size: 14px !important;
+            padding: 12px 20px !important;
+            min-width: 140px !important;
+            height: 44px !important;
+            line-height: 1.2 !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            background: #2F3E35 !important;
+            color: #fff !important;
+            letter-spacing: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+          }
+          
+          .profile-notification {
+            margin-left: 6px !important;
+            margin-right: 6px !important;
+          }
+          
+          .profile-notification .noti-btn {
+            padding: 6px !important;
+            width: 38px;
+            height: 38px;
+          }
+          
+          .profile-notification .noti-btn img {
+            width: 18px !important;
+            height: 18px !important;
+          }
+          
+          .dash-mobile-nav-toggler {
+            margin-right: 10px !important;
+            width: 32px;
+            height: 32px;
+          }
+        }
+        
+        @media (max-width: 575px) {
+          .header-job-post-btn {
+            font-size: 13px !important;
+            padding: 11px 18px !important;
+            min-width: 130px !important;
+            height: 42px !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            background: #2F3E35 !important;
+            color: #fff !important;
+            letter-spacing: 0 !important;
+            box-shadow: none !important;
+          }
+          
+          .profile-notification {
+            margin-left: 4px !important;
+            margin-right: 4px !important;
+          }
+        }
+        
+        @media (max-width: 400px) {
           .header-job-post-btn {
             font-size: 12px !important;
-            padding: 5px 8px !important;
-            min-width: auto !important;
-            height: 35px !important;
-            line-height: 25px !important;
+            padding: 10px 16px !important;
+            min-width: 120px !important;
+            height: 40px !important;
+            border-radius: 11px !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .header-job-post-btn {
+            font-size: 11px !important;
+            padding: 9px 14px !important;
+            min-width: 110px !important;
+            height: 38px !important;
+            border-radius: 10px !important;
           }
         }
       `}</style>
-      <div className="d-flex align-items-center justify-content-between">
-        {/* Left side - User Role */}
-        <div className="d-flex align-items-center">
-          {/* Mobile Sidebar Toggle - Moved to Left */}
+      <div className="d-flex align-items-center justify-content-between w-100">
+        {/* Left side - Hamburger + User Role */}
+        <div className="d-flex align-items-center flex-shrink-1" style={{ minWidth: 0 }}>
+          {/* Mobile Sidebar Toggle */}
           <button
             onClick={handleOpenSidebar}
-            className="dash-mobile-nav-toggler d-block d-md-none me-3"
+            className="dash-mobile-nav-toggler d-block d-md-none me-2"
+            style={{ flexShrink: 0 }}
           >
             <span></span>
           </button>
 
-          {/* Left side - User Role (Hidden on mobile) */}
+          {/* User Role (Hidden on mobile) */}
           <div className="user-role d-none d-md-block" style={{
             fontSize: '14px',
             color: '#244034',
@@ -179,23 +305,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
           </div>
         </div>
 
-        {/* Right side - Search, Notifications, Post Job */}
-        <div className="d-flex align-items-center">
-          {/* Mobile Sidebar Toggle */}
-
-
-          {/* Search Form - Commented out as it's not working */}
-          {/*
-          <form action="#" className="search-form me-2 me-md-5">
-            <input type="text" placeholder="Search here.." />
-            <button type="submit">
-              <Image src={search} alt="search" className="lazy-img m-auto" />
-            </button>
-          </form>
-          */}
-
+        {/* Right side - Notifications only (no post button) */}
+        <div className="d-flex align-items-center flex-shrink-0" style={{ gap: '4px' }}>
           {/* Notifications */}
-          <div className="profile-notification ms-2 ms-md-5 me-4">
+          <div className="profile-notification">
             <button
               className="noti-btn dropdown-toggle"
               type="button"
@@ -203,37 +316,37 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ }) => {
               data-bs-toggle="dropdown"
               data-bs-auto-close="outside"
               aria-expanded="false"
-              style={{ position: 'relative' }}
+              style={{ position: 'relative', background: 'transparent', border: 'none', padding: '8px' }}
             >
-              <Image src={notifi} alt="Notification" className="lazy-img" />
+              <Image src={notifi} alt="Notification" className="lazy-img" style={{ width: '22px', height: '22px' }} />
               {unreadCount > 0 && (
                 <div
                   className="badge-pill"
                   style={{
                     position: 'absolute',
-                    top: '-5px',
+                    top: '-2px',
                     right: '-2px',
                     backgroundColor: '#FF3B30',
                     color: 'white',
                     borderRadius: '50%',
                     width: '18px',
                     height: '18px',
-                    fontSize: '11px',
+                    fontSize: '10px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontWeight: 'bold',
-                    border: '1px solid #fff'
+                    border: '2px solid #fff'
                   }}
                 >
-                  {unreadCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </div>
               )}
             </button>
 
             <ul className="dropdown-menu" aria-labelledby="notification-dropdown">
               <li>
-                <div className="d-flex justify-content-between align-items-center mb-6 px-6 pt-6 gap-11">
+                <div className="d-flex justify-content-between align-items-center mb-2 px-3 pt-2 gap-3">
                   <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>Notifications</h4>
                   {unreadCount > 0 && (
                     <button

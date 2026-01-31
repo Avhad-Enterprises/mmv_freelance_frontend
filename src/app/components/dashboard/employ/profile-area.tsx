@@ -488,29 +488,68 @@ const DashboardProfileArea = ({ }: IProps) => {
           </div>
 
           {Object.keys(tempChanges).length > 0 && (
-            <div style={{
-              position: 'fixed',
-              bottom: '2rem',
-              right: '2rem',
-              zIndex: 1000,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              borderRadius: '8px',
-              animation: 'slideUp 0.3s ease-out'
-            }}>
+            <>
               <button
                 className="dash-btn-two btn-lg"
                 onClick={saveAllChanges}
                 disabled={saving}
                 style={{
+                  position: 'fixed',
+                  bottom: '1rem',
+                  right: '1rem',
+                  zIndex: 1000,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  borderRadius: '30px',
+                  animation: 'slideUp 0.3s ease-out',
                   minWidth: '200px',
                   padding: '12px 24px',
                   fontSize: '1.1rem',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  border: 'none'
                 }}
               >
                 {saving ? 'Saving All Changes...' : 'Save All Changes'}
               </button>
-            </div>
+              
+              {/* Custom CSS for mobile responsiveness */}
+              <style jsx>{`
+                .dash-btn-two { border-radius: 30px !important; }
+                @media (max-width: 768px) {
+                  .dash-btn-two {
+                    min-width: 160px !important;
+                    padding: 10px 16px !important;
+                    font-size: 0.9rem !important;
+                    bottom: 1rem !important;
+                    right: 1rem !important;
+                    left: 1rem !important;
+                    width: calc(100% - 2rem) !important;
+                  }
+                }
+                
+                @media (max-width: 480px) {
+                  .dash-btn-two {
+                    min-width: 140px !important;
+                    padding: 8px 12px !important;
+                    font-size: 0.8rem !important;
+                    bottom: 0.5rem !important;
+                    right: 0.5rem !important;
+                    left: 0.5rem !important;
+                    width: calc(100% - 1rem) !important;
+                  }
+                }
+                
+                @keyframes slideUp {
+                  from {
+                    transform: translateY(100%);
+                    opacity: 0;
+                  }
+                  to {
+                    transform: translateY(0);
+                    opacity: 1;
+                  }
+                }
+              `}</style>
+            </>
           )}
 
           {loading && (
@@ -611,12 +650,18 @@ const DashboardProfileArea = ({ }: IProps) => {
                       ) : (
                         <div>
                           {displayData.social_links && displayData.social_links.length > 0 ? (
-                            displayData.social_links.map((link, index) => (
-                              <div key={index}>
-                                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                              </div>
-                            ))
-                          ) : 'No social links provided'}
+                            <>
+                              {displayData.social_links.map((link, index) => (
+                                <div key={index}>
+                                  <a href={link} target="_blank" rel="noopener noreferrer">
+                                    {link}
+                                  </a>
+                                </div>
+                              ))}
+                            </>
+                          ) : (
+                            <div>No social links provided</div>
+                          )}
                         </div>
                       )}
                     </div>

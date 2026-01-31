@@ -25,12 +25,34 @@ export default function EmployDashboardLayout({ children }: { children: React.Re
       <Wrapper>
         <UserProvider>
           <SidebarProvider>
-            <div>
-              <div className='dashboard-layout'>
+            <style jsx global>{`
+              /* Prevent horizontal scroll on mobile */
+              @media (max-width: 991px) {
+                body, html {
+                  overflow-x: hidden !important;
+                  max-width: 100vw !important;
+                }
+                
+                .dashboard-layout {
+                  overflow-x: hidden !important;
+                  max-width: 100vw !important;
+                }
+              }
+            `}</style>
+            <div
+              style={{
+                paddingTop:
+                  typeof window !== "undefined" && window.innerWidth <= 992
+                    ? "55px"   // mobile + tablet
+                    : "0px"    // desktop
+              }}
+            >
+              <div className="dashboard-layout">
                 <EmployAside />
                 {children}
               </div>
             </div>
+
           </SidebarProvider>
         </UserProvider>
       </Wrapper>

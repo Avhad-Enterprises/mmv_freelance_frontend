@@ -505,7 +505,94 @@ const CandidateV1Area = () => {
   );
 
   return (
-    <div className="dashboard-body">
+    <div className="dashboard-body candidates-page-responsive">
+      {/* Comprehensive Mobile Responsive Styles */}
+      <style jsx global>{`
+        /* Fix horizontal overflow and layout issues */
+        @media (max-width: 1199px) {
+          .candidates-page-responsive.dashboard-body {
+            padding: 100px 25px 30px !important;
+          }
+        }
+        
+        @media (max-width: 991px) {
+          .candidates-page-responsive.dashboard-body {
+            padding: 90px 20px 30px !important;
+            margin-left: 0 !important;
+            border-radius: 20px 0 0 20px !important;
+          }
+          
+          body, html {
+            overflow-x: hidden !important;
+            max-width: 100vw !important;
+          }
+          
+          .dashboard-layout {
+            overflow-x: hidden !important;
+          }
+          
+          .candidates-page-responsive .bg-white.card-box {
+            padding: 25px 20px !important;
+          }
+          
+          .candidates-page-responsive .upper-filter {
+            flex-direction: column !important;
+            gap: 15px;
+            align-items: flex-start !important;
+          }
+          
+          .candidates-page-responsive .short-filter {
+            width: 100% !important;
+          }
+          
+          .candidates-page-responsive .short-filter .nice-select {
+            width: 100% !important;
+          }
+        }
+        
+        @media (max-width: 767px) {
+          .candidates-page-responsive.dashboard-body {
+            padding: 80px 15px 20px !important;
+            border-radius: 15px 0 0 15px !important;
+            overflow-x: hidden !important;
+          }
+          
+          .candidates-page-responsive .main-title {
+            font-size: 24px !important;
+            margin-bottom: 15px !important;
+          }
+          
+          .candidates-page-responsive .filter-btn {
+            margin-bottom: 20px !important;
+          }
+          
+          .candidates-page-responsive .bg-white.card-box {
+            padding: 20px 15px !important;
+          }
+          
+          .candidates-page-responsive .dash-btn-two {
+            font-size: 14px !important;
+            padding: 8px 16px !important;
+          }
+          
+          .candidates-page-responsive .d-sm-flex {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+          }
+        }
+        
+        @media (max-width: 575px) {
+          .candidates-page-responsive.dashboard-body {
+            padding: 70px 12px 20px !important;
+          }
+          
+          .candidates-page-responsive .main-title {
+            font-size: 20px !important;
+          }
+        }
+      `}</style>
+      
       <div className="position-relative">
         <DashboardHeader />
         <div className="d-sm-flex align-items-center justify-content-between mb-20 lg-mb-10">

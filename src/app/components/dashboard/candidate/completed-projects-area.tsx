@@ -37,6 +37,18 @@ const CompletedProjectsArea = () => {
   const [selectedProject, setSelectedProject] =
     useState<CompletedProject | null>(null);
 
+  // Add custom styles for responsive text handling
+  const textEllipsisStyle = {
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical" as const,
+    overflow: "hidden",
+    lineHeight: "1.2em",
+    maxHeight: "2.4em",
+    wordWrap: "break-word" as const,
+    overflowWrap: "break-word" as const
+  };
+
   useEffect(() => {
     fetchCompletedProjects();
   }, []);
@@ -126,6 +138,58 @@ const CompletedProjectsArea = () => {
           <strong>{filteredProjects.length}</strong> completed projects found
         </p>
 
+        {/* Add custom CSS for responsive text handling */}
+        <style jsx>{`
+          .responsive-card {
+            overflow: hidden;
+          }
+          
+          .responsive-text {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+          }
+          
+          .text-ellipsis-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.2em;
+            max-height: 2.4em;
+          }
+          
+          @media (max-width: 768px) {
+            .candidate-info {
+              margin-bottom: 15px;
+            }
+            
+            .candidate-info span {
+              font-size: 13px !important;
+            }
+            
+            .candidate-info div {
+              font-size: 14px !important;
+            }
+            
+            .profile-btn {
+              font-size: 13px !important;
+              padding: 6px 12px !important;
+            }
+          }
+          
+          @media (max-width: 576px) {
+            .candidate-name {
+              font-size: 16px !important;
+            }
+            
+            .profile-btn {
+              font-size: 12px !important;
+              padding: 6px 10px !important;
+            }
+          }
+        `}</style>
+
         {loading ? (
           <div className="text-center py-5">
             <div className="spinner-border text-primary" role="status">
@@ -148,12 +212,12 @@ const CompletedProjectsArea = () => {
           filteredProjects.map((project) => (
             <div
               key={project.submission_id}
-              className="candidate-profile-card list-layout mb-25 border-0"
+              className="candidate-profile-card list-layout mb-25 border-0 responsive-card"
             >
               <div className="d-flex flex-column flex-lg-row">
                 {/* Mobile/Tablet Header: Icon + Title (Visible < lg) */}
                 <div className="d-flex d-lg-none align-items-center mb-3">
-                  <div className="cadidate-avatar online position-relative d-block me-3">
+                  <div className="cadidate-avatar online position-relative d-block me-3 flex-shrink-0">
                     <div
                       className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
                       style={{
@@ -170,15 +234,14 @@ const CompletedProjectsArea = () => {
                       {getCategoryIcon(project.project_category)}
                     </div>
                   </div>
-                  <div>
-                    <h4 className="candidate-name mb-1">
+                  <div className="flex-grow-1 min-w-0">
+                    <h4 className="candidate-name mb-1 text-break responsive-text text-ellipsis-2">
                       <a
                         onClick={() => handleViewDetails(project)}
                         className="tran3s cursor-pointer"
+                        style={textEllipsisStyle}
                       >
-                        {project.project_title.length > 30
-                          ? `${project.project_title.slice(0, 30)}..`
-                          : project.project_title}
+                        {project.project_title}
                       </a>
                     </h4>
 
@@ -186,7 +249,7 @@ const CompletedProjectsArea = () => {
                 </div>
 
                 {/* Desktop Icon (Visible >= lg) */}
-                <div className="cadidate-avatar online position-relative d-none d-lg-block me-4">
+                <div className="cadidate-avatar online position-relative d-none d-lg-block me-4 flex-shrink-0">
                   <div
                     className="lazy-img rounded-circle d-flex align-items-center justify-content-center"
                     style={{
@@ -209,14 +272,13 @@ const CompletedProjectsArea = () => {
                     {/* Desktop Title (Visible >= lg) */}
                     <div className="col-lg-3 d-none d-lg-block">
                       <div className="position-relative">
-                        <h4 className="candidate-name mb-1">
+                        <h4 className="candidate-name mb-1 text-break responsive-text text-ellipsis-2">
                           <a
                             onClick={() => handleViewDetails(project)}
                             className="tran3s cursor-pointer"
+                            style={textEllipsisStyle}
                           >
-                            {project.project_title.length > 22
-                              ? `${project.project_title.slice(0, 22)}..`
-                              : project.project_title}
+                            {project.project_title}
                           </a>
                         </h4>
 
@@ -227,14 +289,28 @@ const CompletedProjectsArea = () => {
                     <div className="col-6 col-md-4 col-lg-2">
                       <div className="candidate-info">
                         <span>Category</span>
-                        <div>{project.project_category}</div>
+                        <div className="text-break" style={{ 
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word",
+                          hyphens: "auto"
+                        }}>
+                          {project.project_category}
+                        </div>
                       </div>
                     </div>
                     <div className="col-6 col-md-4 col-lg-2">
                       <div className="candidate-info">
                         <span>Client</span>
-                        <div className="fw-500">{project.client_name}</div>
-                        <small className="text-muted">
+                        <div className="fw-500 text-break" style={{ 
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word"
+                        }}>
+                          {project.client_name}
+                        </div>
+                        <small className="text-muted text-break" style={{ 
+                          wordWrap: "break-word",
+                          overflowWrap: "break-word"
+                        }}>
                           {project.client_company}
                         </small>
                       </div>
@@ -276,13 +352,14 @@ const CompletedProjectsArea = () => {
                             backgroundColor: "#31795A",
                             color: "white",
                             border: "none",
-                            padding: "1px 23px",
+                            padding: "8px 16px",
                             borderRadius: "25px",
                             fontWeight: "500",
                             fontSize: "14px",
                           }}
                         >
-                          View Details
+                          <span className="d-none d-md-inline">View Details</span>
+                          <span className="d-inline d-md-none">View</span>
                         </button>
                       </div>
                     </div>
@@ -315,13 +392,13 @@ const CompletedProjectsArea = () => {
               </div>
               <div className="modal-body">
                 <div className="mb-4 p-3 bg-light rounded">
-                  <h6 className="fw-bold mb-2">
+                  <h6 className="fw-bold mb-2 text-break responsive-text">
                     {selectedProject.project_title}
                   </h6>
                   <div className="row">
-                    <div className="col-md-6">
+                    <div className="col-md-6 mb-2 mb-md-0">
                       <small className="text-muted d-block">Category</small>
-                      <span>{selectedProject.project_category}</span>
+                      <span className="text-break responsive-text">{selectedProject.project_category}</span>
                     </div>
                     <div className="col-md-6">
                       <small className="text-muted d-block">Budget</small>
@@ -343,13 +420,13 @@ const CompletedProjectsArea = () => {
                   <div className="p-3 border rounded">
                     <div className="mb-2">
                       <small className="text-muted">Name:</small>
-                      <div className="fw-500">
+                      <div className="fw-500 text-break responsive-text">
                         {selectedProject.client_name}
                       </div>
                     </div>
                     <div>
                       <small className="text-muted">Company:</small>
-                      <div>{selectedProject.client_company}</div>
+                      <div className="text-break responsive-text">{selectedProject.client_company}</div>
                     </div>
                   </div>
                 </div>
@@ -382,7 +459,10 @@ const CompletedProjectsArea = () => {
                 {selectedProject.additional_notes && (
                   <div className="mb-4">
                     <h6 className="fw-bold mb-2">Additional Notes</h6>
-                    <div className="p-3 bg-light rounded">
+                    <div className="p-3 bg-light rounded text-break responsive-text" style={{
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word"
+                    }}>
                       {selectedProject.additional_notes}
                     </div>
                   </div>
