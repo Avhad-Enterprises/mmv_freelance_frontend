@@ -148,11 +148,6 @@ const ApplicantsList: React.FC<ApplicantsListProps> = ({
     }
     if (applicantToReject && selectedProjectForApplicants) {
       // Debug logging
-      console.log('=== MODAL: Confirm Reject Clicked ===');
-      console.log('Applicant:', applicantToReject.first_name, applicantToReject.last_name);
-      console.log('Rejection Reason (raw):', rejectionReason);
-      console.log('Rejection Reason (trimmed):', rejectionReason.trim());
-      console.log('====================================');
 
       // Pass rejection reason to the update handler
       onUpdateApplicantStatus(

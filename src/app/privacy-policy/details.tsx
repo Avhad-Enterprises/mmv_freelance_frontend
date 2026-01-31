@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Container } from "react-bootstrap";
+import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Mail01Icon,
   Call02Icon,
@@ -26,7 +27,7 @@ import {
   DatabaseIcon,
   Building01Icon,
   UserCheck01Icon,
-} from "hugeicons-react";
+} from "@hugeicons/core-free-icons";
 
 const headingColor = { color: "rgb(36, 64, 52)" };
 const darkText = { color: "#111111" };
@@ -37,7 +38,7 @@ const PrivacyPolicy = () => {
       <Container className="max-w-4xl">
         {/* Title */}
         <h1 className="fw-bold fs-2 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-          <Shield01Icon size={34} /> Privacy Policy
+          <HugeiconsIcon icon={Shield01Icon} size={34} /> Privacy Policy
         </h1>
         <p className="text-muted mb-4"><strong>Last updated</strong>: 05/09/2025</p>
         <p style={darkText}>
@@ -47,23 +48,23 @@ const PrivacyPolicy = () => {
 
         {/* 1. Contact Details */}
         <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-          <IcoIcon size={28} /> 1. Contact Details
+          <HugeiconsIcon icon={IcoIcon} size={28} /> 1. Contact Details
         </h2>
         <p style={darkText}>
           If you have questions or concerns about this Privacy Policy, or how your personal data is handled, please contact us:
         </p>
         <div className="d-flex flex-column gap-2 mt-2" style={darkText}>
           <span className="d-flex align-items-center gap-2">
-            <Mail01Icon size={18} /> <strong>Email</strong>: info@makemyvid.io
+            <HugeiconsIcon icon={Mail01Icon} size={18} /> <strong>Email</strong>: info@makemyvid.io
           </span>
           <span className="d-flex align-items-center gap-2">
-            <Call02Icon size={18} /> <strong>Phone (India)</strong>: +91 79774 84292
+            <HugeiconsIcon icon={Call02Icon} size={18} /> <strong>Phone (India)</strong>: +91 79774 84292
           </span>
           <span className="d-flex align-items-center gap-2">
-            <Call02Icon size={18} /> <strong>Phone (UK Enquiries)</strong>: +44 75425 50969
+            <HugeiconsIcon icon={Call02Icon} size={18} /> <strong>Phone (UK Enquiries)</strong>: +44 75425 50969
           </span>
           <span className="d-flex align-items-center gap-2">
-            <Location01Icon size={18} /> <strong>Office Address</strong>: 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West, Mumbai 400092
+            <HugeiconsIcon icon={Location01Icon} size={18} /> <strong>Office Address</strong>: 11, Star Trade Centre, Chamunda Circle, Sodawala Lane, Borivali West, Mumbai 400092
           </span>
         </div>
 
@@ -71,7 +72,7 @@ const PrivacyPolicy = () => {
 
 {/* 2. Information We Collect */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <UserIcon size={28} /> 2. Information We Collect About You
+  <HugeiconsIcon icon={UserIcon} size={28} /> 2. Information We Collect About You
 </h2>
 <p style={darkText} className="mb-4">
   At <strong>Make My Vid</strong>, protecting your privacy is a core priority. To deliver high-quality video production and editing services, 
@@ -185,7 +186,7 @@ const PrivacyPolicy = () => {
 
 {/* 3. How We Use Your Information */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Key01Icon size={28} /> 3. How We Use Your Information
+  <HugeiconsIcon icon={Key01Icon} size={28} /> 3. How We Use Your Information
 </h2>
 <p style={darkText} className="mb-4">
   We collect and process your personal information only where it is necessary to deliver our services, fulfil contractual and legal obligations, 
@@ -368,7 +369,7 @@ Protect the integrity of your content and ensure your files are handled securely
       
 {/* 4. Cookies and Tracking Technologies */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <CookieIcon size={28} /> 4. Cookies and Tracking Technologies
+  <HugeiconsIcon icon={CookieIcon} size={28} /> 4. Cookies and Tracking Technologies
 </h2>
 <p style={darkText} className="mb-3">
   Like most online platforms, <strong>Make My Vid</strong> uses cookies and similar tracking technologies on our website and related services. 
@@ -484,7 +485,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 5. Marketing and Advertising */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Megaphone01Icon size={28} /> 5. Marketing and Advertising
+  <HugeiconsIcon icon={Megaphone01Icon} size={28} /> 5. Marketing and Advertising
 </h2>
 <p style={darkText} className="mb-3">
   At <strong>Make My Vid</strong>, we may use your personal information to keep you updated about our latest services, creative tools, offers, and industry insights. 
@@ -585,7 +586,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 6. Use of Automated Systems */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Settings03Icon size={28} /> 6. Use of Automated Systems
+  <HugeiconsIcon icon={Settings03Icon} size={28} /> 6. Use of Automated Systems
 </h2>
 <p style={darkText} className="mb-3">
   To keep <strong>Make My Vid</strong> safe, secure, and efficient for all users, we use automated systems and decision-making tools. 
@@ -667,7 +668,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 7. Retention of Your Information */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <DatabaseIcon size={28} /> 7. Retention of Your Information
+  <HugeiconsIcon icon={DatabaseIcon} size={28} /> 7. Retention of Your Information
 </h2>
 <p style={darkText} className="mb-3">
   <strong>Make My Vid</strong> will only keep your personal information for as long as it is reasonably necessary to fulfil the purposes outlined in this Privacy Policy. 
@@ -746,7 +747,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 8. Sharing Your Information */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Share01Icon size={28} /> 8. Sharing Your Information
+  <HugeiconsIcon icon={Share01Icon} size={28} /> 8. Sharing Your Information
 </h2>
 <p style={darkText} className="mb-3">
   At <strong>Make My Vid</strong>, we respect your privacy and only share your personal information where it is necessary, lawful, and consistent with this Privacy Policy. 
@@ -806,7 +807,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 9. International Data Transfers */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Globe02Icon size={28} /> 9. International Data Transfers
+  <HugeiconsIcon icon={Globe02Icon} size={28} /> 9. International Data Transfers
 </h2>
 <p style={darkText} className="mb-4">
   Your data may be transferred and stored outside India or the UK, depending on our hosting and service providers. 
@@ -814,7 +815,7 @@ Protect the integrity of your content and ensure your files are handled securely
 </p>
 {/* 10. Security */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <Shield01Icon size={28} /> 10. Security
+  <HugeiconsIcon icon={Shield01Icon} size={28} /> 10. Security
 </h2>
 <p style={darkText} className="mb-3">
   At <strong>Make My Vid</strong>, protecting your personal data and creative content is one of our highest priorities. We use a combination of <strong>technical, 
@@ -872,7 +873,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 11. Your Rights */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <UserCheck01Icon size={28} /> 11. Your Rights
+  <HugeiconsIcon icon={UserCheck01Icon} size={28} /> 11. Your Rights
 </h2>
 <p style={darkText} className="mb-3">
   As a user of <strong>Make My Vid</strong>, you are entitled to certain rights over your personal information under applicable data protection laws, 
@@ -963,7 +964,7 @@ Protect the integrity of your content and ensure your files are handled securely
 
 {/* 12. Changes to This Privacy Policy */}
 <h2 className="fs-4 fw-semibold mt-5 pt-3 mb-3 d-flex align-items-center gap-2" style={headingColor}>
-  <RefreshIcon size={28} /> 12. Changes to This Privacy Policy
+  <HugeiconsIcon icon={RefreshIcon} size={28} /> 12. Changes to This Privacy Policy
 </h2>
 <p style={darkText} className="mb-3">
   We may update or revise this Privacy Policy from time to time to reflect:

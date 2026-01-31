@@ -35,11 +35,12 @@ const DashboardJobBrowseArea = () => {
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [shortValue, setShortValue] = useState<string>("");
+  const [showRecommendedOnly, setShowRecommendedOnly] = useState<boolean>(false);
 
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [loadingSkills, setLoadingSkills] = useState<boolean>(true);
-  
+
   // EMC Recommendation state
   const [isFreelancer, setIsFreelancer] = useState<boolean>(false);
   const [freelancerSuperpowers, setFreelancerSuperpowers] = useState<string[]>([]);
@@ -68,26 +69,21 @@ const DashboardJobBrowseArea = () => {
         }
 
         let jobsData: IJobType[] = [];
-        
+
         // Check if user is a freelancer (VIDEO_EDITOR or VIDEOGRAPHER)
         const userRoles = decoded?.roles || [];
         const freelancerRoles = ['VIDEO_EDITOR', 'VIDEOGRAPHER'];
-        const userIsFreelancer = userRoles.some((role: string) => 
+        const userIsFreelancer = userRoles.some((role: string) =>
           freelancerRoles.includes(role.toUpperCase())
         );
         setIsFreelancer(userIsFreelancer);
-        
+
         // Debug logging for EMC
-        console.log('[EMC Debug] decoded token:', decoded);
-        console.log('[EMC Debug] userRoles:', userRoles);
-        console.log('[EMC Debug] userIsFreelancer:', userIsFreelancer);
 
         if (userIsFreelancer && decoded?.user_id) {
           // Use EMC Recommendation API for freelancers
           try {
-            console.log('[EMC Debug] Calling EMC API...');
             const emcResponse = await makeGetRequest("api/v1/emc/recommended-projects");
-            console.log('[EMC Debug] EMC Response:', emcResponse.data);
             if (emcResponse.data?.success) {
               jobsData = emcResponse.data.data || [];
               setFreelancerSuperpowers(emcResponse.data.meta?.freelancerSuperpowers || []);
@@ -98,7 +94,6 @@ const DashboardJobBrowseArea = () => {
               jobsData = jobsRes.data.data || [];
             }
           } catch (emcError) {
-            console.log("EMC API not available, falling back to regular listings");
             const jobsRes = await makeGetRequest("api/v1/projects-tasks/listings");
             jobsData = jobsRes.data.data || [];
           }
@@ -158,6 +153,11 @@ const DashboardJobBrowseArea = () => {
       );
     }
 
+    // Filter by recommendation
+    if (showRecommendedOnly) {
+      filteredData = filteredData.filter((item) => item.isRecommended);
+    }
+
     // Filter by bidding status
     if (biddingFilter === "bidding") {
       filteredData = filteredData.filter((item) => item.bidding_enabled === true);
@@ -195,7 +195,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, projects_type,
-    all_jobs, search_key, biddingFilter, currencyFilter, shortValue,
+    all_jobs, search_key, biddingFilter, currencyFilter, shortValue, showRecommendedOnly
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -249,6 +249,7 @@ const DashboardJobBrowseArea = () => {
     setBiddingFilter("all");
     setCurrencyFilter("all");
     setShortValue("");
+    setShowRecommendedOnly(false);
     setItemOffset(0);
     toast.success("Filters reset successfully");
   };
@@ -265,7 +266,7 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "";
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "" || showRecommendedOnly;
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
@@ -390,12 +391,12 @@ const DashboardJobBrowseArea = () => {
     const isActive = wishlist.some(p => p.projects_task_id === projects_task_id);
 
     return (
-      <div 
-        className={`candidate-profile-card grid-layout d-flex flex-column ${item.isRecommended ? 'border-success' : ''}`} 
+      <div
+        className={`candidate-profile-card grid-layout d-flex flex-column ${item.isRecommended ? 'border-success' : ''}`}
         style={{ minHeight: '100%', ...(item.isRecommended ? { borderTop: '3px solid #28a745' } : {}) }}
       >
         {/* EMC Recommended Badge */}
-        {item.isRecommended && (
+        {/* {item.isRecommended && (
           <span
             className="badge bg-success d-flex align-items-center gap-1 position-absolute"
             style={{ fontSize: '10px', padding: '4px 8px', top: '10px', left: '10px', zIndex: 10 }}
@@ -403,7 +404,7 @@ const DashboardJobBrowseArea = () => {
           >
             <i className="bi bi-star-fill"></i> Recommended
           </span>
-        )}
+        )} */}
         <a
           onClick={() => handleToggleSave(item)}
           className={`save-btn text-center rounded-circle tran3s cursor-pointer ${isActive ? 'active' : ''}`}
@@ -690,6 +691,20 @@ const DashboardJobBrowseArea = () => {
               {/* Selected Filters Display */}
               {hasSelections && (
                 <div className="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
+                  {showRecommendedOnly && (
+                    <div
+                      className="btn-eight fw-500 d-flex align-items-center"
+                      style={{ backgroundColor: '#28a745', color: 'white' }}
+                    >
+                      <span style={{ color: 'white' }}>Recommended Only</span>
+                      <button
+                        onClick={() => setShowRecommendedOnly(false)}
+                        className="btn-close ms-2"
+                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
+                        aria-label="Remove filter"
+                      ></button>
+                    </div>
+                  )}
                   {biddingFilter !== "all" && (
                     <div
                       className="btn-eight fw-500 d-flex align-items-center"
@@ -754,11 +769,11 @@ const DashboardJobBrowseArea = () => {
 
           {/* EMC Recommendation Banner - Only for Freelancers */}
           {isFreelancer && recommendedCount > 0 && (
-            <div 
-              className="alert d-flex align-items-center mb-20" 
+            <div
+              className="alert d-flex align-items-center mb-20"
               role="alert"
-              style={{ 
-                backgroundColor: '#e8f5e9', 
+              style={{
+                backgroundColor: '#e8f5e9',
                 border: '1px solid #28a745',
                 borderRadius: '10px',
                 padding: '15px 20px'
@@ -778,7 +793,7 @@ const DashboardJobBrowseArea = () => {
 
           {/* Jobs Display Area */}
           <div className="job-post-item-wrapper">
-            <div className="upper-filter d-flex justify-content-between align-items-center mb-20">
+            <div className="upper-filter d-flex justify-content-between align-items-center mb-20 flex-wrap gap-2">
               <div className="total-job-found">
                 All <span className="text-dark fw-500">{filterItems.length}</span> projects found
                 {isFreelancer && recommendedCount > 0 && (
@@ -787,6 +802,39 @@ const DashboardJobBrowseArea = () => {
                   </span>
                 )}
               </div>
+
+              {/* Recommended Filter Switch */}
+              {isFreelancer && recommendedCount > 0 && (
+                <div className="d-flex align-items-center">
+                  <div className="form-check form-switch d-flex align-items-center gap-2 m-0 p-0">
+                    <input
+                      className="form-check-input cursor-pointer m-0"
+                      type="checkbox"
+                      id="recommendedSwitch"
+                      role="switch"
+                      checked={showRecommendedOnly}
+                      onChange={(e) => {
+                        setShowRecommendedOnly(e.target.checked);
+                        setItemOffset(0);
+                      }}
+                      style={{
+                        width: '3em',
+                        height: '1.5em',
+                        cursor: 'pointer',
+                        backgroundColor: showRecommendedOnly ? '#31795A' : undefined,
+                        borderColor: showRecommendedOnly ? '#31795A' : undefined
+                      }}
+                    />
+                    <label
+                      className="form-check-label fw-500 cursor-pointer"
+                      htmlFor="recommendedSwitch"
+                      style={{ color: '#31795A' }}
+                    >
+                      Show Recommended Only
+                    </label>
+                  </div>
+                </div>
+              )}
             </div>
 
             {loading ? (

@@ -48,7 +48,7 @@ export function useMessages({
                 try {
                     messagesUnsubscribeRef.current();
                 } catch (error) {
-                    console.error('Error unsubscribing from messages:', error);
+                    // Error unsubscribing from messages
                 } finally {
                     messagesUnsubscribeRef.current = null;
                 }
@@ -58,7 +58,7 @@ export function useMessages({
                 try {
                     typingUnsubscribeRef.current();
                 } catch (error) {
-                    console.error('Error unsubscribing from typing:', error);
+                    // Error unsubscribing from typing
                 } finally {
                     typingUnsubscribeRef.current = null;
                 }
@@ -144,14 +144,14 @@ export function useMessages({
                                     readAt: Date.now()
                                 });
                             } catch (error) {
-                                console.error('Error marking message as read:', error);
+                                // Error marking message as read
                             }
                         }
                     });
                 }
             },
             (err) => {
-                console.error('Error fetching messages:', err);
+                // Error fetching messages
             }
         );
 
@@ -218,7 +218,7 @@ export function useMessages({
                 }
             }
         } catch (error) {
-            console.error('Error loading more messages:', error);
+            // Error loading more messages
         } finally {
             if (isMountedRef.current) {
                 setIsLoadingMore(false);

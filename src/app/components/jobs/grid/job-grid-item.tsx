@@ -64,9 +64,9 @@ const JobGridItem = ({
         </Link>
       </h4>
 
-      <div className="candidate-post">
+      {/* <div className="candidate-post">
         {item.project_category || 'Project'}
-      </div>
+      </div> */}
 
       <ul className="cadidate-skills style-none d-flex flex-wrap align-items-center justify-content-center pt-30 sm-pt-20 pb-10">
         {item.skills_required && item.skills_required.slice(0, 1).map((s, i) => (

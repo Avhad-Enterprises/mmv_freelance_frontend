@@ -99,7 +99,7 @@ export function useSocketMessages({
             }
 
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            // Error fetching messages
         } finally {
             setIsLoading(false);
             setIsLoadingMore(false);

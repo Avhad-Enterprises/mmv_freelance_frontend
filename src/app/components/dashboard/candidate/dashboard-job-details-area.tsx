@@ -584,6 +584,7 @@ const DashboardJobDetailsArea = ({
                               href={link}
                               target="_blank"
                               rel="noopener noreferrer"
+                              style={{ color: '#0d6efd', textDecoration: 'underline' }}
                             >
                               {link}
                             </a>
@@ -619,9 +620,42 @@ const DashboardJobDetailsArea = ({
                           Company: {job.client_company_name}
                         </div>
                       )}
+                      {/* Project Category */}
+                      {job.project_category && (
+                        <div className="mt-15">
+                          <span
+                            className="badge"
+                            style={{
+                              backgroundColor: '#e8f5e9',
+                              color: '#31795a',
+                              fontSize: '13px',
+                              padding: '8px 16px',
+                              fontWeight: '500',
+                              borderRadius: '20px',
+                              whiteSpace: 'normal',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              textAlign: 'left',
+                              maxWidth: '100%',
+                              lineHeight: '1.4'
+                            }}
+                          >
+                            <i className="bi bi-tag-fill me-2 flex-shrink-0"></i>
+                            {job.project_category}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="border-top mt-40 pt-40">
                       <ul className="job-meta-data row style-none">
+                        <li className="col-6">
+                          <span>Category</span>
+                          <div>{job.project_category || 'Not specified'}</div>
+                        </li>
+                        <li className="col-6">
+                          <span>Type</span>
+                          <div>{job.projects_type || 'Not specified'}</div>
+                        </li>
                         <li className="col-6">
                           <span>Budget</span>
                           <div>

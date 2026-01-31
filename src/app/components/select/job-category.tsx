@@ -17,10 +17,8 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        console.log("📂 [Categories] Fetching from API...");
         const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const apiUrl = `${API_BASE}/api/v1/categories`;
-        console.log("📂 [Categories] API URL:", apiUrl);
 
         let response: Response | null = null;
         try {
@@ -31,18 +29,11 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
 
         // If API failed or returned non-OK, try local mock file under public/mock
         if (!response || !response.ok) {
-          console.log("📂 [Categories] Falling back to local mock: /mock/categories.json");
           response = await fetch("/mock/categories.json");
         }
-        console.log("📂 [Categories] Response status:", response.status);
-        console.log("📂 [Categories] Response OK:", response.ok);
 
         //Get raw text first to see what we're receiving
         const responseText = await response.text();
-        console.log(
-          "📂 [Categories] Raw response (first 500 chars):",
-          responseText.substring(0, 500)
-        );
 
         // Try to parse JSON
         let result;
@@ -56,30 +47,18 @@ const JobCategorySelect = ({ setCategoryVal }: Props) => {
           );
         }
 
-        console.log("📂 [Categories] Parsed API response:", result);
 
         const allCategories = result.data || [];
-        console.log(
-          "📂 [Categories] All categories count:",
-          allCategories.length
-        );
 
         // Filter only active categories to match filter component
         const activeCategories = allCategories.filter(
           (cat: any) => cat.is_active
         );
-        console.log(
-          "📂 [Categories] Active categories count:",
-          activeCategories.length
-        );
-        console.log("📂 [Categories] Active categories:", activeCategories);
-
         const options = activeCategories.map((cat: any) => ({
           value: cat.category_name.replace(/\s+/g, " ").trim(),
           label: cat.category_name.replace(/\s+/g, " ").trim(),
         }));
 
-        console.log("📂 [Categories] Dropdown options:", options);
         setCategoryOptions(options);
       } catch (error) {
         console.error("📂 [Categories] ❌ Error fetching categories:", error);

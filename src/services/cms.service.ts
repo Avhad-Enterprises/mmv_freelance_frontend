@@ -34,12 +34,11 @@ export const fetchLandingPageContent =
           cache: "no-store", // Disable caching for fresh data
         });
       } catch (networkErr) {
-        console.warn("Network error fetching landing page, will try local mock:", networkErr);
+        // Network error - will try local mock
       }
 
       // Fallback to local mock if network failed or response not ok
       if (!response || !response.ok) {
-        console.log("Falling back to local mock: /mock/landing.json");
         response = await fetch("/mock/landing.json");
       }
 
@@ -67,7 +66,6 @@ export const fetchLandingPageContent =
 
       return result.data;
     } catch (error) {
-      console.error("Error fetching landing page content:", error);
       throw error;
     }
   };
@@ -101,7 +99,6 @@ export const fetchHeroSection = async (): Promise<HeroSection[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching hero section:", error);
     throw error;
   }
 };
@@ -135,7 +132,6 @@ export const fetchTrustedCompanies = async (): Promise<TrustedCompany[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching trusted companies:", error);
     throw error;
   }
 };
@@ -169,7 +165,6 @@ export const fetchWhyChooseUs = async (): Promise<WhyChooseUs[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching why choose us:", error);
     throw error;
   }
 };
@@ -203,7 +198,6 @@ export const fetchFeaturedCreators = async (): Promise<FeaturedCreator[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching featured creators:", error);
     throw error;
   }
 };
@@ -237,7 +231,6 @@ export const fetchSuccessStories = async (): Promise<SuccessStory[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching success stories:", error);
     throw error;
   }
 };
@@ -271,7 +264,6 @@ export const fetchLandingFaqs = async (): Promise<LandingFaq[]> => {
 
     return result.data;
   } catch (error) {
-    console.error("Error fetching landing FAQs:", error);
     throw error;
   }
 };

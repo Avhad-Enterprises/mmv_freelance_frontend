@@ -1,11 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
 import * as Yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ErrorMsg from "../common/error-msg";
-import icon from "@/assets/images/icon/icon_60.svg";
 import toast from "react-hot-toast";
 import { makePostRequest } from "@/utils/api";
 import TokenRefreshService from "@/utils/tokenRefresh";
@@ -136,10 +134,14 @@ const LoginForm = ({ onLoginSuccess, isModal = false }: LoginFormProps = {}) => 
             <span
               className="placeholder_icon"
               onClick={() => setShowPass(!showPass)}
+              style={{
+                position: 'absolute',
+                right: '15px',
+                top: '44px',
+                cursor: 'pointer'
+              }}
             >
-              <span className={`passVicon ${showPass ? "eye-slash" : ""}`}>
-                <Image src={icon} alt="icon" />
-              </span>
+              <i className={`fa ${showPass ? 'fa-eye-slash' : 'fa-eye'}`}></i>
             </span>
             <div className="help-block with-errors">
               <ErrorMsg msg={errors.password?.message!} />
