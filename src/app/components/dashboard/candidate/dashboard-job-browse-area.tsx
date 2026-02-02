@@ -35,7 +35,7 @@ const DashboardJobBrowseArea = () => {
   const [gridStyle, setGridStyle] = useState(false);
   const [selectedJob, setSelectedJob] = useState<IJobType | null>(null);
   const [shortValue, setShortValue] = useState<string>("");
-  const [showRecommendedOnly, setShowRecommendedOnly] = useState<boolean>(false);
+
 
   // Available options from jobs
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
@@ -159,8 +159,8 @@ const DashboardJobBrowseArea = () => {
       );
     }
 
-    // Filter by recommendation
-    if (showRecommendedOnly) {
+    // For freelancers, always show only recommended projects
+    if (isFreelancer) {
       filteredData = filteredData.filter((item) => item.isRecommended);
     }
 
@@ -201,7 +201,7 @@ const DashboardJobBrowseArea = () => {
     setPageCount(Math.ceil(filteredData.length / itemsPerPage));
   }, [
     itemOffset, itemsPerPage, selectedSkills, projects_type,
-    all_jobs, search_key, biddingFilter, currencyFilter, shortValue, showRecommendedOnly
+    all_jobs, search_key, biddingFilter, currencyFilter, shortValue, isFreelancer
   ]);
 
   const handlePageClick = (event: { selected: number }) => {
@@ -255,7 +255,6 @@ const DashboardJobBrowseArea = () => {
     setBiddingFilter("all");
     setCurrencyFilter("all");
     setShortValue("");
-    setShowRecommendedOnly(false);
     setItemOffset(0);
     toast.success("Filters reset successfully");
   };
@@ -272,13 +271,13 @@ const DashboardJobBrowseArea = () => {
     setItemOffset(0);
   };
 
-  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "" || showRecommendedOnly;
+  const hasSelections = selectedSkills.length > 0 || biddingFilter !== "all" || currencyFilter !== "all" || shortValue !== "";
 
   const ListItemTwo = ({ item }: { item: IJobType }) => {
     const isActive = wishlist.some((p) => p.projects_task_id === item.projects_task_id);
 
     return (
-      <div className={`candidate-profile-card list-layout mb-25 ${item.isRecommended ? 'border-success' : ''}`} style={item.isRecommended ? { borderLeft: '4px solid #28a745' } : {}}>
+      <div className="candidate-profile-card list-layout mb-25">
         {/* EMC Recommended Badge - Works for both Video Editor and Videographer */}
         {/* {item.isRecommended && (
           <span
@@ -319,13 +318,6 @@ const DashboardJobBrowseArea = () => {
                         : ""}
                     </a>
                   </h4>
-                  {/* Show matched category below title */}
-                  {item.isRecommended && item.matchedCategory && (
-                    <small className="text-success d-block mt-1" style={{ fontSize: '11px' }}>
-                      <i className="bi bi-check-circle-fill me-1"></i>
-                      Matches: {item.matchedCategory}
-                    </small>
-                  )}
                 </div>
               </div>
               <div className="col-lg-2 col-md-4 col-sm-6">
@@ -398,8 +390,8 @@ const DashboardJobBrowseArea = () => {
 
     return (
       <div
-        className={`candidate-profile-card grid-layout d-flex flex-column ${item.isRecommended ? 'border-success' : ''}`}
-        style={{ minHeight: '100%', ...(item.isRecommended ? { borderTop: '3px solid #28a745' } : {}) }}
+        className="candidate-profile-card grid-layout d-flex flex-column"
+        style={{ minHeight: '100%' }}
       >
         {/* EMC Recommended Badge */}
         {/* {item.isRecommended && (
@@ -444,13 +436,7 @@ const DashboardJobBrowseArea = () => {
               {project_title}
             </a>
           </h4>
-          {/* Show matched category below title */}
-          {item.isRecommended && item.matchedCategory && (
-            <small className="text-success d-block mb-2" style={{ fontSize: '11px' }}>
-              <i className="bi bi-check-circle-fill me-1"></i>
-              Matches: {item.matchedCategory}
-            </small>
-          )}
+
 
           <ul className="cadidate-skills style-none d-flex align-items-center justify-content-center mb-3">
             {item.skills_required && item.skills_required.slice(0, 2).map((s, i) => (
@@ -697,20 +683,6 @@ const DashboardJobBrowseArea = () => {
               {/* Selected Filters Display */}
               {hasSelections && (
                 <div className="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
-                  {showRecommendedOnly && (
-                    <div
-                      className="btn-eight fw-500 d-flex align-items-center"
-                      style={{ backgroundColor: '#28a745', color: 'white' }}
-                    >
-                      <span style={{ color: 'white' }}>Recommended Only</span>
-                      <button
-                        onClick={() => setShowRecommendedOnly(false)}
-                        className="btn-close ms-2"
-                        style={{ width: '5px', height: '5px', filter: 'brightness(0) invert(1)' }}
-                        aria-label="Remove filter"
-                      ></button>
-                    </div>
-                  )}
                   {biddingFilter !== "all" && (
                     <div
                       className="btn-eight fw-500 d-flex align-items-center"
@@ -773,74 +745,16 @@ const DashboardJobBrowseArea = () => {
             </div>
           </div>
 
-          {/* EMC Recommendation Banner - Only for Freelancers */}
-          {isFreelancer && recommendedCount > 0 && (
-            <div
-              className="alert d-flex align-items-center mb-20"
-              role="alert"
-              style={{
-                backgroundColor: '#e8f5e9',
-                border: '1px solid #28a745',
-                borderRadius: '10px',
-                padding: '15px 20px'
-              }}
-            >
-              <i className="bi bi-star-fill text-success me-3" style={{ fontSize: '24px' }}></i>
-              <div>
-                <strong className="text-success">
-                  {recommendedCount} Recommended Project{recommendedCount > 1 ? 's' : ''} for You!
-                </strong>
-                <p className="mb-0 text-muted" style={{ fontSize: '13px' }}>
-                  Based on your superpowers: {freelancerSuperpowers.join(', ')}
-                </p>
-              </div>
-            </div>
-          )}
+
 
           {/* Jobs Display Area */}
           <div className="job-post-item-wrapper">
             <div className="upper-filter d-flex justify-content-between align-items-center mb-20 flex-wrap gap-2">
               <div className="total-job-found">
                 All <span className="text-dark fw-500">{filterItems.length}</span> projects found
-                {isFreelancer && recommendedCount > 0 && (
-                  <span className="text-success ms-2">
-                    ({recommendedCount} recommended)
-                  </span>
-                )}
               </div>
 
-              {/* Recommended Filter Switch */}
-              {isFreelancer && recommendedCount > 0 && (
-                <div className="d-flex align-items-center">
-                  <div className="form-check form-switch d-flex align-items-center gap-2 m-0 p-0">
-                    <input
-                      className="form-check-input cursor-pointer m-0"
-                      type="checkbox"
-                      id="recommendedSwitch"
-                      role="switch"
-                      checked={showRecommendedOnly}
-                      onChange={(e) => {
-                        setShowRecommendedOnly(e.target.checked);
-                        setItemOffset(0);
-                      }}
-                      style={{
-                        width: '3em',
-                        height: '1.5em',
-                        cursor: 'pointer',
-                        backgroundColor: showRecommendedOnly ? '#31795A' : undefined,
-                        borderColor: showRecommendedOnly ? '#31795A' : undefined
-                      }}
-                    />
-                    <label
-                      className="form-check-label fw-500 cursor-pointer"
-                      htmlFor="recommendedSwitch"
-                      style={{ color: '#31795A' }}
-                    >
-                      Show Recommended Only
-                    </label>
-                  </div>
-                </div>
-              )}
+
             </div>
 
             {loading ? (
