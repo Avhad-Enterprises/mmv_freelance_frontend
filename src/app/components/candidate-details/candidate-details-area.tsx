@@ -323,7 +323,7 @@ const CandidateDetailsArea = ({
                   />
                 </div>
 
-                <h4 className="sidebar-title">Location</h4>
+                {/* <h4 className="sidebar-title">Location</h4>
                 <div className="map-area mb-60 md-mb-40">
                   <div className="gmap_canvas h-100 w-100">
                     <iframe
@@ -333,7 +333,7 @@ const CandidateDetailsArea = ({
                       title="Google Map of Candidate Location"
                     ></iframe>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
