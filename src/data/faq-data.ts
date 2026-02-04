@@ -1,0 +1,561 @@
+export const faqContent = {
+  gettingStarted: [
+    {
+      id: "gs1",
+      title: "What is MakeMyVid.io?",
+      desc: "MakeMyVid.io is the world's first and only global freelance marketplace exclusively for video creators. We connect businesses and individuals with elite, vetted video editors, freelance videographers, animators, and other post-production talent from around the world for any video creation project.",
+    },
+    {
+      id: "gs2",
+      title:
+        "How is MakeMyVid.io different from general freelance platforms like Upwork or Fiverr?",
+      desc: "Our exclusive focus on video sets us apart. Unlike general platforms, we provide deep specialization. Every tool, feature, and talent profile is tailored for video production. This means you find expert video talent faster, without sifting through irrelevant freelancers.",
+    },
+    {
+      id: "gs3",
+      title: "Who is this platform for?",
+      desc: "MakeMyVid.io is designed for two main groups: Clients (agencies, CMOs, founders, marketing teams, YouTubers) looking to hire video editors or outsource video production, and Freelancers (professional video editors, videographers, animators) seeking high-quality, remote video editing jobs and videography gigs.",
+    },
+    {
+      id: "gs4",
+      title: "Is MakeMyVid.io a global marketplace?",
+      desc: "Yes, we are a fully global platform. You can hire remote video editors from any country and find on-ground freelance videographers in a growing number of cities worldwide, starting with major hubs in India and expanding rapidly.",
+    },
+    {
+      id: "gs5",
+      title: "What are the main benefits of using MakeMyVid.io?",
+      desc: "For clients, the key benefits are access to vetted video talent, the ability to post jobs for free, and a seamless hiring process. For freelancers, the benefits include a 0% commission structure for videographers, a low 12.5% fee for editors, and access to a global stream of video production projects.",
+    },
+    {
+      id: "gs6",
+      title: "How do I get started as a client?",
+      desc: 'Getting started is simple and free. Click the "Post a Project" button, fill out a brief form detailing your video project needs (e.g., "looking for a YouTube video editor"), and you\'ll start receiving proposals from qualified creators in hours.',
+    },
+    {
+      id: "gs7",
+      title: "How do I start as a freelancer?",
+      desc: 'To find freelance video work, click "Join as Freelancer," create your profile, showcase your skills, and upload your portfolio. Once approved, you can immediately start bidding on video editing and videography jobs.',
+    },
+    {
+      id: "gs8",
+      title: "What types of video services can I find on the platform?",
+      desc: "You can find a comprehensive range of video production services, including Reels & Shorts editing, wedding video editing, corporate video production, 2D & 3D animation, drone videography, podcast video editing, and much more.",
+    },
+    {
+      id: "gs9",
+      title: "Is there a mobile app for MakeMyVid.io?",
+      desc: "While our website is fully mobile-responsive for easy access on any device, a dedicated mobile app is currently in development to further streamline your video production workflow on the go.",
+    },
+    {
+      id: "gs10",
+      title:
+        "Do you offer services for both large agencies and small businesses?",
+      desc: "Absolutely. Our platform is built to scale. Whether you are a large agency looking to outsource video editing for multiple clients or a small business needing a single promotional video, you'll find the right talent and tools here.",
+    },
+    {
+      id: "gs11",
+      title: "What is the vision behind MakeMyVid.io?",
+      desc: "Our vision is to be the world's top-of-mind destination for video creation. We aim to empower every creator and business to produce high-quality video content seamlessly, regardless of geographic location.",
+    },
+  ],
+  forClients: [
+    {
+      id: "fc1",
+      title: "How much does it cost to post a job on MakeMyVid.io?",
+      desc: "It is 100% free to post a project and receive quotes from vetted video creators on MakeMyVid.io. Unlike generic marketplaces, we charge clients zero platform fees to list a job. You only pay for the work you approve.",
+    },
+    {
+      id: "fc2",
+      title: "How is MakeMyVid.io different from Upwork or Fiverr?",
+      desc: "MakeMyVid.io is the world's only video-exclusive marketplace. While other sites host developers and writers, we only house vetted video editors, cinematographers, and animators. Our workflow is built specifically for video review, including features like CompVid for lossless file compression and specialized technical project briefs.",
+    },
+    {
+      id: "fc3",
+      title: "Can I hire a local videographer for a physical shoot?",
+      desc: "Yes. Our hybrid model allows you to hire on-ground videographers in specific cities for physical filming. These local creators keep 100% of their earnings (0% commission), ensuring you get the best local talent at the most competitive rates without platform markup.",
+    },
+    {
+      id: "fc4",
+      title: "How do I hire a remote video editor?",
+      desc: 'To hire a remote editor, simply select the "Remote Post-Production" option when posting your job. You can browse vetted video showreels, review software proficiency (Premiere Pro, DaVinci Resolve, etc.), and manage the entire edit through our secure platform. Remote editors pay a low, competitive fee of only 12.5%.',
+    },
+    {
+      id: "fc5",
+      title: "Is my payment secure when hiring freelancers?",
+      desc: "Absolutely. MakeMyVid.io uses a secure Escrow Payment System. When you hire a creator, you fund the project milestone upfront. The funds are held safely by the platform and are only released to the freelancer once you have reviewed and approved the final video deliverable.",
+    },
+    {
+      id: "fc6",
+      title: "How do you vet the video creators on your platform?",
+      desc: "We don't just look at resumes; we vet technical capability. Every creator must submit a verified portfolio and professional showreel. We monitor performance metrics and client feedback strictly to ensure only top-tier video talent remains on the platform.",
+    },
+    {
+      id: "fc7",
+      title: "What if I need to send very large raw video files?",
+      desc: "We provide built-in tools to handle the heavy lifting of video production. Every client has access to CompVid, our free, high-performance compression tool. This allows you to reduce file sizes for faster transfers without sacrificing the visual quality your editor needs.",
+    },
+    {
+      id: "fc8",
+      title:
+        "Can I hire both a videographer and an editor for the same project?",
+      desc: "Yes. Our platform is designed for a complete video production workflow. You can post a single project to find an on-ground camera operator in one city to handle the shoot, and a specialized remote editor in another country to handle the post-production and motion graphics.",
+    },
+    {
+      id: "fc9",
+      title: "What technical video specs can I request?",
+      desc: "Our project brief allows you to specify all professional requirements, including resolution (4K/8K), aspect ratios (9:16 for Social, 16:9 for YouTube), color grading preferences, and delivery formats. This ensures no technical details are lost in translation.",
+    },
+    {
+      id: "fc10",
+      title: "How do I find a remote video editor?",
+      desc: 'Select "Remote Editor" to browse a global pool of post-production specialists.',
+    },
+    {
+      id: "fc11",
+      title: "Can I see reviews from previous clients?",
+      desc: "Yes, every creator profile features verified ratings and feedback from their past projects on the platform.",
+    },
+    {
+      id: "fc12",
+      title:
+        "What if I like a creator’s style but they are in another country?",
+      desc: "If they are an editor or animator, they can work with you remotely regardless of location.",
+    },
+    {
+      id: "fc13",
+      title: "Can I interview a freelancer before hiring?",
+      desc: "Yes, you can use our built-in messaging system to discuss project details before funding a milestone.",
+    },
+    {
+      id: "fc14",
+      title: "What video software do your creators use?",
+      desc: "Our creators specialize in industry-standard tools like Adobe Premiere Pro, DaVinci Resolve, After Effects, and Final Cut Pro.",
+    },
+    {
+      id: "fc15",
+      title: "Can I request specific resolutions like 4K or 8K?",
+      desc: "Yes, our technical brief includes fields for resolution requirements so your creator knows exactly what to deliver.",
+    },
+    {
+      id: "fc16",
+      title: "Do you support vertical video for TikTok and Reels?",
+      desc: "Absolutely. We have a dedicated category for social media creators who specialize in 9:16 vertical content.",
+    },
+    {
+      id: "fc17",
+      title: 'What is "Raw Footage"?',
+      desc: "Raw footage is the unedited, original files from a camera. You can choose to have this delivered or keep it with the editor.",
+    },
+    {
+      id: "fc18",
+      title: "How do I give feedback on video drafts?",
+      desc: "Our workflow allows you to leave time-stamped comments so editors know exactly which second needs an adjustment.",
+    },
+    {
+      id: "fc19",
+      title: "How many revisions can I ask for?",
+      desc: "The number of revisions is set by the freelancer in their proposal; usually, it ranges from 1 to 3 rounds.",
+    },
+    {
+      id: "fc20",
+      title: "What is CompVid?",
+      desc: "CompVid is our free, built-in tool that allows you to compress large video files without losing quality for faster transfers.",
+    },
+    {
+      id: "fc21",
+      title: "How much does it cost to post a job?",
+      desc: "It costs $0 to post a job. You only pay the freelancer’s agreed-upon rate.",
+    },
+    {
+      id: "fc22",
+      title: "What are the platform fees for clients?",
+      desc: "MakeMyVid.io charges zero platform fees to clients for hiring talent.",
+    },
+    {
+      id: "fc23",
+      title: "What is an Escrow payment?",
+      desc: "Escrow is a secure system where your money is held by the platform and only released once you approve the final video.",
+    },
+    {
+      id: "fc24",
+      title: "Are videographer commissions different?",
+      desc: "Yes, on-ground videographers keep 100% of their earnings (0% commission), ensuring you get the best local rates.",
+    },
+    {
+      id: "fc25",
+      title: "What is the commission for remote editors?",
+      desc: "Remote editors pay a highly competitive fee of 12.5%, which is lower than most general marketplaces.",
+    },
+    {
+      id: "fc26",
+      title: "When do I release the payment?",
+      desc: "You should only release payment once you have received and approved the final high-resolution deliverable.",
+    },
+    {
+      id: "fc27",
+      title: "Can I pay in my local currency?",
+      desc: "Yes, our payment gateway supports multiple global currencies for your convenience.",
+    },
+    {
+      id: "fc28",
+      title: "What if I am not happy with the video?",
+      desc: "You can request revisions. If the creator fails to meet the brief, our dispute resolution team can step in.",
+    },
+    {
+      id: "fc29",
+      title: "Is there a refund policy?",
+      desc: "Yes, if a project is canceled before work begins or if a dispute is settled in your favor, funds in Escrow are refunded.",
+    },
+    {
+      id: "fc30",
+      title: 'What is a "Hybrid" video project?',
+      desc: "A project where you hire a local videographer to shoot the footage and a remote editor in a different location to edit it.",
+    },
+    {
+      id: "fc31",
+      title: "Do videographers bring their own gear?",
+      desc: "Most do. You can specify gear needs (lighting, drones, mics) in your project brief.",
+    },
+    {
+      id: "fc32",
+      title: "Can I hire a drone pilot on MakeMyVid.io?",
+      desc: 'Yes, search for "Licensed Drone Operator" in the on-ground videography section.',
+    },
+    {
+      id: "fc33",
+      title: "Who owns the copyright to the final video?",
+      desc: "Upon full payment and release of funds, the copyright and ownership of the final video typically transfer to the client.",
+    },
+    {
+      id: "fc34",
+      title: "Can I hire for a multi-city shoot?",
+      desc: "Yes, you can post multiple jobs to find local crews in different cities for a single campaign.",
+    },
+    {
+      id: "fc35",
+      title: "Is my data safe on MakeMyVid.io?",
+      desc: "We use industry-standard encryption to protect your project files and personal information.",
+    },
+    {
+      id: "fc36",
+      title: "How do I know the freelancer won't steal my footage?",
+      desc: "Our Terms of Service include strict confidentiality and intellectual property clauses to protect your content.",
+    },
+    {
+      id: "fc37",
+      title: "Does the platform use AI to vet talent?",
+      desc: "We use a combination of smart algorithms and human expertise to maintain high-quality talent standards.",
+    },
+    {
+      id: "fc38",
+      title: "Can I sign an NDA with a freelancer?",
+      desc: "Yes, you can require a freelancer to sign a Non-Disclosure Agreement before sharing sensitive footage.",
+    },
+    {
+      id: "fc39",
+      title: "What if I need motion graphics added later?",
+      desc: 'You can start a new milestone or a new project specifically for "Motion Graphics" with the same or a new creator.',
+    },
+    {
+      id: "fc40",
+      title: "How long are my files stored on the platform?",
+      desc: "We recommend downloading your final files immediately. We typically store project files for 30 days post-completion.",
+    },
+    {
+      id: "fc41",
+      title: "Can I tip my freelancer?",
+      desc: "Yes, if you are thrilled with the work, you can add a bonus/tip when releasing the final payment.",
+    },
+    {
+      id: "fc42",
+      title: "How do I contact customer support?",
+      desc: 'You can reach our support team 24/7 via the "Help Center" or live chat on your dashboard.',
+    },
+  ],
+  forFreelancers: [
+    {
+      id: "ff1",
+      title: "How does the 0% commission for videographers work?",
+      desc: "It's simple: for any on-ground videography gigs you secure through MakeMyVid.io, you keep 100% of what you earn. We charge zero commission to help you maximize your income from local shoots.",
+    },
+    {
+      id: "ff2",
+      title: "What are the commission fees for video editors?",
+      desc: "We offer a highly competitive flat commission of just 12.5% for remote video editors. This fee is only charged after you have been successfully paid by the client for a completed project.",
+    },
+    {
+      id: "ff3",
+      title: "What kind of video editing jobs can I find?",
+      desc: "You'll find a wide variety of freelance video editing jobs, including opportunities in YouTube content creation, corporate video production, wedding film editing, social media ads, documentary post-production, and much more.",
+    },
+    {
+      id: "ff4",
+      title: "How can I make my profile stand out to clients?",
+      desc: 'A great profile has a professional headshot, a clear and concise bio highlighting your expertise, and a stunning portfolio. Be specific about your skills (e.g., "expert in Adobe Premiere Pro," "DaVinci Resolve colorist").',
+    },
+    {
+      id: "ff5",
+      title: "How do I bid on a project?",
+      desc: "When you find a job you're interested in, you'll submit a proposal. Tailor each proposal to the client's specific needs, explain how your skills are a perfect match, and provide relevant examples from your portfolio.",
+    },
+    {
+      id: "ff6",
+      title:
+        "Are there opportunities for new freelancers with less experience?",
+      desc: "Yes. While many clients seek experienced professionals, there are also numerous entry-level video editing jobs and opportunities for talented newcomers to build their portfolios and gain experience.",
+    },
+    {
+      id: "ff7",
+      title: "Can I set my own rates?",
+      desc: "Yes. You have complete control over your pricing. You can set an hourly rate or bid with a fixed price on a per-project basis.",
+    },
+    {
+      id: "ff8",
+      title: "How can I get more invitations to jobs?",
+      desc: "Maintaining a high rating, completing projects on time, and having a specialized, keyword-rich profile will increase your visibility. Clients can search for and invite top-rated video freelancers directly to their projects.",
+    },
+    {
+      id: "ff9",
+      title: 'What is the "Rising Talent" badge?',
+      desc: 'The "Rising Talent" badge is awarded to new freelancers who show great potential through strong portfolios and positive early feedback. It helps you stand out to clients looking for fresh talent.',
+    },
+    {
+      id: "ff10",
+      title: "Do I need my own editing software?",
+      desc: "Yes. As a freelance professional, you are expected to have your own licensed software (e.g., Adobe Creative Suite, Final Cut Pro, DaVinci Resolve) and hardware to complete your work.",
+    },
+    {
+      id: "ff11",
+      title: "Can I find long-term or recurring work?",
+      desc: "Many clients on MakeMyVid.io are looking for long-term partners for ongoing needs, such as a YouTube channel editor or a regular corporate video producer. Delivering excellent work on your first project is the best way to secure recurring gigs.",
+    },
+  ],
+  accountManagement: [
+    {
+      id: "am1",
+      title: "How do I sign up for a MakeMyVid.io account?",
+      desc: "Signing up is fast and easy. Simply click the \"Login/Sign up\" button, and you can register using your email address or by linking your Google or LinkedIn account. You'll then choose whether you're primarily here to hire video talent or find video work.",
+    },
+    {
+      id: "am2",
+      title: "Can I have both a client and a freelancer account?",
+      desc: "Yes, you can. Your MakeMyVid.io account allows you to seamlessly switch between a client profile (for hiring) and a freelancer profile (for working) from a single login, giving you the flexibility to both outsource video editing and take on video editing gigs.",
+    },
+    {
+      id: "am3",
+      title: "What are the key elements of a compelling freelance profile?",
+      desc: 'A top-tier profile includes a professional profile picture, a strong headline that summarizes your expertise (e.g., "Corporate Video Editor & Motion Graphics Artist"), a detailed bio, a list of your technical skills, and a high-quality portfolio that showcases your best video production work.',
+    },
+    {
+      id: "am4",
+      title: "What are the guidelines for uploading to my portfolio?",
+      desc: "We recommend uploading high-resolution video clips or links to full projects (e.g., via YouTube or Vimeo). Be sure to include a brief description for each project, outlining your role, the tools you used, and the project's objective. A diverse portfolio showing different styles is highly effective.",
+    },
+    {
+      id: "am5",
+      title: "How do I verify my account?",
+      desc: "To ensure a secure marketplace, we have an identity verification process. This typically involves providing a government-issued ID. A verified badge on your profile increases trust and can lead to more opportunities to hire or be hired for video projects.",
+    },
+    {
+      id: "am6",
+      title: "I forgot my password. How can I reset it?",
+      desc: "If you've forgotten your password, simply click the \"Forgot Password\" link on the login page. You'll receive an email with instructions on how to securely reset your password and regain access to your account.",
+    },
+    {
+      id: "am7",
+      title: "How can I manage my email notifications?",
+      desc: "You have full control over your notifications. In your account settings, you can choose to be notified about new project matches, messages from clients, payment updates, and platform news. You can customize these settings at any time.",
+    },
+    {
+      id: "am8",
+      title: "How do I close my MakeMyVid.io account?",
+      desc: "If you wish to close your account, you can do so from your account settings page. Please ensure all active projects are completed and all payments have been settled before you proceed with account deactivation.",
+    },
+    {
+      id: "am9",
+      title: "Why is my freelancer profile pending approval?",
+      desc: "All new freelancer profiles are reviewed by our team to ensure they meet our quality standards. This vetting process helps maintain a high-quality pool of video talent. The review is typically completed within 24-48 hours.",
+    },
+    {
+      id: "am10",
+      title: "How do I update my skills or services?",
+      desc: 'You can update your profile at any time. Simply navigate to your profile page and click "Edit." We recommend keeping your skills (e.g., "4K Video Editing," "Drone Videography") and portfolio updated to attract the most relevant video production projects.',
+    },
+    {
+      id: "am11",
+      title: "Is my personal information safe on MakeMyVid.io?",
+      desc: "Yes. We take data privacy very seriously. Your personal information is protected with industry-standard security measures and is never shared with third parties. Please refer to our Privacy Policy for more details.",
+    },
+  ],
+  paymentsFeesSecurity: [
+    {
+      id: "pfs1",
+      title: "How does the payment system work for clients?",
+      desc: "When you hire a video freelancer, you'll fund the project or milestone into our secure escrow system. The funds are held safely and are only released to the freelancer once you have reviewed and approved the delivered work. This ensures you only pay for results you are happy with.",
+    },
+    {
+      id: "pfs2",
+      title: "What payment methods do you accept?",
+      desc: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal for funding your video editing and videography projects. We are continuously working on adding more local payment options for our global users.",
+    },
+    {
+      id: "pfs3",
+      title: "What are the withdrawal options for freelancers?",
+      desc: "Freelancers can withdraw their earnings through several methods, including direct bank transfer, PayPal, and Payoneer. You can choose the most convenient withdrawal method in your payment settings.",
+    },
+    {
+      id: "pfs4",
+      title: "How quickly do I get paid as a freelancer?",
+      desc: "Once a client approves a project or milestone, the funds are immediately released to your MakeMyVid.io account. The time it takes for the funds to arrive in your bank account depends on your chosen withdrawal method, but it is typically within 1-5 business days.",
+    },
+    {
+      id: "pfs5",
+      title: "How are disputes over payments or work quality handled?",
+      desc: "In the rare event of a dispute, MakeMyVid.io offers mediation services. Our support team will review the project communications and deliverables to help facilitate a fair resolution for both the client and the video creator. The funds in escrow provide security for both parties throughout this process.",
+    },
+    {
+      id: "pfs6",
+      title: "Are there any fees for clients?",
+      desc: "No, there are no fees for clients to post a project or hire talent. Clients only pay the agreed-upon price for the project, plus a standard payment processing fee.",
+    },
+    {
+      id: "pfs7",
+      title: "Can you clarify the 0% commission for videographers?",
+      desc: "The 0% commission for videographers applies specifically to on-ground shooting gigs. For these projects, you keep 100% of the project price. For remote video editing work, our standard 12.5% fee applies.",
+    },
+    {
+      id: "pfs8",
+      title: "Can I get an invoice for my payment?",
+      desc: "Yes, all transactions on MakeMyVid.io are recorded. Clients can download detailed invoices for their accounting purposes directly from their transaction history page.",
+    },
+    {
+      id: "pfs9",
+      title: "Is it safe to enter my payment details on the platform?",
+      desc: "Absolutely. Our platform uses PCI-compliant payment gateways and SSL encryption to ensure that all your financial data is processed securely and kept confidential.",
+    },
+    {
+      id: "pfs10",
+      title: "Do you support fixed-price and hourly projects?",
+      desc: "Yes, we support both. You can hire a video editor on a fixed-price basis for projects with a clearly defined scope, or on an hourly basis for more flexible, ongoing work.",
+    },
+    {
+      id: "pfs11",
+      title: "How are taxes handled for freelancers?",
+      desc: "As a freelancer, you are responsible for your own tax obligations according to the laws of your country. MakeMyVid.io provides you with a detailed earnings history to make tax reporting easier.",
+    },
+  ],
+  projectsWorkflow: [
+    {
+      id: "pw1",
+      title: "How do I communicate with the freelancer or client?",
+      desc: "Our platform has a built-in messaging system that allows for real-time communication. You can share messages, attach files, and discuss all aspects of your video project in one secure place.",
+    },
+    {
+      id: "pw2",
+      title: "How can I securely share large video files for editing?",
+      desc: "You can share files directly through our messaging system for smaller files. For larger raw footage, we recommend using secure, shareable links from services like Google Drive, Dropbox, or WeTransfer. Additionally, our CompVid tool helps with video compression to make sharing easier.",
+    },
+    {
+      id: "pw3",
+      title: "What is the process for requesting revisions?",
+      desc: "When a freelancer delivers a draft, you can review it and request revisions if needed. Clear communication about the required changes is key. Most freelancers include a certain number of revisions in their project scope, which should be discussed before starting the video editing process.",
+    },
+    {
+      id: "pw4",
+      title: "How do I mark a project as complete?",
+      desc: "Once you have received the final deliverables and are 100% satisfied with the work, you can mark the project or milestone as complete. This action authorizes the release of the payment from escrow to the freelancer.",
+    },
+    {
+      id: "pw5",
+      title: "How does the feedback and rating system work?",
+      desc: "After a project is completed, both the client and the freelancer can leave a rating and feedback for each other. This public feedback is crucial for building a strong reputation on the platform and helps others make informed decisions when they hire video talent.",
+    },
+    {
+      id: "pw6",
+      title: "Can I set milestones for a large project?",
+      desc: "Yes, for larger video production projects, we highly recommend setting up milestones. This allows you to break down the project into smaller, manageable parts. You fund and approve each milestone one by one, providing better control over the workflow and payments.",
+    },
+    {
+      id: "pw7",
+      title: "What happens if a freelancer misses a deadline?",
+      desc: "We encourage clear communication. If a deadline is approaching, check in with your freelancer. If there is a persistent issue, you can reach out to our support team for assistance. The escrow system ensures you do not pay for uncompleted work.",
+    },
+    {
+      id: "pw8",
+      title: "How can I track the progress of my project?",
+      desc: "Regular communication with your freelancer is the best way to track progress. You can request regular updates, and for hourly projects, freelancers can log their time through our platform's work diary.",
+    },
+    {
+      id: "pw9",
+      title: "What are the standard file formats for video delivery?",
+      desc: "This should be agreed upon at the start of the project. Common delivery formats include MP4 (H.264) for web use, and higher-quality formats like ProRes for professional applications. Always discuss your specific needs with your video editor.",
+    },
+    {
+      id: "pw10",
+      title: "Who owns the rights to the final video?",
+      desc: "Unless otherwise agreed upon in a separate contract, once the project is completed and the freelancer is paid in full, the client typically owns the full rights to the final video.",
+    },
+    {
+      id: "pw11",
+      title: "Can I re-hire a freelancer I enjoyed working with?",
+      desc: "Yes! We make it easy to build long-term relationships. You can directly offer a new contract to any freelancer you have previously worked with, bypassing the project posting process for a faster hiring experience.",
+    },
+  ],
+  platformToolsFeatures: [
+    {
+      id: "ptf1",
+      title: "What is CompVid and how does it help with video compression?",
+      desc: "CompVid is our powerful, built-in video compression tool. It allows you to significantly reduce the file size of large video files (e.g., 10GB+) in minutes without a noticeable loss in quality. This makes it faster and cheaper to share and store your video footage.",
+    },
+    {
+      id: "ptf2",
+      title: "Are the platform tools like CompVid free to use?",
+      desc: "Yes, many of our integrated tools, including a basic tier of CompVid and our YouTube short video browser, are offered for free to all registered MakeMyVid.io users to enhance their video production workflow.",
+    },
+    {
+      id: "ptf3",
+      title: "How does the YouTube short video browser work?",
+      desc: "This free tool allows you to browse and discover trending YouTube Shorts without the distraction of the main YouTube interface. It’s an excellent resource for market research and finding inspiration for your short-form video content.",
+    },
+    {
+      id: "ptf4",
+      title: "What is the video summarizer tool?",
+      desc: "Our AI-powered video summarizer tool can analyze a long video and provide a concise text summary. This is useful for quickly understanding the content of a video before you decide to outsource the editing or use it for reference.",
+    },
+    {
+      id: "ptf5",
+      title: "How can I access these tools?",
+      desc: 'You can find all our supplementary tools under the "Tools" section in the main navigation menu of the MakeMyVid.io website.',
+    },
+    {
+      id: "ptf6",
+      title: "Does CompVid integrate with cloud storage?",
+      desc: "Yes, CompVid is designed for a modern workflow. You can directly connect your Google Drive or Dropbox account to automatically save your compressed files, saving you time and local storage space.",
+    },
+    {
+      id: "ptf7",
+      title: "Will you be adding more tools in the future?",
+      desc: "Absolutely. We are constantly working on developing new features and tools to support the global video creator community. Our goal is to be a comprehensive resource for the entire video creation lifecycle.",
+    },
+    {
+      id: "ptf8",
+      title: "Can I use the tools without hiring a freelancer?",
+      desc: "Yes, you can create a free MakeMyVid.io account and use our free tools without any obligation to post a project or hire talent. We aim to provide value to the entire video community.",
+    },
+    {
+      id: "ptf9",
+      title: "Is there a limit on how many videos I can compress with CompVid?",
+      desc: "Our free tier of CompVid comes with a generous monthly limit. For users with heavy video compression needs, we will be offering affordable premium plans with higher limits and advanced features.",
+    },
+    {
+      id: "ptf10",
+      title: "How does the search and filter system work?",
+      desc: 'Our advanced search feature allows you to find the perfect video freelancer quickly. You can filter by specific skills (e.g., "Color Grading"), software expertise ("Adobe Premiere Pro"), language, location, budget, and ratings.',
+    },
+    {
+      id: "ptf11",
+      title: 'What is the "Featured Creators" section?',
+      desc: 'The "Featured Creators" section highlights top-performing and rising talent on our platform. Being featured is a great way for video editors and videographers to gain visibility and for clients to quickly find proven professionals.',
+    },
+  ],
+};
