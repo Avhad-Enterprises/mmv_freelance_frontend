@@ -16,9 +16,25 @@ type CandidateDetailsAreaProps = {
   loading: boolean;
 };
 
-const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps) => {
-  if (loading) return <div className="container text-center p-5"> <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div> </div>;
-  if (!freelancer) return <div className="container text-center p-5"><p>No freelancer data found.</p></div>;
+const CandidateDetailsArea = ({
+  freelancer,
+  loading,
+}: CandidateDetailsAreaProps) => {
+  if (loading)
+    return (
+      <div className="container text-center p-5">
+        {" "}
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>{" "}
+      </div>
+    );
+  if (!freelancer)
+    return (
+      <div className="container text-center p-5">
+        <p>No freelancer data found.</p>
+      </div>
+    );
 
   const {
     bio = "No bio available.",
@@ -53,7 +69,10 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
     const amount = parseFloat(amountStr);
     if (isNaN(amount)) return `${amountStr} ${currencyCode}`;
     try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(amount);
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: currencyCode,
+      }).format(amount);
     } catch (e) {
       return `${amount.toFixed(2)} ${currencyCode}`;
     }
@@ -62,9 +81,10 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
   const formattedRate = formatCurrency(rate_amount, currency);
 
   // Corrected Dynamic Google Maps URL
-  const googleMapsSrc = (latitude && longitude)
-    ? `https://maps.google.com/maps?q=${latitude},${longitude}&t=&z=12&ie=UTF8&iwloc=B&output=embed`
-    : "https://maps.google.com/maps?q=Nashik,Maharashtra,India&t=&z=12&ie=UTF8&iwloc=B&output=embed"; // Default fallback location
+  const googleMapsSrc =
+    latitude && longitude
+      ? `https://maps.google.com/maps?q=${latitude},${longitude}&t=&z=12&ie=UTF8&iwloc=B&output=embed`
+      : "https://maps.google.com/maps?q=Nashik,Maharashtra,India&t=&z=12&ie=UTF8&iwloc=B&output=embed"; // Default fallback location
 
   return (
     <>
@@ -73,7 +93,6 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
           <div className="row">
             <div className="col-xxl-9 col-lg-8">
               <div className="candidates-profile-details me-xxl-5 pe-xxl-4">
-
                 {/* --- MOBILE BACK BUTTON & PROFILE SIDEBAR --- */}
                 <div className="d-lg-none">
                   <Link href="/freelancers" className="btn-two mb-30">
@@ -83,10 +102,26 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                     <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40">
                       <div className="pt-25">
                         <div className="cadidate-avatar m-auto">
-                          {profile_picture && profile_picture.trim() !== '' ? (
-                            <AuthenticatedImage src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} unoptimized fallbackSrc={avatar.src} />
+                          {profile_picture && profile_picture.trim() !== "" ? (
+                            <AuthenticatedImage
+                              src={profile_picture}
+                              alt="avatar"
+                              width={85}
+                              height={85}
+                              className="lazy-img rounded-circle w-100"
+                              style={{ objectFit: "cover" }}
+                              unoptimized
+                              fallbackSrc={avatar.src}
+                            />
                           ) : (
-                            <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
+                            <Image
+                              src={avatar}
+                              alt="default avatar"
+                              width={150}
+                              height={150}
+                              className="lazy-img rounded-circle w-100"
+                              style={{ objectFit: "cover" }}
+                            />
                           )}
                         </div>
                       </div>
@@ -95,7 +130,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                       </h3>
                       <CandidateBio
                         bio={{
-                          location: `${city || 'N/A'}, ${country || 'N/A'}`,
+                          location: `${city || "N/A"}, ${country || "N/A"}`,
                           email,
                           rateAmount: formattedRate,
                           availability,
@@ -108,7 +143,10 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                 </div>
 
                 {/* --- DESKTOP BACK BUTTON --- */}
-                <Link href="/freelancers" className="btn-two mb-30 d-none d-lg-inline-block">
+                <Link
+                  href="/freelancers"
+                  className="btn-two mb-30 d-none d-lg-inline-block"
+                >
                   &larr; Back to Candidates
                 </Link>
 
@@ -124,68 +162,75 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                     <div className="row">
                       {portfolio_links.map((link, idx) => {
                         const videoId = extractYouTubeVideoId(link);
-                        const thumbnailUrl = videoId ? getYouTubeThumbnail(videoId) : null;
+                        const thumbnailUrl = videoId
+                          ? getYouTubeThumbnail(videoId)
+                          : null;
 
                         return (
                           <div key={idx} className="col-lg-4 col-md-6 mb-4">
-                            <div 
+                            <div
                               className="portfolio-item-wrapper position-relative overflow-hidden rounded-3"
-                              style={{ 
-                                cursor: videoId ? 'pointer' : 'default',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                              style={{
+                                cursor: videoId ? "pointer" : "default",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                                transition:
+                                  "transform 0.2s ease, box-shadow 0.2s ease",
                               }}
                               onMouseEnter={(e) => {
                                 if (videoId) {
-                                  e.currentTarget.style.transform = 'scale(1.02)';
-                                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                                  e.currentTarget.style.transform =
+                                    "scale(1.02)";
+                                  e.currentTarget.style.boxShadow =
+                                    "0 4px 16px rgba(0,0,0,0.15)";
                                 }
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'scale(1)';
-                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                                e.currentTarget.style.transform = "scale(1)";
+                                e.currentTarget.style.boxShadow =
+                                  "0 2px 8px rgba(0,0,0,0.1)";
                               }}
                             >
                               {videoId && thumbnailUrl ? (
-                                <div 
-                                  className="youtube-thumbnail-wrapper position-relative" 
-                                  style={{ paddingTop: '56.25%' }}
+                                <div
+                                  className="youtube-thumbnail-wrapper position-relative"
+                                  style={{ paddingTop: "56.25%" }}
                                   onClick={() => handleVideoOpen(videoId)}
                                 >
                                   <Image
                                     src={thumbnailUrl}
                                     alt={`YouTube video thumbnail`}
                                     fill
-                                    style={{ objectFit: 'cover' }}
+                                    style={{ objectFit: "cover" }}
                                     className="img-fluid"
                                     unoptimized
                                   />
                                   {/* Play Button Overlay */}
-                                  <div 
+                                  <div
                                     className="play-button-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                                    style={{ 
-                                      backgroundColor: 'rgba(0,0,0,0.2)',
-                                      transition: 'background-color 0.2s ease'
+                                    style={{
+                                      backgroundColor: "rgba(0,0,0,0.2)",
+                                      transition: "background-color 0.2s ease",
                                     }}
                                   >
-                                    <div 
+                                    <div
                                       className="play-icon-circle d-flex align-items-center justify-content-center"
                                       style={{
-                                        width: '60px',
-                                        height: '60px',
-                                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                                        borderRadius: '50%',
-                                        transition: 'transform 0.2s ease'
+                                        width: "60px",
+                                        height: "60px",
+                                        backgroundColor:
+                                          "rgba(255, 255, 255, 0.6)",
+                                        borderRadius: "50%",
+                                        transition: "transform 0.2s ease",
                                       }}
                                     >
-                                      <svg 
-                                        width="24" 
-                                        height="24" 
-                                        viewBox="0 0 24 24" 
+                                      <svg
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
                                         fill="#FF0000"
-                                        style={{ marginLeft: '3px' }}
+                                        style={{ marginLeft: "3px" }}
                                       >
-                                        <path d="M8 5v14l11-7z"/>
+                                        <path d="M8 5v14l11-7z" />
                                       </svg>
                                     </div>
                                   </div>
@@ -196,7 +241,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="d-block p-3 border rounded text-primary text-decoration-underline"
-                                  style={{ wordBreak: 'break-all' }}
+                                  style={{ wordBreak: "break-all" }}
                                 >
                                   <i className="bi bi-link-45deg me-2"></i>
                                   {link}
@@ -240,10 +285,26 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                 <div className="cadidate-bio bg-wrapper bg-color mb-60 md-mb-40 d-none d-lg-block">
                   <div className="pt-25">
                     <div className="cadidate-avatar m-auto">
-                      {profile_picture && profile_picture.trim() !== '' ? (
-                        <AuthenticatedImage src={profile_picture} alt="avatar" width={85} height={85} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} unoptimized fallbackSrc={avatar.src} />
+                      {profile_picture && profile_picture.trim() !== "" ? (
+                        <AuthenticatedImage
+                          src={profile_picture}
+                          alt="avatar"
+                          width={85}
+                          height={85}
+                          className="lazy-img rounded-circle w-100"
+                          style={{ objectFit: "cover" }}
+                          unoptimized
+                          fallbackSrc={avatar.src}
+                        />
                       ) : (
-                        <Image src={avatar} alt="default avatar" width={150} height={150} className="lazy-img rounded-circle w-100" style={{ objectFit: 'cover' }} />
+                        <Image
+                          src={avatar}
+                          alt="default avatar"
+                          width={150}
+                          height={150}
+                          className="lazy-img rounded-circle w-100"
+                          style={{ objectFit: "cover" }}
+                        />
                       )}
                     </div>
                   </div>
@@ -252,7 +313,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                   </h3>
                   <CandidateBio
                     bio={{
-                      location: `${city || 'N/A'}, ${country || 'N/A'}`,
+                      location: `${city || "N/A"}, ${country || "N/A"}`,
                       email,
                       rateAmount: formattedRate,
                       availability,
@@ -262,7 +323,7 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                   />
                 </div>
 
-                <h4 className="sidebar-title">Location</h4>
+                {/* <h4 className="sidebar-title">Location</h4>
                 <div className="map-area mb-60 md-mb-40">
                   <div className="gmap_canvas h-100 w-100">
                     <iframe
@@ -272,13 +333,17 @@ const CandidateDetailsArea = ({ freelancer, loading }: CandidateDetailsAreaProps
                       title="Google Map of Candidate Location"
                     ></iframe>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
         </div>
       </section>
-      <VideoPopup isVideoOpen={isVideoOpen} setIsVideoOpen={setIsVideoOpen} videoId={currentVideoId} />
+      <VideoPopup
+        isVideoOpen={isVideoOpen}
+        setIsVideoOpen={setIsVideoOpen}
+        videoId={currentVideoId}
+      />
     </>
   );
 };

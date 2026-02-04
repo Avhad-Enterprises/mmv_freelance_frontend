@@ -15,18 +15,20 @@ interface CandidateBioProps {
 const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
   return (
     <ul className="style-none">
-      <li>
+      {/* <li>
         <span>Location: </span>
         <div>{bio.location}</div>
-      </li>
-      {bio.email && !bio.email.includes('@example.com') && bio.email.trim() !== '' && (
-        <li>
-          <span>Email: </span>
-          <div>
-            <a href={`mailto:${bio.email}`}>{bio.email}</a>
-          </div>
-        </li>
-      )}
+      </li> */}
+      {bio.email &&
+        !bio.email.includes("@example.com") &&
+        bio.email.trim() !== "" && (
+          <li>
+            <span>Email: </span>
+            <div>
+              <a href={`mailto:${bio.email}`}>{bio.email}</a>
+            </div>
+          </li>
+        )}
       <li>
         <span>Expected Rate: </span>
         <div>{bio.rateAmount} / hr</div>
@@ -34,22 +36,27 @@ const CandidateBio: React.FC<CandidateBioProps> = ({ bio }) => {
       {bio.availability && (
         <li>
           <span>Availability: </span>
-          <div className="text-capitalize">{bio.availability.replace(/_/g, ' ')}</div>
+          <div className="text-capitalize">
+            {bio.availability.replace(/_/g, " ")}
+          </div>
         </li>
       )}
       {bio.experience_level && (
         <li>
           <span>Experience: </span>
-          <div className="text-capitalize">{bio.experience_level.replace(/_/g, ' ')}</div>
+          <div className="text-capitalize">
+            {bio.experience_level.replace(/_/g, " ")}
+          </div>
         </li>
       )}
       {bio.role_name && (
         <li>
           <span>Role: </span>
-          <div className="text-capitalize">{bio.role_name.replace(/_/g, ' ')}</div>
+          <div className="text-capitalize">
+            {bio.role_name.replace(/_/g, " ")}
+          </div>
         </li>
       )}
-
     </ul>
   );
 };

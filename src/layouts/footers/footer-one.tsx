@@ -1,7 +1,15 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
-import { WidgetOne, WidgetTwo, WidgetThree, WidgetFour } from "./component/footer-widgets";
+import {
+  WidgetOne,
+  WidgetTwo,
+  WidgetThree,
+  WidgetFour,
+} from "./component/footer-widgets";
 import SocialLinks from "./component/social-links";
+import { useNewsletterSubscription } from "@/services/newsletter.service";
 
 const FooterOne = ({
   bottom_bg,
@@ -12,6 +20,27 @@ const FooterOne = ({
   style_2?: boolean;
   style_3?: boolean;
 }) => {
+  const [email, setEmail] = useState("");
+  const { subscribe, isLoading, error, success, reset } =
+    useNewsletterSubscription();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    const result = await subscribe(email);
+    if (result) {
+      setEmail(""); // Clear input on success
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (error || success) {
+      reset(); // Clear status when user starts typing again
+    }
+  };
+
   return (
     <div className={`footer-one ${style_2 ? "bg-two white-version" : ""}`}>
       <div className="container">
@@ -23,24 +52,46 @@ const FooterOne = ({
             <WidgetThree style_2={style_2} cls="col-lg-2 col-md-3 col-sm-6" />
             <WidgetFour style_2={style_2} cls="col-lg-2 col-md-3 col-sm-6" />
 
-            {/* Newsletter Section (Updated) */}
+            {/* Newsletter Section */}
             <div className="col-lg-4 mb-20 footer-newsletter">
               <h5 className={`footer-title ${style_2 ? "text-white" : ""}`}>
                 Get Video Insights
               </h5>
               <p className={`${style_2 ? "text-white" : ""}`}>
-                Join our newsletter for industry trends, platform updates, and tips for video success.
+                Join our newsletter for industry trends, platform updates, and
+                tips for video success.
               </p>
               <form
-                action="#"
+                onSubmit={handleSubmit}
                 className={`d-flex ${style_3 ? "border-style" : ""}`}
               >
-                <input type="email" placeholder="Enter your email" />
-                <button>Subscribe</button>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  required
+                />
+                <button type="submit" disabled={isLoading || !email.trim()}>
+                  {isLoading ? "..." : "Subscribe"}
+                </button>
               </form>
-              <p className="note">
-                We only send interesting and relevant emails.
-              </p>
+              {success && (
+                <p className="note" style={{ color: "#10b981" }}>
+                  🎉 Thanks for subscribing!
+                </p>
+              )}
+              {error && (
+                <p className="note" style={{ color: "#ef4444" }}>
+                  {error}
+                </p>
+              )}
+              {!success && !error && (
+                <p className="note">
+                  We only send interesting and relevant emails.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -63,8 +114,7 @@ const FooterOne = ({
 
             {/* Bottom Navigation */}
             <div className="col-lg-4 order-lg-1 mb-15">
-              <ul className="d-flex style-none bottom-nav justify-content-center justify-content-lg-start">
-              </ul>
+              <ul className="d-flex style-none bottom-nav justify-content-center justify-content-lg-start"></ul>
             </div>
 
             {/* Copyright */}
